@@ -1,0 +1,27 @@
+// Makes sure unbounded arrays are supported across all register classes t,u,s,b,
+// This one fails because resources can not be added after unbounded arrays.
+
+
+ShaderResourceGroupSemantic slot1
+{
+    FrequencyId = 1;
+};
+
+struct MyStruct
+{
+    float3 m_a;
+    float3 m_b;
+};
+
+ShaderResourceGroup SRG1 : slot1
+{
+    Texture2D<float4>        m_texSRVa[];      // Takes t0+
+    Texture2D<float4>        m_texSRVb;        // #EC 48. Error. t0+ already taken.  
+    RWTexture2D<float4>      m_texUAVa[];      // Takes u0+
+    RWTexture2D<float4>      m_texUAVb;        // #EC 48. Error. u0+ already taken. 
+    Sampler                  m_samplera[];     // Takes s0+
+    Sampler                  m_samplerb;       // #EC 48. Error. s0+ already taken. 
+    ConstantBuffer<MyStruct> m_structArraya[]; // Takes b0+
+    ConstantBuffer<MyStruct> m_structArrayb;   // #EC 48. Error. b0+ already taken.
+};
+

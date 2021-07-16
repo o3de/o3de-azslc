@@ -1,0 +1,50 @@
+name: AZSL Compiler
+
+on: pull_request
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+    strategy:
+      max-parallel: 1
+      matrix:
+        python-version: [3.8]
+
+    steps:
+    - uses: actions/checkout@v1
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v1
+      with:
+        python-version: ${{ matrix.python-version }}
+    - name: actions-setup-cmake
+      uses: jwlawson/actions-setup-cmake@v1.0
+      env:
+        ACTIONS_ALLOW_UNSECURE_COMMANDS: true
+      with:
+        # The version of cmake to setup.
+        cmake-version: 3.15.0
+    
+    # Dependencies for linux environment
+    - name: Install dependencies (Linux) 
+      env:
+        ACTIONS_ALLOW_UNSECURE_COMMANDS: true
+      run: |
+        sudo gem install apt-spy2
+        sudo apt-spy2 check
+        sudo apt-spy2 fix --commit
+        sudo apt-get update
+        sudo apt-get install cmake
+        sudo apt-get install gcc-8
+        sudo apt-get install g++-8
+        echo "::set-env name=CC::gcc-8"
+        echo "::set-env name=CXX::g++-8"
+        sudo apt-get install uuid-dev
+        python -m pip install --upgrade pip
+        pip install pyyaml
+    # Build and execute all the tests for Debug & Release
+    - name: Build and Execute AZSLc tests
+      run: |
+        cd Overhaul
+        export PYTHONPATH=${PYTHONPATH}:`pwd`
+        python test.and.py

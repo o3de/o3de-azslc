@@ -1,0 +1,9 @@
+"RaytracingAccelerationStructure RaySRG_g_scene : register ( t0 ) ;"
+"RWTexture2D < float4 > RaySRG_g_renderTarget : register ( u0 ) ;"
+"ByteAddressBuffer RaySRG_g_indices : register ( t1 ) ;"
+"StructuredBuffer < Vertex > RaySRG_g_vertices : register ( t2 ) ;"
+"StructuredBuffer < PrimitiveInstancePerFrameBuffer > RaySRG_g_AABBPrimitiveAttributes : register ( t3 ) ;"
+"ConstantBuffer < :: SceneConstantBuffer > RaySRG_g_sceneCB : register ( b0 ) ;"
+"ConstantBuffer < :: PrimitiveConstantBuffer > RaySRG_l_materialCB : register ( b1 ) ;"
+"ConstantBuffer < :: PrimitiveInstanceConstantBuffer > RaySRG_l_aabbCB : register ( b2 ) ;"
+

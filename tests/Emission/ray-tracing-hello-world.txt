@@ -1,0 +1,4 @@
+"RaytracingAccelerationStructure RaySRG_Scene : register ( t0 ) ;"
+"RWTexture2D < float4 > RaySRG_RenderTarget : register ( u0 ) ;"
+"ConstantBuffer < :: RayGenConstantBuffer > RaySRG_g_rayGenCB : register ( b0 ) ;"
+

@@ -1,0 +1,13 @@
+ShaderResourceGroupSemantic Slot0  {    FrequencyId = 0; };
+ShaderResourceGroupSemantic Slot1  {    FrequencyId = 1; };
+
+ShaderResourceGroup SRG0 : Slot1
+{
+    float4 float4Test00;
+};
+
+ShaderResourceGroup SRG1 : Slot0
+{
+    Texture2D m_tex2D;
+    float4 m_f4;
+};

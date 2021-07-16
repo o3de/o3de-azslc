@@ -1,0 +1,4 @@
+struct S{};
+void func(ConstantBuffer<S> arg) // #EC 512 'impossible to use ConstantBuffer in that context'
+{
+}

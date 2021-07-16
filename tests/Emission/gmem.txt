@@ -1,0 +1,14 @@
+/*
+    Cmdargs: ['--use-space', '--namespace', 'vk']
+*/
+"# if ! defined ( AZ_USE_SUBPASSINPUT )"
+"class SubpassInputStub"
+"float4 SubpassLoad ( )"
+"class SubpassInputStubMS"
+"# define SubpassInput SubpassInputStub"
+"# ifdef AZ_USE_SUBPASSINPUT"
+"[[ vk :: input_attachment_index ( 0 ) ]]"
+"[[ vk :: binding ( 0, 0 ) ]]"
+"# else"
+"SubpassInput SRG_m_sub ;"
+"MainPS"

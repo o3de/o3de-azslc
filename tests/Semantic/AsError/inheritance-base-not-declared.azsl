@@ -1,0 +1,6 @@
+class Child : InexistentInterface
+{  
+};
+
+// Semantic Error 16: line 1::12 'Base symbol InexistentInterface not found'
+// #EC 16
