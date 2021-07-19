@@ -60,20 +60,9 @@ missingOptional = 0
 
 # Windows
 if os.name == 'nt':
-    criticalCMake = "../lib/CMake/bin/cmake.exe"
-    if not os.path.isfile(criticalCMake):
-        from shutil import which
-        if which("cmake") is None:
-            print ( fg.RED + style.BRIGHT + "[ X ] Expected CMake 3.15+ (in {} or as command)".format(criticalCMake) + style.RESET_ALL )
-            missingCritical = missingCritical + 1
-
-    criticalBoostD = "../lib/boost_1_70_0/"
-    criticalBoostH = criticalBoostD + "boost/regex/regex_traits.hpp"
-    criticalBoostL = criticalBoostD + "libs/boost_regex-vc141-mt-x64-1_70.dll"
-    if not os.path.isfile(criticalBoostH) or not os.path.isfile(criticalBoostL):
-        print ( fg.RED + style.BRIGHT + "[ X ] Expected Boost 1.70 in {}".format(criticalBoostD) + style.RESET_ALL )
-        print ( fg.RED + style.BRIGHT + "      - All relevant headers required for {}".format(criticalBoostH) + style.RESET_ALL )
-        print ( fg.RED + style.BRIGHT + "      - All Boost-Regex libraries, for example {}".format(criticalBoostL) + style.RESET_ALL )
+    from shutil import which
+    if which("cmake") is None:
+        print ( fg.RED + style.BRIGHT + "[ X ] Expected CMake 3.15+ (in {} or as command)".format(criticalCMake) + style.RESET_ALL )
         missingCritical = missingCritical + 1
 
 try:

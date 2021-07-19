@@ -26,7 +26,7 @@ then
 fi
 
 echo "Pulling ANTLR from git..."
-python pull_from_git.py --git-url https://github.com/galibzon/antlr4.git --destination-dir src/external --git-tag o3de-4.7.1
+python3 pull_from_git.py --git-url https://github.com/o3de/antlr4.git --destination-dir src/external --git-tag o3de-4.7.1
 
 $CMAKE -DMAKE_BUILD_TYPE=Release -S "src/external/antlr4/runtime/Cpp/" -B "build/release/external/antlr4/runtime/Cpp/"
 pushd build/release/external/antlr4/runtime/Cpp
