@@ -330,7 +330,8 @@ namespace AZ::ShaderCompiler
             UnqualifiedNameView funcName = ExtractLeaf(uid.m_name);
 
             bool validFunc = (IsGlobal(uid.m_name)
-                              && (psEntry == nullptr || strcmp(psEntry, funcName.data()) == 0));
+                              && (psEntry == nullptr || strcmp(psEntry, funcName.data()) == 0)
+                              && sym->m_defNode); // Regarding OM data, only defined functions are relevant.
             if (!validFunc)
             {   // It's not the function we are looking for
                 continue;
