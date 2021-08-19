@@ -23,7 +23,7 @@ namespace StdFs = std::filesystem;
 // For large features or milestones. Minor version allows for breaking changes. Existing tests can change.
 #define AZSLC_MINOR    "7"
 // For small features or bug fixes. They cannot introduce breaking changes. Existing tests shouldn't change.
-#define AZSLC_REVISION "23" // ATOM-15801
+#define AZSLC_REVISION "24" // ATOM-14295
 
 namespace AZ::ShaderCompiler
 {

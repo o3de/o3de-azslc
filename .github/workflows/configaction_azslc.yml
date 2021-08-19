@@ -45,6 +45,5 @@ jobs:
     # Build and execute all the tests for Debug & Release
     - name: Build and Execute AZSLc tests
       run: |
-        cd Overhaul
         export PYTHONPATH=${PYTHONPATH}:`pwd`
         python test.and.py
