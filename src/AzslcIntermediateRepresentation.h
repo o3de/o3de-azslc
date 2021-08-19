@@ -222,6 +222,62 @@ namespace AZ::ShaderCompiler
             return {};
         }
 
+        ///////////////////////////////////////////////////////////////////////
+        //! [GFX TODO] - ATOM-16287. Validate other matrix dimensions.
+        ///////////////////////////////////////////////////////////////////////
+        //! This function is useful to workaround a bug in SpirvCross when
+        //! -fvk-use-dx-layout is specified and there are variables of type Float3x3
+        //! followed by primitives of 4 bytes or less.
+        //! In DX12 the variable of 4 bytes or less starts at offset 44,
+        //! But in Vulkan ALWAYS (regardless whether -fvk-use-dx-layout is used or not)
+        //! starts at offset 48.
+        //! The solution is to check for all member field primitives of size 4bytes or less, if it is emitted
+        //! after a float3x3 or a variable of type struct that contains a float3x3 as last member. In such case,
+        //! the word size primitive should be prepended by a "float2" padding variable.
+        //! ////////////////////////////////////////////////////////////
+        //! Example 1:
+        //! 
+        //! struct MyStruct {
+        //!     float3x3 m_mat;
+        //!     float m_value;
+        //! }
+        //! 
+        //! After the Fix:
+        //! 
+        //! struct MyStruct {
+        //!     float3x3 m_mat;
+        //!     float2 __pad__;  //<-- FIX
+        //!     float m_value;
+        //! }
+        //!
+        //! ////////////////////////////////////////////////////////////
+        //! Example 2:
+        //! 
+        //! struct MyStructA {
+        //!     float4 m_vec;
+        //!     float3x3 m_mat;
+        //! }
+        //! 
+        //! struct MyStructB {
+        //!     MyStructA m_a;
+        //!     float m_value;
+        //! }
+        //! 
+        //! After the Fix:
+        //! 
+        //! struct MyStructA {
+        //!     float4 m_vec;
+        //!     float3x3 m_mat;
+        //! }
+        //! 
+        //! struct MyStructB {
+        //!     MyStructA m_a;
+        //!     float2 __pad__; //<-- FIX
+        //!     float m_value;
+        //! }
+        //!  
+        void PadAllFloat3x3WhenFollowedByFourOrLessBytes(const MiddleEndConfiguration& middleEndconfigration);
+
         //////////////////////////////////////////////////////////////////////////
         // PreprocessorLineDirective overrides...
         const LineDirectiveInfo* GetNearestPreprocessorLineDirective(size_t azslLineNumber) const override;
