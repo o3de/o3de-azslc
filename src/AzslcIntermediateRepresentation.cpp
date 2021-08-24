@@ -655,6 +655,11 @@ namespace AZ::ShaderCompiler
                 // Not a 3x3 matrix. skip.
                 return false;
             }
+            if (symbolUid.GetName().find("(") != string::npos)
+            {
+                // It's the return value of a function or a function argument. Skip.
+                return false;
+            }
             return true;
         };
 
@@ -812,7 +817,7 @@ namespace AZ::ShaderCompiler
             else
             {
                 throw std::logic_error{ "error: Was expecting " + string(parentName) +
-                    +"to be struct, class or ShaderResourceGroup" };
+                    + " to be struct, class or ShaderResourceGroup" };
             }
         };
 
