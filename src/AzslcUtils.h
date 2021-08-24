@@ -468,8 +468,7 @@ namespace AZ::ShaderCompiler
             case Layout::RelaxedDirectXPacking:
                 if (alignment == Alignment::asMatrixStart ||
                     alignment == Alignment::asArrayStart ||
-                    alignment == Alignment::asStructStart ||
-                    alignment == Alignment::asStructEnd)
+                    alignment == Alignment::asStructStart)
                 {
                     return AlignUp(currentSize, s_bytesPerRegister);
                 }
