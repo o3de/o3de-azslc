@@ -23,7 +23,7 @@ def verifyOK(thefile, compilerPath, silent):
         predicates.append(lambda: j["InlineConstantBuffer"]["bufferForInlineConstants"]["index"]                    ==    0)
         predicates.append(lambda: j["InlineConstantBuffer"]["bufferForInlineConstants"]["space"]                    ==    0)
         predicates.append(lambda: j["InlineConstantBuffer"]["bufferForInlineConstants"]["usage"]                    ==    "Read")
-        predicates.append(lambda: j["InlineConstantBuffer"]["bufferForInlineConstants"]["sizeInBytes"]              ==    64)
+        predicates.append(lambda: j["InlineConstantBuffer"]["bufferForInlineConstants"]["sizeInBytes"]              ==    60)
         predicates.append(lambda: j["InlineConstantBuffer"]["bufferForInlineConstants"]["id"]                       ==    "Root_Constants")
 
         if not silent: print (fg.CYAN+ style.BRIGHT+ "inline const verification..."+ style.RESET_ALL)

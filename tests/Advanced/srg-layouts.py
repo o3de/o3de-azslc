@@ -165,7 +165,7 @@ def verifyPackingDirectX(thefile, compilerPath, silent):
         predicates.append(lambda: j["ShaderResourceGroups"][0]["inputsForSRGConstants"][2]["constantByteOffset"]  ==  16)
         predicates.append(lambda: j["ShaderResourceGroups"][0]["inputsForSRGConstants"][2]["constantByteSize"]    ==  12)
         predicates.append(lambda: j["ShaderResourceGroups"][0]["inputsForSRGConstants"][3]["constantByteOffset"]  ==  16)
-        predicates.append(lambda: j["ShaderResourceGroups"][0]["inputsForSRGConstants"][3]["constantByteSize"]    ==  16) # Complex type. Size & offset match previous entries' sum
+        predicates.append(lambda: j["ShaderResourceGroups"][0]["inputsForSRGConstants"][3]["constantByteSize"]    ==  12) # Complex type. Size & offset match previous entries' sum
         predicates.append(lambda: j["ShaderResourceGroups"][0]["inputsForSRGConstants"][3]["typeName"]            ==  "/ExampleSRG/S")
         predicates.append(lambda: j["ShaderResourceGroups"][0]["inputsForSRGConstants"][4]["constantByteOffset"]  ==  32)
         predicates.append(lambda: j["ShaderResourceGroups"][0]["inputsForSRGConstants"][4]["constantByteSize"]    ==  40) # float2x3 - 2 full registers of 16 bytes each and 2 elements of the last register of 4 bytes each
@@ -190,7 +190,7 @@ def verifyPackingDirectX(thefile, compilerPath, silent):
         predicates.append(lambda: j["ShaderResourceGroups"][0]["inputsForSRGConstants"][14]["constantByteOffset"] == 208)
         predicates.append(lambda: j["ShaderResourceGroups"][0]["inputsForSRGConstants"][14]["constantByteSize"]   ==  12)
         predicates.append(lambda: j["ShaderResourceGroups"][0]["inputsForSRGConstants"][15]["constantByteOffset"] == 192)
-        predicates.append(lambda: j["ShaderResourceGroups"][0]["inputsForSRGConstants"][15]["constantByteSize"]   ==  32)
+        predicates.append(lambda: j["ShaderResourceGroups"][0]["inputsForSRGConstants"][15]["constantByteSize"]   ==  28)
         predicates.append(lambda: j["ShaderResourceGroups"][0]["inputsForSRGConstants"][15]["typeName"]           ==  "/ExampleSRG/S")
         predicates.append(lambda: j["ShaderResourceGroups"][0]["inputsForSRGConstants"][16]["constantByteOffset"] == 224)
         predicates.append(lambda: j["ShaderResourceGroups"][0]["inputsForSRGConstants"][16]["constantByteSize"]   ==   4)
@@ -221,15 +221,15 @@ def verifyPackingDirectX(thefile, compilerPath, silent):
         predicates.append(lambda: j["ShaderResourceGroups"][0]["inputsForSRGConstants"][29]["constantByteOffset"] == 416)
         predicates.append(lambda: j["ShaderResourceGroups"][0]["inputsForSRGConstants"][29]["constantByteSize"]   ==  12)
         predicates.append(lambda: j["ShaderResourceGroups"][0]["inputsForSRGConstants"][30]["constantByteOffset"] == 368)
-        predicates.append(lambda: j["ShaderResourceGroups"][0]["inputsForSRGConstants"][30]["constantByteSize"]   ==  64)
+        predicates.append(lambda: j["ShaderResourceGroups"][0]["inputsForSRGConstants"][30]["constantByteSize"]   ==  60)
         predicates.append(lambda: j["ShaderResourceGroups"][0]["inputsForSRGConstants"][31]["constantByteOffset"] ==   0)
-        predicates.append(lambda: j["ShaderResourceGroups"][0]["inputsForSRGConstants"][31]["constantByteSize"]   == 432)
+        predicates.append(lambda: j["ShaderResourceGroups"][0]["inputsForSRGConstants"][31]["constantByteSize"]   == 428)
         predicates.append(lambda: j["ShaderResourceGroups"][0]["inputsForSRGConstants"][31]["typeName"]           ==  "/ExampleSRG/T")
 
         predicates.append(lambda: j["ShaderResourceGroups"][0]["inputsForBufferViews"][0]["count"]    == 1)
-        predicates.append(lambda: j["ShaderResourceGroups"][0]["inputsForBufferViews"][0]["stride"]   == 432)
+        predicates.append(lambda: j["ShaderResourceGroups"][0]["inputsForBufferViews"][0]["stride"]   == 428)
         predicates.append(lambda: j["ShaderResourceGroups"][0]["inputsForBufferViews"][1]["count"]    == 2)
-        predicates.append(lambda: j["ShaderResourceGroups"][0]["inputsForBufferViews"][1]["stride"]   == 432)
+        predicates.append(lambda: j["ShaderResourceGroups"][0]["inputsForBufferViews"][1]["stride"]   == 428)
         predicates.append(lambda: j["ShaderResourceGroups"][0]["inputsForBufferViews"][2]["count"]    == 1)
         predicates.append(lambda: j["ShaderResourceGroups"][0]["inputsForBufferViews"][2]["stride"]   == 144)
         predicates.append(lambda: j["ShaderResourceGroups"][0]["inputsForBufferViews"][3]["type"]     == "Buffer<float4>")
@@ -981,7 +981,7 @@ def verifyPackingDirectXMatrices(thefile, compilerPath, silent):
         predicates.append(lambda: j["ShaderResourceGroups"][0]["inputsForSRGConstants"][23]["constantByteOffset"]  ==   512)
 
         predicates.append(lambda: j["ShaderResourceGroups"][0]["inputsForSRGConstants"][24]["constantByteOffset"]  ==     0)
-        predicates.append(lambda: j["ShaderResourceGroups"][0]["inputsForSRGConstants"][24]["constantByteSize"]    ==   528) # Complex type. Size & offset match previous entries' sum. Confirmed in Dxc
+        predicates.append(lambda: j["ShaderResourceGroups"][0]["inputsForSRGConstants"][24]["constantByteSize"]    ==   520) # Complex type. Size & offset match previous entries' sum. Confirmed in Dxc
         predicates.append(lambda: j["ShaderResourceGroups"][0]["inputsForSRGConstants"][24]["typeName"]            ==  "/ExampleSRG/T2")
 
         # struct T3
@@ -1011,7 +1011,7 @@ def verifyPackingDirectXMatrices(thefile, compilerPath, silent):
         predicates.append(lambda: j["ShaderResourceGroups"][0]["inputsForSRGConstants"][23 + 25]["constantByteOffset"]  ==   656 + 528)
 
         predicates.append(lambda: j["ShaderResourceGroups"][0]["inputsForSRGConstants"][49]["constantByteOffset"]  ==   528)
-        predicates.append(lambda: j["ShaderResourceGroups"][0]["inputsForSRGConstants"][49]["constantByteSize"]    ==   672) # Complex type. Size & offset match previous entries' sum. Confirmed in Dxc
+        predicates.append(lambda: j["ShaderResourceGroups"][0]["inputsForSRGConstants"][49]["constantByteSize"]    ==   664) # Complex type. Size & offset match previous entries' sum. Confirmed in Dxc
         predicates.append(lambda: j["ShaderResourceGroups"][0]["inputsForSRGConstants"][49]["typeName"]            ==  "/ExampleSRG/T3")
 
 
@@ -1042,7 +1042,7 @@ def verifyPackingDirectXMatrices(thefile, compilerPath, silent):
         predicates.append(lambda: j["ShaderResourceGroups"][0]["inputsForSRGConstants"][23 + 50]["constantByteOffset"]  ==   800 + 1200)
 
         predicates.append(lambda: j["ShaderResourceGroups"][0]["inputsForSRGConstants"][74]["constantByteOffset"]  ==  1200)
-        predicates.append(lambda: j["ShaderResourceGroups"][0]["inputsForSRGConstants"][74]["constantByteSize"]    ==   816) # Complex type. Size & offset match previous entries' sum. Confirmed in Dxc
+        predicates.append(lambda: j["ShaderResourceGroups"][0]["inputsForSRGConstants"][74]["constantByteSize"]    ==   808) # Complex type. Size & offset match previous entries' sum. Confirmed in Dxc
         predicates.append(lambda: j["ShaderResourceGroups"][0]["inputsForSRGConstants"][74]["typeName"]            ==  "/ExampleSRG/T4")
 
         # struct TU
@@ -1248,27 +1248,27 @@ def verifyPackingDirectXStride(thefile, compilerPath, silent):
 
         # Column major Constant Buffers
         # Note that the stride here means size. ConstantBuffers should have stride of 0
-        predicates.append(lambda: j["ShaderResourceGroups"][0]["inputsForBufferViews"][0]["stride"]  ==    48)
-        predicates.append(lambda: j["ShaderResourceGroups"][0]["inputsForBufferViews"][1]["stride"]  ==    64)
-        predicates.append(lambda: j["ShaderResourceGroups"][0]["inputsForBufferViews"][2]["stride"]  ==    48)
-        predicates.append(lambda: j["ShaderResourceGroups"][0]["inputsForBufferViews"][3]["stride"]  ==    80)
-        predicates.append(lambda: j["ShaderResourceGroups"][0]["inputsForBufferViews"][4]["stride"]  ==    64)
-        predicates.append(lambda: j["ShaderResourceGroups"][0]["inputsForBufferViews"][5]["stride"]  ==    64)
-        predicates.append(lambda: j["ShaderResourceGroups"][0]["inputsForBufferViews"][6]["stride"]  ==    80)
-        predicates.append(lambda: j["ShaderResourceGroups"][0]["inputsForBufferViews"][7]["stride"]  ==    80)
-        predicates.append(lambda: j["ShaderResourceGroups"][0]["inputsForBufferViews"][8]["stride"]  ==    96)
+        predicates.append(lambda: j["ShaderResourceGroups"][0]["inputsForBufferViews"][0]["stride"]  ==    32)
+        predicates.append(lambda: j["ShaderResourceGroups"][0]["inputsForBufferViews"][1]["stride"]  ==    48)
+        predicates.append(lambda: j["ShaderResourceGroups"][0]["inputsForBufferViews"][2]["stride"]  ==    36)
+        predicates.append(lambda: j["ShaderResourceGroups"][0]["inputsForBufferViews"][3]["stride"]  ==    64)
+        predicates.append(lambda: j["ShaderResourceGroups"][0]["inputsForBufferViews"][4]["stride"]  ==    40)
+        predicates.append(lambda: j["ShaderResourceGroups"][0]["inputsForBufferViews"][5]["stride"]  ==    52)
+        predicates.append(lambda: j["ShaderResourceGroups"][0]["inputsForBufferViews"][6]["stride"]  ==    68)
+        predicates.append(lambda: j["ShaderResourceGroups"][0]["inputsForBufferViews"][7]["stride"]  ==    56)
+        predicates.append(lambda: j["ShaderResourceGroups"][0]["inputsForBufferViews"][8]["stride"]  ==    72)
 
         # Row major Constant Buffers
         # Note that the stride here means size. ConstantBuffers should have stride of 0
-        predicates.append(lambda: j["ShaderResourceGroups"][1]["inputsForBufferViews"][0]["stride"]  ==    48)
-        predicates.append(lambda: j["ShaderResourceGroups"][1]["inputsForBufferViews"][1]["stride"]  ==    48)
-        predicates.append(lambda: j["ShaderResourceGroups"][1]["inputsForBufferViews"][2]["stride"]  ==    64)
-        predicates.append(lambda: j["ShaderResourceGroups"][1]["inputsForBufferViews"][3]["stride"]  ==    64)
-        predicates.append(lambda: j["ShaderResourceGroups"][1]["inputsForBufferViews"][4]["stride"]  ==    80)
-        predicates.append(lambda: j["ShaderResourceGroups"][1]["inputsForBufferViews"][5]["stride"]  ==    64)
-        predicates.append(lambda: j["ShaderResourceGroups"][1]["inputsForBufferViews"][6]["stride"]  ==    80)
-        predicates.append(lambda: j["ShaderResourceGroups"][1]["inputsForBufferViews"][7]["stride"]  ==    80)
-        predicates.append(lambda: j["ShaderResourceGroups"][1]["inputsForBufferViews"][8]["stride"]  ==    96)
+        predicates.append(lambda: j["ShaderResourceGroups"][1]["inputsForBufferViews"][0]["stride"]  ==    32)
+        predicates.append(lambda: j["ShaderResourceGroups"][1]["inputsForBufferViews"][1]["stride"]  ==    36)
+        predicates.append(lambda: j["ShaderResourceGroups"][1]["inputsForBufferViews"][2]["stride"]  ==    48)
+        predicates.append(lambda: j["ShaderResourceGroups"][1]["inputsForBufferViews"][3]["stride"]  ==    40)
+        predicates.append(lambda: j["ShaderResourceGroups"][1]["inputsForBufferViews"][4]["stride"]  ==    64)
+        predicates.append(lambda: j["ShaderResourceGroups"][1]["inputsForBufferViews"][5]["stride"]  ==    52)
+        predicates.append(lambda: j["ShaderResourceGroups"][1]["inputsForBufferViews"][6]["stride"]  ==    56)
+        predicates.append(lambda: j["ShaderResourceGroups"][1]["inputsForBufferViews"][7]["stride"]  ==    68)
+        predicates.append(lambda: j["ShaderResourceGroups"][1]["inputsForBufferViews"][8]["stride"]  ==    72)
 
         # Column major Structured Buffers
         # Note that the stride is the size of a single element in the buffer. For DirectX packing layout majorness is ignored
@@ -1309,7 +1309,7 @@ def verifyPackingDirectXInlineConstants(thefile, compilerPath, silent):
         predicates.append(lambda: j["InlineConstantBuffer"]["bufferForInlineConstants"]["index"]                    ==    1)
         predicates.append(lambda: j["InlineConstantBuffer"]["bufferForInlineConstants"]["space"]                    ==    0)
         predicates.append(lambda: j["InlineConstantBuffer"]["bufferForInlineConstants"]["usage"]                    ==    "Read")
-        predicates.append(lambda: j["InlineConstantBuffer"]["bufferForInlineConstants"]["sizeInBytes"]              ==    64)
+        predicates.append(lambda: j["InlineConstantBuffer"]["bufferForInlineConstants"]["sizeInBytes"]              ==    60)
         predicates.append(lambda: j["InlineConstantBuffer"]["bufferForInlineConstants"]["id"]                       ==    "Root_Constants")
 
         # Inline constant structure members validation

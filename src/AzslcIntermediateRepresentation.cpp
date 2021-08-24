@@ -586,7 +586,19 @@ namespace AZ::ShaderCompiler
             const auto layoutPacking = middleEndconfigration.m_packConstantBuffers;
             uint32_t startAt = Packing::AlignOffset(layoutPacking, 0, Packing::Alignment::asStructStart, 0, 0);
             uint32_t strideSize = CalculateSizeOfRootConstantsCB(rootConstantStructUid, middleEndconfigration.m_isRowMajor, layoutPacking);
-            uint32_t endOffset = Packing::AlignOffset(layoutPacking, strideSize, Packing::Alignment::asStructEnd, 0, 0);
+            uint32_t endOffset = 0;
+            switch (layoutPacking)
+            {
+                case Packing::Layout::DirectXPacking:          
+                case Packing::Layout::RelaxedDirectXPacking:
+                    // asStructEnd does nothing in DirectX, but in case of padding the root constant We force
+                    // asStructStart in order to get 16byte alignment.
+                    endOffset = Packing::AlignOffset(layoutPacking, strideSize, Packing::Alignment::asStructStart, 0, 0);
+                    break;
+                default:
+                    endOffset = Packing::AlignOffset(layoutPacking, strideSize, Packing::Alignment::asStructEnd, 0, 0);
+                    break;
+            }
 
             // If the structure is NOT aligned, we inject a 'pad' member to enforce that padding.
             // There are 4 cases: uint1, uint2, uint3, or uint4.
