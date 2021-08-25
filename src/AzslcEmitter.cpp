@@ -1211,6 +1211,34 @@ namespace AZ::ShaderCompiler
         }
     }
 
+    void CodeEmitter::ValidateIsNotUndefinedSrgVariableOrThrow(antlr4::Token* token, TokenToAst::AstNode* nodeFromToken) const
+    {
+        // A common user mistake is to reference an undefined SRG field like
+        // "MySrg::m_someVariable", where "m_someVariable" is undefined inside "MySrg",
+        // or because it's a typo. Either way let's catch the scenario and provide a meaningful message.
+        if (auto nestedNameSpecifierCtx = As<azslParser::NestedNameSpecifierContext*>(nodeFromToken))
+        {
+            // Get the parent rule, which should be a QualifiedIdContext.
+            auto qualifiedIdCtx = As<azslParser::QualifiedIdContext*>(nestedNameSpecifierCtx->parent);
+            if (!qualifiedIdCtx)
+            {
+                const string errorMessage = FormatString("Unexpected expression '%s'", token->getText().c_str());
+                throw AzslcEmitterException(EMITTER_UNEXPECTED_EXPRESSION, token, errorMessage);
+            }
+            // We only care to call out the error if the token has the name of an SRG.
+            QualifiedName qualifiedSymbolName(FormatString("/%s", token->getText().c_str()));
+            if (const IdAndKind* idAndKind = m_ir->GetIdAndKindInfo(qualifiedSymbolName))
+            {
+                const auto& [uid, kindInfo] = *idAndKind;
+                if (kindInfo.IsKindOneOf(Kind::ShaderResourceGroup))
+                {
+                    const string errorMessage = FormatString("\nUndefined ShaderResourceGroup symbol '%s'", qualifiedIdCtx->getText().c_str());
+                    throw AzslcEmitterException(EMITTER_UNDEFINED_SYMBOL_FROM_SRG, qualifiedIdCtx->getStart(), errorMessage);
+                }
+            }
+        }
+    }
+
     // override of the base method, to incorporate symbol and expression mutations
     void CodeEmitter::GetTextInStream(misc::Interval interval, std::ostream& output) const
     {
@@ -1271,7 +1299,10 @@ namespace AZ::ShaderCompiler
                     }
                 }
                 if (emitAsIs)
-                {   // do minimal reformatting to have a pseudo-readable emitted code
+                {
+                    ValidateIsNotUndefinedSrgVariableOrThrow(token, astNode);
+                    
+                    // do minimal reformatting to have a pseudo-readable emitted code
                     auto str = token->getText();
                     bool lineFeed = str == ";" || str == "{";
                     output << str << (lineFeed ? '\n' : ' ');

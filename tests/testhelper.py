@@ -117,3 +117,34 @@ def printFailedTestList(silent):
         print(style.BRIGHT + fg.RED + "failed files: " + fg.WHITE + str(failList) + style.RESET_ALL)
         
     failList = [] # since the module is imported for other platforms too, reset the list
+
+def compileAndExpectError(thefile, compilerPath, silent, argList):
+    """
+    This function will compile @thefile, with the given @argList.
+    Returns 1 (success) if the compilation failed AND the error code of the runtime exception
+    produced by AZSLc matches the "#EC <code number>" expression found inside the comments of @thefile.
+    Otherwise returns 0 (failure).
+    """
+    global failList
+    result = 0
+
+    options = [thefile]
+    options.extend(argList)
+    out, err, code = testfuncs.launchCompiler(compilerPath, options, silent)
+    if code == 0:
+        if not silent:
+            print (fg.RED + style.BRIGHT + f"FAIL. Expected {thefile} to report compilation errors" + style.RESET_ALL)
+        failList.append(thefile)
+        return 0 # Failure
+    # Read the expected error code from the source file.
+    f = io.open(thefile, 'r', encoding="latin-1")
+    azslCode = f.read()
+    f.close()
+    expectedErrorCode = testfuncs.findTokenToInt(azslCode, r"#EC\s\d*")
+    outputEC = testfuncs.findTokenToInt(err.decode('utf-8'), r"error\s#\d*:")
+    if outputEC == expectedErrorCode:
+        return 1 # Success
+    if not silent:
+        print (fg.RED + style.BRIGHT + f"FAIL. Expected error code {expectedErrorCode} from {thefile}, instead got error code {outputEC}" + style.RESET_ALL)
+    failList.append(thefile)
+    return 0 # Success
