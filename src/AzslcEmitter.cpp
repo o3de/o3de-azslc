@@ -1211,7 +1211,7 @@ namespace AZ::ShaderCompiler
         }
     }
 
-    void CodeEmitter::ValidateIsNotUndefinedSrgVariableOrThrow(antlr4::Token* token, TokenToAst::AstNode* nodeFromToken) const
+    void CodeEmitter::IfIsSrgMemberValidateIsDefined(antlr4::Token* token, TokenToAst::AstNode* nodeFromToken) const
     {
         // A common user mistake is to reference an undefined SRG field like
         // "MySrg::m_someVariable", where "m_someVariable" is undefined inside "MySrg",
@@ -1232,8 +1232,8 @@ namespace AZ::ShaderCompiler
                 const auto& [uid, kindInfo] = *idAndKind;
                 if (kindInfo.IsKindOneOf(Kind::ShaderResourceGroup))
                 {
-                    const string errorMessage = FormatString("\nUndefined ShaderResourceGroup symbol '%s'", qualifiedIdCtx->getText().c_str());
-                    throw AzslcEmitterException(EMITTER_UNDEFINED_SYMBOL_FROM_SRG, qualifiedIdCtx->getStart(), errorMessage);
+                    const string errorMessage = FormatString("Undefined ShaderResourceGroup member '%s'", qualifiedIdCtx->getText().c_str());
+                    throw AzslcEmitterException(EMITTER_UNDEFINED_SRG_MEMBER, qualifiedIdCtx->getStart(), errorMessage);
                 }
             }
         }
@@ -1300,7 +1300,7 @@ namespace AZ::ShaderCompiler
                 }
                 if (emitAsIs)
                 {
-                    ValidateIsNotUndefinedSrgVariableOrThrow(token, astNode);
+                    IfIsSrgMemberValidateIsDefined(token, astNode);
                     
                     // do minimal reformatting to have a pseudo-readable emitted code
                     auto str = token->getText();

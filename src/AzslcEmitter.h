@@ -194,7 +194,7 @@ namespace AZ::ShaderCompiler
         //! It checks whether the token that is about to be written to the output
         //! is not an undefined SRG field/variable.
         //! Throws an exception if it is an undefined ShaderResourceGroup field/variable.
-        void ValidateIsNotUndefinedSrgVariableOrThrow(antlr4::Token* token, TokenToAst::AstNode* nodeFromToken) const;
+        void IfIsSrgMemberValidateIsDefined(antlr4::Token* token, TokenToAst::AstNode* nodeFromToken) const;
 
         SymbolTranslation m_translations;
         unordered_set<IdentifierUID> m_alreadyEmittedFunctionDeclarations;
