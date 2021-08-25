@@ -663,8 +663,8 @@ namespace AZ::ShaderCompiler
             return true;
         };
 
-        //! Helper lambda. Checks if VarInfo is of primitive type for which its size is 4 or smaller,
-        auto isWordSizedPrimitive = [](const MiddleEndConfiguration& middleEndconfigration, const VarInfo* varInfo)
+        //! Helper lambda. Checks if VarInfo is of scalar type for which its size is 4 or smaller,
+        auto isWordSizedScalar = [](const MiddleEndConfiguration& middleEndconfigration, const VarInfo* varInfo)
         {
             if (!IsFundamental(varInfo->GetTypeClass()))
             {
@@ -716,7 +716,7 @@ namespace AZ::ShaderCompiler
                 continue;
             }
 
-            if (!isWordSizedPrimitive(middleEndconfigration, varInfo))
+            if (!isWordSizedScalar(middleEndconfigration, varInfo))
             {
                 continue;
             }
