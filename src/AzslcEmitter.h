@@ -189,6 +189,13 @@ namespace AZ::ShaderCompiler
         bool AlreadyEmittedFunctionDeclaration(const IdentifierUID& uid) const;
         bool AlreadyEmittedFunctionDefinition(const IdentifierUID& uid) const;
 
+        //! Helper function used during GetTextInStream().
+        //! The function assumes @nodeFromToken comes from @token.
+        //! It checks whether the token that is about to be written to the output
+        //! is not an undefined SRG field/variable.
+        //! Throws an exception if it is an undefined ShaderResourceGroup field/variable.
+        void IfIsSrgMemberValidateIsDefined(antlr4::Token* token, TokenToAst::AstNode* nodeFromToken) const;
+
         SymbolTranslation m_translations;
         unordered_set<IdentifierUID> m_alreadyEmittedFunctionDeclarations;
         unordered_set<IdentifierUID> m_alreadyEmittedFunctionDefinitions;

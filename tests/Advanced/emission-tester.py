@@ -49,8 +49,13 @@ def doTests(compiler, silent, azdxcpath):
     for base, dirs, files in os.walk(os.path.join(workDir, "../Emission/")):
         for f in files:
             if f.endswith(".azsl"):
+                subdirName = os.path.basename(base)
                 completePath = os.path.join(base, f)
-                if testhelper.verifyEmissionPatterns(completePath, compiler, silent, []) > 0:
+                if subdirName != "AsError":
+                    success = testhelper.verifyEmissionPatterns(completePath, compiler, silent, []) > 0
+                else:
+                    success = testhelper.compileAndExpectError(completePath, compiler, silent, []) > 0
+                if success:
                     result += 1
                 else:
                     resultFailed += 1
