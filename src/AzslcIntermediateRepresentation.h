@@ -225,7 +225,7 @@ namespace AZ::ShaderCompiler
         ///////////////////////////////////////////////////////////////////////
         //! [GFX TODO] - ATOM-16287. Validate other matrix dimensions.
         ///////////////////////////////////////////////////////////////////////
-        //! This function is useful to workaround a bug in SpirvCross when
+        //! This function is useful to workaround a bug in DXC when
         //! -fvk-use-dx-layout is specified and there are variables of type Float3x3
         //! followed by primitives of 4 bytes or less.
         //! In DX12 the variable of 4 bytes or less starts at offset 44,
