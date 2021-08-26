@@ -117,6 +117,10 @@ namespace AZ::ShaderCompiler
 
         RegisterRootConstantStruct(middleEndconfigration);
 
+        if (!middleEndconfigration.m_skipMatrix33Padding)
+        {
+            PadAllFloat3x3WhenFollowedByFourOrLessBytes(middleEndconfigration);
+        }
     }
 
     bool IntermediateRepresentation::Validate()
@@ -626,6 +630,201 @@ namespace AZ::ShaderCompiler
         }
 
         m_rootConstantStructUID = rootConstantStructUid;
+    }
+
+    void IntermediateRepresentation::PadAllFloat3x3WhenFollowedByFourOrLessBytes(const MiddleEndConfiguration& middleEndconfigration)
+    {
+        //! Helper lambda to check if a symbol is a 3x3 matrix.
+        auto isMatrix3x3 = [&](const IdentifierUID& symbolUid)
+        {
+            KindInfo* kindInfo = GetKindInfo(symbolUid);
+            const VarInfo* varInfo = kindInfo->GetSubAs<VarInfo>();
+            if (!varInfo)
+            {
+                // Not a variable.
+                return false;
+            }
+            if (varInfo->GetTypeClass() != TypeClass::Matrix)
+            {
+                // Not a matrix.
+                return false;
+            }
+            const auto* arithmeticInfo = &varInfo->m_typeInfoExt.m_coreType.m_arithmeticInfo;
+            if ((arithmeticInfo->m_rows != 3) || (arithmeticInfo->m_cols != 3))
+            {
+                // Not a 3x3 matrix. skip.
+                return false;
+            }
+            if (symbolUid.GetName().find("(") != string::npos)
+            {
+                // It's the return value of a function or a function argument. Skip.
+                return false;
+            }
+            return true;
+        };
+
+        //! Helper lambda. Checks if VarInfo is of scalar type for which its size is 4 or smaller,
+        auto isWordSizedScalar = [](const MiddleEndConfiguration& middleEndconfigration, const VarInfo* varInfo)
+        {
+            if (!IsFundamental(varInfo->GetTypeClass()))
+            {
+                return false;
+            }
+            if (varInfo->m_typeInfoExt.IsArray())
+            {
+                return false;
+            }
+            if (varInfo->m_typeInfoExt.GetTotalSize(middleEndconfigration.m_packDataBuffers, middleEndconfigration.m_isRowMajor) > 4)
+            {
+                return false;
+            }
+            return true;
+        };
+
+        // We'll loop through all symbols, find the 3x3 matrices (float3x3), and We can check the next symbol
+        const auto& orderedSymbols = m_symbols.m_elastic.m_order;
+        unordered_set<IdentifierUID> structsWithMatrix3x3AsLastField;
+        vector<IdentifierUID> symbolsToPrepad;
+        for (size_t symbolIndex = 0; symbolIndex < orderedSymbols.size(); ++symbolIndex)
+        {
+            const IdentifierUID uid = orderedSymbols[symbolIndex];
+            KindInfo* kindInfo = GetKindInfo(uid);
+
+            // We need to keep track of the structs for which the last member is
+            // a float3x3.
+            const bool isStructOrClass = kindInfo->IsKindOneOf(Kind::Class, Kind::Struct);
+            if (isStructOrClass)
+            {
+                auto& classInfo = kindInfo->GetSubRefAs<ClassInfo>();
+                const auto& memberFieldList = classInfo.GetMemberFields();
+                if (memberFieldList.empty())
+                {
+                    continue;
+                }
+                const auto memberCount = memberFieldList.size();
+                auto& lastMemberUid = memberFieldList[memberCount - 1];
+                if (isMatrix3x3(lastMemberUid))
+                {
+                    structsWithMatrix3x3AsLastField.insert(uid);
+                }
+                continue;
+            }
+
+            const VarInfo* varInfo = kindInfo->GetSubAs<VarInfo>();
+            if (!varInfo)
+            {
+                continue;
+            }
+
+            if (!isWordSizedScalar(middleEndconfigration, varInfo))
+            {
+                continue;
+            }
+
+            if (uid.GetName().find("(") != string::npos)
+            {
+                // It's a function argument. Skip.
+                continue;
+            }
+
+            // We only care if the previous VarInfo is one of:
+            // 1- A struct or class whose last member is a Matrix3x3.
+            // XOR
+            // 2- a Matrix3x3.
+            // 
+            //! Helper lambda to get the previously declared variable.
+            auto getPreviousVarInfo = [&](ssize_t& startSearchSymbolIndex /*in out*/) -> VarInfo* {
+                while (startSearchSymbolIndex >= 0)
+                {
+                    const auto& prevSymbolUid = orderedSymbols[startSearchSymbolIndex];
+                    KindInfo* prevKindInfo = GetKindInfo(prevSymbolUid);
+                    VarInfo* prevVarInfo = prevKindInfo->GetSubAs<VarInfo>();
+                    if (prevVarInfo)
+                    {
+                        return prevVarInfo;
+                    }
+                    startSearchSymbolIndex--;
+                }
+                return nullptr;
+            };
+
+            ssize_t prevSymbolIndex = symbolIndex - 1;
+            const VarInfo* prevVarInfo = getPreviousVarInfo(prevSymbolIndex);
+            if (prevVarInfo == nullptr)
+            {
+                // Nothing to do, keep going.
+                continue;
+            }
+
+            // Is it a Matrix3x3
+            const auto& prevSymbolUid = orderedSymbols[prevSymbolIndex];
+            if (isMatrix3x3(prevSymbolUid))
+            {
+                symbolsToPrepad.push_back(uid);
+                continue;
+            }
+            
+            // Is the type a struct or class whose last member is a Matrix3x3?
+            const auto prevVarTypeUid = prevVarInfo->m_typeInfoExt.m_coreType.m_typeId;
+            if (structsWithMatrix3x3AsLastField.count(prevVarTypeUid))
+            {
+                symbolsToPrepad.push_back(uid);
+            }
+
+        } // for loop end.
+
+        //! Helper method to insert a dummy float2 in the symbol table.
+        auto insertDummyFloat2 = [&](IdentifierUID insertBeforeThisUid)
+        {
+            // We can deduce the name of parent struct, class or SRG from the name of the field that should come AFTER
+            // the dummy float2.
+            auto parentName = GetParentName(insertBeforeThisUid.GetName());
+
+            // Define the name of the new dummy float2:
+            // Remark: it is possible that We end up adding more than one dummy padding variable
+            // to the same struct. This is why We have a static counter that will be helpful to avoid
+            // name collision.
+            static int s_numDummyFloats = 0;
+            string dummySymbolLeafName = FormatString("__mat33_pad%d__", s_numDummyFloats++);
+            QualifiedName dummySymbolFieldName{ JoinPath(parentName, dummySymbolLeafName) };
+
+            // Add the dummy field to the symbol table.
+            auto& [newVarUid, newVarKind] = m_symbols.AddIdentifier(dummySymbolFieldName, Kind::Variable);
+            // We must fill up the data.
+            VarInfo newVarInfo;
+            newVarInfo.m_declNode = nullptr;
+            newVarInfo.m_isPublic = false;
+            string typeName("float2");
+            ExtractedTypeExt padType = { UnqualifiedNameView(typeName), nullptr };
+            newVarInfo.m_typeInfoExt = ExtendedTypeInfo{ m_sema.CreateTypeRefInfo(padType),
+                             {}, {}, {}, Packing::MatrixMajor::Default };
+            newVarKind.GetSubRefAs<VarInfo>() = newVarInfo;
+
+            // Finally, We must insert the symbol just before @insertBeforeThisUid within the
+            // ordered list of the struct/class/SRG.
+            KindInfo* parentKindInfo = GetKindInfo({ parentName });
+            assert(parentKindInfo);
+            const bool isStructOrClass = parentKindInfo->IsKindOneOf(Kind::Class, Kind::Struct);
+            if (isStructOrClass)
+            {
+                parentKindInfo->GetSubRefAs<ClassInfo>().InsertBefore(newVarUid, Kind::Variable, insertBeforeThisUid);
+            }
+            else if (parentKindInfo->IsKindOneOf(Kind::ShaderResourceGroup))
+            {
+                auto& srgInfo = parentKindInfo->GetSubRefAs<SRGInfo>();
+                srgInfo.m_implicitStruct.InsertBefore(newVarUid, Kind::Variable, insertBeforeThisUid);
+            }
+            else
+            {
+                throw std::logic_error{ "error: Was expecting " + string(parentName) +
+                    + " to be struct, class or ShaderResourceGroup" };
+            }
+        };
+
+        for (const auto& uid : symbolsToPrepad)
+        {
+            insertDummyFloat2(uid);
+        }
     }
 
     //////////////////////////////////////////////////////////////////////////

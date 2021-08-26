@@ -90,6 +90,21 @@ namespace AZ::ShaderCompiler
             m_members.insert(uid);
         }
 
+        void InsertBefore(const IdentifierUID& newUid, Kind newKind, const IdentifierUID& beforeUid)
+        {
+            if (newKind == Kind::Variable)
+            {
+                auto itor = std::find(m_memberFields.begin(), m_memberFields.end(), beforeUid);
+                assert(itor != m_memberFields.end());
+                m_memberFields.insert(itor, newUid);
+            }
+            m_members.insert(newUid);
+
+            auto itor = std::find(m_ordered.begin(), m_ordered.end(), beforeUid);
+            assert(itor != m_ordered.end());
+            m_ordered.insert(itor, newUid);
+        }
+
         const vector<IdentifierUID>& GetMemberFields() const
         {
             return m_memberFields;
