@@ -34,7 +34,7 @@ namespace AZ::ShaderCompiler
         bool m_emitRowMajor = false;     //!< False by default (HLSL standard)
         bool m_forceEmitMajor = false;   //!< True if either -Zpc or -Zpr was specified
         bool m_padRootConstantCB = false; //!< If True, the emitted root constant CB will padded to 16-byte boundary.
-        bool m_skipMatrix33Padding = false; //! < If True, disables padding of Matrix33 variables when followed by a word size primitive.
+        bool m_skipAlignmentValidation = false; //! < If True, disables validation of a known DXC issue when certain word or 2-words size variables are preceded by some MatrixRxC variables.
         DescriptorCountBounds m_minAvailableDescriptors;   //!< Hint about the targeted graphics API's minimal guaranteed usable descriptors
         int m_maxSpaces = std::numeric_limits<int>::max();   //!< Maximum allocatable register logical space, after which register indexes will accumulate, but spaces will be capped
         int m_rootConstantsMaxSize = std::numeric_limits<int>::max();   //!< Indicates the number of root constants to be allowed, 0 means root constants not enabled

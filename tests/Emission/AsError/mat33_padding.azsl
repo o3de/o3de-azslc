@@ -1,6 +1,11 @@
-// This test case is used to validate proper insertion of dummy
-// float2 variables after float3x3 matrices in structs/classes & ShaderResourceGroups.
-// The idea is to match offsets and alignment between dx12 & vulkan. See ATOM-14595.
+// This test case is used to validate that the exception code 131 is thrown.
+// Exception code 131 (IR_POTENTIAL_DX12_VS_VULKAN_ALIGNMENT_ERROR) means
+// that AZSLc detected data layout issues within struct, classes or SRGs
+// that are known to produce different layout data by DXC when using
+// the command line option: -fvk-use-dx-layout
+// See https://github.com/o3de/o3de-azslc/issues/8
+//
+// #EC 131
 
 ShaderResourceGroupSemantic slot1
 {

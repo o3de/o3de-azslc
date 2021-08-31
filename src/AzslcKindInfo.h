@@ -345,6 +345,8 @@ namespace AZ::ShaderCompiler
         // access array dimensions. think of it as it they apply on the whole variable's type. (so not the generic type)
         // returns an ArrayDimensions struct const ref.
         inline const auto&         GetArrayDimensions() const;
+        // Returns the line number, in the AZSL file, where this symbol is declared. 
+        inline size_t GetLineOfDeclaration () const;
 
         AstUnnamedVarDecl*         m_declNode = nullptr;
         UnqualifiedName            m_identifier;
@@ -429,6 +431,15 @@ namespace AZ::ShaderCompiler
     const auto& VarInfo::GetArrayDimensions() const
     {
         return m_typeInfoExt.GetDimensions();
+    }
+
+    size_t VarInfo::GetLineOfDeclaration() const
+    {
+        if (m_declNode)
+        {
+            return m_declNode->start->getLine();
+        }
+        return 0;
     }
 
     struct OverloadSetInfo

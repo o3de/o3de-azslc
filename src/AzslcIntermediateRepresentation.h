@@ -222,18 +222,28 @@ namespace AZ::ShaderCompiler
             return {};
         }
 
+
+        // GFX-TODO: https://github.com/o3de/o3de-azslc/issues/9
+        // Upgrade DXC and if the alignment issues are fixed when using
+        // -fvk-use-dx-layout then this function can be deleted.
         ///////////////////////////////////////////////////////////////////////
-        //! [GFX TODO] - ATOM-16287. Validate other matrix dimensions.
-        ///////////////////////////////////////////////////////////////////////
-        //! This function is useful to workaround a bug in DXC when
-        //! -fvk-use-dx-layout is specified and there are variables of type Float3x3
-        //! followed by primitives of 4 bytes or less.
-        //! In DX12 the variable of 4 bytes or less starts at offset 44,
-        //! But in Vulkan ALWAYS (regardless whether -fvk-use-dx-layout is used or not)
-        //! starts at offset 48.
-        //! The solution is to check for all member field primitives of size 4bytes or less, if it is emitted
-        //! after a float3x3 or a variable of type struct that contains a float3x3 as last member. In such case,
-        //! the word size primitive should be prepended by a "float2" padding variable.
+        //! This function is useful to check if the alignment of the data in "struct"s 
+        //! or "SRG"s will encounter issues related with  a bug in DXC when
+        //! -fvk-use-dx-layout is specified and there are
+        //! float or float2 variables
+        //! preceded by matrices or structs that end in matrices of type:
+        //! float2x2, float3x2, float4x2
+        //! In such case the "float" or "float2" should be be prepadded by a float3 variable
+        //! and an exception error will be produced with a proposed solution.
+        //! 
+        //! The other cases are when
+        //! "float" type variables
+        //! are preceded by matrices or structs that end in matrices of type:
+        //! float2x3, float3x3, float4x3
+        //! In such case the "float" should be prepadded by a float2 variables.
+        //! 
+        //! Also it's important to keep track of structs that end in one of the matrices mentioned above.
+        //! 
         //! ////////////////////////////////////////////////////////////
         //! Example 1:
         //! 
@@ -246,7 +256,7 @@ namespace AZ::ShaderCompiler
         //! 
         //! struct MyStruct {
         //!     float3x3 m_mat;
-        //!     float2 __pad__;  //<-- FIX
+        //!     float2 __pad__;  //<-- Suggested FIX
         //!     float m_value;
         //! }
         //!
@@ -255,28 +265,28 @@ namespace AZ::ShaderCompiler
         //! 
         //! struct MyStructA {
         //!     float4 m_vec;
-        //!     float3x3 m_mat;
+        //!     float4x2 m_mat;
         //! }
         //! 
         //! struct MyStructB {
         //!     MyStructA m_a;
-        //!     float m_value;
+        //!     float2 m_value;
         //! }
         //! 
         //! After the Fix:
         //! 
         //! struct MyStructA {
         //!     float4 m_vec;
-        //!     float3x3 m_mat;
+        //!     float4x2 m_mat;
         //! }
         //! 
         //! struct MyStructB {
         //!     MyStructA m_a;
-        //!     float2 __pad__; //<-- FIX
-        //!     float m_value;
+        //!     float3 __pad__; //<-- Suggested FIX
+        //!     float2 m_value;
         //! }
         //!  
-        void PadAllFloat3x3WhenFollowedByFourOrLessBytes(const MiddleEndConfiguration& middleEndconfigration);
+        void ValidateAlignmentIssueWhenScalarOrFloat2PrecededByMatrix(const MiddleEndConfiguration& middleEndconfigration);
 
         //////////////////////////////////////////////////////////////////////////
         // PreprocessorLineDirective overrides...

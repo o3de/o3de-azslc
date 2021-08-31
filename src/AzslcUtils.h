@@ -1160,7 +1160,7 @@ namespace AZ::ShaderCompiler
         AZ::ShaderCompiler::Packing::Layout m_packDataBuffers;
         bool m_isRowMajor;
         bool m_padRootConstantCB;
-        bool m_skipMatrix33Padding;
+        bool m_skipAlignmentValidation;
     };
 
     ExtractedComposedType ExtractComposedTypeNamesFromAstContext(AstType* ctx, vector<tree::TerminalNode*>* genericDims = nullptr);

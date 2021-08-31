@@ -23,7 +23,7 @@ namespace StdFs = std::filesystem;
 // For large features or milestones. Minor version allows for breaking changes. Existing tests can change.
 #define AZSLC_MINOR    "7"
 // For small features or bug fixes. They cannot introduce breaking changes. Existing tests shouldn't change.
-#define AZSLC_REVISION "28" // ATOM-4800
+#define AZSLC_REVISION "29" // ATOM-16433
 
 namespace AZ::ShaderCompiler
 {
@@ -204,19 +204,19 @@ namespace AZ::ShaderCompiler::Main
     R"(Amazon Shader Language Compiler
 
         Usage:
-          azslc (- | FILE) [--use-spaces] [--unique-idx] [--cb-body] [--root-sig] [--root-const=<size>] [--pad-root-const] [--Zpc] [--Zpr] [--namespace=<nspc>] [--strip-unused-srgs] [--no-ms] [--skip-mat33-padding] [-o OUTFILE]
+          azslc (- | FILE) [--use-spaces] [--unique-idx] [--cb-body] [--root-sig] [--root-const=<size>] [--pad-root-const] [--Zpc] [--Zpr] [--namespace=<nspc>] [--strip-unused-srgs] [--no-ms] [--no-alignment-validation] [-o OUTFILE]
                            [--W0|--W1|--W2|--W3] [--Wx|--Wx1|--Wx2|--Wx3] [--min-descriptors=<set,spaces,samplers,textures,buffers>] [--max-spaces=<count>]
-          azslc (- | FILE) --full [--use-spaces] [--unique-idx] [--cb-body] [--root-sig] [--root-const=<size>] [--pad-root-const] [--Zpc] [--Zpr] [--pack-dx12] [--pack-vulkan] [--pack-opengl] [--namespace=<nspc>] [--strip-unused-srgs] [--no-ms] [--skip-mat33-padding] [-o OUTFILE]
+          azslc (- | FILE) --full [--use-spaces] [--unique-idx] [--cb-body] [--root-sig] [--root-const=<size>] [--pad-root-const] [--Zpc] [--Zpr] [--pack-dx12] [--pack-vulkan] [--pack-opengl] [--namespace=<nspc>] [--strip-unused-srgs] [--no-ms] [--no-alignment-validation] [-o OUTFILE]
                            [--W0|--W1|--W2|--W3] [--Wx|--Wx1|--Wx2|--Wx3] [--min-descriptors=<set,spaces,samplers,textures,buffers>] [--max-spaces=<count>]
           azslc (- | FILE) --ia [--use-spaces] [--unique-idx] [--cb-body] [--root-sig] [--Zpc] [--Zpr] [--pack-dx12] [--pack-vulkan] [--pack-opengl] [--namespace=<nspc>] [--strip-unused-srgs] [-o OUTFILE]
           azslc (- | FILE) --om [--use-spaces] [--unique-idx] [--cb-body] [--root-sig] [--Zpc] [--Zpr] [--pack-dx12] [--pack-vulkan] [--pack-opengl] [--namespace=<nspc>] [--strip-unused-srgs] [-o OUTFILE]
-          azslc (- | FILE) --srg [--use-spaces] [--unique-idx] [--cb-body] [--root-sig] [--root-const=<size>] [--pad-root-const] [--Zpc] [--Zpr] [--pack-dx12] [--pack-vulkan] [--pack-opengl] [--namespace=<nspc>] [--min-descriptors=<set,spaces,samplers,textures,buffers>] [--max-spaces=<count>] [--strip-unused-srgs] [--no-ms] [--skip-mat33-padding] [-o OUTFILE]
+          azslc (- | FILE) --srg [--use-spaces] [--unique-idx] [--cb-body] [--root-sig] [--root-const=<size>] [--pad-root-const] [--Zpc] [--Zpr] [--pack-dx12] [--pack-vulkan] [--pack-opengl] [--namespace=<nspc>] [--min-descriptors=<set,spaces,samplers,textures,buffers>] [--max-spaces=<count>] [--strip-unused-srgs] [--no-ms] [--no-alignment-validation] [-o OUTFILE]
           azslc (- | FILE) --options [--use-spaces] [--unique-idx] [--cb-body] [--root-sig] [--Zpc] [--Zpr] [--pack-dx12] [--pack-vulkan] [--pack-opengl] [--namespace=<nspc>] [--strip-unused-srgs] [-o OUTFILE]
           azslc (- | FILE) --semantic [--verbose] [--W0|--W1|--W2|--W3] [--Wx|--Wx1|--Wx2|--Wx3] [--root-const=<size>] [--pad-root-const] [--strip-unused-srgs]
           azslc (- | FILE) --syntax
-          azslc (- | FILE) --dumpsym [--strip-unused-srgs] [--no-ms] [--skip-mat33-padding]
+          azslc (- | FILE) --dumpsym [--strip-unused-srgs] [--no-ms] [--no-alignment-validation]
           azslc (- | FILE) --ast [--strip-unused-srgs]
-          azslc (- | FILE) --bindingdep [--use-spaces] [--unique-idx] [--cb-body] [--Zpc] [--Zpr] [--pack-dx12] [--pack-vulkan] [--pack-opengl] [--namespace=<nspc>] [--max-spaces=<count>] [--strip-unused-srgs] [--no-ms] [--skip-mat33-padding] [-o OUTFILE]
+          azslc (- | FILE) --bindingdep [--use-spaces] [--unique-idx] [--cb-body] [--Zpc] [--Zpr] [--pack-dx12] [--pack-vulkan] [--pack-opengl] [--namespace=<nspc>] [--max-spaces=<count>] [--strip-unused-srgs] [--no-ms] [--no-alignment-validation] [-o OUTFILE]
           azslc (- | FILE) --visitsym MQNAME [-d] [-v] [-f] [-r]
           azslc --listpredefined
           azslc -h | --help | --version
@@ -254,7 +254,9 @@ namespace AZ::ShaderCompiler::Main
           --no-ms                   Transforms usage of Texture2DMS/Texture2DMSArray and related functions and semantics into plain Texture2D/Texture2DArray equivalents.
                                     This is useful for allowing shader authors to easily write AZSL code that can be compiled into alternatives
                                     to work with both a multisample render pipeline and a non-MS render pipeline.
-[         --skip-mat33-padding]     Skips pre-padding word-sized primitives when preceded by a 3x3 matrix.
+[         --no-alignment-validation Skips checking for potential alignment issues related with differences between dx12 and vulkan.
+                                    By default, the compiler checks for those issues and fails to compile when those issues are detected.
+                                    Use this flag to skip such validation. 
           -d                        (Option of --visitsym) Visit direct references
           -v                        (Option of --visitsym) Visit overload-set
           -f                        (Option of --visitsym) Visit family
@@ -513,7 +515,7 @@ int main(int argc, const char* argv[])
             emitOptions.m_emitConstantBufferBody = args["--cb-body"].asBool();
             emitOptions.m_emitRootSig = args["--root-sig"].asBool();
             emitOptions.m_padRootConstantCB = args["--pad-root-const"].asBool();
-            emitOptions.m_skipMatrix33Padding = args["--skip-mat33-padding"].asBool();
+            emitOptions.m_skipAlignmentValidation = args["--no-alignment-validation"].asBool();
 
             if (args["--root-const"])
             {
@@ -576,7 +578,7 @@ int main(int argc, const char* argv[])
                                                           emitOptions.m_packDataBuffers,
                                                           emitOptions.m_emitRowMajor,
                                                           emitOptions.m_padRootConstantCB,
-                                                          emitOptions.m_skipMatrix33Padding };
+                                                          emitOptions.m_skipAlignmentValidation };
             ir.MiddleEnd(middleEndConfigration);
             if (convertToNoMS)
             {
