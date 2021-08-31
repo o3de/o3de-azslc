@@ -945,7 +945,7 @@ def verifyPackingRelaxedUniqueIdxUseSpaces(thefile, compilerPath, silent):
     return True if ok else False
 
 def verifyPackingDirectXMatrices(thefile, compilerPath, silent):
-    j, ok = testfuncs.buildAndGetJson(thefile, compilerPath, silent, ["--pack-dx12", "--skip-mat33-padding", "--srg"])
+    j, ok = testfuncs.buildAndGetJson(thefile, compilerPath, silent, ["--pack-dx12", "--skip-matrix-padding", "--srg"])
 
     if ok:
         predicates = []
@@ -1093,7 +1093,7 @@ def verifyPackingDirectXMatrices(thefile, compilerPath, silent):
     return True if ok else False
 
 def verifyPackingVulkanMatrices(thefile, compilerPath, silent):
-    j, ok = testfuncs.buildAndGetJson(thefile, compilerPath, silent, ["--pack-vulkan", "--skip-mat33-padding", "--srg"])
+    j, ok = testfuncs.buildAndGetJson(thefile, compilerPath, silent, ["--pack-vulkan", "--skip-matrix-padding", "--srg"])
 
     if ok:
         predicates = []
@@ -1241,7 +1241,7 @@ def verifyPackingVulkanMatrices(thefile, compilerPath, silent):
     return True if ok else False
 
 def verifyPackingDirectXStride(thefile, compilerPath, silent):
-    j, ok = testfuncs.buildAndGetJson(thefile, compilerPath, silent, ["--pack-dx12", "--skip-mat33-padding", "--srg"])
+    j, ok = testfuncs.buildAndGetJson(thefile, compilerPath, silent, ["--pack-dx12", "--skip-matrix-padding", "--srg"])
 
     if ok:
         predicates = []
@@ -1384,37 +1384,37 @@ def verifyPackingForPaddedMatrix33(thefile, compilerPath, silent):
 
         predicates.append(lambda: j["ShaderResourceGroups"][0]["inputsForSRGConstants"][4]["constantByteOffset"]  ==   160)
         predicates.append(lambda: j["ShaderResourceGroups"][0]["inputsForSRGConstants"][4]["constantByteSize"]    ==   8)
-        predicates.append(lambda: j["ShaderResourceGroups"][0]["inputsForSRGConstants"][4]["qualifiedName"]       ==   "/A/D/__mat33_pad0__")
+        predicates.append(lambda: j["ShaderResourceGroups"][0]["inputsForSRGConstants"][4]["qualifiedName"]       ==   "/A/D/__mat_pad0__")
         predicates.append(lambda: j["ShaderResourceGroups"][0]["inputsForSRGConstants"][5]["constantByteOffset"]  ==   168)
         predicates.append(lambda: j["ShaderResourceGroups"][0]["inputsForSRGConstants"][5]["constantByteSize"]    ==   4)
 
         predicates.append(lambda: j["ShaderResourceGroups"][0]["inputsForSRGConstants"][10]["constantByteOffset"]  ==   224)
         predicates.append(lambda: j["ShaderResourceGroups"][0]["inputsForSRGConstants"][10]["constantByteSize"]    ==   8)
-        predicates.append(lambda: j["ShaderResourceGroups"][0]["inputsForSRGConstants"][10]["qualifiedName"]       ==   "/B/__mat33_pad1__")
+        predicates.append(lambda: j["ShaderResourceGroups"][0]["inputsForSRGConstants"][10]["qualifiedName"]       ==   "/B/__mat_pad1__")
         predicates.append(lambda: j["ShaderResourceGroups"][0]["inputsForSRGConstants"][11]["constantByteOffset"]  ==   232)
         predicates.append(lambda: j["ShaderResourceGroups"][0]["inputsForSRGConstants"][11]["constantByteSize"]    ==   4)
 
         predicates.append(lambda: j["ShaderResourceGroups"][0]["inputsForSRGConstants"][17]["constantByteOffset"]  ==   352)
         predicates.append(lambda: j["ShaderResourceGroups"][0]["inputsForSRGConstants"][17]["constantByteSize"]    ==   8)
-        predicates.append(lambda: j["ShaderResourceGroups"][0]["inputsForSRGConstants"][17]["qualifiedName"]       ==   "/C/__mat33_pad2__")
+        predicates.append(lambda: j["ShaderResourceGroups"][0]["inputsForSRGConstants"][17]["qualifiedName"]       ==   "/C/__mat_pad2__")
         predicates.append(lambda: j["ShaderResourceGroups"][0]["inputsForSRGConstants"][18]["constantByteOffset"]  ==   360)
         predicates.append(lambda: j["ShaderResourceGroups"][0]["inputsForSRGConstants"][18]["constantByteSize"]    ==   4)
 
         predicates.append(lambda: j["ShaderResourceGroups"][0]["inputsForSRGConstants"][23]["constantByteOffset"]  ==   448)
         predicates.append(lambda: j["ShaderResourceGroups"][0]["inputsForSRGConstants"][23]["constantByteSize"]    ==   8)
-        predicates.append(lambda: j["ShaderResourceGroups"][0]["inputsForSRGConstants"][23]["qualifiedName"]       ==   "/C/F/__mat33_pad3__")
+        predicates.append(lambda: j["ShaderResourceGroups"][0]["inputsForSRGConstants"][23]["qualifiedName"]       ==   "/C/F/__mat_pad3__")
         predicates.append(lambda: j["ShaderResourceGroups"][0]["inputsForSRGConstants"][24]["constantByteOffset"]  ==   456)
         predicates.append(lambda: j["ShaderResourceGroups"][0]["inputsForSRGConstants"][24]["constantByteSize"]    ==   4)
 
         predicates.append(lambda: j["ShaderResourceGroups"][0]["inputsForSRGConstants"][28]["constantByteOffset"]  ==   512)
         predicates.append(lambda: j["ShaderResourceGroups"][0]["inputsForSRGConstants"][28]["constantByteSize"]    ==   8)
-        predicates.append(lambda: j["ShaderResourceGroups"][0]["inputsForSRGConstants"][28]["qualifiedName"]       ==   "/SRG1/__mat33_pad4__")
+        predicates.append(lambda: j["ShaderResourceGroups"][0]["inputsForSRGConstants"][28]["qualifiedName"]       ==   "/SRG1/__mat_pad4__")
         predicates.append(lambda: j["ShaderResourceGroups"][0]["inputsForSRGConstants"][29]["constantByteOffset"]  ==   520)
         predicates.append(lambda: j["ShaderResourceGroups"][0]["inputsForSRGConstants"][29]["constantByteSize"]    ==   4)
 
         predicates.append(lambda: j["ShaderResourceGroups"][0]["inputsForSRGConstants"][31]["constantByteOffset"]  ==   576)
         predicates.append(lambda: j["ShaderResourceGroups"][0]["inputsForSRGConstants"][31]["constantByteSize"]    ==   8)
-        predicates.append(lambda: j["ShaderResourceGroups"][0]["inputsForSRGConstants"][31]["qualifiedName"]       ==   "/SRG1/__mat33_pad5__")
+        predicates.append(lambda: j["ShaderResourceGroups"][0]["inputsForSRGConstants"][31]["qualifiedName"]       ==   "/SRG1/__mat_pad5__")
         predicates.append(lambda: j["ShaderResourceGroups"][0]["inputsForSRGConstants"][32]["constantByteOffset"]  ==   584)
         predicates.append(lambda: j["ShaderResourceGroups"][0]["inputsForSRGConstants"][32]["constantByteSize"]    ==   4)
 

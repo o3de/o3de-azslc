@@ -1,5 +1,5 @@
 /*
-    Cmdargs: ['--skip-mat33-padding']
+    Cmdargs: ['--skip-matrix-padding']
 */
 "struct A"
 "{"
