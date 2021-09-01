@@ -196,6 +196,15 @@ namespace AZ::ShaderCompiler
 
     void SemaCheckListener::enterFunctionDefinition(azslParser::FunctionDefinitionContext* ctx)
     {
+        // Forbid function definitions inside "struct"s.
+        if (m_ir->m_sema.IsScopeStruct())
+        {
+            throw AzslcException(ADVANCED_SYNTAX_FUNCTION_IN_STRUCT,
+                                 "Syntax",
+                                 ctx->start,
+                                 "structs cannot have member functions; consider using a class.");
+        }
+
         auto signature = ctx->hlslFunctionDefinition()->leadingTypeFunctionSignature();
         auto uqName = ExtractNameFromAnyContextWithName(signature);
 
@@ -226,6 +235,15 @@ namespace AZ::ShaderCompiler
 
     void SemaCheckListener::enterFunctionDeclaration(azslParser::FunctionDeclarationContext* ctx)
     {
+        // Forbid function declarations inside "struct"s.
+        if (m_ir->m_sema.IsScopeStruct())
+        {
+            throw AzslcException(ADVANCED_SYNTAX_FUNCTION_IN_STRUCT,
+                                 "Syntax",
+                                 ctx->start,
+                                 "structs cannot have member functions; consider using a class.");
+        }
+
         auto signature = ctx->hlslFunctionDeclaration()->leadingTypeFunctionSignature();
         auto uqName = ExtractNameFromAnyContextWithName(signature);
         auto& [id, _] = m_ir->m_sema.RegisterFunctionDeclarationAndAddSeenat(uqName, signature);

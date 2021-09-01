@@ -351,8 +351,11 @@ namespace AZ::ShaderCompiler
         // another helper to streamline what to do directly with the result from ExtractTypeNameFromAstContext function families.
         auto CreateExtendedTypeInfo(const ExtractedComposedType& extractedComposed, ArrayDimensions dims, Packing::MatrixMajor mtxMajor) const -> ExtendedTypeInfo;
 
-        //! check if current scope is a structured user defined type
+        //! check if current scope is a structured user defined type ("struct", "class" or "interface")
         bool IsScopeStructClassInterface() const;
+
+        //! check if current scope is of type "struct".
+        bool IsScopeStruct() const;
 
         //! Find a concrete function from an overload-set and an argument list.
         //! (adjust the shoot of a lookup to something more precise in case that it's possible)

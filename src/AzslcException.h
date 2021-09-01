@@ -100,6 +100,7 @@ namespace AZ::ShaderCompiler
         ADVANCED_SYNTAX_CONSTANT_BUFFER_ONLY_IN_SRG = 513u,
         ADVANCED_SYNTAX_DOUBLE_SCOPE_RESOLUTION = 514u,
         ADVANCED_RESERVED_NAME_USED = 515u,
+        ADVANCED_SYNTAX_FUNCTION_IN_STRUCT = 516u,
     };
 
     class AzslcException : public antlr4::RuntimeException

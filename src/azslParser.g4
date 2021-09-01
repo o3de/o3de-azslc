@@ -78,6 +78,8 @@ structDefinition:
 
 structMemberDeclaration:
         variableDeclarationStatement
+    |   attributedFunctionDefinition //AZSL+, forbidden, but allows us to provide better error message.
+    |   attributedFunctionDeclaration //AZSL+, forbidden, but allows us to provide better error message.
     |   anyStructuredTypeDefinitionStatement  // AZSL+
     |   typeAliasingDefinitionStatement // AZSL+
 ;
