@@ -503,6 +503,8 @@ public:
     StructMemberDeclarationContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
     VariableDeclarationStatementContext *variableDeclarationStatement();
+    AttributedFunctionDefinitionContext *attributedFunctionDefinition();
+    AttributedFunctionDeclarationContext *attributedFunctionDeclaration();
     AnyStructuredTypeDefinitionStatementContext *anyStructuredTypeDefinitionStatement();
     TypeAliasingDefinitionStatementContext *typeAliasingDefinitionStatement();
 

@@ -1953,6 +1953,12 @@ namespace AZ::ShaderCompiler
         return found;
     }
 
+    bool SemanticOrchestrator::IsScopeStruct() const
+    {
+        const KindInfo& scopeKind = m_symbols->GetIdAndKindInfo(m_scope->GetNameOfCurScope())->second;
+        return scopeKind.IsKindOneOf(Kind::Struct);
+    }
+
     bool SemanticOrchestrator::IsScopeStructClassInterface() const
     {
         const KindInfo& scopeKind = m_symbols->GetIdAndKindInfo(m_scope->GetNameOfCurScope())->second;
