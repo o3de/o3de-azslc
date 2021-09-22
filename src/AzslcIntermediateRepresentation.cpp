@@ -117,9 +117,9 @@ namespace AZ::ShaderCompiler
 
         RegisterRootConstantStruct(middleEndconfigration);
 
-        if (!middleEndconfigration.m_skipMatrix33Padding)
+        if (!middleEndconfigration.m_skipAlignmentValidation)
         {
-            PadAllFloat3x3WhenFollowedByFourOrLessBytes(middleEndconfigration);
+            ValidateAlignmentIssueWhenScalarOrFloat2PrecededByMatrix(middleEndconfigration);
         }
     }
 
@@ -632,10 +632,11 @@ namespace AZ::ShaderCompiler
         m_rootConstantStructUID = rootConstantStructUid;
     }
 
-    void IntermediateRepresentation::PadAllFloat3x3WhenFollowedByFourOrLessBytes(const MiddleEndConfiguration& middleEndconfigration)
+    void IntermediateRepresentation::ValidateAlignmentIssueWhenScalarOrFloat2PrecededByMatrix(const MiddleEndConfiguration& middleEndconfigration)
     {
-        //! Helper lambda to check if a symbol is a 3x3 matrix.
-        auto isMatrix3x3 = [&](const IdentifierUID& symbolUid)
+        //! Helper lambda to check if a symbol is a matrix, it also returns
+        //! the number of columns in @numColumns
+        auto isMatrix = [&](const IdentifierUID& symbolUid, int& numColumns)
         {
             KindInfo* kindInfo = GetKindInfo(symbolUid);
             const VarInfo* varInfo = kindInfo->GetSubAs<VarInfo>();
@@ -650,11 +651,11 @@ namespace AZ::ShaderCompiler
                 return false;
             }
             const auto* arithmeticInfo = &varInfo->m_typeInfoExt.m_coreType.m_arithmeticInfo;
-            if ((arithmeticInfo->m_rows != 3) || (arithmeticInfo->m_cols != 3))
+            if (arithmeticInfo->m_rows < 2)
             {
-                // Not a 3x3 matrix. skip.
                 return false;
             }
+            numColumns = arithmeticInfo->m_cols;
             if (symbolUid.GetName().find("(") != string::npos)
             {
                 // It's the return value of a function or a function argument. Skip.
@@ -663,8 +664,9 @@ namespace AZ::ShaderCompiler
             return true;
         };
 
-        //! Helper lambda. Checks if VarInfo is of scalar type for which its size is 4 or smaller,
-        auto isWordSizedScalar = [](const MiddleEndConfiguration& middleEndconfigration, const VarInfo* varInfo)
+        //! Helper lambda. Checks if @varInfo size is 8 or smaller.
+        //! The actual size in bytes is returned in sizeInBytes.
+        auto isVariableOf8BytesOrLess = [](const MiddleEndConfiguration& middleEndconfigration, const VarInfo* varInfo, size_t& sizeInBytes)
         {
             if (!IsFundamental(varInfo->GetTypeClass()))
             {
@@ -674,17 +676,34 @@ namespace AZ::ShaderCompiler
             {
                 return false;
             }
-            if (varInfo->m_typeInfoExt.GetTotalSize(middleEndconfigration.m_packDataBuffers, middleEndconfigration.m_isRowMajor) > 4)
+            const auto byteCount = varInfo->m_typeInfoExt.GetTotalSize(middleEndconfigration.m_packDataBuffers, middleEndconfigration.m_isRowMajor);
+            if (byteCount > 8)
             {
                 return false;
             }
+            sizeInBytes = byteCount;
             return true;
         };
 
-        // We'll loop through all symbols, find the 3x3 matrices (float3x3), and We can check the next symbol
+        // We'll loop through all symbols.
         const auto& orderedSymbols = m_symbols.m_elastic.m_order;
-        unordered_set<IdentifierUID> structsWithMatrix3x3AsLastField;
-        vector<IdentifierUID> symbolsToPrepad;
+        // Keep record of the structs that end in float2x2, float3x2, float4x2
+        unordered_set<IdentifierUID> structsWithMatrixRx2AsLastField;
+        // and also the structs that end in float2x3, float3x3, float4x3
+        unordered_set<IdentifierUID> structsWithMatrixRx3AsLastField;
+
+        enum class PrepadType
+        {
+            Float2,
+            Float3,
+            Unknown,
+        };
+        struct UidWithPrepadType
+        {
+            PrepadType m_prepadType;
+            IdentifierUID m_uid;
+        };
+        vector<UidWithPrepadType> symbolsToPrepad;
         for (size_t symbolIndex = 0; symbolIndex < orderedSymbols.size(); ++symbolIndex)
         {
             const IdentifierUID uid = orderedSymbols[symbolIndex];
@@ -703,9 +722,17 @@ namespace AZ::ShaderCompiler
                 }
                 const auto memberCount = memberFieldList.size();
                 auto& lastMemberUid = memberFieldList[memberCount - 1];
-                if (isMatrix3x3(lastMemberUid))
+                int numColumns = 0;
+                if (isMatrix(lastMemberUid, numColumns))
                 {
-                    structsWithMatrix3x3AsLastField.insert(uid);
+                    if (numColumns == 2)
+                    {
+                        structsWithMatrixRx2AsLastField.insert(uid);
+                    }
+                    else if (numColumns == 3)
+                    {
+                        structsWithMatrixRx3AsLastField.insert(uid);
+                    }
                 }
                 continue;
             }
@@ -716,7 +743,8 @@ namespace AZ::ShaderCompiler
                 continue;
             }
 
-            if (!isWordSizedScalar(middleEndconfigration, varInfo))
+            size_t variableSizeInBytes;
+            if (!isVariableOf8BytesOrLess(middleEndconfigration, varInfo, variableSizeInBytes))
             {
                 continue;
             }
@@ -728,10 +756,11 @@ namespace AZ::ShaderCompiler
             }
 
             // We only care if the previous VarInfo is one of:
-            // 1- A struct or class whose last member is a Matrix3x3.
-            // XOR
-            // 2- a Matrix3x3.
-            // 
+            // 1- A struct or class whose last member is a float2x2, float3x2, float4x2,
+            //    float2x3, float3x3, float4x3.
+            // OR
+            // 2- a float2x2, float3x2, float4x2,
+            //    float2x3, float3x3, float4x3.
             //! Helper lambda to get the previously declared variable.
             auto getPreviousVarInfo = [&](ssize_t& startSearchSymbolIndex /*in out*/) -> VarInfo* {
                 while (startSearchSymbolIndex >= 0)
@@ -756,75 +785,124 @@ namespace AZ::ShaderCompiler
                 continue;
             }
 
-            // Is it a Matrix3x3
+            // Is it a Matrix?
             const auto& prevSymbolUid = orderedSymbols[prevSymbolIndex];
-            if (isMatrix3x3(prevSymbolUid))
+            int numColumns = 0;
+            if (isMatrix(prevSymbolUid, numColumns))
             {
-                symbolsToPrepad.push_back(uid);
+                if (numColumns == 2)
+                {
+                    symbolsToPrepad.push_back(UidWithPrepadType{PrepadType::Float3, uid});
+                }
+                else if ((numColumns == 3) && (variableSizeInBytes <= 4))
+                {
+                    symbolsToPrepad.push_back(UidWithPrepadType{PrepadType::Float2, uid});
+                }
                 continue;
             }
             
-            // Is the type a struct or class whose last member is a Matrix3x3?
+            // Is the type a struct or class whose last member is a Matrix of interest?
             const auto prevVarTypeUid = prevVarInfo->m_typeInfoExt.m_coreType.m_typeId;
-            if (structsWithMatrix3x3AsLastField.count(prevVarTypeUid))
+            if (structsWithMatrixRx2AsLastField.count(prevVarTypeUid))
             {
-                symbolsToPrepad.push_back(uid);
+                symbolsToPrepad.push_back(UidWithPrepadType{PrepadType::Float3, uid});
+            }
+            else if (structsWithMatrixRx3AsLastField.count(prevVarTypeUid) && (variableSizeInBytes <= 4))
+            {
+                symbolsToPrepad.push_back(UidWithPrepadType{PrepadType::Float2, uid});
             }
 
         } // for loop end.
 
-        //! Helper method to insert a dummy float2 in the symbol table.
-        auto insertDummyFloat2 = [&](IdentifierUID insertBeforeThisUid)
+        //! Helper function that returns a string suggesting padding solution
+        auto getPaddingSolutionMessage = [&](PrepadType prepadType, IdentifierUID insertBeforeThisUid) -> string
         {
             // We can deduce the name of parent struct, class or SRG from the name of the field that should come AFTER
-            // the dummy float2.
+            // the dummy float2/float3.
             auto parentName = GetParentName(insertBeforeThisUid.GetName());
 
-            // Define the name of the new dummy float2:
-            // Remark: it is possible that We end up adding more than one dummy padding variable
-            // to the same struct. This is why We have a static counter that will be helpful to avoid
-            // name collision.
-            static int s_numDummyFloats = 0;
-            string dummySymbolLeafName = FormatString("__mat33_pad%d__", s_numDummyFloats++);
-            QualifiedName dummySymbolFieldName{ JoinPath(parentName, dummySymbolLeafName) };
-
-            // Add the dummy field to the symbol table.
-            auto& [newVarUid, newVarKind] = m_symbols.AddIdentifier(dummySymbolFieldName, Kind::Variable);
-            // We must fill up the data.
-            VarInfo newVarInfo;
-            newVarInfo.m_declNode = nullptr;
-            newVarInfo.m_isPublic = false;
-            string typeName("float2");
-            ExtractedTypeExt padType = { UnqualifiedNameView(typeName), nullptr };
-            newVarInfo.m_typeInfoExt = ExtendedTypeInfo{ m_sema.CreateTypeRefInfo(padType),
-                             {}, {}, {}, Packing::MatrixMajor::Default };
-            newVarKind.GetSubRefAs<VarInfo>() = newVarInfo;
-
-            // Finally, We must insert the symbol just before @insertBeforeThisUid within the
-            // ordered list of the struct/class/SRG.
+            // The padding is not needed if the variable @insertBeforeThisUid is the first member
+            // of a struct/class/SRG
             KindInfo* parentKindInfo = GetKindInfo({ parentName });
             assert(parentKindInfo);
-            const bool isStructOrClass = parentKindInfo->IsKindOneOf(Kind::Class, Kind::Struct);
-            if (isStructOrClass)
+            const bool isClass = parentKindInfo->IsKindOneOf(Kind::Class);
+            const bool isStruct = parentKindInfo->IsKindOneOf(Kind::Struct);
+            const bool isSrg = parentKindInfo->IsKindOneOf(Kind::ShaderResourceGroup);
+            if (isStruct || isClass)
             {
-                parentKindInfo->GetSubRefAs<ClassInfo>().InsertBefore(newVarUid, Kind::Variable, insertBeforeThisUid);
+                auto firstMemberUid = parentKindInfo->GetSubRefAs<ClassInfo>().GetMemberFields()[0];
+                if (firstMemberUid == insertBeforeThisUid)
+                {
+                    return {};
+                }
             }
-            else if (parentKindInfo->IsKindOneOf(Kind::ShaderResourceGroup))
+            else if (isSrg)
             {
                 auto& srgInfo = parentKindInfo->GetSubRefAs<SRGInfo>();
-                srgInfo.m_implicitStruct.InsertBefore(newVarUid, Kind::Variable, insertBeforeThisUid);
+                auto firstMemberUid = srgInfo.m_implicitStruct.GetMemberFields()[0];
+                if (firstMemberUid == insertBeforeThisUid)
+                {
+                    return {};
+                }
             }
             else
             {
                 throw std::logic_error{ "error: Was expecting " + string(parentName) +
                     + " to be struct, class or ShaderResourceGroup" };
             }
+
+            string typeName;
+            if (isClass)
+            {
+                typeName = "class";
+            }
+            else if (isStruct)
+            {
+                typeName = "struct";
+            }
+            else
+            {
+                typeName = "ShaderResourceGroup";
+            }
+
+            // Let's get the line number where @insertBeforeThisUid was found in the flat AZSL file.
+            const auto * tmpThis = this; // To disambiguate which version of GetSymbolSubAs<> to call.
+            const auto * varInfo = tmpThis->GetSymbolSubAs<VarInfo>(insertBeforeThisUid.GetName());
+            size_t lineOfDeclaration = varInfo->GetLineOfDeclaration();
+            const LineDirectiveInfo* lineInfo = GetNearestPreprocessorLineDirective(lineOfDeclaration);
+            if (!lineInfo)
+            {
+                // When the LineDirectiveInfo* is null, it means We have detected a variable that was added
+                // by AZSLc itself. e.g. Root Constant padding, etc.
+                // In such case, this is not an issue We want to interfere with.
+                return {};
+            }
+            const auto originallineNumber = GetLineNumberInOriginalSourceFile(*lineInfo, lineOfDeclaration);
+
+            string solution = FormatString("- A 'float%d' variable should be added before the variable '%s' in '%s %s' at Line number %zu of '%s'\n",
+                prepadType == PrepadType::Float2 ? 2 : 3, insertBeforeThisUid.GetNameLeaf().c_str(), typeName.c_str(), parentName.data(),
+                originallineNumber, lineInfo->m_containingFilename.c_str());
+
+            return solution;
+
         };
 
-        for (const auto& uid : symbolsToPrepad)
+        string solutionsReport;
+        for (const auto& uidAndPrepadType : symbolsToPrepad)
         {
-            insertDummyFloat2(uid);
+            solutionsReport += getPaddingSolutionMessage(uidAndPrepadType.m_prepadType, uidAndPrepadType.m_uid);
         }
+
+        if (solutionsReport.empty())
+        {
+            return;
+        }
+
+        string errorMessage(
+            "Detected potential alignment issues related with DXC flag '-fvk-use-dx-layout'.\n"
+            "Alternatively you can use the option '--no-alignment-validation' to void this error and compile as is.:\n");
+        errorMessage += solutionsReport;
+        throw AzslcIrException(IR_POTENTIAL_DX12_VS_VULKAN_ALIGNMENT_ERROR, errorMessage);
     }
 
     //////////////////////////////////////////////////////////////////////////

@@ -80,6 +80,7 @@ namespace AZ::ShaderCompiler
         IR_MULTIPLE_SRG_FALLBACK  = 128u,
         IR_NO_FALLBACK_ASSIGNED = 129u,
         IR_SRG_WITHOUT_SEMANTIC = 130u,
+        IR_POTENTIAL_DX12_VS_VULKAN_ALIGNMENT_ERROR = 131u,
 
         // emitter error codes
         EMITTER_INVALID_ARRAY_DIMENSIONS = 256u,

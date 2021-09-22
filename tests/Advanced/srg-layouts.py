@@ -945,7 +945,7 @@ def verifyPackingRelaxedUniqueIdxUseSpaces(thefile, compilerPath, silent):
     return True if ok else False
 
 def verifyPackingDirectXMatrices(thefile, compilerPath, silent):
-    j, ok = testfuncs.buildAndGetJson(thefile, compilerPath, silent, ["--pack-dx12", "--skip-mat33-padding", "--srg"])
+    j, ok = testfuncs.buildAndGetJson(thefile, compilerPath, silent, ["--pack-dx12", "--no-alignment-validation", "--srg"])
 
     if ok:
         predicates = []
@@ -1093,7 +1093,7 @@ def verifyPackingDirectXMatrices(thefile, compilerPath, silent):
     return True if ok else False
 
 def verifyPackingVulkanMatrices(thefile, compilerPath, silent):
-    j, ok = testfuncs.buildAndGetJson(thefile, compilerPath, silent, ["--pack-vulkan", "--skip-mat33-padding", "--srg"])
+    j, ok = testfuncs.buildAndGetJson(thefile, compilerPath, silent, ["--pack-vulkan", "--no-alignment-validation", "--srg"])
 
     if ok:
         predicates = []
@@ -1241,7 +1241,7 @@ def verifyPackingVulkanMatrices(thefile, compilerPath, silent):
     return True if ok else False
 
 def verifyPackingDirectXStride(thefile, compilerPath, silent):
-    j, ok = testfuncs.buildAndGetJson(thefile, compilerPath, silent, ["--pack-dx12", "--skip-mat33-padding", "--srg"])
+    j, ok = testfuncs.buildAndGetJson(thefile, compilerPath, silent, ["--pack-dx12", "--no-alignment-validation", "--srg"])
 
     if ok:
         predicates = []
@@ -1370,59 +1370,6 @@ def verifyPackingMetalInlineConstants(thefile, compilerPath, silent):
         ok = testfuncs.verifyAllPredicates(predicates, j)
     return True if ok else False
 
-def verifyPackingForPaddedMatrix33(thefile, compilerPath, silent):
-    j, ok = testfuncs.buildAndGetJson(thefile, compilerPath, silent, ["--srg"])
-
-    if ok:
-        predicates = []
-
-        predicates.append(lambda: j["ShaderResourceGroups"][0]["bufferForSRGConstants"]["count"]  ==   1)
-        predicates.append(lambda: j["ShaderResourceGroups"][0]["bufferForSRGConstants"]["index"]  ==   0)
-        predicates.append(lambda: j["ShaderResourceGroups"][0]["bufferForSRGConstants"]["space"]  ==   0)
-        predicates.append(lambda: j["ShaderResourceGroups"][0]["bufferForSRGConstants"]["id"]     ==   "SRG1")
-        predicates.append(lambda: j["ShaderResourceGroups"][0]["bufferForSRGConstants"]["usage"]  ==   "Read")
-
-        predicates.append(lambda: j["ShaderResourceGroups"][0]["inputsForSRGConstants"][4]["constantByteOffset"]  ==   160)
-        predicates.append(lambda: j["ShaderResourceGroups"][0]["inputsForSRGConstants"][4]["constantByteSize"]    ==   8)
-        predicates.append(lambda: j["ShaderResourceGroups"][0]["inputsForSRGConstants"][4]["qualifiedName"]       ==   "/A/D/__mat33_pad0__")
-        predicates.append(lambda: j["ShaderResourceGroups"][0]["inputsForSRGConstants"][5]["constantByteOffset"]  ==   168)
-        predicates.append(lambda: j["ShaderResourceGroups"][0]["inputsForSRGConstants"][5]["constantByteSize"]    ==   4)
-
-        predicates.append(lambda: j["ShaderResourceGroups"][0]["inputsForSRGConstants"][10]["constantByteOffset"]  ==   224)
-        predicates.append(lambda: j["ShaderResourceGroups"][0]["inputsForSRGConstants"][10]["constantByteSize"]    ==   8)
-        predicates.append(lambda: j["ShaderResourceGroups"][0]["inputsForSRGConstants"][10]["qualifiedName"]       ==   "/B/__mat33_pad1__")
-        predicates.append(lambda: j["ShaderResourceGroups"][0]["inputsForSRGConstants"][11]["constantByteOffset"]  ==   232)
-        predicates.append(lambda: j["ShaderResourceGroups"][0]["inputsForSRGConstants"][11]["constantByteSize"]    ==   4)
-
-        predicates.append(lambda: j["ShaderResourceGroups"][0]["inputsForSRGConstants"][17]["constantByteOffset"]  ==   352)
-        predicates.append(lambda: j["ShaderResourceGroups"][0]["inputsForSRGConstants"][17]["constantByteSize"]    ==   8)
-        predicates.append(lambda: j["ShaderResourceGroups"][0]["inputsForSRGConstants"][17]["qualifiedName"]       ==   "/C/__mat33_pad2__")
-        predicates.append(lambda: j["ShaderResourceGroups"][0]["inputsForSRGConstants"][18]["constantByteOffset"]  ==   360)
-        predicates.append(lambda: j["ShaderResourceGroups"][0]["inputsForSRGConstants"][18]["constantByteSize"]    ==   4)
-
-        predicates.append(lambda: j["ShaderResourceGroups"][0]["inputsForSRGConstants"][23]["constantByteOffset"]  ==   448)
-        predicates.append(lambda: j["ShaderResourceGroups"][0]["inputsForSRGConstants"][23]["constantByteSize"]    ==   8)
-        predicates.append(lambda: j["ShaderResourceGroups"][0]["inputsForSRGConstants"][23]["qualifiedName"]       ==   "/C/F/__mat33_pad3__")
-        predicates.append(lambda: j["ShaderResourceGroups"][0]["inputsForSRGConstants"][24]["constantByteOffset"]  ==   456)
-        predicates.append(lambda: j["ShaderResourceGroups"][0]["inputsForSRGConstants"][24]["constantByteSize"]    ==   4)
-
-        predicates.append(lambda: j["ShaderResourceGroups"][0]["inputsForSRGConstants"][28]["constantByteOffset"]  ==   512)
-        predicates.append(lambda: j["ShaderResourceGroups"][0]["inputsForSRGConstants"][28]["constantByteSize"]    ==   8)
-        predicates.append(lambda: j["ShaderResourceGroups"][0]["inputsForSRGConstants"][28]["qualifiedName"]       ==   "/SRG1/__mat33_pad4__")
-        predicates.append(lambda: j["ShaderResourceGroups"][0]["inputsForSRGConstants"][29]["constantByteOffset"]  ==   520)
-        predicates.append(lambda: j["ShaderResourceGroups"][0]["inputsForSRGConstants"][29]["constantByteSize"]    ==   4)
-
-        predicates.append(lambda: j["ShaderResourceGroups"][0]["inputsForSRGConstants"][31]["constantByteOffset"]  ==   576)
-        predicates.append(lambda: j["ShaderResourceGroups"][0]["inputsForSRGConstants"][31]["constantByteSize"]    ==   8)
-        predicates.append(lambda: j["ShaderResourceGroups"][0]["inputsForSRGConstants"][31]["qualifiedName"]       ==   "/SRG1/__mat33_pad5__")
-        predicates.append(lambda: j["ShaderResourceGroups"][0]["inputsForSRGConstants"][32]["constantByteOffset"]  ==   584)
-        predicates.append(lambda: j["ShaderResourceGroups"][0]["inputsForSRGConstants"][32]["constantByteSize"]    ==   4)
-
-        if not silent: print (fg.CYAN+ style.BRIGHT+ "padded float3x3 layouts verification..."+ style.RESET_ALL)
-        ok = testfuncs.verifyAllPredicates(predicates, j)
-        
-    return True if ok else False
-
 
 result = 0  # to define for sub-tests
 resultFailed = 0
@@ -1481,8 +1428,6 @@ def doTests(compiler, silent, azdxcpath):
     if verifyPackingMetalInlineConstants(os.path.join(workDir, "inline-constant-layouts.azsl"), compiler, silent) : result += 1
     else: resultFailed += 1
 
-    if verifyPackingForPaddedMatrix33(os.path.join(workDir, "../Emission/mat33_padding.azsl"), compiler, silent) : result += 1
-    else: resultFailed += 1
 
 if __name__ == "__main__":
     print ("please call from testapp.py")
