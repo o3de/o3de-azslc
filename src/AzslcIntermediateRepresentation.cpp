@@ -336,7 +336,7 @@ namespace AZ::ShaderCompiler
             case Kind::Enum:
             {
                 auto& sub = sym.GetSubRefAs<ClassInfo>();
-                cout << "  line: " << sub.GetOrigSourceLine() << "\n";
+                cout << "  line: " << sub.GetOriginalLineNumber() << "\n";
                 cout << "  members:\n";
                 for (auto&& member : sub.GetOrderedMembers())
                 {
@@ -868,7 +868,7 @@ namespace AZ::ShaderCompiler
             // Let's get the line number where @insertBeforeThisUid was found in the flat AZSL file.
             const auto * tmpThis = this; // To disambiguate which version of GetSymbolSubAs<> to call.
             const auto * varInfo = tmpThis->GetSymbolSubAs<VarInfo>(insertBeforeThisUid.GetName());
-            size_t lineOfDeclaration = varInfo->GetLineOfDeclaration();
+            size_t lineOfDeclaration = varInfo->GetOriginalLineNumber();
             const LineDirectiveInfo* lineInfo = GetNearestPreprocessorLineDirective(lineOfDeclaration);
             if (!lineInfo)
             {

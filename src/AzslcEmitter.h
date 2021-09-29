@@ -10,6 +10,7 @@
 #include "AzslcBackend.h"
 #include "AzslcSymbolTranslation.h"
 #include "AzslcCodeEmissionMutator.h"
+#include "NewLineCounterStream.h"
 
 namespace Json
 {
@@ -27,6 +28,12 @@ namespace AZ::ShaderCompiler
     struct CodeEmitter : Backend
     {
         using Backend::Backend;
+
+        CodeEmitter(IntermediateRepresentation* ir, TokenStream* tokens, std::ostream& out)
+            :
+            Backend(ir, tokens, out),
+            m_out(out)
+        {}
 
         //! Create a companion database of mutations on the IR, through which the emitter backend can query symbols scope and names.
         //! The state of changes is stored in the AZ::ShaderCompiler::SymbolTranslation class
@@ -206,5 +213,20 @@ namespace AZ::ShaderCompiler
         //! If not null it will be used during code emission to produce
         //! the mutations. 
         ICodeEmissionMutator* m_codeMutator = nullptr;
+
+        //! We keep track here of the number of lines that have been emitted.
+        //! The idea is to try to keep the number of lines between the input and the output files
+        //! as close to each other as possible.
+        //! Each symbol has an original line number where it appeared and if the number of output lines
+        //! is less We fill with '\n' (new line) characters until they match.
+        mutable NewLineCounterStream m_out;
+        void EmitNewLinesAsNecessary(size_t originalLineNumber) const;
+
+        // This template takes over the previous implementation of
+        // void GetTextInStream(misc::Interval interval, std::ostream& output) const override;
+        // The idea is that by using the template We only have to write the same code once
+        // whether We are using a regular std::ostream or an instance of NewLineCounterStream.
+        template <class StreamLike>
+        void GetTextInStreamInternal(misc::Interval interval, StreamLike& output, bool emitNewLines) const;
     };
 }
