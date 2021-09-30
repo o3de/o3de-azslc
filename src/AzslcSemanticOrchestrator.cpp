@@ -569,8 +569,8 @@ namespace AZ::ShaderCompiler
         {
             if (!varInfo.m_typeInfoExt.IsClassFound())
             {
-                const string message = FormatString("Unknown type '%s' for shader option '%s'",
-                    varInfo.m_typeInfoExt.GetDisplayName().c_str(), uqNameView.data());
+                const string message = FormatString("Unknown type '%s' for shader option '%.*s'",
+                    varInfo.m_typeInfoExt.GetDisplayName().c_str(), uqNameView.size(), uqNameView.data());
                 ThrowAzslcOrchestratorException(ORCHESTRATOR_UNKNOWN_OPTION_TYPE, ctx->start, message);
             }
             // we'll set that here, an option is better flagged as static const for simplicity during emission
