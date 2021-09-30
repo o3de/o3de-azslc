@@ -71,6 +71,7 @@ namespace AZ::ShaderCompiler
         ORCHESTRATOR_TRYING_TO_EXTEND_NOT_PARTIAL_SRG = 46u,
         ORCHESTRATOR_SRG_EXTENSION_HAS_DIFFERENT_SEMANTIC = 47u,
         ORCHESTRATOR_UNBOUNDED_RESOURCE_ISSUE = 48u,
+        ORCHESTRATOR_UNKNOWN_OPTION_TYPE = 49u,
 
 
         // Treat all compiler warnings as errors
