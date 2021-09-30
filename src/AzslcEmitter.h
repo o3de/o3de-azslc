@@ -220,7 +220,7 @@ namespace AZ::ShaderCompiler
         //! Each symbol has an original line number where it appeared and if the number of output lines
         //! is less We fill with '\n' (new line) characters until they match.
         mutable NewLineCounterStream m_out;
-        void EmitNewLinesAsNecessary(size_t originalLineNumber) const;
+        void EmitEmptyLinesToLineNumber(size_t originalLineNumber) const;
 
         // This template takes over the previous implementation of
         // void GetTextInStream(misc::Interval interval, std::ostream& output) const override;

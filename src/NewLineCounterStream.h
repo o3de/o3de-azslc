@@ -22,7 +22,7 @@ namespace AZ
 
     public:
 
-        NewLineCounterStream(std::ostream& streamToWrap) : m_wrappedStream(streamToWrap)
+        explicit NewLineCounterStream(std::ostream& streamToWrap) : m_wrappedStream(streamToWrap)
         {}
 
         Self& operator<<(char c)
@@ -51,9 +51,9 @@ namespace AZ
 
         Self& operator<<(const std::string& str)
         {
-            for (auto it = str.begin(); it != str.end(); ++it )
+            for (char c : str)
             {
-                if (*it == '\n')
+                if (c == '\n')
                 {
                     m_lineCount++;
                 }
@@ -63,9 +63,9 @@ namespace AZ
         }
 
         template <class Any>
-        Self& operator<<(Any&& thing) // universal reference
+        Self& operator<<(Any&& thing)
         {
-            m_wrappedStream << thing;
+            m_wrappedStream << std::forward<Any>(thing);
             return *this;
         }
 

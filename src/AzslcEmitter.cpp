@@ -488,7 +488,7 @@ namespace AZ::ShaderCompiler
 
     void CodeEmitter::EmitStruct(const ClassInfo& classInfo, string_view structName, const Options& options)
     {
-        EmitNewLinesAsNecessary(classInfo.GetOriginalLineNumber());
+        EmitEmptyLinesToLineNumber(classInfo.GetOriginalLineNumber());
 
         const bool hasName = (structName.length() > 0);
         const auto tabs = "    ";
@@ -669,7 +669,7 @@ namespace AZ::ShaderCompiler
 
     void CodeEmitter::EmitEnum(const IdentifierUID& uid, const ClassInfo& classInfo, const Options& options)
     {
-        EmitNewLinesAsNecessary(classInfo.GetOriginalLineNumber());
+        EmitEmptyLinesToLineNumber(classInfo.GetOriginalLineNumber());
 
         const auto& enumInfo = get<EnumerationInfo>(classInfo.m_subInfo);
 
@@ -720,7 +720,7 @@ namespace AZ::ShaderCompiler
 
         AstFuncSig* node = funcSub.m_defNode ? funcSub.m_defNode : funcSub.m_declNode;
 
-        EmitNewLinesAsNecessary(funcSub.GetOriginalLineNumber(emitAsDefinition));
+        EmitEmptyLinesToLineNumber(funcSub.GetOriginalLineNumber(emitAsDefinition));
 
         EmitAllAttachedAttributes(uid);
 
@@ -856,7 +856,7 @@ namespace AZ::ShaderCompiler
 
     void CodeEmitter::EmitVariableDeclaration(const VarInfo& varInfo, const IdentifierUID& uid, const Options& options, VarDeclHasFlag declOptions) const
     {
-        EmitNewLinesAsNecessary(varInfo.GetOriginalLineNumber());
+        EmitEmptyLinesToLineNumber(varInfo.GetOriginalLineNumber());
 
         // from MSDN: https://docs.microsoft.com/en-us/windows/desktop/direct3dhlsl/dx-graphics-hlsl-variable-syntax
         // [Storage_Class] [Type_Modifier] Type Name[Index] [: Semantic] [: Packoffset] [: Register]; [Annotations] [= Initial_Value]
@@ -1037,7 +1037,7 @@ namespace AZ::ShaderCompiler
         const auto* varInfo = m_ir->GetSymbolSubAs<VarInfo>(cId.m_name);
         auto cbName = ReplaceSeparators(cId.m_name, Underscore);
 
-        EmitNewLinesAsNecessary(varInfo->GetOriginalLineNumber());
+        EmitEmptyLinesToLineNumber(varInfo->GetOriginalLineNumber());
 
         assert(varInfo->IsConstantBuffer());
         // note: instead of redoing this work ad-hoc, EmitText could be used directly on the ext type.
@@ -1064,7 +1064,7 @@ namespace AZ::ShaderCompiler
         const auto& bindInfo = rootSig.Get(sId);
         const auto* varInfo = m_ir->GetSymbolSubAs<VarInfo>(sId.m_name);
 
-        EmitNewLinesAsNecessary(varInfo->GetOriginalLineNumber());
+        EmitEmptyLinesToLineNumber(varInfo->GetOriginalLineNumber());
 
         const string spaceX = (options.m_useLogicalSpaces) ? ", space" + std::to_string(bindInfo.m_registerBinding.m_pair[bindSet].m_logicalSpace) : "";
         m_out << (varInfo->m_samplerState->m_isComparison ? "SamplerComparisonState " : "SamplerState ")
@@ -1117,7 +1117,7 @@ namespace AZ::ShaderCompiler
             stringifiedLogicalSpace = std::to_string(bindInfo.m_registerBinding.m_pair[bindSet].m_logicalSpace);
         }
 
-        EmitNewLinesAsNecessary(varInfo->GetOriginalLineNumber());
+        EmitEmptyLinesToLineNumber(varInfo->GetOriginalLineNumber());
 
         // depending on platforms we may have supplementary attributes or/and type modifier.
         auto [prefix, suffix] = GetPlatformEmitter().GetDataViewHeaderFooter(*this, tId, bindInfo.m_registerBinding.m_pair[bindSet].m_registerIndex, registerTypeLetter, stringifiedLogicalSpace);
@@ -1201,7 +1201,7 @@ namespace AZ::ShaderCompiler
         RootSigDesc::SrgDesc srgDesc;
         srgDesc.m_uid = srgId;
 
-        EmitNewLinesAsNecessary(srgInfo.GetOriginalLineNumber());
+        EmitEmptyLinesToLineNumber(srgInfo.GetOriginalLineNumber());
 
         m_out << "/* Generated code from ";
         // We don't emit the SRG attributes (only as a comment), but they can be accessed by the srgId if needed
@@ -1268,7 +1268,7 @@ namespace AZ::ShaderCompiler
             
             if (emitNewLines)
             {
-                EmitNewLinesAsNecessary(token->getLine());
+                EmitEmptyLinesToLineNumber(token->getLine());
             }
 
             const auto tokenIndex = token->getTokenIndex();
@@ -1356,7 +1356,7 @@ namespace AZ::ShaderCompiler
         GetTextInStream(interval, Backend::m_out);
     }
 
-    void CodeEmitter::EmitNewLinesAsNecessary(size_t originalLineNumber) const
+    void CodeEmitter::EmitEmptyLinesToLineNumber(size_t originalLineNumber) const
     {
         while (m_out.GetLineCount() < originalLineNumber)
         {
