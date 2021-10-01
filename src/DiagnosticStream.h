@@ -53,11 +53,11 @@ namespace AZ
         typedef DiagnosticStream Self;
 
         template< typename Any >
-        Self& operator<< (Any&& thing)  // universal reference
+        Self& operator<< (Any&& thing)
         {
             if (m_on && PassLevelFilter())
             {
-                m_wrappedStream << thing;
+                m_wrappedStream << std::forward<Any>(thing);
             }
 
             if (AsError() && m_onErrorCallback)

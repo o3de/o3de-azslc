@@ -162,7 +162,7 @@ namespace AZ::ShaderCompiler
                                    }, m_declNodeVt);
         }
 
-        size_t GetOrigSourceLine() const
+        size_t GetOriginalLineNumber() const
         {
             if (GetDeclNode())
             {
@@ -346,7 +346,7 @@ namespace AZ::ShaderCompiler
         // returns an ArrayDimensions struct const ref.
         inline const auto&         GetArrayDimensions() const;
         // Returns the line number, in the AZSL file, where this symbol is declared. 
-        inline size_t GetLineOfDeclaration () const;
+        inline size_t GetOriginalLineNumber () const;
 
         AstUnnamedVarDecl*         m_declNode = nullptr;
         UnqualifiedName            m_identifier;
@@ -433,7 +433,7 @@ namespace AZ::ShaderCompiler
         return m_typeInfoExt.GetDimensions();
     }
 
-    size_t VarInfo::GetLineOfDeclaration() const
+    size_t VarInfo::GetOriginalLineNumber() const
     {
         if (m_declNode)
         {
@@ -729,6 +729,19 @@ namespace AZ::ShaderCompiler
             }
         }
 
+        size_t GetOriginalLineNumber(bool useDefNode = true) const
+        {
+            if (useDefNode && m_defNode)
+            {
+                return m_defNode->start->getLine();
+            }
+            else if (m_declNode)
+            {
+                return m_declNode->start->getLine();
+            }
+            return 0;
+        }
+
         ExtendedTypeInfo          m_returnType;
         AstFuncSig*               m_declNode     = nullptr;   //!< point to the AST node first declaring this function
         AstFuncSig*               m_defNode      = nullptr;   //!< point to the AST node defining this function
@@ -774,6 +787,11 @@ namespace AZ::ShaderCompiler
         }
 
         bool IsPartial() const { return m_declNode ? !!m_declNode->Partial() : false; }
+
+        size_t GetOriginalLineNumber() const
+        {
+            return m_declNode ? m_declNode->start->getLine() : 0;
+        }
 
         AstSRGDeclNode*           m_declNode = nullptr;
         ClassInfo                 m_implicitStruct;           // Implicit holding struct for SRG Constants
@@ -1043,17 +1061,17 @@ namespace AZ::ShaderCompiler
 
         size_t operator()(const FunctionInfo& func) const
         {
-            return func.m_declNode ? func.m_declNode->start->getLine() : NoLine;
+            return func.GetOriginalLineNumber(false /*useDefNode*/);
         }
 
         size_t operator()(const ClassInfo& clInfo) const
         {
-            return clInfo.GetOrigSourceLine();
+            return clInfo.GetOriginalLineNumber();
         }
 
         size_t operator()(const SRGInfo& srgInfo) const
         {
-            return srgInfo.m_declNode ? srgInfo.m_declNode->start->getLine() : NoLine;
+            return srgInfo.GetOriginalLineNumber();
         }
 
         size_t operator()(const TypeAliasInfo& tai) const
