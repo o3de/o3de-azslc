@@ -15,18 +15,6 @@ set src_path=%curr_dir%\src
 set build_path=%curr_dir%\build\%platform%_%architecture%
 set cmake_exe=cmake
 
-REM boost-regex is required on windows only because docopt needs a better std::regex implementation
-REM than then one provided by visual studio.
-REM ----------------------------------
-REM Pulling boost from git
-python pull_from_git.py --git-url https://github.com/boostorg/boost.git --destination-dir src/external --git-tag boost-1.70.0 || goto :error
-
-REM Compiling boost-regex multithreaded dynamic libraries
-cd src\external\boost
-CALL .\bootstrap.bat
-.\b2 threading=multi link=static,shared runtime-link=shared address-model=64 -j64 --with-regex || goto :error
-cd ..\..\..\
-
 REM ----------------------------------
 REM Pulling ANTLR from git
 python pull_from_git.py --git-url https://github.com/o3de/antlr4.git --destination-dir src/external --git-tag o3de-4.7.1 || goto :error

@@ -43,7 +43,7 @@ def found(needle, haystack):
         return True
     return False
     
-# pars the argument mentioned in the shader source file Ex : Cmdargs: --namespace=vk   or Cmdargs: ['--unique-idx', '--use-space', '--root-sig', '--root-const', '0']
+# pars the argument mentioned in the shader source file Ex : Cmdargs: --namespace=vk   or Cmdargs: ['--unique-idx', '--use-spaces', '--root-sig', '--root-const', '0']
 def parse_strlist(sl):
     clean = re.sub("[\[\],\s]","",sl)
     splitted = re.split("[\'\"]",clean)

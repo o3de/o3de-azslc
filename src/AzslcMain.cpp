@@ -6,7 +6,7 @@
  *
  */
 
-#include "docopt/docopt.h"
+#include <CLI/CLI.hpp>
 
 #include "AzslcReflection.h"
 #include "AzslcEmitter.h"
@@ -19,9 +19,9 @@ namespace StdFs = std::filesystem;
 
 // versioning
 // Correspond to the supported version of the AZSL language.
-#define AZSLC_MAJOR    "1"
+#define AZSLC_MAJOR "1"
 // For large features or milestones. Minor version allows for breaking changes. Existing tests can change.
-#define AZSLC_MINOR    "7"
+#define AZSLC_MINOR "7"
 // For small features or bug fixes. They cannot introduce breaking changes. Existing tests shouldn't change.
 #define AZSLC_REVISION "31" // AZSLc: The HLSL file should preserve the original line numbers
 
@@ -29,9 +29,9 @@ namespace AZ::ShaderCompiler
 {
     DiagnosticStream verboseCout;
     DiagnosticStream warningCout(std::cerr);
-    Endl             azEndl;
+    Endl azEndl;
 
-    using MapOfStringViewToSetOfString = map< string_view, set<string> >;
+    using MapOfStringViewToSetOfString = map<string_view, set<string>>;
 
     // out argument: classifiedTokens
     // filter: is a predicate for condition to check to pass registration
@@ -45,8 +45,8 @@ namespace AZ::ShaderCompiler
         for (size_t ii = 0; ii < maxToken; ++ii)
         {
             string token = vocabulary.getLiteralName(ii);
-            token = Trim(token, "\"'");  // because AntlR gives us e.g "'float'"
-            if (!token.empty()) // empty when there is a complex rule (not a straight unconditional keyword)
+            token = Trim(token, "\"'"); // because AntlR gives us e.g "'float'"
+            if (!token.empty())         // empty when there is a complex rule (not a straight unconditional keyword)
             {
                 TypeClass tc = AnalyzeTypeClass(TentativeName{token});
                 bool accept = true;
@@ -62,7 +62,7 @@ namespace AZ::ShaderCompiler
 
                 if (accept)
                 {
-                    classifiedTokens[ TypeClass::ToStr(tc) ].emplace( std::move(token) );
+                    classifiedTokens[TypeClass::ToStr(tc)].emplace(std::move(token));
                 }
             }
         }
@@ -98,15 +98,15 @@ namespace AZ::ShaderCompiler
                 switch (state)
                 {
                 case RetryStateMachine::OneTypeGenericParameter:
-                    attemptedTypeName  += "<" + someScalar + ">";
+                    attemptedTypeName += "<" + someScalar + ">";
                     state = RetryStateMachine::OneTypeAndDimensionGenericParameters;
                     break;
                 case RetryStateMachine::OneTypeAndDimensionGenericParameters:
-                    attemptedTypeName  += "<" + someScalar + ",1>";
+                    attemptedTypeName += "<" + someScalar + ",1>";
                     state = RetryStateMachine::OneTypeAndTwoDimensionsGenericParameters;
                     break;
                 case RetryStateMachine::OneTypeAndTwoDimensionsGenericParameters:
-                    attemptedTypeName  += "<" + someScalar + "1,1>";
+                    attemptedTypeName += "<" + someScalar + "1,1>";
                     state = RetryStateMachine::End;
                     break;
                 case RetryStateMachine::End:
@@ -155,11 +155,11 @@ namespace AZ::ShaderCompiler
     void ConstructLineMap(vector<std::unique_ptr<Token>>* allTokens, IntermediateRepresentation* irOut)
     {
         string lastNonEmptyFileName = AzslcException::s_currentSourceFileName;
-        for (auto& token : *allTokens)  // auto& because each element is a unique_ptr we can't copy
+        for (auto& token : *allTokens) // auto& because each element is a unique_ptr we can't copy
         {
             if (token->getType() == azslLexer::LineDirective)
             {
-                LineDirectiveInfo directiveInfo{0,0};
+                LineDirectiveInfo directiveInfo{ 0, 0 };
                 const auto lineText = token->getText();
                 //                    the sharp
                 //                        |  any whitespaces
@@ -199,89 +199,6 @@ namespace AZ::ShaderCompiler
 namespace AZ::ShaderCompiler::Main
 {
     using namespace AZ::ShaderCompiler;
-
-    static const char USAGE[] =
-    R"(Amazon Shader Language Compiler
-
-        Usage:
-          azslc (- | FILE) [--use-spaces] [--unique-idx] [--cb-body] [--root-sig] [--root-const=<size>] [--pad-root-const] [--Zpc] [--Zpr] [--namespace=<nspc>] [--strip-unused-srgs] [--no-ms] [--no-alignment-validation] [-o OUTFILE]
-                           [--W0|--W1|--W2|--W3] [--Wx|--Wx1|--Wx2|--Wx3] [--min-descriptors=<set,spaces,samplers,textures,buffers>] [--max-spaces=<count>]
-          azslc (- | FILE) --full [--use-spaces] [--unique-idx] [--cb-body] [--root-sig] [--root-const=<size>] [--pad-root-const] [--Zpc] [--Zpr] [--pack-dx12] [--pack-vulkan] [--pack-opengl] [--namespace=<nspc>] [--strip-unused-srgs] [--no-ms] [--no-alignment-validation] [-o OUTFILE]
-                           [--W0|--W1|--W2|--W3] [--Wx|--Wx1|--Wx2|--Wx3] [--min-descriptors=<set,spaces,samplers,textures,buffers>] [--max-spaces=<count>]
-          azslc (- | FILE) --ia [--use-spaces] [--unique-idx] [--cb-body] [--root-sig] [--Zpc] [--Zpr] [--pack-dx12] [--pack-vulkan] [--pack-opengl] [--namespace=<nspc>] [--strip-unused-srgs] [-o OUTFILE]
-          azslc (- | FILE) --om [--use-spaces] [--unique-idx] [--cb-body] [--root-sig] [--Zpc] [--Zpr] [--pack-dx12] [--pack-vulkan] [--pack-opengl] [--namespace=<nspc>] [--strip-unused-srgs] [-o OUTFILE]
-          azslc (- | FILE) --srg [--use-spaces] [--unique-idx] [--cb-body] [--root-sig] [--root-const=<size>] [--pad-root-const] [--Zpc] [--Zpr] [--pack-dx12] [--pack-vulkan] [--pack-opengl] [--namespace=<nspc>] [--min-descriptors=<set,spaces,samplers,textures,buffers>] [--max-spaces=<count>] [--strip-unused-srgs] [--no-ms] [--no-alignment-validation] [-o OUTFILE]
-          azslc (- | FILE) --options [--use-spaces] [--unique-idx] [--cb-body] [--root-sig] [--Zpc] [--Zpr] [--pack-dx12] [--pack-vulkan] [--pack-opengl] [--namespace=<nspc>] [--strip-unused-srgs] [-o OUTFILE]
-          azslc (- | FILE) --semantic [--verbose] [--W0|--W1|--W2|--W3] [--Wx|--Wx1|--Wx2|--Wx3] [--root-const=<size>] [--pad-root-const] [--strip-unused-srgs]
-          azslc (- | FILE) --syntax
-          azslc (- | FILE) --dumpsym [--strip-unused-srgs] [--no-ms] [--no-alignment-validation]
-          azslc (- | FILE) --ast [--strip-unused-srgs]
-          azslc (- | FILE) --bindingdep [--use-spaces] [--unique-idx] [--cb-body] [--Zpc] [--Zpr] [--pack-dx12] [--pack-vulkan] [--pack-opengl] [--namespace=<nspc>] [--max-spaces=<count>] [--strip-unused-srgs] [--no-ms] [--no-alignment-validation] [-o OUTFILE]
-          azslc (- | FILE) --visitsym MQNAME [-d] [-v] [-f] [-r]
-          azslc --listpredefined
-          azslc -h | --help | --version
-
-        Arguments:
-          FILE              Input file (optional if use of stdin)
-
-        Options:
-          -o OUTFILE                Output file (optional if use of stdout).
-          --use-spaces              Use logical space index per SRG.
-          --unique-idx              Use unique indices for all registers. e.g. b0, t0, u0, s0 becomes b0, t1, u2, s3.
-          --cb-body                 Emit ConstantBuffer body rather than using <T>
-          --root-sig                Emit RootSignature for parameter binding in the shader.
-          --root-const=<size>       Maximum size in bytes, of the root constants buffer.
-          --pad-root-const          Automatically append padding data to the root constant CB to keep it aligned to 16-byte boundary.
-          --Zpc                     Pack matrices in column-major order (default). Cannot be specified together with -Zpr
-          --Zpr                     Pack matrices in row-major order. Cannot be specified together with -Zpc
-          --pack-dx12               Pack buffers using strict DX12 packing rules. If not specified it will use relaxed packing rules.
-          --pack-vulkan             Pack buffers using strict Vulkan packing rules. That's vector-relaxed std140 for uniform and std430 for storage buffers.
-          --pack-opengl             Pack buffers using strict OpenGL packing rules. That's vector-strict std140 for uniform and std430 for storage buffers.
-          --namespace=<nspc>        The list of namespaces (comma separated, no white spaces) indicates which attribute namespaces are active.
-          --ia                      Output a list of vs entries with their Input Assembler layout *and* a list of cs entries with their numthreads.
-          --om                      Output the Output Merger layout, not the shader code.
-          --srg                     Output the Shader Resource Group layout, not the shader code.
-          --options                 Output the list of available shader options for this shader.
-          --dumpsym                 Dump symbols
-          --syntax                  Check syntax    (no output means no complaints)
-          --semantic                Check semantics (no output means no complaints)
-          --ast                     Output the syntax tree.
-          --bindingdep              Output binding dependencies (what entry points access what external resource).
-          --visitsym MQNAME         Output the locations of all relationships of the symbol MQNAME.
-          --full                    Output the shader code, Input Assembler layout, Output Merger layout, Shader Resource Group layout,
-                                    the list of available shader options, and the binding dependencies.
-          --strip-unused-srgs       Strips the unused SRGs.
-          --no-ms                   Transforms usage of Texture2DMS/Texture2DMSArray and related functions and semantics into plain Texture2D/Texture2DArray equivalents.
-                                    This is useful for allowing shader authors to easily write AZSL code that can be compiled into alternatives
-                                    to work with both a multisample render pipeline and a non-MS render pipeline.
-[         --no-alignment-validation Skips checking for potential alignment issues related with differences between dx12 and vulkan.
-                                    By default, the compiler checks for those issues and fails to compile when those issues are detected.
-                                    Use this flag to skip such validation. 
-          -d                        (Option of --visitsym) Visit direct references
-          -v                        (Option of --visitsym) Visit overload-set
-          -f                        (Option of --visitsym) Visit family
-          -r                        (Option of --visitsym) Visit recursively
-          --listpredefined          Output a list of all predefined types in AZSLang.
-          --max-spaces=<count>      Will choose register spaces that do not extend past this limit.
-
-        Diagnostic Options:
-          --W0                      Suppresses all warnings.
-          --W1                      Severe warnings activated. (default)
-          --W2                      Maybe significant warnings activated.
-          --W3                      Low-confidence-diagnostic warnings activated.
-          --Wx                      Treat any currently activated warning as error.
-          --Wx1                     Treat level-1 warning as error.
-          --Wx2                     Treat up to level-2 warning as error.
-          --Wx3                     Treat up to level-3 warning as error.
-          --min-descriptors=<set,spaces,samplers,textures,buffers>  Emits a warning if a count overshoots the limit. Use -1 for "no limit".
-
-        Example:
-            azslc.exe myshader.azsl --W3 -o out.hlsl --namespace=dx --min-descriptors=-1,10,16,128,-1
-            azslc.exe myshader.azsl --namespace=vk --min-descriptors=-1,4 --max-spaces=4
-)";
-// Note: for now, the docopt C++ port, uses a regexp internally, that crashes the MSVC version of std <regex>.
-//       We need a dependence to boost to fix that (or build with GCC-cygwin or clang, or give-up docopt).
-//       https://github.com/docopt/docopt.cpp/issues/67
 
     /// This function will support the --ast option. It uses an AntlR facility and prettifies it.
     void PrintAst(tree::ParseTree* tree, azslParser& parser)
@@ -325,23 +242,22 @@ namespace AZ::ShaderCompiler::Main
         std::cout << "Symbol found. kind: " << Kind::ToStr(ir.GetKind(symbol->first)) << ". Homonyms list:\n";
         HomonymVisitor hv{[&ir](QualifiedNameView qnv) { return ir.GetKindInfo({{qnv}}); }};
         hv(symbol->first,
-           [](const Seenat& at, RelationshipExtent category)
+           [](const Seenat &at, RelationshipExtent category)
              {
                  std::cout << "- {categ: " << RelationshipExtent::ToStr(category)
-                      << ", id: " << Decorate("'", at.m_referredDefinition.GetName())
-                      << ", at: ':" << at.m_where.m_line << ":" << at.m_where.m_charPos + 1 << "'"
-                      << ", token#: " << at.m_where.m_focusedTokenId << "}\n";
+                           << ", id: " << Decorate("'", at.m_referredDefinition.GetName())
+                           << ", at: ':" << at.m_where.m_line << ":" << at.m_where.m_charPos + 1 << "'"
+                           << ", token#: " << at.m_where.m_focusedTokenId << "}\n";
              },
-           visitOptions);
+            visitOptions);
     }
 
-    void ParseWarningLevel(const map<string, docopt::value>& args, DiagnosticStream& warningConfig)
+    void ParseWarningLevel(const unordered_map<Warn::EnumType, bool>& args, DiagnosticStream& warningConfig)
     {
         for (auto level : Warn::Enumerate{})
         {
-            auto optionString = "--" + string{Warn::ToStr(level)};  // example "--W0"
-            auto lookup = args.find(optionString);
-            if (lookup != args.end() && lookup->second.asBool())
+            auto lookup = args.find(level);
+            if (lookup != args.end() && lookup->second)
             {
                 if (level >= Warn::Wx)
                 {
@@ -381,30 +297,142 @@ int main(int argc, const char* argv[])
     using namespace AZ;
     using namespace AZ::ShaderCompiler::Main;
 
+    CLI::App cli{ "Amazon Shader Language Compiler" };
+
+    std::string inputFile;
+    cli.add_option("(- | FILE)", inputFile, "Input file (pass - to read from stdin).")
+        ->required(true);
+
+    std::string output;
+    cli.add_option("-o", output, "Output file (writes to stdout if omitted).");
+
+    bool useSpaces = false;
+    cli.add_flag("--use-spaces", useSpaces, "Use a logical space index per SRG.");
+
+    bool uniqueIdx = false;
+    cli.add_flag("--unique-idx", uniqueIdx, "Use unique indices for all registers. e.g. b0, t0, u0, s0 becomes b0, t1, u2, s3.");
+
+    bool cbBody = false;
+    cli.add_flag("--cb-body", cbBody, "Emit ConstantBuffer body rather than using <T>.");
+
+    bool rootSig = false;
+    cli.add_flag("--root-sig", rootSig, "Emit RootSignature for parameter binding in the shader.");
+
+    int rootConst = 0;
+    auto rootConstOpt = cli.add_option("--root-const", rootConst, "Maximum size in bytes of the root constants buffer.");
+
+    bool padRootConst = false;
+    cli.add_flag("--pad-root-const", padRootConst, "Automatically append padding data to the root constant CB to keep it aligned to a 16-byte boundary.");
+
+    bool Zpc = true;
+    cli.add_flag("--Zpc", Zpc, "Pack matrices in column-major order (default). Cannot be specified together with -Zpr.");
+
+    bool Zpr = false;
+    cli.add_flag("--Zpr", Zpr, "Pack matrices in row-major order. Cannot be specified together with -Zpc.");
+
+    bool packDx12 = false;
+    cli.add_flag("--pack-dx12", packDx12, "Pack buffers using strict DX12 packing rules. If not specified AZSLc will use relaxed packing rules.");
+
+    bool packVulkan = false;
+    cli.add_flag("--pack-vulkan", packVulkan, "Pack buffers using strict Vulkan packing rules (Vector-relaxed std140 for uniforms and std430 for storage buffers).");
+
+    bool packOpenGL = false;
+    cli.add_flag("--pack-opengl", packOpenGL, "Pack buffers using strict OpenGL packing rules (Vector-strict std140 for uniforms and std430 for storage buffers).");
+
+    std::vector<std::string> namespaces;
+    cli.add_option("--namespace", namespaces, "The list of comma-separated namespaces (no whitespace) indicates which attribute namespaces are active.");
+
+    bool ia = false;
+    cli.add_flag("--ia", ia, "Output a list of vs entries with their Input Assembler layouts *and* a list of CS entries and their numthreads.");
+
+    bool om = false;
+    cli.add_flag("--om", om, "Output the Output Merger layout instead of the shader code.");
+
+    bool srg = false;
+    cli.add_flag("--srg", srg, "Output the Shader Resource Group layout instead of the shader code.");
+
+    bool options = false;
+    cli.add_flag("--options", options, "Output the list of available shader options for this shader.");
+
+    bool dumpsym = false;
+    cli.add_flag("--dumpsym", dumpsym, "Dump symbols.");
+
+    bool syntax = false;
+    cli.add_flag("--syntax", syntax, "Check syntax (no output means no complaints).");
+
+    bool semantic = false;
+    cli.add_flag("--semantic", semantic, "Check semantics (no output means no complaints).");
+
+    bool ast = false;
+    cli.add_flag("--ast", ast, "Output the abstract syntax tree.");
+
+    bool bindingdep = false;
+    cli.add_flag("--bindingdep", bindingdep, "Output binding dependencies (what entry points access what external resources).");
+
+    std::string visitName;
+    cli.add_option("--visitsym", visitName, "Output the locations of all relationships of the supplied symbol name.");
+
+    bool full = false;
+    cli.add_flag("--full", full, "Output the shader code, IA layout, OM layout, SRG layout, the list of available shader options, and the binding dependencies.");
+
+    bool stripUnusedSrgs = false;
+    cli.add_flag("--strip-unused-srgs", stripUnusedSrgs, "Strips unused SRGs.");
+
+    bool noMS = false;
+    cli.add_flag("--no-ms", noMS, "Transforms usage of Texture2DMS/Texture2DMSArray and related functions and semantics into plain Texture2D/Texture2DArray "
+        "equivalents. This is useful for allowing shader authors to easily write AZSL code that can be compiled into alternatives to work with both a "
+        "multisample render pipeline and a non-MS render pipeline.");
+
+    bool noAlignmentValidation = false;
+    cli.add_flag("--no-alignment-validation", noAlignmentValidation, "Skips checking for potential alignment issues related to differences between dxil and spirv."
+        "By default, potential alignment discrepancies will fail compilation.");
+
+    bool visitDirectReferences = false;
+    cli.add_flag("-d", visitDirectReferences, "(Option of --visitsym) Visit direct references.");
+
+    bool visitOverloadSet = false;
+    cli.add_flag("-v", visitOverloadSet, "(Option of --visitsym) Visit overload-set.");
+
+    bool visitFamily = false;
+    cli.add_flag("-f", visitFamily, "(Option of --visitsym) Visit family.");
+
+    bool visitRecursively = false;
+    cli.add_flag("-r", visitRecursively, "(Option of --visitsym) Visit recursively.");
+
+    bool listPredefined = false;
+    cli.add_flag("--listpredefined", "Output a list of all predefined types in AZSLang.");
+
+    int maxSpaces = std::numeric_limits<int>::max();
+    auto maxSpacesOpt = cli.add_option("--max-spaces", maxSpaces, "Will choose register spaces that do not extend past this limit.");
+
+    std::unordered_map<Warn::EnumType, bool> warningOpts;
+    cli.add_option("--W0", warningOpts[Warn::EnumType::W0], "Suppresses all warnings.");
+    cli.add_option("--W1", warningOpts[Warn::EnumType::W1], "Activate severe warnings (default).");
+    cli.add_option("--W2", warningOpts[Warn::EnumType::W2], "Activate warnings that may be significant.");
+    cli.add_option("--W3", warningOpts[Warn::EnumType::W3], "Activate low-confidence diagnostic warnings.");
+    cli.add_option("--Wx", warningOpts[Warn::EnumType::Wx], "Treat activated warnings as errors.");
+    cli.add_option("--Wx1", warningOpts[Warn::EnumType::Wx1], "Treat level-1 warnings as errors.");
+    cli.add_option("--Wx2", warningOpts[Warn::EnumType::Wx2], "Treat level-2 and below warnings as errors.");
+    cli.add_option("--Wx3", warningOpts[Warn::EnumType::Wx3], "Treat level-3 and below warnings as errors.");
+
+    std::string minDescriptors;
+    cli.add_option("--min-descriptors", minDescriptors, "Comma-separated list of limits corresponding to "
+        "<set,space,sampler,texture,buffer> descriptors. Emits a warning if a count overshoots a limit. Use -1 to specify \"no limit\".");
+    
+    bool verbose = false;
+    cli.add_flag("--verbose", verbose);
+
     DoAsserts();
 
     int processReturnCode = 0;
     try
     {
-        bool constexpr showHelpIfRequested = true;
+        CLI11_PARSE(cli, argc, argv);
+
         // Major.Minor.Revision
         auto versionString = string{"AZSL Compiler " AZSLC_MAJOR "." AZSLC_MINOR "." AZSLC_REVISION " "} + GetCurrentOsName().data();
-        map<string, docopt::value> args
-            = docopt::docopt(USAGE, { argv + 1, argv + argc }, showHelpIfRequested, versionString);
 
-        auto parseLongCommandLineArgument = [&args](const string& name, string_view errorMessage) -> long
-        {
-            try
-            {
-                return args[name].asLong();
-            }
-            catch (...)
-            {
-                throw std::runtime_error(errorMessage.data());
-            }
-        };
-
-        if (args["--listpredefined"].asBool())
+        if (listPredefined)
         {
             verboseCout.m_on = false;
             ANTLRInputStream is;
@@ -413,27 +441,27 @@ int main(int argc, const char* argv[])
             return 0;
         }
 
-        verboseCout.m_on = args["--verbose"].asBool();
+        verboseCout.m_on = verbose;
 
-        bool useStdin = args["-"].asBool();
+        bool useStdin = inputFile == '-';
         // we need to scope a stream object here, to be able to bind a polymorphic reference to it
         std::ifstream ifs;
         if (!useStdin)
         {
-            ifs = std::ifstream(args["FILE"].asString()); // try to open as file
+            ifs = std::ifstream{ inputFile }; // try to open as file
         }
 
-        std::istream& in{ useStdin ? std::cin : ifs };
+        std::istream& in{useStdin ? std::cin : ifs};
         if (!in.good())
         {
             throw std::runtime_error("input file could not be opened");
         }
 
-        const string inputFileName = useStdin ? "" : args["FILE"].asString();
-        AzslcException::s_currentSourceFileName = useStdin ? "stdin" : args["FILE"].asString();
+        const string inputFileName = useStdin ? "" : inputFile;
+        AzslcException::s_currentSourceFileName = useStdin ? "stdin" : inputFile;
 
-        bool useOutputFile = !!args["-o"];
-        const string outputFileName = useOutputFile ? args["-o"].asString() : "";
+        bool useOutputFile = !output.empty();
+        const string outputFileName = output;
 
         ANTLRInputStream input(in);
         azslLexer lexer(&input);
@@ -450,59 +478,47 @@ int main(int argc, const char* argv[])
         azslParser parser(&tokens);
         parser.removeErrorListeners();
         parser.addErrorListener(&azslParserEventListener);
-        tree::ParseTree* tree = parser.compilationUnit();
+        tree::ParseTree *tree = parser.compilationUnit();
 
         if (parser.getNumberOfSyntaxErrors() > 0)
         {
             throw std::runtime_error("grammatic errors present");
         }
 
-        if (args["--syntax"].asBool())
-        {  // if we are here with no exception then the syntax pass is valid.
+        if (syntax)
+        { // if we are here with no exception then the syntax pass is valid.
         }
-        else  // continue with semantic, and later emission
+        else // continue with semantic, and later emission
         {
             if (!useStdin)
             {
-                StdFs::path inSource{ args["FILE"].asString() };
+                StdFs::path inSource{ inputFile };
                 ir.m_metaData.m_insource = StdFs::absolute(inSource).lexically_normal().generic_string();
             }
             tree::ParseTreeWalker walker;
             Texture2DMSto2DCodeMutator texture2DMSto2DCodeMutator(&ir);
             SemaCheckListener semanticListener{&ir};
-            warningCout.m_onErrorCallback = [](string_view message)
-                                            {
-                                                throw AzslcException{WX_WARNINGS_AS_ERRORS, "as-error", string{message}};
-                                            };
-            ParseWarningLevel(args, warningCout);
-            const char* nonValidativeOptions[] = { "--full", "--ia", "--om", "--srg", "--options", "--dumpsym", "--ast", "--bindingdep", "--visitsym", "--strip-unused-srgs" };
-            bool anyNonValidativeOption = std::any_of(std::begin(nonValidativeOptions), std::end(nonValidativeOptions),
-                                                      [&](auto opt)
-                                                      {
-                                                          return args[opt].isBool() ? args[opt].asBool() : !!args[opt];
-                                                      });
-            semanticListener.m_silentPrintExtensions = !args["--semantic"].asBool() || args["--verbose"].asBool(); // print-extensions are useful for interested parties; but not normal operation.
-            const bool convertToNoMS = args["--no-ms"].asBool();
-            if (convertToNoMS)
+            warningCout.m_onErrorCallback = [](string_view message) {
+                throw AzslcException{WX_WARNINGS_AS_ERRORS, "as-error", string{message}};
+            };
+            ParseWarningLevel(warningOpts, warningCout);
+            bool nonValidativeOptions[] = {full, ia, om, srg, options, dumpsym, ast, bindingdep, !visitName.empty(), stripUnusedSrgs};
+            bool anyNonValidativeOption = std::any_of(std::begin(nonValidativeOptions), std::end(nonValidativeOptions), [](bool opt) { return opt; });
+            semanticListener.m_silentPrintExtensions = !semantic || verbose; // print-extensions are useful for interested parties; but not normal operation.
+            if (noMS)
             {
                 semanticListener.m_functionCallMutator = &texture2DMSto2DCodeMutator;
             }
-            warningCout.m_on = !anyNonValidativeOption;  // warnings are interesting for emission, and explicit semantic check modes.
+            warningCout.m_on = !anyNonValidativeOption; // warnings are interesting for emission, and explicit semantic check modes.
 
             // Enable attribute namespaces
-            if (args["--namespace"])
-            {
-                auto spaces = Split<vector<string>>(args["--namespace"].asString(), ",");
-                std::for_each(spaces.begin(), spaces.end(),
-                    [&](const string& space) { ir.AddAttributeNamespaceFilter(space); });
-            }
+            std::for_each(namespaces.begin(), namespaces.end(),
+                [&](const string& space) { ir.AddAttributeNamespaceFilter(space); });
 
-            UnboundedArraysValidator::Options unboundedArraysValidationOptions = {
-                args["--use-spaces"].asBool(), args["--unique-idx"].asBool()
-            };
-            if (args["--max-spaces"])
+            UnboundedArraysValidator::Options unboundedArraysValidationOptions = { useSpaces, uniqueIdx };
+            if (*maxSpacesOpt)
             {
-                unboundedArraysValidationOptions.m_maxSpaces = parseLongCommandLineArgument("--max-spaces", "--max-spaces requires a number. eg --max-spaces=4");
+                unboundedArraysValidationOptions.m_maxSpaces = maxSpaces;
             }
             ir.m_sema.m_unboundedArraysValidator.SetOptions(unboundedArraysValidationOptions);
 
@@ -510,21 +526,21 @@ int main(int argc, const char* argv[])
             walker.walk(&semanticListener, tree);
 
             Options emitOptions;
-            emitOptions.m_useLogicalSpaces = args["--use-spaces"].asBool();
-            emitOptions.m_useUniqueIndices = args["--unique-idx"].asBool();
-            emitOptions.m_emitConstantBufferBody = args["--cb-body"].asBool();
-            emitOptions.m_emitRootSig = args["--root-sig"].asBool();
-            emitOptions.m_padRootConstantCB = args["--pad-root-const"].asBool();
-            emitOptions.m_skipAlignmentValidation = args["--no-alignment-validation"].asBool();
+            emitOptions.m_useLogicalSpaces = useSpaces;
+            emitOptions.m_useUniqueIndices = uniqueIdx;
+            emitOptions.m_emitConstantBufferBody = cbBody;
+            emitOptions.m_emitRootSig = rootSig;
+            emitOptions.m_padRootConstantCB = padRootConst;
+            emitOptions.m_skipAlignmentValidation = noAlignmentValidation;
 
-            if (args["--root-const"])
+            if (*rootConstOpt)
             {
-                emitOptions.m_rootConstantsMaxSize = parseLongCommandLineArgument("--root-const", "--root-const requires a number of bytes. eg --root-const=128");
+                emitOptions.m_rootConstantsMaxSize = rootConst;
             }
 
-            if (args["--min-descriptors"])
+            if (!minDescriptors.empty())
             {
-                sscanf(args["--min-descriptors"].asString().c_str(), "%d,%d,%d,%d,%d",
+                sscanf(minDescriptors.c_str(), "%d,%d,%d,%d,%d",
                        &emitOptions.m_minAvailableDescriptors.m_descriptorsTotal,
                        &emitOptions.m_minAvailableDescriptors.m_spaces,
                        &emitOptions.m_minAvailableDescriptors.m_samplers,
@@ -532,55 +548,53 @@ int main(int argc, const char* argv[])
                        &emitOptions.m_minAvailableDescriptors.m_buffers);
             }
 
-            if (args["--max-spaces"])
+            if (*maxSpacesOpt)
             {
-                emitOptions.m_maxSpaces = parseLongCommandLineArgument("--max-spaces", "--max-spaces requires a number. eg --max-spaces=4");
+                emitOptions.m_maxSpaces = maxSpaces;
             }
 
-            auto isZpc = args["--Zpc"].asBool();
-            auto isZpr = args["--Zpr"].asBool();
-            if (isZpc && isZpr)
+            if (Zpc && Zpr)
             {
                 throw std::runtime_error("Cannot specify --Zpr and --Zpc together, use --help to get usage information");
             }
-            else if (isZpr)
+            else if (Zpr)
             {
                 emitOptions.m_emitRowMajor = true;
                 emitOptions.m_forceEmitMajor = true;
             }
-            else if (isZpc)
+            else if (Zpc)
             {
                 emitOptions.m_emitRowMajor = false; // Default
                 emitOptions.m_forceEmitMajor = true;
             }
 
-            if (args["--pack-dx12"].asBool())
+            if (packDx12)
             {
                 emitOptions.m_packConstantBuffers = AZ::ShaderCompiler::Packing::Layout::DirectXPacking;
                 emitOptions.m_packDataBuffers = AZ::ShaderCompiler::Packing::Layout::DirectXStoragePacking;
             }
 
-            if (args["--pack-vulkan"].asBool())
+            if (packVulkan)
             {
                 emitOptions.m_packConstantBuffers = AZ::ShaderCompiler::Packing::Layout::RelaxedStd140Packing;
                 emitOptions.m_packDataBuffers = AZ::ShaderCompiler::Packing::Layout::RelaxedStd430Packing;
             }
 
-            if (args["--pack-opengl"].asBool())
+            if (packOpenGL)
             {
                 emitOptions.m_packConstantBuffers = AZ::ShaderCompiler::Packing::Layout::StrictStd140Packing;
                 emitOptions.m_packDataBuffers = AZ::ShaderCompiler::Packing::Layout::StrictStd430Packing;
             }
 
             // middle end logic
-            MiddleEndConfiguration middleEndConfigration{ emitOptions.m_rootConstantsMaxSize,
-                                                          emitOptions.m_packConstantBuffers,
-                                                          emitOptions.m_packDataBuffers,
-                                                          emitOptions.m_emitRowMajor,
-                                                          emitOptions.m_padRootConstantCB,
-                                                          emitOptions.m_skipAlignmentValidation };
+            MiddleEndConfiguration middleEndConfigration{emitOptions.m_rootConstantsMaxSize,
+                                                         emitOptions.m_packConstantBuffers,
+                                                         emitOptions.m_packDataBuffers,
+                                                         emitOptions.m_emitRowMajor,
+                                                         emitOptions.m_padRootConstantCB,
+                                                         emitOptions.m_skipAlignmentValidation};
             ir.MiddleEnd(middleEndConfigration);
-            if (convertToNoMS)
+            if (noMS)
             {
                 texture2DMSto2DCodeMutator.RunMiddleEndMutations();
             }
@@ -595,39 +609,39 @@ int main(int argc, const char* argv[])
 
             bool doEmission = true;
 
-            if (args["--strip-unused-srgs"].asBool())
+            if (stripUnusedSrgs)
             {
                 ir.RemoveUnusedSrgs();
             }
 
-            if (args["--dumpsym"].asBool())
+            if (dumpsym)
             {
                 DumpSymbols(ir);
                 doEmission = false;
             }
-            else if (args["--ast"].asBool())
+            else if (ast)
             {
                 PrintAst(tree, parser);
                 doEmission = false;
             }
-            else if (args["--visitsym"])
+            else if (!visitName.empty())
             {
                 using RE = RelationshipExtent;
-                RelationshipExtentFlag visitOptions{RE::Self};  // at least self.  + optional things as listed here-under
-                static constexpr array<pair<const char*, RE::EnumType>, 4> optToRelation = {{ {"-d", RE::Reference},
-                                                                                              {"-f", RE::Family},
-                                                                                              {"-v", RE::OverloadSet},
-                                                                                              {"-r", RE::Recursive} }};
-                for (auto&& possibleOption : optToRelation)
+                RelationshipExtentFlag visitOptions{RE::Self}; // at least self.  + optional things as listed here-under
+                array<pair<bool, RE::EnumType>, 4> optToRelation = {{{visitDirectReferences, RE::Reference},
+                    {visitFamily, RE::Family},
+                    {visitOverloadSet, RE::OverloadSet},
+                    {visitRecursively, RE::Recursive}}};
+                for (auto &&possibleOption : optToRelation)
                 {
-                    visitOptions |= args[possibleOption.first].asBool() ? possibleOption.second : RE::EnumType(0);
+                    visitOptions |= possibleOption.first ? possibleOption.second : RE::EnumType(0);
                 }
-                PrintVisitSymbol(ir, args["--visitsym"].asString(), visitOptions);
+                PrintVisitSymbol(ir, visitName, visitOptions);
                 doEmission = false;
             }
             else
             {
-                bool checkerFlagsPresent = args["--semantic"].asBool() || args["--verbose"].asBool(); // or --syntax but we already exited by now.
+                bool checkerFlagsPresent = semantic || verbose; // or --syntax but we already exited by now.
                 doEmission = !checkerFlagsPresent;
             }
 
@@ -644,12 +658,12 @@ int main(int argc, const char* argv[])
                     }
                 }
 
-                std::ostream& out{ useOutputFile ? mainOutFile : std::cout };
+                std::ostream& out{useOutputFile ? mainOutFile : std::cout};
 
-                CodeReflection reflecter{ &ir, &tokens, out };
+                CodeReflection reflecter{&ir, &tokens, out};
 
                 // Lambda to create an output stream and perform an output action
-                auto prepareOutputAndCall = [&](const string& suffix, std::function<void(CodeReflection&)> action)
+                auto prepareOutputAndCall = [&](const string &suffix, std::function<void(CodeReflection&)> action)
                 {
                     string outputName;
                     if (useOutputFile)
@@ -668,52 +682,52 @@ int main(int argc, const char* argv[])
                         throw std::runtime_error("output file '" + outputName + "' could not be opened");
                     }
 
-                    std::ostream& out{ outFile };
-                    CodeReflection reflecter{ &ir, &tokens, out };
+                    std::ostream& out{outFile};
+                    CodeReflection reflecter{&ir, &tokens, out};
 
                     action(reflecter);
                 };
 
-                if (args["--full"].asBool())
-                {   // Combine the default emission and the ia, om, srg, options, bindingdep commands
-                    CodeEmitter emitter{ &ir, &tokens, out };
-                    if (convertToNoMS)
+                if (full)
+                { // Combine the default emission and the ia, om, srg, options, bindingdep commands
+                    CodeEmitter emitter{&ir, &tokens, out};
+                    if (noMS)
                     {
                         emitter.SetCodeMutator(&texture2DMSto2DCodeMutator);
                     }
                     out << "// HLSL emission by " << versionString << "\n";
                     emitter.Run(emitOptions);
 
-                    prepareOutputAndCall("ia", [&](CodeReflection& r){r.DumpShaderEntries();});
-                    prepareOutputAndCall("om", [&](CodeReflection& r) {r.DumpOutputMergerLayout(); });
-                    prepareOutputAndCall("srg", [&](CodeReflection& r) {r.DumpSRGLayout(emitOptions); });
-                    prepareOutputAndCall("options", [&](CodeReflection& r) {r.DumpVariantList(emitOptions); });
-                    prepareOutputAndCall("bindingdep", [&](CodeReflection& r) {r.DumpResourceBindingDependencies(emitOptions); });
+                    prepareOutputAndCall("ia", [&](CodeReflection& r) { r.DumpShaderEntries(); });
+                    prepareOutputAndCall("om", [&](CodeReflection& r) { r.DumpOutputMergerLayout(); });
+                    prepareOutputAndCall("srg", [&](CodeReflection& r) { r.DumpSRGLayout(emitOptions); });
+                    prepareOutputAndCall("options", [&](CodeReflection& r) { r.DumpVariantList(emitOptions); });
+                    prepareOutputAndCall("bindingdep", [&](CodeReflection& r) { r.DumpResourceBindingDependencies(emitOptions); });
                 }
-                else if (args["--ia"].asBool())
-                {   // Reflect the Input Assembler layout and the Compute shader entries
+                else if (ia)
+                { // Reflect the Input Assembler layout and the Compute shader entries
                     reflecter.DumpShaderEntries();
                 }
-                else if (args["--om"].asBool())
-                {   // Reflect the Input Assembler layout
+                else if (om)
+                { // Reflect the Input Assembler layout
                     reflecter.DumpOutputMergerLayout();
                 }
-                else if (args["--srg"].asBool())
-                {   // Reflect the Shader Resource Groups layout
+                else if (srg)
+                { // Reflect the Shader Resource Groups layout
                     reflecter.DumpSRGLayout(emitOptions);
                 }
-                else if (args["--options"].asBool())
-                {   // Reflect the list of available variant options for this shader
+                else if (options)
+                { // Reflect the list of available variant options for this shader
                     reflecter.DumpVariantList(emitOptions);
                 }
-                else if (args["--bindingdep"].asBool())
+                else if (bindingdep)
                 {
                     reflecter.DumpResourceBindingDependencies(emitOptions);
                 }
                 else
-                {   // Emit the shader source code
-                    CodeEmitter emitter{ &ir, &tokens, out };
-                    if (convertToNoMS)
+                { // Emit the shader source code
+                    CodeEmitter emitter{&ir, &tokens, out};
+                    if (noMS)
                     {
                         emitter.SetCodeMutator(&texture2DMSto2DCodeMutator);
                     }
