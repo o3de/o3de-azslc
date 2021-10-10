@@ -1,4 +1,4 @@
-set azslc_binary=..\bin\x64\Debug\azslc.exe
+set azslc_binary=..\bin\win_x64\Debug\azslc.exe
 set atom_dev_path=%1
 
 @if not exist %azslc_binary% (
