@@ -8,7 +8,7 @@
 "void M ( )"
 "m_e = E :: A ;"
 "void F ( )"
-"static const :: C g_c = 0 ;"
+"static const :: C g_c"
 "struct Srg1_S"
 "struct Srg1_SRGConstantsStruct"
 "float4 Srg1_m_f4 ;"

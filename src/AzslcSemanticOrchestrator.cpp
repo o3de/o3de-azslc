@@ -1739,7 +1739,7 @@ namespace AZ::ShaderCompiler
         {
             if (!hasInitializer && isStaticConst)
             {
-                return int32_t{0}; // non-assigned statics are zero-initialized
+                return monostate{}; // non-initialized static constants will be zero-initialized appropriately by DXC.
             }
             else
             {
