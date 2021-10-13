@@ -17,13 +17,8 @@ jobs:
       uses: actions/setup-python@v1
       with:
         python-version: ${{ matrix.python-version }}
-    - name: actions-setup-cmake
-      uses: jwlawson/actions-setup-cmake@v1.0
-      env:
-        ACTIONS_ALLOW_UNSECURE_COMMANDS: true
-      with:
-        # The version of cmake to setup.
-        cmake-version: 3.15.0
+    - name: Get CMake
+      uses: lukka/get-cmake@latest
     
     # Dependencies for linux environment
     - name: Install dependencies (Linux) 
@@ -34,7 +29,6 @@ jobs:
         sudo apt-spy2 check
         sudo apt-spy2 fix --commit
         sudo apt-get update
-        sudo apt-get install cmake
         sudo apt-get install gcc-8
         sudo apt-get install g++-8
         echo "::set-env name=CC::gcc-8"

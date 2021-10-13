@@ -9,7 +9,6 @@ src/generated/java/
 .vs
 build
 src/external/antlr4*
-src/external/boost*
 /src/.antlr/azslLexer.interp
 /src/.antlr/azslLexer.java
 /src/.antlr/azslLexer.tokens

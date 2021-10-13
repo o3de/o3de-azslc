@@ -1,8 +1,17 @@
-cmake_minimum_required(VERSION 3.7)
+cmake_minimum_required(VERSION 3.21)
 
 project (Azslc)
 
 SET (CMAKE_CXX_STANDARD 17)
+
+include(FetchContent)
+
+FetchContent_Declare(
+  cli11
+  GIT_REPOSITORY https://github.com/CLIUtils/CLI11.git
+  GIT_TAG 3ce61a169297f5fe7d4b08bdbfa82290950d6f7f
+)
+FetchContent_MakeAvailable(cli11)
 
 if (MSVC)
   add_compile_options("/std:c++17")
@@ -51,7 +60,6 @@ file(GLOB azslc_LocalSRC
 )
 
 file(GLOB azslc_ExternalSRC
-  "${PROJECT_SOURCE_DIR}/external/docopt/*.cpp"
   "${PROJECT_SOURCE_DIR}/external/jsoncpp/dist/json/*.h"
   "${PROJECT_SOURCE_DIR}/external/jsoncpp/dist/*.cpp"
   "${PROJECT_SOURCE_DIR}/external/mpark-variant/master/*.hpp"
@@ -100,19 +108,6 @@ elseif (UNIX)
   )
 endif()
 
-if (MSVC)
-    # For Windows builds we need to replace the std::regex with boost::regex for as long as we use docopt
-    set( BOOST_PATH              ${PROJECT_SOURCE_DIR}/external/boost)
-    set( BOOST_INCLUDE_DIRS      ${BOOST_PATH} )
-    set( BOOST_LINK_DIRS         ${BOOST_PATH}/stage/lib )
-  
-  add_definitions(-DDOCTOPT_USE_BOOST_REGEX)
-
-  include_directories( ${BOOST_INCLUDE_DIRS} )
-
-  link_directories( ${BOOST_LINK_DIRS} )
-endif()
-
 add_executable(azslc ${azslc_LocalSRC} ${azslc_PlatformSRC} ${azslc_GeneratedSrc} ${azslc_ExternalSRC})
 
 source_group("azslc" FILES ${azslc_LocalSRC})
@@ -121,27 +116,21 @@ source_group("external" FILES ${azslc_ExternalSRC})
 source_group("platforms" FILES ${azslc_PlatformSRC})
 
 if (MSVC)
-  target_link_libraries(azslc antlr4-runtime-static)
+  target_link_libraries(azslc PRIVATE antlr4-runtime-static)
 elseif (UNIX AND NOT APPLE)
-  target_link_libraries(azslc libantlr4-runtime.a stdc++fs)
+  target_link_libraries(azslc PRIVATE libantlr4-runtime.a stdc++fs)
 elseif (UNIX)
-  target_link_libraries(azslc libantlr4-runtime.a)
+  target_link_libraries(azslc PRIVATE libantlr4-runtime.a)
 endif()
 
+target_link_libraries(azslc PRIVATE CLI11::CLI11)
+
 if (MSVC)
-  SET(boostRegexReleaseLib boost_regex-vc142-mt-x64-1_70)
-  SET(boostRegexDebugLib boost_regex-vc142-mt-gd-x64-1_70)
-  SET(LINK_REGEX_LIBRARY optimized ${boostRegexReleaseLib} debug ${boostRegexDebugLib})
-  target_link_libraries(azslc ${LINK_REGEX_LIBRARY})
   add_dependencies(azslc antlr4_static)
 
   add_custom_command(TARGET azslc POST_BUILD
-      COMMAND if $(Configuration) == "Debug" (COMMAND ${CMAKE_COMMAND} -E copy ${BOOST_LINK_DIRS}/${boostRegexDebugLib}.dll ${CMAKE_BINARY_DIR}/$(Configuration)/)
-      COMMAND if NOT $(Configuration) == "Debug" (COMMAND ${CMAKE_COMMAND} -E copy ${BOOST_LINK_DIRS}/${boostRegexReleaseLib}.dll ${CMAKE_BINARY_DIR}/$(Configuration)/)
       COMMAND ${CMAKE_COMMAND} -E make_directory "${PROJECT_SOURCE_DIR}/../bin/${buildPlatform}/$(Configuration)"
       COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_BINARY_DIR}/$(Configuration)/azslc.exe" "${PROJECT_SOURCE_DIR}/../bin/${buildPlatform}/$(Configuration)"
-      COMMAND if $(Configuration) == "Debug" (COMMAND ${CMAKE_COMMAND} -E copy ${BOOST_LINK_DIRS}/${boostRegexDebugLib}.dll "${PROJECT_SOURCE_DIR}/../bin/${buildPlatform}/$(Configuration)")
-      COMMAND if NOT $(Configuration) == "Debug" (COMMAND ${CMAKE_COMMAND} -E copy ${BOOST_LINK_DIRS}/${boostRegexReleaseLib}.dll "${PROJECT_SOURCE_DIR}/../bin/${buildPlatform}/$(Configuration)")
 )
 endif()
 

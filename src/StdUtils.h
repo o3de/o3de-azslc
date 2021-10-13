@@ -14,7 +14,6 @@
 // I don't recommend custom lib utilities on windows because they don't have natvis and are hard to debug.
 #else
 #define USE_TINY_OPTIONAL
-//#define USE_BOOST_OPTIONAL
 #define USE_MPARK_VARIANT
 #endif
 
@@ -60,8 +59,6 @@ using invoke_result_t = std::invoke_result_t<C, T...>;
 
 #if defined(USE_TINY_OPTIONAL)
 #include <tiny/optional.h>
-#elif defined(USE_BOOST_OPTIONAL)
-#include <boost/optional/optional.hpp>
 #else // std
 #include <optional>
 inline constexpr auto none = std::nullopt;
@@ -70,18 +67,15 @@ inline constexpr auto none = std::nullopt;
 namespace AZ
 {
     // C++17 `std::variant` for C++11/14/17
-    using StdUtils::variant;
-    using StdUtils::monostate;
     using StdUtils::get;
     using StdUtils::holds_alternative;
+    using StdUtils::monostate;
+    using StdUtils::variant;
 
     // Alternatives for the C++17 std::optional
 #if defined(USE_TINY_OPTIONAL)
-    using tiny::optional;
     using tiny::none;
-#elif defined(USE_BOOST_OPTIONAL)
-    using boost::optional;
-    using boost::none;
+    using tiny::optional;
 #else
     using std::optional;
 #endif
@@ -127,7 +121,7 @@ namespace AZ
     }
 
     template <typename Lambda, typename T, typename... TOther>
-    invoke_result_t<Lambda, T*> VisitFirstNonNull(Lambda functor, T* object, TOther*... rest) noexcept(false)
+    invoke_result_t<Lambda, T*> VisitFirstNonNull(Lambda functor, T*object, TOther*... rest) noexcept(false)
     {
         if (object)
         {
@@ -139,11 +133,11 @@ namespace AZ
         }
     }
 
-    template< typename SetType >
+    template <typename SetType>
     void SetMerge(SetType& dest, SetType& src)
     {
 #ifdef _WIN32
-        dest.merge(src);  // when you have correct libraries.
+        dest.merge(src); // when you have correct libraries.
 #else
         for (auto it = src.begin(); it != src.end(); )
         {
