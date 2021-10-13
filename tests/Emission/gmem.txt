@@ -1,5 +1,5 @@
 /*
-    Cmdargs: ['--use-space', '--namespace', 'vk']
+    Cmdargs: ['--use-spaces', '--namespace', 'vk']
 */
 "# if ! defined ( AZ_USE_SUBPASSINPUT )"
 "class SubpassInputStub"
