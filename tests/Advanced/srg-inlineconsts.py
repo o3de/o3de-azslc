@@ -19,12 +19,12 @@ def verifyOK(thefile, compilerPath, silent):
     if ok:
         predicates = []
 
-        predicates.append(lambda: j["InlineConstantBuffer"]["bufferForInlineConstants"]["count"]                    ==    1)
-        predicates.append(lambda: j["InlineConstantBuffer"]["bufferForInlineConstants"]["index"]                    ==    0)
-        predicates.append(lambda: j["InlineConstantBuffer"]["bufferForInlineConstants"]["space"]                    ==    0)
-        predicates.append(lambda: j["InlineConstantBuffer"]["bufferForInlineConstants"]["usage"]                    ==    "Read")
-        predicates.append(lambda: j["InlineConstantBuffer"]["bufferForInlineConstants"]["sizeInBytes"]              ==    60)
-        predicates.append(lambda: j["InlineConstantBuffer"]["bufferForInlineConstants"]["id"]                       ==    "Root_Constants")
+        predicates.append(lambda: j["RootConstantBuffer"]["bufferForRootConstants"]["count"]                    ==    1)
+        predicates.append(lambda: j["RootConstantBuffer"]["bufferForRootConstants"]["index"]                    ==    0)
+        predicates.append(lambda: j["RootConstantBuffer"]["bufferForRootConstants"]["space"]                    ==    0)
+        predicates.append(lambda: j["RootConstantBuffer"]["bufferForRootConstants"]["usage"]                    ==    "Read")
+        predicates.append(lambda: j["RootConstantBuffer"]["bufferForRootConstants"]["sizeInBytes"]              ==    60)
+        predicates.append(lambda: j["RootConstantBuffer"]["bufferForRootConstants"]["id"]                       ==    "Root_Constants")
 
         if not silent: print (fg.CYAN+ style.BRIGHT+ "inline const verification..."+ style.RESET_ALL)
         ok = testfuncs.verifyAllPredicates(predicates, j)
