@@ -23,7 +23,7 @@ namespace StdFs = std::filesystem;
 // For large features or milestones. Minor version allows for breaking changes. Existing tests can change.
 #define AZSLC_MINOR    "7"
 // For small features or bug fixes. They cannot introduce breaking changes. Existing tests shouldn't change.
-#define AZSLC_REVISION "31" // AZSLc: The HLSL file should preserve the original line numbers
+#define AZSLC_REVISION "32" // non-initialized static const of any type seems to get a spurious 0 initializer
 
 namespace AZ::ShaderCompiler
 {

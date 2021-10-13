@@ -13,10 +13,6 @@ __azslc_print_message(" == 1\n");
 
 static const int non_init;
 
-__azslc_print_message("@check predicate ");
-__azslc_print_symbol(non_init, __azslc_prtsym_constint_value);
-__azslc_print_message(" == 0\n");
-
 static const int indirect[2] = {1,2};
 static const int complex_init = indirect[1];
 

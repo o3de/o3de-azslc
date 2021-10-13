@@ -39,7 +39,7 @@
 ":: MySRGOne_InnerStruct :: SpecMode sm = :: MySRGOne_InnerStruct :: SpecMode :: Rough ;"
 "bool same = sm == :: MySRGOne_m_structured1 [ i ] . m_spec ;"
 "return :: MySRGOne_m_structured1 [ i ] . m_diffuseColor ;"
-"g_staticInitIsZero = 0"
+"g_staticInitIsZero"
 "enum Nums"
 "Uno"
 "Dos"
