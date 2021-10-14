@@ -819,7 +819,7 @@ namespace AZ::ShaderCompiler
             uint32_t strideSize = BuildUserDefinedMemberLayout(structLayout, m_ir->m_rootConstantStructUID, options, options.m_packConstantBuffers, startAt, "");
             strideSize = GetPlatformEmitter().AlignRootConstants(strideSize);
 
-            rootConstantLayout["inputsForInlineConstants"] = structLayout;
+            rootConstantLayout["inputsForRootConstants"] = structLayout;
 
             const auto& bindInfo = rootSig.Get(m_ir->m_rootConstantStructUID);
             Json::Value dataView(Json::objectValue);
@@ -828,10 +828,10 @@ namespace AZ::ShaderCompiler
             ReflectBinding(dataView, bindInfo);
             dataView["sizeInBytes"] = strideSize;
 
-            rootConstantLayout["bufferForInlineConstants"] = dataView;
+            rootConstantLayout["bufferForRootConstants"] = dataView;
 
             // Add the layout to Root node
-            srgRoot["InlineConstantBuffer"] = rootConstantLayout;
+            srgRoot["RootConstantBuffer"] = rootConstantLayout;
         }
 
         m_out << srgRoot;
