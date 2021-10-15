@@ -286,6 +286,7 @@ namespace AZ::ShaderCompiler
     public:
         explicit AzslParserEventListener(PreprocessorLineDirectiveFinder& lineDirectiveFinder) : m_lineDirectiveFinder(lineDirectiveFinder) {}
         AzslParserEventListener() = delete;
+        ~AzslParserEventListener() override = default;
 
         void syntaxError(antlr4::Recognizer* recognizer, antlr4::Token* offendingSymbol, size_t line,
             size_t charPositionInLine, const string &msg, std::exception_ptr e) override

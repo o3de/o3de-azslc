@@ -12,10 +12,6 @@
 mkdir build
 mkdir build/release
 mkdir build/debug
-mkdir build/release/external
-mkdir build/release/external/antlr-runtime-cpp
-mkdir build/debug/external
-mkdir build/debug/external/antlr-runtime-cpp
 
 CMAKE='cmake'
 if ! command -v $CMAKE &> /dev/null
@@ -24,14 +20,6 @@ then
     CMAKE='-/Applications/CMake.app/Contents/bin/cmake'
     echo "$OLDCMAKE not found in PATH. Defaulting to: $CMAKE"
 fi
-
-echo "Pulling ANTLR from git..."
-python3 pull_from_git.py --git-url https://github.com/o3de/antlr4.git --destination-dir src/external --git-tag o3de-4.7.1
-
-$CMAKE -DMAKE_BUILD_TYPE=Release -S "src/external/antlr4/runtime/Cpp/" -B "build/release/external/antlr4/runtime/Cpp/"
-pushd build/release/external/antlr4/runtime/Cpp
-make -j16
-popd
 
 $CMAKE -DMAKE_BUILD_TYPE=Release -S "src/" -B "build/release"
 pushd build/release

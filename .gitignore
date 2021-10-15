@@ -8,7 +8,6 @@ src/generated/*.tokens
 src/generated/java/
 .vs
 build
-src/external/antlr4*
 /src/.antlr/azslLexer.interp
 /src/.antlr/azslLexer.java
 /src/.antlr/azslLexer.tokens
