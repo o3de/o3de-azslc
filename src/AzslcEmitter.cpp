@@ -154,6 +154,12 @@ namespace AZ::ShaderCompiler
                 if (IsTopLevelThroughTranslation(iteratedSymbolUid))
                 {
                     auto* varInfo = m_ir->GetSymbolSubAs<VarInfo>(iteratedSymbolName);
+
+                    if (varInfo->m_skipDeclaration)
+                    {
+                        break;
+                    }
+
                     if (varInfo->CheckHasStorageFlag(StorageFlag::Enumerator))
                     {   // Enumerators have already been emitted in the Kind::Enum case.
                         // They act as static const, but no need to emit them here
@@ -1023,11 +1029,11 @@ namespace AZ::ShaderCompiler
 
         // Emit unbounded arrays for each resource type
         m_out
-            << "ByteAddressBuffer ManagedHeap_ByteAddressBuffer[] : register(t0, space32);\n"
-            << "Texture2D ManagedHeap_Texture2D[] : register(t0, space33);\n"
-            << "Texture3D ManagedHeap_Texture3D[] : register(t0, space34);\n"
-            << "TextureCube ManagedHeap_TextureCube[] : register(t0, space35);\n"
-            << "SamplerState ManagedHeap_SamplerState[] : register(s0, space36);\n"
+            << "ByteAddressBuffer ManagedHeap_ByteAddressBuffer[] : register(t0, space100);\n"
+            << "Texture2D ManagedHeap_Texture2D[] : register(t0, space101);\n"
+            << "Texture3D ManagedHeap_Texture3D[] : register(t0, space102);\n"
+            << "TextureCube ManagedHeap_TextureCube[] : register(t0, space103);\n"
+            << "SamplerState ManagedHeap_SamplerState[] : register(s0, space104);\n"
             << "struct ManagedIndirection { uint index; uint offset; };\n";
     }
 
@@ -1038,7 +1044,6 @@ namespace AZ::ShaderCompiler
             return;
         }
 
-        uint32_t indexOffset = 0;
         std::string srgName = srgInfo.m_declNode->Name->getText();
         std::string indirectHeapIndexOffset = srgName + "_indirect";
         uint32_t indirectStride = static_cast<uint32_t>(srgInfo.m_srViews.size() + srgInfo.m_samplers.size()) * 4;
@@ -1048,7 +1053,7 @@ namespace AZ::ShaderCompiler
         }
 
         std::string indirectBase = srgName + "_base";
-        int srgSpace = rootSig.Get(srgId).m_registerBinding.m_pair[BindingPair::Set::Merged].m_logicalSpace;
+        int srgSpace = rootSig.Get(srgInfo.m_indirectUID).m_registerBinding.m_pair[BindingPair::Set::Merged].m_logicalSpace;
         m_out << "ConstantBuffer<ManagedIndirection> " << indirectHeapIndexOffset << " : register(b0, space" << srgSpace << ");\n";
 
         std::string indirectBaseSetter = "set" + indirectBase;
@@ -1069,7 +1074,6 @@ namespace AZ::ShaderCompiler
                 << indirectHeapIndexOffset << ".index].Load<uint2>(" << indirectBase << ");\n\t" << implicitCBForEmission
                 << " = ManagedHeap_ByteAddressBuffer[indexOffset.x].Load<"
                 << implicitStructForEmission << ">(indexOffset.y);\n}\n\n";
-            indexOffset += 8;
 
             m_entryPointPreamble << implicitCBSetter << "();\n";
         }
@@ -1078,7 +1082,7 @@ namespace AZ::ShaderCompiler
         // in order of occurrence. The only exception is the data which corresponds to two constants
         // (byte address buffer index and offset).
 
-        auto emitMemberGetter = [this, &indirectBase, &indirectHeapIndexOffset, &indexOffset](const IdentifierUID& id)
+        auto emitMemberSetter = [this, &srgInfo, &indirectBase, &indirectHeapIndexOffset](const IdentifierUID& id)
         {
             VarInfo* varInfo = m_ir->GetSymbolSubAs<VarInfo>(id.GetName());
             std::string shortName = varInfo->m_typeInfoExt.GetDisplayShortName();
@@ -1092,27 +1096,25 @@ namespace AZ::ShaderCompiler
                 << "static " << shortName << ' ' << translatedName << ";\n"
                 << "void " << memberSetter << "() {\n\t"
                 << translatedName << " = ManagedHeap_" << shortName << "[ManagedHeap_ByteAddressBuffer["
-                << indirectHeapIndexOffset << ".index].Load<uint>(" << indirectBase << " + " << indexOffset << ")];\n}\n";
-
-            // Each index is a 4 byte uint
-            indexOffset += 4;
+                << indirectHeapIndexOffset << ".index].Load<uint>(" << indirectBase << " + " << srgInfo.m_indirectSequence.find(id)->second * 4 << ")];\n}\n";
 
             m_entryPointPreamble << memberSetter << "();\n";
         };
 
         for (const auto& t : srgInfo.m_srViews)
         {
-            emitMemberGetter(t);
+            emitMemberSetter(t);
         }
 
         for (const auto& s : srgInfo.m_samplers)
         {
-            emitMemberGetter(s);
+            emitMemberSetter(s);
         }
     }
 
     void CodeEmitter::EmitSRGCBUnified(const SRGInfo& srgInfo, IdentifierUID srgId, const Options& options, const RootSigDesc& rootSig)
     {
+        bool indirect = srgInfo.m_indirect && options.m_indirect;
         auto bindSet = BindingPair::Set::Merged;
         // Use the uId of the SRG instead of a CBV, because we create a dummy placeholder CBV to hold the rest of the declarations:
         if (!options.m_emitConstantBufferBody)
@@ -1123,20 +1125,23 @@ namespace AZ::ShaderCompiler
                 const QualifiedName implicitCB = MakeSrgConstantsCBName(srgId);
                 EmitStruct(srgInfo.m_implicitStruct, implicitStruct, options);
 
-                const auto& bindInfo = rootSig.Get(srgId);
-                const auto spaceX = (options.m_useLogicalSpaces) ? ", space" + std::to_string(bindInfo.m_registerBinding.m_pair[bindSet].m_logicalSpace) : "";
-                const auto implicitStructForEmission = GetTranslatedName(implicitStruct, UsageContext::ReferenceSite);
-                const auto implicitCBForEmission = GetTranslatedName(implicitCB, UsageContext::DeclarationSite);
-
-                if (!(srgInfo.m_indirect && options.m_indirect))
+                if (!indirect)
                 {
+                    const auto& bindInfo = rootSig.Get(srgId);
+                    const auto spaceX = (options.m_useLogicalSpaces) ? ", space" + std::to_string(bindInfo.m_registerBinding.m_pair[bindSet].m_logicalSpace) : "";
+                    const auto implicitStructForEmission = GetTranslatedName(implicitStruct, UsageContext::ReferenceSite);
+                    const auto implicitCBForEmission = GetTranslatedName(implicitCB, UsageContext::DeclarationSite);
+
                     m_out << "ConstantBuffer<" << implicitStructForEmission << "> " << implicitCBForEmission << " : register(b" << bindInfo.m_registerBinding.m_pair[bindSet].m_registerIndex << spaceX << ");\n\n";
                 }
             }
 
-            for (auto cId : srgInfo.m_CBs)
+            if (!indirect)
             {
-                EmitSRGCB(cId, options, rootSig);
+                for (auto cId : srgInfo.m_CBs)
+                {
+                    EmitSRGCB(cId, options, rootSig);
+                }
             }
 
             return;

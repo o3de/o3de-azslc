@@ -934,6 +934,13 @@ namespace AZ::ShaderCompiler
         srgInfo.m_implicitStruct.m_kind = Kind::Struct;
         bool indirect = get<SRGSemanticInfo>(srgSemanticSym->second.GetSubRefAs<ClassInfo>().m_subInfo).m_indirect;
         srgInfo.m_indirect = indirect;
+        if (indirect)
+        {
+            std::string indirectUIDName = uid.m_name + "_indirect";
+            srgInfo.m_indirectUID = IdentifierUID{ QualifiedName{ indirectUIDName } };
+            AddIdentifier(UnqualifiedNameView{ std::string_view{ indirectUIDName.c_str() + 1, indirectUIDName.size() - 1 } }, Kind::Variable)
+                .second.GetSubRefAs<VarInfo>().m_skipDeclaration = true;
+        }
         return symbol;
     }
 
@@ -1503,7 +1510,30 @@ namespace AZ::ShaderCompiler
             return;
         }
 
-        // TODO:Indirect
+        // Establish a canonical ordering for all SRV indirection constants
+        uint32_t offset = 0;
+
+        if (!srgInfo.m_implicitStruct.GetMemberFields().empty())
+        {
+            // If there are implicit members, always assign the initial two uints to the implicit struct index/offset pair
+            offset += 2;
+        }
+
+        for (const auto& id : srgInfo.m_srViews)
+        {
+            srgInfo.m_indirectSequence[id] = offset++;
+        }
+
+        for (const auto& id : srgInfo.m_samplers)
+        {
+            srgInfo.m_indirectSequence[id] = offset++;
+        }
+
+        for (const auto& id : srgInfo.m_CBs)
+        {
+            srgInfo.m_indirectSequence[id] = offset;
+            offset += 2;
+        }
     }
 
     void SemanticOrchestrator::ValidateSrg(azslParser::SrgDefinitionContext* ctx) noexcept(false)

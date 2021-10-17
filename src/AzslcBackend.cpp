@@ -610,21 +610,42 @@ namespace AZ::ShaderCompiler
             RootSigDesc::SrgDesc srgDesc;
             srgDesc.m_uid = srgUid;
 
-            if (!srgInfo->m_indirect && options.m_indirect)
+            if (srgInfo->m_indirect && options.m_indirect)
             {
                 // SRGs attached to an indirect SRG semantic do not bind resources directly into the root signature.
                 // Instead they index into the managed resource heaps with a secondary indirection. The indirection
-                // scheme is as follows:
-                // ByteAddressBuffer ManagedHeap_ByteAddressBuffer[] : register(b0, space32);
-                // uint32 IndirectionBuffer : root constant
-                // uint32 IndirectionOffset : root constant
-                // const uint32 IndirectionStride = SRG indirection size;
+                // scheme is as follows (pseudo code):
                 //
-                // uint32* indirectionBase =
-                //     ManagedHeap_ByteAddressBuffer[IndirectionBuffer]
-                //         [IndirectionStride * SV_InstanceID + IndirectionOffset]
+                //     ByteAddressBuffer ManagedHeap_ByteAddressBuffer[] : register(b0, space100);
+                //     struct ManagedIndirection { uint index; uint offset; };
+                //     ConstantBuffer<ManagedIndirection> SrgName_indirect : register(b0, [srg semantic space]);
+                //
+                //     // Note, we can't take addresses in HLSL obviously, but this just illustrates where the memory
+                //     // is stored for the SRG indirection constants
+                //     uint* indirectionBase =
+                //         &ManagedHeap_ByteAddressBuffer[ManagedIndirection.index].Load<uint>(
+                //             indirectionStride * SV_InstanceID + ManagedIndirection.offset);
+                //
+                // The data that starts at indirectionBase is a sequence of indirection constants needed to retrieve
+                // all the SRVs in the SRG, including the implicit struct data (which requires both a byte address buffer
+                // index and offset).
 
-                // TODO
+                RootSigDesc::SrgParamDesc indirectParam = ReflectOneExternalResourceAndWrapWithUnifyIndices(srgInfo->m_indirectUID, bindInfo, rootSig);
+                indirectParam.m_type = RootParamType::SrgConstantCB;
+                indirectParam.m_num32BitConstants = 2;
+                srgDesc.m_parameters.push_back(indirectParam);
+
+                bindInfo.SignalIncrementSpace(/*overshoot callback:*/[&, srgInfo = srgInfo, srgUid = srgUid](int numSpaces, int spacesAvailable)
+                    {
+                        PrintWarning(Warn::W1, srgInfo->m_declNode->start,
+                                 "SRG ", srgUid.m_name, " on space ", numSpaces,
+                                 " overshoots the minimum supported logical register space count guaranteed by the specification (from --min-descriptors argument currently set to ",
+                                 spacesAvailable, ")");
+                    });
+
+                bindInfo.SignalUnifyIndices();
+
+                rootSig.m_srGroups.push_back(srgDesc);
                 continue;
             }
 
@@ -658,7 +679,7 @@ namespace AZ::ShaderCompiler
                 srgDesc.m_parameters.push_back(
                     ReflectOneExternalResourceAndWrapWithUnifyIndices(srgUid, bindInfo, rootSig));
             }
-            if (!options.m_emitConstantBufferBody)  // emitCB is the SM5- "cbufer{}" block syntax. !emitCB is the "ConstantBuffer<>" SM5.1+ syntax
+            if (!options.m_emitConstantBufferBody)  // emitCB is the SM5- "cbuffer{}" block syntax. !emitCB is the "ConstantBuffer<>" SM5.1+ syntax
             {
                 for (const auto cId : srgInfo->m_CBs)
                 {

@@ -1,8 +1,8 @@
-ByteAddressBuffer ManagedHeap_ByteAddressBuffer[] : register(t0, space32);
-Texture2D ManagedHeap_Texture2D[] : register(t0, space33);
-Texture3D ManagedHeap_Texture3D[] : register(t0, space34);
-TextureCube ManagedHeap_TextureCube[] : register(t0, space35);
-SamplerState ManagedHeap_SamplerState[] : register(s0, space36);
+ByteAddressBuffer ManagedHeap_ByteAddressBuffer[] : register(t0, space100);
+Texture2D ManagedHeap_Texture2D[] : register(t0, space101);
+Texture3D ManagedHeap_Texture3D[] : register(t0, space102);
+TextureCube ManagedHeap_TextureCube[] : register(t0, space103);
+SamplerState ManagedHeap_SamplerState[] : register(s0, space104);
 struct ManagedIndirection { uint index; uint offset; };
 
 /* Generated code from  ShaderResourceGroup PerObject*/

@@ -680,11 +680,13 @@ namespace AZ::ShaderCompiler
             Json::Value buffersList(Json::arrayValue);
             Json::Value imagesList(Json::arrayValue);
 
+            bool indirect = srgInfo->m_indirect && options.m_indirect;
+            // TODO:Indirect, we need to establish a canonical ordering for looping over SRVs, CBs, and samplers so that
+            // the indices can be returned in the reflection information as an "indirectOffset" value
+
             // External CBVs
             for (const auto& cId : srgInfo->m_CBs)
             {
-                const auto& bindInfo = rootSig.Get(cId);
-
                 uint32_t strideSize = GetViewStride(cId, options.m_packConstantBuffers, options);
 
                 auto& srgMemberInfo = *m_ir->GetSymbolSubAs<VarInfo>(cId.m_name);
@@ -696,7 +698,16 @@ namespace AZ::ShaderCompiler
                 dataView["type"] = typeNameLeaf;
                 dataView["usage"] = "Read";
                 dataView["stride"] = strideSize;
-                ReflectBinding(dataView, bindInfo);
+
+                if (indirect)
+                {
+                    dataView["indirectOffset"] = srgInfo->m_indirectSequence[cId];
+                }
+                else
+                {
+                    const auto& bindInfo = rootSig.Get(cId);
+                    ReflectBinding(dataView, bindInfo);
+                }
 
                 buffersList.append(dataView);
             }
@@ -704,8 +715,6 @@ namespace AZ::ShaderCompiler
             // SRVs and UAVs
             for (const auto& tId : srgInfo->m_srViews)
             {
-                const auto& bindInfo = rootSig.Get(tId);
-
                 uint32_t strideSize = GetViewStride(tId, options.m_packDataBuffers, options);
 
                 auto& srgMemberInfo = *m_ir->GetSymbolSubAs<VarInfo>(tId.m_name);
@@ -723,7 +732,16 @@ namespace AZ::ShaderCompiler
                 dataView["id"]     = ExtractLeaf(tId.m_name).data();
                 dataView["type"]   = viewName;
                 dataView["usage"]  = (isReadWriteView) ? "ReadWrite" : "Read";
-                ReflectBinding(dataView, bindInfo);
+
+                if (indirect)
+                {
+                    dataView["indirectOffset"] = srgInfo->m_indirectSequence[tId];
+                }
+                else
+                {
+                    const auto& bindInfo = rootSig.Get(tId);
+                    ReflectBinding(dataView, bindInfo);
+                }
                 dataView["stride"] = strideSize;
 
                 if (isBufferView)
@@ -742,15 +760,22 @@ namespace AZ::ShaderCompiler
             Json::Value samplersList(Json::arrayValue);
             for (const auto& sId : srgInfo->m_samplers)
             {
-                const auto& bindInfo = rootSig.Get(sId);
-
                 const auto* srgMemberInfo = m_ir->GetSymbolSubAs<VarInfo>(sId.m_name);
                 const auto& samplerInfo = *srgMemberInfo->m_samplerState;
 
                 Json::Value samplerJson(Json::objectValue);
                 samplerJson["Id"] = sId.GetNameLeaf();
                 samplerJson["isDynamic"] = samplerInfo.m_isDynamic;
-                ReflectBinding(samplerJson, bindInfo);
+
+                if (indirect)
+                {
+                    samplerJson["indirectOffset"] = srgInfo->m_indirectSequence[sId];
+                }
+                else
+                {
+                    const auto& bindInfo = rootSig.Get(sId);
+                    ReflectBinding(samplerJson, bindInfo);
+                }
 
                 if (!samplerInfo.m_isDynamic)
                 {
@@ -793,12 +818,15 @@ namespace AZ::ShaderCompiler
 
                 // CBuffer for SRG Constants
                 {
-                    const auto& bindInfo = rootSig.Get(srgUid);
-
                     Json::Value dataView(Json::objectValue);
                     dataView["id"] = ExtractLeaf(srgUid.m_name).data();
                     dataView["usage"] = "Read";
-                    ReflectBinding(dataView, bindInfo);
+
+                    if (!indirect)
+                    {
+                        const auto& bindInfo = rootSig.Get(srgUid);
+                        ReflectBinding(dataView, bindInfo);
+                    }
 
                     srgLayout["bufferForSRGConstants"] = dataView;
                 }

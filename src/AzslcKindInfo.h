@@ -356,6 +356,7 @@ namespace AZ::ShaderCompiler
         vector<string>             m_unknownQualifiers;        // For qualifiers we didn't add to the enum
         bool                       m_srgMember = false;
         bool                       m_isPublic = true;
+        bool                       m_skipDeclaration = false;
         ConstNumericVal            m_constVal;   // (attempted folded) initializer value for simple scalars
         optional<SamplerStateDesc> m_samplerState;
         ExtendedTypeInfo           m_typeInfoExt;
@@ -815,6 +816,9 @@ namespace AZ::ShaderCompiler
 
         // If set, the SRG semantic associated with this SRG accesses resources through
         // a layer of indirection
+        IdentifierUID m_indirectUID;
+        // Maps each SRG resource to a constant offset
+        unordered_map<IdentifierUID, uint32_t> m_indirectSequence;
         bool m_indirect = false;
     };
 
