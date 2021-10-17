@@ -1,5 +1,5 @@
 "struct SRG0_SRGConstantsStruct"
 "ConstantBuffer < :: SRG0_SRGConstantsStruct > SRG0_SRGConstantBuffer : register ( b1 ) ;"
-"Texture2D SRG1_m_tex2D : register ( t0 ) ;"
 "struct SRG1_SRGConstantsStruct"
 "ConstantBuffer < :: SRG1_SRGConstantsStruct > SRG1_SRGConstantBuffer : register ( b0 ) ;
+"Texture2D SRG1_m_tex2D : register ( t0 ) ;"

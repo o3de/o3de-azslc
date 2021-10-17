@@ -919,28 +919,12 @@ namespace AZ::ShaderCompiler
                 ctx->Name, "A semantic is mandatory on the declaration of a non-partial ShaderResourceGroup.");
         }
 
-        IdAndKind* srgSemanticSym = LookupSymbol(UnqualifiedNameView{ ctx->Semantic->getText() });
-        if (!srgSemanticSym)
-        {
-            ThrowAzslcOrchestratorException(ORCHESTRATOR_INVALID_SEMANTIC_DECLARATION,
-                ctx->Name, "A semantic must be declared before the SRG declaration.");
-        }
-
         auto& symbol       = AddIdentifier(uqNameView, Kind::ShaderResourceGroup, line);
         // now fillup what we can about the kindinfo:
         auto& [uid, info]  = symbol;
         SRGInfo& srgInfo   = info.GetSubAfterInitAs<Kind::ShaderResourceGroup>();
         srgInfo.m_declNode = ctx;
         srgInfo.m_implicitStruct.m_kind = Kind::Struct;
-        bool indirect = get<SRGSemanticInfo>(srgSemanticSym->second.GetSubRefAs<ClassInfo>().m_subInfo).m_indirect;
-        srgInfo.m_indirect = indirect;
-        if (indirect)
-        {
-            std::string indirectUIDName = uid.m_name + "_indirect";
-            srgInfo.m_indirectUID = IdentifierUID{ QualifiedName{ indirectUIDName } };
-            AddIdentifier(UnqualifiedNameView{ std::string_view{ indirectUIDName.c_str() + 1, indirectUIDName.size() - 1 } }, Kind::Variable)
-                .second.GetSubRefAs<VarInfo>().m_skipDeclaration = true;
-        }
         return symbol;
     }
 
@@ -1505,10 +1489,27 @@ namespace AZ::ShaderCompiler
     void SemanticOrchestrator::FinalizeIndirectSrg()
     {
         auto& srgInfo = GetCurrentScopeSubInfoAs<SRGInfo>();
+
+        if (!srgInfo.m_declNode->Semantic)
+        {
+            return;
+        }
+
+        IdAndKind* srgSemanticSym = LookupSymbol(UnqualifiedNameView{ srgInfo.m_declNode->Semantic->getText() });
+        const ClassInfo& srgSemanticClassInfo = srgSemanticSym->second.GetSubRefAs<ClassInfo>();
+        bool indirect = get<SRGSemanticInfo>(srgSemanticClassInfo.m_subInfo).m_indirect;
+        srgInfo.m_indirect = indirect;
+
         if (!srgInfo.m_indirect)
         {
             return;
         }
+
+        std::string indirectUIDName = GetCurrentScopeIdAndKind().first.m_name + "_indirect";
+        srgInfo.m_indirectUID = IdentifierUID{ QualifiedName{ indirectUIDName } };
+        AddIdentifier(UnqualifiedNameView{ std::string_view{ indirectUIDName.c_str() + 1, indirectUIDName.size() - 1 } }, Kind::Variable)
+            .second.GetSubRefAs<VarInfo>().m_skipDeclaration = true;
+
 
         // Establish a canonical ordering for all SRV indirection constants
         uint32_t offset = 0;

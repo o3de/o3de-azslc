@@ -146,10 +146,9 @@ namespace AZ::ShaderCompiler
 
     void SemaCheckListener::exitSrgDefinition(azslParser::SrgDefinitionContext* ctx)
     {
-        m_ir->m_sema.FinalizeIndirectSrg();
-
         // Validate the content on scope exit
         m_ir->m_sema.ValidateSrg(ctx);
+        m_ir->m_sema.FinalizeIndirectSrg();
         m_ir->m_scope.ExitScope(ctx->RightBrace()->getSourceInterval().b);
     }
 

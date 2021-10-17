@@ -681,8 +681,11 @@ namespace AZ::ShaderCompiler
             Json::Value imagesList(Json::arrayValue);
 
             bool indirect = srgInfo->m_indirect && options.m_indirect;
-            // TODO:Indirect, we need to establish a canonical ordering for looping over SRVs, CBs, and samplers so that
-            // the indices can be returned in the reflection information as an "indirectOffset" value
+
+            if (indirect)
+            {
+                srgLayout["indirectBinding"] = true;
+            }
 
             // External CBVs
             for (const auto& cId : srgInfo->m_CBs)
