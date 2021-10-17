@@ -610,6 +610,24 @@ namespace AZ::ShaderCompiler
             RootSigDesc::SrgDesc srgDesc;
             srgDesc.m_uid = srgUid;
 
+            if (!srgInfo->m_indirect && options.m_indirect)
+            {
+                // SRGs attached to an indirect SRG semantic do not bind resources directly into the root signature.
+                // Instead they index into the managed resource heaps with a secondary indirection. The indirection
+                // scheme is as follows:
+                // ByteAddressBuffer ManagedHeap_ByteAddressBuffer[] : register(b0, space32);
+                // uint32 IndirectionBuffer : root constant
+                // uint32 IndirectionOffset : root constant
+                // const uint32 IndirectionStride = SRG indirection size;
+                //
+                // uint32* indirectionBase =
+                //     ManagedHeap_ByteAddressBuffer[IndirectionBuffer]
+                //         [IndirectionStride * SV_InstanceID + IndirectionOffset]
+
+                // TODO
+                continue;
+            }
+
             for (const auto tId : srgInfo->m_srViews)
             {
                 if (useUniqueIndices && !srgInfo->m_unboundedArrays.empty() && srgInfo->m_unboundedArrays[0] == tId)

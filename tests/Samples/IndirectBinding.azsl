@@ -1,0 +1,41 @@
+[indirect]
+ShaderResourceGroupSemantic BindingPerObject
+{
+    FrequencyId = 0;
+};
+
+[indirect]
+ShaderResourceGroupSemantic BindingPerMaterial
+{
+    FrequencyId = 1;
+};
+
+ShaderResourceGroup PerObject : BindingPerObject
+{
+    row_major float3x4 m_modelToWorld;
+}
+
+ShaderResourceGroup MaterialSrg : BindingPerMaterial
+{
+    float3 m_baseColor;
+    float m_baseColorFactor;
+
+    Texture2D m_baseColorMap;
+
+    Sampler m_sampler
+    {
+       AddressU = Clamp;
+       AddressV = Clamp;
+       MinFilter = Linear;
+       MagFilter = Linear;
+       MipFilter = Linear;
+    };
+}
+
+float4 MainPS(float2 uv : TEXCOORD) : SV_Target0
+{
+    float4 baseColorMapSample = MaterialSrg::m_baseColorMap.Sample(MaterialSrg::m_sampler, uv);
+    float3 baseColor = baseColorMapSample.rgb * MaterialSrg::m_baseColor.rgb * MaterialSrg::m_baseColorFactor;
+
+    return float4(baseColor, 1.0);
+}

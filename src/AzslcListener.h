@@ -21,7 +21,7 @@ namespace AZ::ShaderCompiler
         {}
 
         void enterIdExpression(azslParser::IdExpressionContext* ctx) override;
-        void enterSrgSemantic(azslParser::SrgSemanticContext* ctx) override;
+        void enterAttributedSrgSemantic(azslParser::AttributedSrgSemanticContext* ctx) override;
         void enterInterfaceDefinition(azslParser::InterfaceDefinitionContext* ctx) override;
         void enterStructDefinition(azslParser::StructDefinitionContext* ctx) override;
         void enterClassDefinition(azslParser::ClassDefinitionContext* ctx) override;

@@ -152,7 +152,7 @@ namespace AZ::ShaderCompiler
 
         auto RegisterTypeAlias(string_view newIdentifier, AstFuncType* existingTypeCtx, azslParser::TypeAliasingDefinitionStatementContext* ctx) -> IdAndKind&;
 
-        auto RegisterSRGSemantic(AstSRGSemanticDeclNode* ctx) -> IdAndKind&;
+        auto RegisterAttributedSRGSemantic(AstAttributedSRGSemanticDeclNode* ctx) -> IdAndKind&;
 
         auto RegisterInterface(AstInterfaceDeclNode* ctx) -> IdAndKind&;
 
@@ -238,6 +238,8 @@ namespace AZ::ShaderCompiler
         // Returns: the symbol of the overridden function if found. nullopt if hidingCandidate doesn't hide.
         // Will diagnose-throw if multiple bases have the candidate symbol's name.
         auto GetSymbolHiddenInBase(IdentifierUID hidingCandidate) -> IdAndKind*;
+
+        void FinalizeIndirectSrg();
 
         void ValidateSrg(azslParser::SrgDefinitionContext* ctx) noexcept(false);
 

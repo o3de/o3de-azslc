@@ -43,6 +43,8 @@ namespace AZ::ShaderCompiler
     {
         optional<int64_t> m_frequencyId;
         optional<int64_t> m_variantFallback;
+        // Set if the SRG semantic is decorated with an [indirect] attribute
+        bool m_indirect;
     };
 
     struct EnumerationInfo
@@ -810,6 +812,10 @@ namespace AZ::ShaderCompiler
         // Later, during emission, we can easily change the order of appearance of these
         // variables. 
         vector< IdentifierUID >   m_unboundedArrays;
+
+        // If set, the SRG semantic associated with this SRG accesses resources through
+        // a layer of indirection
+        bool m_indirect = false;
     };
 
     static const uint32_t SRGSemanticInfo_MaxAllowedFrequency = 15;  // Maximum CB slots for all graphics API we support (common minimum)

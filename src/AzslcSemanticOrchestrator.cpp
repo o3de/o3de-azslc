@@ -458,9 +458,26 @@ namespace AZ::ShaderCompiler
         return idKind;
     }
 
-    IdAndKind& SemanticOrchestrator::RegisterSRGSemantic(AstSRGSemanticDeclNode* ctx)
+    IdAndKind& SemanticOrchestrator::RegisterAttributedSRGSemantic(AstAttributedSRGSemanticDeclNode* ctx)
     {
-        return RegisterStructuredType(ctx, Kind::ShaderResourceGroupSemantic);
+        auto& out = RegisterStructuredType(ctx->srgSemantic(), Kind::ShaderResourceGroupSemantic);
+
+        bool indirect = false;
+        for (auto* attribute : ctx->attributeSpecifierAny())
+        {
+            if (auto* specifier = attribute->attributeSpecifier())
+            {
+                if (specifier->attribute()->getText() == "indirect")
+                {
+                    indirect = true;
+                    break;
+                }
+            }
+        }
+
+        get<SRGSemanticInfo>(out.second.GetSubRefAs<ClassInfo>().m_subInfo).m_indirect = indirect;
+
+        return out;
     }
 
     IdAndKind& SemanticOrchestrator::RegisterInterface(AstInterfaceDeclNode* ctx)
@@ -901,12 +918,22 @@ namespace AZ::ShaderCompiler
             ThrowAzslcOrchestratorException(ORCHESTRATOR_INVALID_SEMANTIC_DECLARATION,
                 ctx->Name, "A semantic is mandatory on the declaration of a non-partial ShaderResourceGroup.");
         }
+
+        IdAndKind* srgSemanticSym = LookupSymbol(UnqualifiedNameView{ ctx->Semantic->getText() });
+        if (!srgSemanticSym)
+        {
+            ThrowAzslcOrchestratorException(ORCHESTRATOR_INVALID_SEMANTIC_DECLARATION,
+                ctx->Name, "A semantic must be declared before the SRG declaration.");
+        }
+
         auto& symbol       = AddIdentifier(uqNameView, Kind::ShaderResourceGroup, line);
         // now fillup what we can about the kindinfo:
         auto& [uid, info]  = symbol;
         SRGInfo& srgInfo   = info.GetSubAfterInitAs<Kind::ShaderResourceGroup>();
         srgInfo.m_declNode = ctx;
         srgInfo.m_implicitStruct.m_kind = Kind::Struct;
+        bool indirect = get<SRGSemanticInfo>(srgSemanticSym->second.GetSubRefAs<ClassInfo>().m_subInfo).m_indirect;
+        srgInfo.m_indirect = indirect;
         return symbol;
     }
 
@@ -1466,6 +1493,17 @@ namespace AZ::ShaderCompiler
                                                                                 : " overloads a function that has default arguments)"));
             }
         }
+    }
+
+    void SemanticOrchestrator::FinalizeIndirectSrg()
+    {
+        auto& srgInfo = GetCurrentScopeSubInfoAs<SRGInfo>();
+        if (!srgInfo.m_indirect)
+        {
+            return;
+        }
+
+        // TODO:Indirect
     }
 
     void SemanticOrchestrator::ValidateSrg(azslParser::SrgDefinitionContext* ctx) noexcept(false)

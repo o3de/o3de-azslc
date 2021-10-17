@@ -43,7 +43,7 @@ def found(needle, haystack):
         return True
     return False
     
-# pars the argument mentioned in the shader source file Ex : Cmdargs: --namespace=vk   or Cmdargs: ['--unique-idx', '--use-spaces', '--root-sig', '--root-const', '0']
+# parse the argument mentioned in the shader source file Ex : Cmdargs: --namespace=vk   or Cmdargs: ['--unique-idx', '--use-spaces', '--root-sig', '--root-const', '0']
 def parse_strlist(sl):
     clean = re.sub("[\[\],\s]","",sl)
     splitted = re.split("[\'\"]",clean)
@@ -63,7 +63,8 @@ def verifyEmissionPattern(azslFile, patternsFileName, compilerPath, silent, argL
             if line.find("Cmdargs") >= 0:
                 line = line[line.rfind(':')+1:]
                 arg = parse_strlist(line)
-                if arg and not silent: print ("Adding extra command line arguments: " + str(arg))
+                # if arg and not silent: print ("Adding extra command line arguments: " + str(arg))
+                if arg: print ("Adding extra command line arguments: " + str(arg))
                 # now arg has additional arguments required for the test
 
     shaderCode, ok = testfuncs.buildAndGet(azslFile, compilerPath, silent, argList + arg)
@@ -100,9 +101,9 @@ def verifyEmissionPatterns(thefile, compilerPath, silent, argList):
     # loop over the .txt file for the same .azsl file by matching pattern filename.txt or filename-[0-9].txt
     # extract the Cmdargs (command arguments) specified in the .txt file to compile the .azsl shader with those arguments
     for file in glob.glob('%s*[0-9].txt' % filePrefixName) or glob.glob('%s.txt' % filePrefixName):
-        patterFileName = file
-        if not verifyEmissionPattern(thefile, patterFileName, compilerPath, silent, argList):
-            localFailList.append(patterFileName)
+        patternFileName = file
+        if not verifyEmissionPattern(thefile, patternFileName, compilerPath, silent, argList):
+            localFailList.append(patternFileName)
         else: 
             result = result + 1
     if len(localFailList) > 0:

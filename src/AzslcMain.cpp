@@ -23,7 +23,7 @@ namespace StdFs = std::filesystem;
 // For large features or milestones. Minor version allows for breaking changes. Existing tests can change.
 #define AZSLC_MINOR "7"
 // For small features or bug fixes. They cannot introduce breaking changes. Existing tests shouldn't change.
-#define AZSLC_REVISION "33" // Changing inlineConstant to rootConstant keyword work
+#define AZSLC_REVISION "34" // Add [indirect] SRG Semantic attribute
 
 namespace AZ::ShaderCompiler
 {
@@ -306,6 +306,12 @@ int main(int argc, const char* argv[])
     std::string output;
     cli.add_option("-o", output, "Output file (writes to stdout if omitted).");
 
+    bool indirect = false;
+    cli.add_flag("--indirect", indirect, "Support the [indirect] attribute on SRG semantics to access SRVs through managed descriptor heaps.");
+
+    std::unordered_set<std::string> entryPoints;
+    cli.add_option("--entry-points", entryPoints, "Comma-separated list of potential entry points. Entry points supplied in this manner are *not* usable as normal functions. Needed for automatic indirection.");
+
     bool useSpaces = false;
     cli.add_flag("--use-spaces", useSpaces, "Use a logical space index per SRG.");
 
@@ -532,6 +538,8 @@ int main(int argc, const char* argv[])
             emitOptions.m_emitRootSig = rootSig;
             emitOptions.m_padRootConstantCB = padRootConst;
             emitOptions.m_skipAlignmentValidation = noAlignmentValidation;
+            emitOptions.m_indirect = indirect;
+            emitOptions.m_entryPoints = entryPoints;
 
             if (*rootConstOpt)
             {

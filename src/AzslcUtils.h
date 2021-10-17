@@ -38,25 +38,26 @@ namespace AZ::ShaderCompiler
     extern DiagnosticStream warningCout;
     extern Endl             azEndl;
 
-    using AstType                       = azslParser::TypeContext;                  // all usertypes and predefined, but cannot be Void
-    using AstFuncType                   = azslParser::FunctionTypeContext;          // all (can be Void)
-    using AstTypeofNode                 = azslParser::TypeofExpressionContext;
-    using AstPredefinedTypeNode         = azslParser::PredefinedTypeContext;
-    using AstClassDeclNode              = azslParser::ClassDefinitionContext;
-    using AstStructDeclNode             = azslParser::StructDefinitionContext;
-    using AstEnumDeclNode               = azslParser::EnumDefinitionContext;
-    using AstInterfaceDeclNode          = azslParser::InterfaceDefinitionContext;
-    using AstSRGSemanticDeclNode        = azslParser::SrgSemanticContext;
-    using AstSRGSemanticMemberDeclNode  = azslParser::SrgSemanticMemberDeclarationContext;
-    using AstSRGDeclNode                = azslParser::SrgDefinitionContext;
-    using AstSRGMemberNode              = azslParser::SrgMemberDeclarationContext;
-    using AstNamedVarDecl               = azslParser::NamedVariableDeclaratorContext;
-    using AstUnnamedVarDecl             = azslParser::UnnamedVariableDeclaratorContext;
-    using AstFuncSig                    = azslParser::LeadingTypeFunctionSignatureContext;
-    using AstIdExpr                     = azslParser::IdExpressionContext;
-    using AstExpr                       = azslParser::ExpressionContext;
-    using AstMemberAccess               = azslParser::MemberAccessExpressionContext;
-    using AstVarInitializer             = azslParser::VariableInitializerContext;
+    using AstType                          = azslParser::TypeContext;                  // all usertypes and predefined, but cannot be Void
+    using AstFuncType                      = azslParser::FunctionTypeContext;          // all (can be Void)
+    using AstTypeofNode                    = azslParser::TypeofExpressionContext;
+    using AstPredefinedTypeNode            = azslParser::PredefinedTypeContext;
+    using AstClassDeclNode                 = azslParser::ClassDefinitionContext;
+    using AstStructDeclNode                = azslParser::StructDefinitionContext;
+    using AstEnumDeclNode                  = azslParser::EnumDefinitionContext;
+    using AstInterfaceDeclNode             = azslParser::InterfaceDefinitionContext;
+    using AstAttributedSRGSemanticDeclNode = azslParser::AttributedSrgSemanticContext;
+    using AstSRGSemanticDeclNode           = azslParser::SrgSemanticContext;
+    using AstSRGSemanticMemberDeclNode     = azslParser::SrgSemanticMemberDeclarationContext;
+    using AstSRGDeclNode                   = azslParser::SrgDefinitionContext;
+    using AstSRGMemberNode                 = azslParser::SrgMemberDeclarationContext;
+    using AstNamedVarDecl                  = azslParser::NamedVariableDeclaratorContext;
+    using AstUnnamedVarDecl                = azslParser::UnnamedVariableDeclaratorContext;
+    using AstFuncSig                       = azslParser::LeadingTypeFunctionSignatureContext;
+    using AstIdExpr                        = azslParser::IdExpressionContext;
+    using AstExpr                          = azslParser::ExpressionContext;
+    using AstMemberAccess                  = azslParser::MemberAccessExpressionContext;
+    using AstVarInitializer                = azslParser::VariableInitializerContext;
 
     inline constexpr ssize_t operator ""_ssz(unsigned long long n)
     {

@@ -43,10 +43,13 @@ namespace AZ::ShaderCompiler
         }
     }
 
-    void SemaCheckListener::enterSrgSemantic(azslParser::SrgSemanticContext* ctx)
+    void SemaCheckListener::enterAttributedSrgSemantic(azslParser::AttributedSrgSemanticContext* ctx)
     {
-        m_ir->m_sema.RegisterSRGSemantic(ctx);
-        m_ir->m_scope.EnterScope(ctx->Name->getText(), ctx->srgSemanticBodyDeclaration()->LeftBrace()->getSourceInterval().a);
+        azslParser::SrgSemanticContext* srgSemantic = ctx->srgSemantic();
+        m_ir->m_sema.RegisterAttributedSRGSemantic(ctx);
+        m_ir->m_scope.EnterScope(
+            srgSemantic->Name->getText(),
+            srgSemantic->srgSemanticBodyDeclaration()->LeftBrace()->getSourceInterval().a);
     }
 
     void SemaCheckListener::enterInterfaceDefinition(azslParser::InterfaceDefinitionContext* ctx)
@@ -143,6 +146,8 @@ namespace AZ::ShaderCompiler
 
     void SemaCheckListener::exitSrgDefinition(azslParser::SrgDefinitionContext* ctx)
     {
+        m_ir->m_sema.FinalizeIndirectSrg();
+
         // Validate the content on scope exit
         m_ir->m_sema.ValidateSrg(ctx);
         m_ir->m_scope.ExitScope(ctx->RightBrace()->getSourceInterval().b);

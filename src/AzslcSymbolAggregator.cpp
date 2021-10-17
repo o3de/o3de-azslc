@@ -232,7 +232,7 @@ namespace AZ::ShaderCompiler
             KindInfo& ki = GetIdAndKindInfo(QualifiedNameView{name})->second;
             return std::make_pair(ki.IsKindOneOf(Kind::Function, Kind::OverloadSet), ki.IsKindOneOf(Kind::Variable));
         };
-        // instanciate an empty solver and fill it up with the elastic symbols from the aggregator to reorder them
+        // instantiate an empty solver and fill it up with the elastic symbols from the aggregator to reorder them
         DependencySolver<IdentifierUID, 50_maxdep_pernode> solver;
         // state variable that remembers the last iterated symbol that was of a specific nesting depth
         stack<IdentifierUID> lastSymbolAtCurrentLevel;

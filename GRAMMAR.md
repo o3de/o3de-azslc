@@ -82,7 +82,7 @@ However, AZSLc doesn't restrict the choice of namespace. It is left to the shade
 To differentiate between attributes which belong to the global scope and attributes attached to the next declaration, we use the root namespace `global::`.
 This is required since both cases appear in the same space! Think about attribute sequence before a function declaration in the global scope.
 
-Thus `[[global::attribute]]` is a global attribute with no namespace (`global` is ignored as a namespace in this case) and `[[global::dx::atttribute]]` is a global attribute in the `dx` namespace.
+Thus `[[global::attribute]]` is a global attribute with no namespace (`global` is ignored as a namespace in this case) and `[[global::dx::attribute]]` is a global attribute in the `dx` namespace.
 
 #### Special Attributes
 

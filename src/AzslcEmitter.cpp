@@ -104,6 +104,9 @@ namespace AZ::ShaderCompiler
             EmitAttribute(attr);
         }
 
+        // Emit managed resource heaps if indirect bindings are enabled
+        EmitManagedResourceHeaps(options, rootSig);
+
         if (m_ir->m_sema.m_subpassInputSeen)
         {
             m_out << StubSubpassInputTypes << "\n";
@@ -701,6 +704,26 @@ namespace AZ::ShaderCompiler
         return m_alreadyEmittedFunctionDefinitions.find(uid) != m_alreadyEmittedFunctionDefinitions.end();
     }
 
+    struct PreambleInjector : public ICodeEmissionMutator
+    {
+        const CodeMutation* GetMutation(ssize_t tokenIndex) const override
+        {
+            if (tokenIndex == m_tokenIndex)
+            {
+                return &m_mutation;
+            }
+            return nullptr;
+        }
+
+        void SetPreamble(const std::string& preamble)
+        {
+            m_mutation.m_append = preamble;
+        }
+
+        CodeMutation m_mutation;
+        ssize_t m_tokenIndex;
+    };
+
     void CodeEmitter::EmitFunction(const FunctionInfo& funcSub, const IdentifierUID& uid, EmitFunctionAs entityConfiguration, const Options& options)
     {
         // reproduce the signature `[attr] [modifiers] rettype [classnameFQN::] Name(params) [semantics]`
@@ -723,6 +746,8 @@ namespace AZ::ShaderCompiler
         EmitEmptyLinesToLineNumber(funcSub.GetOriginalLineNumber(emitAsDefinition));
 
         EmitAllAttachedAttributes(uid);
+
+        std::string preamble = m_entryPointPreamble.str();
 
         // emit modifiers in case of first declaration/definition
         // because:    class C{ static vd A(); };
@@ -752,7 +777,19 @@ namespace AZ::ShaderCompiler
         // emit parameters:
         m_out << "(";
         bool inhibitInitializers = AlreadyEmittedFunctionDeclaration(uid) && !emitAsDeclaration;
-        EmitParameters(funcSub.GetParameters(emitAsDeclaration).begin(), funcSub.GetParameters(emitAsDeclaration).end(), options, !inhibitInitializers);
+        auto& parameters = funcSub.GetParameters(emitAsDeclaration);
+        EmitParameters(parameters.begin(), parameters.end(), options, !inhibitInitializers);
+
+        if (!preamble.empty())
+        {
+            if (!parameters.empty())
+            {
+                m_out << ", ";
+            }
+            // Ensure the instance id is available to this entry point
+            m_out << "uint instanceId :SV_InstanceID";
+        }
+
         m_out << ")";
 
         if (const auto hlslSemantic = node->hlslSemantic())
@@ -771,8 +808,26 @@ namespace AZ::ShaderCompiler
             auto astNode = m_ir->m_tokenMap.GetNode(scopeInterval.a);
             auto funcDefNode = ExtractSpecificParent<azslParser::HlslFunctionDefinitionContext>(astNode);
             auto blockInterval = funcDefNode->block()->getSourceInterval();
-            m_out << "\n";
+
+            PreambleInjector preambleInjector;
+            if (!preamble.empty())
+            {
+                // Scan the interval for the opening brace and add inject the preamble afterwards
+                
+                for (ssize_t i = blockInterval.a; i != blockInterval.b; ++i)
+                {
+                    if (m_tokens->get(i)->getText() == '{')
+                    {
+                        preambleInjector.m_tokenIndex = i;
+                        preambleInjector.SetPreamble(preamble);
+                        m_transientMutator = &preambleInjector;
+                        break;
+                    }
+                }
+            }
+
             EmitText(blockInterval);
+            m_transientMutator = nullptr;
             m_out << "\n\n";
             m_alreadyEmittedFunctionDefinitions.insert(uid);
         }
@@ -959,6 +1014,103 @@ namespace AZ::ShaderCompiler
         }
     }
 
+    void CodeEmitter::EmitManagedResourceHeaps(const Options& options, const RootSigDesc& rootSig)
+    {
+        if (!options.m_indirect)
+        {
+            return;
+        }
+
+        // Emit unbounded arrays for each resource type
+        m_out
+            << "ByteAddressBuffer ManagedHeap_ByteAddressBuffer[] : register(t0, space32);\n"
+            << "Texture2D ManagedHeap_Texture2D[] : register(t0, space33);\n"
+            << "Texture3D ManagedHeap_Texture3D[] : register(t0, space34);\n"
+            << "TextureCube ManagedHeap_TextureCube[] : register(t0, space35);\n"
+            << "SamplerState ManagedHeap_SamplerState[] : register(s0, space36);\n"
+            << "struct ManagedIndirection { uint index; uint offset; };\n";
+    }
+
+    void CodeEmitter::EmitSRGIndirectionSetters(const SRGInfo& srgInfo, const IdentifierUID& srgId, const Options& options, const RootSigDesc& rootSig)
+    {
+        if (!options.m_indirect)
+        {
+            return;
+        }
+
+        uint32_t indexOffset = 0;
+        std::string srgName = srgInfo.m_declNode->Name->getText();
+        std::string indirectHeapIndexOffset = srgName + "_indirect";
+        uint32_t indirectStride = static_cast<uint32_t>(srgInfo.m_srViews.size() + srgInfo.m_samplers.size()) * 4;
+        if (!srgInfo.m_implicitStruct.GetMemberFields().empty())
+        {
+            indirectStride += 8;
+        }
+
+        std::string indirectBase = srgName + "_base";
+        int srgSpace = rootSig.Get(srgId).m_registerBinding.m_pair[BindingPair::Set::Merged].m_logicalSpace;
+        m_out << "ConstantBuffer<ManagedIndirection> " << indirectHeapIndexOffset << " : register(b0, space" << srgSpace << ");\n";
+
+        std::string indirectBaseSetter = "set" + indirectBase;
+        m_out << "static uint " << indirectBase << ";\nvoid " << indirectBaseSetter << "(uint instanceId) {\n\t"
+            << indirectBase << " = " << indirectStride << " * instanceId + " << indirectHeapIndexOffset << ".offset;\n}\n\n";
+        m_entryPointPreamble << indirectBaseSetter << "(instanceId);\n";
+
+        if (!srgInfo.m_implicitStruct.GetMemberFields().empty())
+        {
+            const QualifiedName implicitStruct = MakeSrgConstantsStructName(srgId);
+            const QualifiedName implicitCB = MakeSrgConstantsCBName(srgId);
+            const auto implicitStructForEmission = GetTranslatedName(implicitStruct, UsageContext::ReferenceSite);
+            const auto implicitCBForEmission = GetTranslatedName(implicitCB, UsageContext::DeclarationSite);
+            std::string implicitCBSetter = "set" + implicitCBForEmission;
+            m_out
+                << "static " << implicitStructForEmission << ' ' << implicitCBForEmission << ";\n"
+                << "void " << implicitCBSetter << "() {\n\tuint2 indexOffset = ManagedHeap_ByteAddressBuffer["
+                << indirectHeapIndexOffset << ".index].Load<uint2>(" << indirectBase << ");\n\t" << implicitCBForEmission
+                << " = ManagedHeap_ByteAddressBuffer[indexOffset.x].Load<"
+                << implicitStructForEmission << ">(indexOffset.y);\n}\n\n";
+            indexOffset += 8;
+
+            m_entryPointPreamble << implicitCBSetter << "();\n";
+        }
+
+        // Each resource in the indirection buffer corresponds to a single uint32, packed one after another
+        // in order of occurrence. The only exception is the data which corresponds to two constants
+        // (byte address buffer index and offset).
+
+        auto emitMemberGetter = [this, &indirectBase, &indirectHeapIndexOffset, &indexOffset](const IdentifierUID& id)
+        {
+            VarInfo* varInfo = m_ir->GetSymbolSubAs<VarInfo>(id.GetName());
+            std::string shortName = varInfo->m_typeInfoExt.GetDisplayShortName();
+            if (shortName == "Sampler")
+            {
+                shortName = "SamplerState";
+            }
+            std::string translatedName = GetTranslatedName(id, UsageContext::DeclarationSite);
+            std::string memberSetter = "set" + translatedName;
+            m_out
+                << "static " << shortName << ' ' << translatedName << ";\n"
+                << "void " << memberSetter << "() {\n\t"
+                << translatedName << " = ManagedHeap_" << shortName << "[ManagedHeap_ByteAddressBuffer["
+                << indirectHeapIndexOffset << ".index].Load<uint>(" << indirectBase << " + " << indexOffset << ")];\n}\n";
+
+            // Each index is a 4 byte uint
+            indexOffset += 4;
+
+            m_entryPointPreamble << memberSetter << "();\n";
+        };
+
+        for (const auto& t : srgInfo.m_srViews)
+        {
+            emitMemberGetter(t);
+        }
+
+        for (const auto& s : srgInfo.m_samplers)
+        {
+            emitMemberGetter(s);
+        }
+    }
+
     void CodeEmitter::EmitSRGCBUnified(const SRGInfo& srgInfo, IdentifierUID srgId, const Options& options, const RootSigDesc& rootSig)
     {
         auto bindSet = BindingPair::Set::Merged;
@@ -967,16 +1119,19 @@ namespace AZ::ShaderCompiler
         {
             if (srgInfo.m_implicitStruct.GetMemberFields().size() > 0)
             {
-                const auto& bindInfo = rootSig.Get(srgId);
-
                 const QualifiedName implicitStruct = MakeSrgConstantsStructName(srgId);
                 const QualifiedName implicitCB = MakeSrgConstantsCBName(srgId);
                 EmitStruct(srgInfo.m_implicitStruct, implicitStruct, options);
 
+                const auto& bindInfo = rootSig.Get(srgId);
                 const auto spaceX = (options.m_useLogicalSpaces) ? ", space" + std::to_string(bindInfo.m_registerBinding.m_pair[bindSet].m_logicalSpace) : "";
                 const auto implicitStructForEmission = GetTranslatedName(implicitStruct, UsageContext::ReferenceSite);
                 const auto implicitCBForEmission = GetTranslatedName(implicitCB, UsageContext::DeclarationSite);
-                m_out << "ConstantBuffer<" << implicitStructForEmission << "> " << implicitCBForEmission << " : register(b" << bindInfo.m_registerBinding.m_pair[bindSet].m_registerIndex << spaceX << ");\n\n";
+
+                if (!(srgInfo.m_indirect && options.m_indirect))
+                {
+                    m_out << "ConstantBuffer<" << implicitStructForEmission << "> " << implicitCBForEmission << " : register(b" << bindInfo.m_registerBinding.m_pair[bindSet].m_registerIndex << spaceX << ");\n\n";
+                }
             }
 
             for (auto cId : srgInfo.m_CBs)
@@ -992,8 +1147,11 @@ namespace AZ::ShaderCompiler
             return;
         }
 
-        const auto& bindInfo = rootSig.Get(srgId);
-        m_out << "ConstantBuffer " << srgInfo.m_declNode->Name->getText() << "_CBContainer : register(b" << bindInfo.m_registerBinding.m_pair[bindSet].m_registerIndex << ")\n{\n";
+        if (!(srgInfo.m_indirect && options.m_indirect))
+        {
+            const auto& bindInfo = rootSig.Get(srgId);
+            m_out << "ConstantBuffer " << srgInfo.m_declNode->Name->getText() << "_CBContainer : register(b" << bindInfo.m_registerBinding.m_pair[bindSet].m_registerIndex << ")\n{\n";
+        }
 
         for (const auto& cId : srgInfo.m_CBs)
         {
@@ -1208,17 +1366,27 @@ namespace AZ::ShaderCompiler
         EmitAllAttachedAttributes(srgId);
         m_out << " ShaderResourceGroup " << srgInfo.m_declNode->Name->getText() << "*/\n";
 
-        for (const auto& t : srgInfo.m_srViews)
-        {
-            EmitSRGDataView(t, options, rootSig);
-        }
-
-        for (const auto& s : srgInfo.m_samplers)
-        {
-            EmitSRGSampler(s, options, rootSig);
-        }
-
         EmitSRGCBUnified(srgInfo, srgId, options, rootSig);
+
+        if (srgInfo.m_indirect && options.m_indirect)
+        {
+            // Indirect bindings don't emit resource binding code directly and exposes setters for each
+            // SRV/sampler and a single setter for the constant data. The setters retrieve data from managed heaps
+            // and store them in static storage
+            EmitSRGIndirectionSetters(srgInfo, srgId, options, rootSig);
+        }
+        else
+        {
+            for (const auto &t : srgInfo.m_srViews)
+            {
+                EmitSRGDataView(t, options, rootSig);
+            }
+
+            for (const auto &s : srgInfo.m_samplers)
+            {
+                EmitSRGSampler(s, options, rootSig);
+            }
+        }
 
         if (srgInfo.m_shaderVariantFallback)
         {
@@ -1272,6 +1440,7 @@ namespace AZ::ShaderCompiler
             }
 
             const auto tokenIndex = token->getTokenIndex();
+
 
             const CodeMutation* codeMutation = codeMutator ? codeMutator->GetMutation(tokenIndex) : nullptr;
             if (codeMutation && codeMutation->m_prepend)
@@ -1334,6 +1503,17 @@ namespace AZ::ShaderCompiler
             if (codeMutation && codeMutation->m_append)
             {
                 output << codeMutation->m_append.value();
+            }
+
+            if (m_transientMutator)
+            {
+                if (const CodeMutation* transientMutation = m_transientMutator->GetMutation(tokenIndex); transientMutation)
+                {
+                    if (transientMutation->m_append)
+                    {
+                        output << transientMutation->m_append.value();
+                    }
+                }
             }
         }
     }
