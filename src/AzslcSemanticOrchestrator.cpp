@@ -966,21 +966,6 @@ namespace AZ::ShaderCompiler
         return funcInfo ? funcInfo->HasAnyDefaultParameterValue() : false;
     }
 
-    void SemanticOrchestrator::OverrideAzslcExceptionFileAndLine(size_t azslLineNumber) const
-    {
-        if (!m_preprocessorLineDirectiveFinder)
-        {
-            return;
-        }
-        const LineDirectiveInfo* lineInfo = m_preprocessorLineDirectiveFinder->GetNearestPreprocessorLineDirective(azslLineNumber);
-        if (!lineInfo)
-        {
-            return;
-        }
-        AzslcException::s_currentSourceFileName = lineInfo->m_containingFilename;
-        AzslcException::s_sourceFileLineNumber = m_preprocessorLineDirectiveFinder->GetLineNumberInOriginalSourceFile(*lineInfo, azslLineNumber);
-    }
-
     IdAndKind* SemanticOrchestrator::ResolveOverload(IdAndKind* maybeOverloadSet, azslParser::ArgumentListContext* argumentListCtx) const
     {
         IdAndKind* toReturn = maybeOverloadSet;

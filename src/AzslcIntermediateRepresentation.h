@@ -11,9 +11,11 @@
 #include "AzslcTokenToAst.h"
 #include "AzslcKindInfo.h"
 #include "PreprocessorLineDirectiveFinder.h"
+#include "StructPadToMutator.h"
 
 namespace AZ::ShaderCompiler
 {
+
     //! We limit the maximum number of render targets to 8, with indices in the range [0..7]
     static const uint32_t kMaxRenderTargets = 8;
 
@@ -41,6 +43,7 @@ namespace AZ::ShaderCompiler
                      }
             , m_lexer{ lexer }
             , m_sema{&m_symbols, &m_scope, lexer, this}
+            , m_structPadToMutator(*this)
         {
             // Default output format for all targets
             std::fill_n(m_metaData.m_outputFormatHint, kMaxRenderTargets, m_metaData.m_outputFormatHint[0]);
@@ -146,7 +149,9 @@ namespace AZ::ShaderCompiler
                                         azslParser::AttributeArgumentListContext* argList);
 
         //! called internally after a new attribute is registered
-        void ProcessAttributeSpecifier(const AttributeInfo& attrInfo);
+        //! Returns true if the attribute must be registered, otherwise
+        //! returns false.
+        bool ProcessAttributeSpecifier(const AttributeInfo& attrInfo);
 
         void RegisterTokenToNodeAssociation(ssize_t tokenId, antlr4::ParserRuleContext* node);
 
@@ -222,6 +227,7 @@ namespace AZ::ShaderCompiler
             return {};
         }
 
+        IdAndKind& GetCurrentScopeIdAndKind();
 
         // GFX-TODO: https://github.com/o3de/o3de-azslc/issues/9
         // Upgrade DXC and if the alignment issues are fixed when using
@@ -291,7 +297,18 @@ namespace AZ::ShaderCompiler
         //////////////////////////////////////////////////////////////////////////
         // PreprocessorLineDirective overrides...
         const LineDirectiveInfo* GetNearestPreprocessorLineDirective(size_t azslLineNumber) const override;
+        void OverrideAzslcExceptionFileAndLine(size_t azslLineNumber) const override;
         //////////////////////////////////////////////////////////////////////////
+
+        void ThrowAzslcIrException(uint32_t errorCode, size_t lineNumber, const string& message)
+        {
+            OverrideAzslcExceptionFileAndLine(lineNumber);
+            throw AzslcIrException(errorCode, message);
+        }
+
+        // Returns info for the last variable inside the struct or class named @structUid.
+        // If @structUid is not struct or class, then it returns nullptr.
+        IdentifierUID GetLastMemberVariable(const IdentifierUID& structUid);
 
         // the maps of all variables, functions, etc, from the source code (things with declarations and a name).
         SymbolAggregator      m_symbols;
@@ -309,6 +326,9 @@ namespace AZ::ShaderCompiler
         map<size_t, LineDirectiveInfo> m_lineMap;
 
         IRMetaData m_metaData;
+
+        // Helper to deal with the [[pad_to(N)]] attribute.
+        StructPadToMutator m_structPadToMutator;
     };
 
     string ToYaml(const TypeRefInfo& tref, const IntermediateRepresentation& ir, string_view indent);

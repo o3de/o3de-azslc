@@ -381,31 +381,30 @@ namespace AZ::ShaderCompiler
         //! queries whether a function has default parameters
         bool HasAnyDefaultParameterValue(const IdentifierUID& functionUid) const;
 
-        //! A helper method. Configures the exception system to report the original
-        //! source file and line location given the line number in the file that is being compiled.
-        void OverrideAzslcExceptionFileAndLine(size_t azslLineNumber) const;
-
-        //! Same as bove, but gets the @azslLineNumber from the @errorToken.
-        void OverrideAzslcExceptionFileAndLine(Token* errorToken) const { OverrideAzslcExceptionFileAndLine(errorToken->getLine()); }
-
         void ThrowAzslcOrchestratorException(uint32_t errorCode, optional<size_t> line, optional<size_t> column, const string& message) const
         {
-            if (line)
+            if (line && m_preprocessorLineDirectiveFinder)
             {
-                OverrideAzslcExceptionFileAndLine(line.value());
+                m_preprocessorLineDirectiveFinder->OverrideAzslcExceptionFileAndLine(line.value());
             }
             throw AzslcOrchestratorException(errorCode, line, column, message);
         }
 
         void ThrowAzslcOrchestratorException(uint32_t errorCode, Token* token, const string& message) const
         {
-            OverrideAzslcExceptionFileAndLine(token);
+            if (token && m_preprocessorLineDirectiveFinder)
+            {
+                m_preprocessorLineDirectiveFinder->OverrideAzslcExceptionFileAndLine(token->getLine());
+            }
             throw AzslcOrchestratorException(errorCode, token, message);
         }
 
         void ThrowRedeclarationAsDifferentKindInternal(string_view symbolName, Kind newKind, const KindInfo& kindInfo, size_t lineNumber) const
         {
-            OverrideAzslcExceptionFileAndLine(lineNumber);
+            if (lineNumber && m_preprocessorLineDirectiveFinder)
+            {
+                m_preprocessorLineDirectiveFinder->OverrideAzslcExceptionFileAndLine(lineNumber);
+            }
             ThrowRedeclarationAsDifferentKind(symbolName, newKind, kindInfo, lineNumber);
         }
 

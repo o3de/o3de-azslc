@@ -82,6 +82,7 @@ structMemberDeclaration:
     |   attributedFunctionDeclaration //AZSL+, forbidden, but allows us to provide better error message.
     |   anyStructuredTypeDefinitionStatement  // AZSL+
     |   typeAliasingDefinitionStatement // AZSL+
+    |   attributeSpecifierAny // AZSL+. Allows [[pad_to(N)]] for struct only.
 ;
 
 anyStructuredTypeDefinitionStatement:
