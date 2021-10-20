@@ -299,9 +299,11 @@ int main(int argc, const char* argv[])
 
     CLI::App cli{ "Amazon Shader Language Compiler" };
 
+    bool printVersion = false;
+    cli.add_flag("--version", printVersion, "Prints version information");
+
     std::string inputFile;
-    cli.add_option("(- | FILE)", inputFile, "Input file (pass - to read from stdin).")
-        ->required(true);
+    cli.add_option("(- | FILE)", inputFile, "Input file (pass - to read from stdin).");
 
     std::string output;
     cli.add_option("-o", output, "Output file (writes to stdout if omitted).");
@@ -431,6 +433,12 @@ int main(int argc, const char* argv[])
 
         // Major.Minor.Revision
         auto versionString = string{"AZSL Compiler " AZSLC_MAJOR "." AZSLC_MINOR "." AZSLC_REVISION " "} + GetCurrentOsName().data();
+
+        if (printVersion)
+        {
+            std::cout << versionString << std::endl;
+            return 0;
+        }
 
         if (listPredefined)
         {
