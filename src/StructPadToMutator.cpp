@@ -27,13 +27,13 @@ namespace AZ::ShaderCompiler
             m_ir.ThrowAzslcIrException(IR_INVALID_PAD_TO_ARGUMENTS, attrInfo.m_lineNumber, errorMsg);
         }
         // Read the integral.
-        auto pad_to_value = static_cast<uint32_t>(ExtractValueAsInt64(get<ConstNumericVal>(attrInfo.m_argList[0]), 0));
+        auto pad_to_value = ExtractValueAs<uint32_t>(get<ConstNumericVal>(attrInfo.m_argList[0]), uint32_t(0));
         if (!pad_to_value)
         {
             string errorMsg("Failed to read input integral to [[pad_to(N)]].");
             m_ir.ThrowAzslcIrException(IR_INVALID_PAD_TO_ARGUMENTS, attrInfo.m_lineNumber, errorMsg);
         }
-        // Must be a multiple of 16
+        // Must be a multiple of 4.
         static const uint32_t MultipleOf = 4;
         if (pad_to_value & (MultipleOf-1))
         {
@@ -48,8 +48,9 @@ namespace AZ::ShaderCompiler
             auto varUid = m_ir.GetLastMemberVariable(curScopeId);
             if (varUid.IsEmpty())
             {
-                auto errorMsg = FormatString("The [[pad_to(N)]] attribute must be added after a member variable inside 'struct' or 'class'. The current scope '%.*s' doesn't have a declared variable yet.",
-                static_cast<int>(curScopeId.GetName().size()), curScopeId.GetName().data());
+                auto errorMsg = FormatString("The [[pad_to(N)]] attribute must be added after a member variable inside 'struct' or 'class'."
+                                             " The current scope '%.*s' doesn't have a declared variable yet.",
+                                             static_cast<int>(curScopeId.GetName().size()), curScopeId.GetName().data());
                 m_ir.ThrowAzslcIrException(IR_INVALID_PAD_TO_LOCATION, attrInfo.m_lineNumber, errorMsg);
             }
             auto structItor = m_structsToPad.find(curScopeId);

@@ -94,7 +94,8 @@ namespace AZ::ShaderCompiler
                     m_metaData.m_outputFormatHint[rtIndex] = hint;
                 }
             }
-        } else if (attrInfo.m_attribute == "pad_to")
+        }
+        else if (attrInfo.m_attribute == "pad_to")
         {
             m_structPadToMutator.ProcessPadToAttribute(attrInfo);
             return false; //Do not store this attribute
