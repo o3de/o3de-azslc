@@ -42,23 +42,23 @@ namespace AZ::ShaderCompiler
         }
 
         auto& [curScopeId, curScopeKindInfo] = m_ir.GetCurrentScopeIdAndKind();
-        if (curScopeKindInfo.IsKindOneOf(Kind::Struct))
+        if (curScopeKindInfo.IsKindOneOf(Kind::Struct, Kind::Class, Kind::ShaderResourceGroup))
         {
             // We need to get the variable declared before this attribute.
             auto varUid = m_ir.GetLastMemberVariable(curScopeId);
             if (varUid.IsEmpty())
             {
-                auto errorMsg = FormatString("The [[pad_to(N)]] attribute must be added after a member variable inside 'struct'."
+                auto errorMsg = FormatString("The [[pad_to(N)]] attribute must be added after a member variable."
                                              " The current scope '%.*s' doesn't have a declared variable yet.",
                                              static_cast<int>(curScopeId.GetName().size()), curScopeId.GetName().data());
                 m_ir.ThrowAzslcIrException(IR_INVALID_PAD_TO_LOCATION, attrInfo.m_lineNumber, errorMsg);
             }
-            auto structItor = m_structsToPad.find(curScopeId);
-            if (structItor == m_structsToPad.end())
+            auto structItor = m_scopesToPad.find(curScopeId);
+            if (structItor == m_scopesToPad.end())
             {
-                m_structsToPad[curScopeId] = MapOfVarInfoUidToPadding();
+                m_scopesToPad[curScopeId] = MapOfVarInfoUidToPadding();
             }
-            MapOfVarInfoUidToPadding& varInfoUidToPadMap = m_structsToPad[curScopeId];
+            MapOfVarInfoUidToPadding& varInfoUidToPadMap = m_scopesToPad[curScopeId];
             auto varInfoItor = varInfoUidToPadMap.find(varUid);
             if (varInfoItor != varInfoUidToPadMap.end())
             {
@@ -70,43 +70,55 @@ namespace AZ::ShaderCompiler
         }
         else
         {
-            auto errorMsg = FormatString("The [[pad_to(N)]] attribute is only supported inside 'struct'. The current scope '%.*s' is not a struct.",
+            auto errorMsg = FormatString("The [[pad_to(N)]] attribute is only supported inside  inside 'struct', 'class' or 'ShaderResourceGroup'."
+                                         " The current scope '%.*s' is not one of those scope types.",
                 static_cast<int>(curScopeId.GetName().size()), curScopeId.GetName().data());
             m_ir.ThrowAzslcIrException(IR_INVALID_PAD_TO_LOCATION, attrInfo.m_lineNumber, errorMsg);
         }
     }
 
-    void PadToAttributeMutator::MutateStructs(const MiddleEndConfiguration& middleEndconfigration)
+    void PadToAttributeMutator::RunMutationsForPadToAttributes(const MiddleEndConfiguration& middleEndconfigration)
     {
-        if (m_structsToPad.empty())
+        if (m_scopesToPad.empty())
         {
             return;
         }
 
-        // Build sorted list from the keys in @m_structsToPad so that the first 'structs' don't reference other structs that require padding.
+        // Build sorted list from the keys in @m_scopesToPad so that the first 'structs' don't reference other structs that require padding.
         // In other words, We must first pad the structs that don't reference other structs that need padding.
-        const auto sortedStructUids = GetSortedStructUidList(m_structsToPad);
+        const auto sortedStructUids = GetSortedScopeUidList(m_scopesToPad);
 
-        for (const auto& structUid : sortedStructUids)
+        for (const auto& scopeUid : sortedStructUids)
         {
-            const auto& varInfoUidToPadMap = m_structsToPad[structUid];
-            auto classInfo = m_ir.GetSymbolSubAs<ClassInfo>(structUid.GetName());
+            const auto& varInfoUidToPadMap = m_scopesToPad[scopeUid];
+            ClassInfo* classInfo = nullptr;
+            auto kind = m_ir.GetKind(scopeUid);
+            if (kind.IsOneOf(Kind::Struct, Kind::Class))
+            {
+                classInfo = m_ir.GetSymbolSubAs<ClassInfo>(scopeUid.GetName());
+            }
+            else if (kind.IsOneOf(Kind::ShaderResourceGroup))
+            {
+                auto srgInfo = m_ir.GetSymbolSubAs<SRGInfo>(scopeUid.GetName());
+                classInfo = &srgInfo->m_implicitStruct;
+            }
+            
             if (!classInfo)
             {
-                auto errorMsg = FormatString("Error during struct padding: couldn't find ClassInfo for struct %.*s", structUid.GetName().size(), structUid.GetName().data());
+                auto errorMsg = FormatString("Error during struct padding: couldn't find ClassInfo for scope %.*s", scopeUid.GetName().size(), scopeUid.GetName().data());
                 throw std::logic_error(errorMsg);
             }
-            InsertStructPaddings(classInfo, structUid, varInfoUidToPadMap, middleEndconfigration);
+            InsertScopePaddings(classInfo, scopeUid, varInfoUidToPadMap, middleEndconfigration);
         }
     }
 
-    vector<IdentifierUID> PadToAttributeMutator::GetSortedStructUidList(const MapOfStructUidToPaddingMap& structsToPad) const
+    vector<IdentifierUID> PadToAttributeMutator::GetSortedScopeUidList(const MapOfScopeUidToPaddingMap& scopesToPad) const
     {
         vector<IdentifierUID> sortedList;
 
         unordered_set<IdentifierUID> visitedStructs;
         unordered_set<IdentifierUID> unvisitedStructs;
-        for (const auto &item : structsToPad)
+        for (const auto &item : scopesToPad)
         {
             unvisitedStructs.insert(item.first);
         }
@@ -114,7 +126,7 @@ namespace AZ::ShaderCompiler
         while (!unvisitedStructs.empty())
         {
             const IdentifierUID unvisitedStructUid = *unvisitedStructs.begin();
-            StructUidSortVisitFunction(unvisitedStructUid, visitedStructs, sortedList);
+            ScopeUidSortVisitFunction(unvisitedStructUid, visitedStructs, sortedList);
             unvisitedStructs.erase(unvisitedStructUid);
         }
 
@@ -122,26 +134,37 @@ namespace AZ::ShaderCompiler
     }
 
 
-    void PadToAttributeMutator::StructUidSortVisitFunction(const IdentifierUID& structUid, unordered_set<IdentifierUID>& visitedStructs, vector<IdentifierUID>& sortedList) const
+    void PadToAttributeMutator::ScopeUidSortVisitFunction(const IdentifierUID& scopeUid, unordered_set<IdentifierUID>& visitedScopes, vector<IdentifierUID>& sortedList) const
     {
-        if (visitedStructs.count(structUid))
+        if (visitedScopes.count(scopeUid))
         {
             return;
         }
         
-        const auto* classInfoPtr = m_ir.GetSymbolSubAs<ClassInfo>(structUid.m_name);
-        const auto listOfPairs = GetVariablesOfStructTypeThatRequirePadding(classInfoPtr);
+        ClassInfo* classInfo = nullptr;
+        auto kind = m_ir.GetKind(scopeUid);
+        if (kind.IsOneOf(Kind::Struct, Kind::Class))
+        {
+            classInfo = m_ir.GetSymbolSubAs<ClassInfo>(scopeUid.GetName());
+        }
+        else if (kind.IsOneOf(Kind::ShaderResourceGroup))
+        {
+            auto srgInfo = m_ir.GetSymbolSubAs<SRGInfo>(scopeUid.GetName());
+            classInfo = &srgInfo->m_implicitStruct;
+        }
+
+        const auto listOfPairs = GetVariablesOfScopeTypeThatRequirePadding(classInfo);
         for (const auto& [typeUid, varUid] : listOfPairs)
         {
-            StructUidSortVisitFunction(typeUid, visitedStructs, sortedList);
+            ScopeUidSortVisitFunction(typeUid, visitedScopes, sortedList);
         }
         
-        visitedStructs.insert(structUid);
-        sortedList.push_back(structUid);
+        visitedScopes.insert(scopeUid);
+        sortedList.push_back(scopeUid);
     }
 
 
-    vector<pair<IdentifierUID, IdentifierUID>> PadToAttributeMutator::GetVariablesOfStructTypeThatRequirePadding(const ClassInfo* classInfo) const
+    vector<pair<IdentifierUID, IdentifierUID>> PadToAttributeMutator::GetVariablesOfScopeTypeThatRequirePadding(const ClassInfo* classInfo) const
     {
         vector<pair<IdentifierUID, IdentifierUID>> retList;
         const auto& memberFields = classInfo->GetMemberFields();
@@ -154,11 +177,11 @@ namespace AZ::ShaderCompiler
             }
             const auto& typeUid = varInfoPtr->GetTypeId();
             const auto kind = m_ir.GetKind(typeUid);
-            if (!kind.IsOneOf(Kind::Struct))
+            if (!kind.IsOneOf(Kind::Struct, Kind::Class)) // No need to check for SRG types, as SRGs can not be variables.
             {
                 continue;
             }
-            if (m_structsToPad.find(typeUid) == m_structsToPad.end())
+            if (m_scopesToPad.find(typeUid) == m_scopesToPad.end())
             {
                 // It's of struct type, but doesn't require padding.
                 continue;
@@ -168,8 +191,8 @@ namespace AZ::ShaderCompiler
         return retList;
     }
 
-    void PadToAttributeMutator::InsertStructPaddings(ClassInfo* classInfo,
-                                                  const IdentifierUID& structUid,
+    void PadToAttributeMutator::InsertScopePaddings(ClassInfo* classInfo,
+                                                  const IdentifierUID& scopeUid,
                                                   const MapOfVarInfoUidToPadding& varInfoUidToPadMap,
                                                   const MiddleEndConfiguration& middleEndconfigration)
     {
@@ -200,7 +223,7 @@ namespace AZ::ShaderCompiler
                                                          "is bigger than requested boundary = [[pad_to(%u)]], and this case requires a power of two boundary.",
                                                           nextMemberOffset,
                                                           static_cast<int>(varUid.m_name.size()), varUid.m_name.data(),
-                                                          static_cast<int>(structUid.m_name.size()), structUid.m_name.data(),
+                                                          static_cast<int>(scopeUid.m_name.size()), scopeUid.m_name.data(),
                                                           padToBoundary);
                     const auto * varInfoPtr= m_ir.GetSymbolSubAs<VarInfo>(varUid.m_name);
                     m_ir.ThrowAzslcIrException(IR_PAD_TO_CASE_REQUIRES_POWER_OF_TWO, varInfoPtr->GetOriginalLineNumber(), errorMsg);
@@ -219,7 +242,7 @@ namespace AZ::ShaderCompiler
                 continue;
             }
 
-            idx += InsertPaddingVariables(classInfo, structUid, idx+1, nextMemberOffset, bytesToAdd);
+            idx += InsertPaddingVariables(classInfo, scopeUid, idx+1, nextMemberOffset, bytesToAdd);
             nextMemberOffset += bytesToAdd;
         }
     }
@@ -386,7 +409,7 @@ namespace AZ::ShaderCompiler
     }
 
 
-    size_t PadToAttributeMutator::InsertPaddingVariables(ClassInfo* classInfo, const IdentifierUID& structUid,
+    size_t PadToAttributeMutator::InsertPaddingVariables(ClassInfo* classInfo, const IdentifierUID& scopeUid,
                                                       size_t insertionIndex, uint32_t startingOffset, uint32_t numBytesToAdd)
     {
         auto getFloatTypeNameOfSize = +[](uint32_t sizeInBytes) -> const char *
@@ -444,7 +467,7 @@ namespace AZ::ShaderCompiler
             {
                 string typeName = getFloatTypeNameOfSize(deltaBytes);
                 auto variableName = FormatString("__pad_at%u", startingOffset);
-                IdentifierUID newVarUid = createVariableInSymbolTable(structUid.GetName(), typeName, UnqualifiedName{variableName});
+                IdentifierUID newVarUid = createVariableInSymbolTable(scopeUid.GetName(), typeName, UnqualifiedName{variableName});
                 if (insertBeforeThisUid.IsEmpty())
                 {
                     classInfo->PushMember(newVarUid, Kind::Variable);
@@ -465,7 +488,7 @@ namespace AZ::ShaderCompiler
             if (numFloat4s)
             {
                 auto variableName = FormatString("__pad_at%u", startingOffset);
-                IdentifierUID newVarUid = createVariableInSymbolTable(structUid.GetName(), "float4", UnqualifiedName{variableName}, numFloat4s);
+                IdentifierUID newVarUid = createVariableInSymbolTable(scopeUid.GetName(), "float4", UnqualifiedName{variableName}, numFloat4s);
                 if (insertBeforeThisUid.IsEmpty())
                 {
                     classInfo->PushMember(newVarUid, Kind::Variable);
@@ -485,7 +508,7 @@ namespace AZ::ShaderCompiler
         {
             auto variableName = FormatString("__pad_at%u", startingOffset);
             string typeName = getFloatTypeNameOfSize(numBytesToAdd);
-            IdentifierUID newVarUid = createVariableInSymbolTable(structUid.GetName(), typeName, UnqualifiedName{variableName});
+            IdentifierUID newVarUid = createVariableInSymbolTable(scopeUid.GetName(), typeName, UnqualifiedName{variableName});
             if (insertBeforeThisUid.IsEmpty())
             {
                 classInfo->PushMember(newVarUid, Kind::Variable);

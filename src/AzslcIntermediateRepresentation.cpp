@@ -125,7 +125,7 @@ namespace AZ::ShaderCompiler
 
         RegisterRootConstantStruct(middleEndconfigration);
 
-        m_padToAttributeMutator.MutateStructs(middleEndconfigration);
+        m_padToAttributeMutator.RunMutationsForPadToAttributes(middleEndconfigration);
 
         if (!middleEndconfigration.m_skipAlignmentValidation)
         {
@@ -933,6 +933,11 @@ namespace AZ::ShaderCompiler
         if (kind.IsOneOf(Kind::Struct, Kind::Class))
         {
             classInfo = GetSymbolSubAs<ClassInfo>(uid.GetName());
+        }
+        else if (kind.IsOneOf(Kind::ShaderResourceGroup))
+        {
+            auto srgInfo = GetSymbolSubAs<SRGInfo>(uid.GetName());
+            classInfo = &srgInfo->m_implicitStruct;
         }
 
         if (!classInfo)

@@ -13,10 +13,10 @@ from clr import *
 import testfuncs
 
 '''
-Validates the functionality of the [[pad_to(N)]] attribute.
+Validates the functionality of the [[pad_to(N)]] attribute for struct, class and SRGs.
 '''
 
-def checkPadding(thefile, compilerPath, silent, expectedSize):
+def check_StructuredBuffer_Vs_ConstantBuffer_Padding(thefile, compilerPath, silent, expectedSize):
     # Compile the shader with --srg and check that the final size of the struct
     # is 256 for both the StructureBuffer<MyStruct> DemoSrg::m_mySB, and MyStruct DemoSrg::m_myStruct
     j, ok = testfuncs.buildAndGetJson(thefile, compilerPath, silent, ["--srg"])
@@ -35,6 +35,31 @@ def checkPadding(thefile, compilerPath, silent, expectedSize):
             print (style.BRIGHT+ "OK! "+ str(len(predicates)) + " checkPadding: All sizes were the same." + style.RESET_ALL)
     return ok
 
+
+def check_SRG_Padding(thefile, compilerPath, silent, expectedSize):
+    j, ok = testfuncs.buildAndGetJson(thefile, compilerPath, silent, ["--srg"])
+    if ok:
+        if not silent: print (fg.CYAN+ style.BRIGHT+ "check_SRG_Padding: Verifying SRG sizes..."+ style.RESET_ALL)
+
+        #The offset + size of the last variable in each SRG must match the value of @expectedSize.
+        srg1LastVariableOffset = j["ShaderResourceGroups"][0]["inputsForSRGConstants"][-1]["constantByteOffset"]
+        srg1LastVariableSize= j["ShaderResourceGroups"][0]["inputsForSRGConstants"][-1]["constantByteSize"]
+        srg1Size = srg1LastVariableOffset + srg1LastVariableSize
+
+        srg2LastVariableOffset = j["ShaderResourceGroups"][1]["inputsForSRGConstants"][-1]["constantByteOffset"]
+        srg2LastVariableSize= j["ShaderResourceGroups"][1]["inputsForSRGConstants"][-1]["constantByteSize"]
+        srg2Size = srg2LastVariableOffset + srg2LastVariableSize
+
+        ok = (srg1Size == srg2Size) and (srg1Size == expectedSize)
+        if not ok and not silent:
+            errorMsg = f"Was expecting both SRG sizes to be {expectedSize}, instead got SRG1 size={srg1Size} and SRG2 size={srg2Size}"
+            print (fg.RED + "FAIL (" + errorMsg + "):" + style.RESET_ALL)
+
+        if ok and not silent:
+            print (style.BRIGHT+ "OK! check_SRG_Padding: All sizes were the same." + style.RESET_ALL)
+    return ok
+
+
 result = 0  # to define for sub-tests
 resultFailed = 0
 def doTests(compiler, silent, azdxcpath):
@@ -47,11 +72,15 @@ def doTests(compiler, silent, azdxcpath):
     workDir = os.getcwd()
 
     if not silent: print ("testing [[pad_to(256)]] attribute...")
-    if checkPadding(os.path.join(workDir, "struct-pad-to-256.azsl"), compiler, silent, 256): result += 1
+    if check_StructuredBuffer_Vs_ConstantBuffer_Padding(os.path.join(workDir, "struct-pad-to-256.azsl"), compiler, silent, 256): result += 1
     else: resultFailed += 1
 
     if not silent: print ("testing [[pad_to(252)]] attribute...")
-    if checkPadding(os.path.join(workDir, "struct-pad-to-252.azsl"), compiler, silent, 252): result += 1
+    if check_StructuredBuffer_Vs_ConstantBuffer_Padding(os.path.join(workDir, "struct-pad-to-252.azsl"), compiler, silent, 252): result += 1
+    else: resultFailed += 1
+
+    if not silent: print ("testing [[pad_to(N)]] for SRGs...")
+    if check_SRG_Padding(os.path.join(workDir, "srg-pad-to-256.azsl"), compiler, silent, 256): result += 1
     else: resultFailed += 1
 
 if __name__ == "__main__":

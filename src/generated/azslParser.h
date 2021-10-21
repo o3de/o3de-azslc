@@ -457,6 +457,7 @@ public:
     AttributedFunctionDeclarationContext *attributedFunctionDeclaration();
     TypeAliasingDefinitionStatementContext *typeAliasingDefinitionStatement();
     AnyStructuredTypeDefinitionStatementContext *anyStructuredTypeDefinitionStatement();
+    AttributeSpecifierAnyContext *attributeSpecifierAny();
 
     virtual void enterRule(antlr4::tree::ParseTreeListener *listener) override;
     virtual void exitRule(antlr4::tree::ParseTreeListener *listener) override;
@@ -2787,6 +2788,7 @@ public:
     VariableDeclarationStatementContext *variableDeclarationStatement();
     EnumDefinitionStatementContext *enumDefinitionStatement();
     TypeAliasingDefinitionStatementContext *typeAliasingDefinitionStatement();
+    AttributeSpecifierAnyContext *attributeSpecifierAny();
 
     virtual void enterRule(antlr4::tree::ParseTreeListener *listener) override;
     virtual void exitRule(antlr4::tree::ParseTreeListener *listener) override;

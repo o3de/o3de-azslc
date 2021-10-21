@@ -65,6 +65,7 @@ classMemberDeclaration:
     |   attributedFunctionDeclaration
     |   typeAliasingDefinitionStatement  // AZSL specificity
     |   anyStructuredTypeDefinitionStatement   // Amazon extension (DXC supports it)
+    |   attributeSpecifierAny // AZSL+. Allows [[pad_to(N)]].
 ;
 
 structDefinitionStatement:
@@ -82,7 +83,7 @@ structMemberDeclaration:
     |   attributedFunctionDeclaration //AZSL+, forbidden, but allows us to provide better error message.
     |   anyStructuredTypeDefinitionStatement  // AZSL+
     |   typeAliasingDefinitionStatement // AZSL+
-    |   attributeSpecifierAny // AZSL+. Allows [[pad_to(N)]] for struct only.
+    |   attributeSpecifierAny // AZSL+. Allows [[pad_to(N)]].
 ;
 
 anyStructuredTypeDefinitionStatement:
@@ -879,6 +880,7 @@ srgMemberDeclaration:
     |   variableDeclarationStatement
     |   enumDefinitionStatement
     |   typeAliasingDefinitionStatement
+    |   attributeSpecifierAny // Allows [[pad_to(N)]].
 ;
 
 srgSemantic:
