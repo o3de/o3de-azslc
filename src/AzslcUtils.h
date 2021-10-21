@@ -230,6 +230,36 @@ namespace AZ::ShaderCompiler
         return static_cast<int64_t>(get<uint32_t>(var));
     }
 
+    template<class T>
+    inline T ExtractValueAs(const ConstNumericVal& var, optional<T> defval = none)
+    {
+        if (holds_alternative<monostate>(var))
+        {
+            if (defval == none)
+            {
+                throw std::logic_error{ "Constant value did not hold anything. Set defval if you want a fallback option." };
+            }
+            else
+            {
+                return *defval;
+            }
+        }
+        else if (holds_alternative<float>(var))
+        {
+            // Casting from float has precision loss: https://onlinegdb.com/By0AJTUVE
+            auto floatVal = get<float>(var);
+            auto intVal = static_cast<int64_t>(floatVal);
+            PrintWarning(Warn::W3, none, "warning: Casting float ", floatVal, " to integer, will result in ", intVal);
+            return static_cast<T>(intVal);
+        }
+        else if (holds_alternative<int32_t>(var))
+        {
+            return static_cast<T>(get<int32_t>(var));
+        }
+        return static_cast<T>(get<uint32_t>(var));
+    }
+
+
     //! Safe way to call ExtractValueAsInt64 which returns false instead of throwing
     inline bool TryGetConstExprValueAsInt64(const ConstNumericVal& foldedIdentifier, int64_t& returnValue) noexcept(true)
     {

@@ -40,5 +40,7 @@ namespace AZ::ShaderCompiler
             const size_t absoluteLineNumberInIncludedFile = lineInfo.m_forcedLineNumber + relativeLineNumber - 1;
             return absoluteLineNumberInIncludedFile;
         }
+
+        virtual void OverrideAzslcExceptionFileAndLine(size_t azslLineNumber) const = 0;
     };
 }

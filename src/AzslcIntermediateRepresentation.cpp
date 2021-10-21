@@ -62,11 +62,13 @@ namespace AZ::ShaderCompiler
             }
         }
 
-        ProcessAttributeSpecifier(attrInfo);
-        m_symbols.PushPendingAttribute(attrInfo, scope);
+        if (ProcessAttributeSpecifier(attrInfo))
+        {
+            m_symbols.PushPendingAttribute(attrInfo, scope);
+        }
     }
 
-    void IntermediateRepresentation::ProcessAttributeSpecifier(const AttributeInfo& attrInfo)
+    bool IntermediateRepresentation::ProcessAttributeSpecifier(const AttributeInfo& attrInfo)
     {
         // Hint for the pixel output format for all or one of the render targets
         if (attrInfo.m_attribute == "output_format")
@@ -75,7 +77,7 @@ namespace AZ::ShaderCompiler
             bool isIndexed = (attrInfo.m_argList.size() == 2 && holds_alternative<string>(attrInfo.m_argList[1]) && holds_alternative<ConstNumericVal>(attrInfo.m_argList[0]));
             if (!isDefault && !isIndexed)
             {
-                return;
+                return true;
             }
 
             OutputFormat hint = OutputFormat::FromStr(Trim(get<string>(attrInfo.m_argList[isDefault ? 0 : 1]), "\""));
@@ -93,7 +95,13 @@ namespace AZ::ShaderCompiler
                 }
             }
         }
+        else if (attrInfo.m_attribute == "pad_to")
+        {
+            m_padToAttributeMutator.ProcessPadToAttribute(attrInfo);
+            return false; //Do not store this attribute
+        }
         // The attribute has no special meaning to AZSLc, just pass it
+        return true;
     }
 
     void IntermediateRepresentation::RegisterTokenToNodeAssociation(ssize_t tokenId, antlr4::ParserRuleContext* node)
@@ -116,6 +124,8 @@ namespace AZ::ShaderCompiler
         m_symbols.ReorderBySymbolDependency();
 
         RegisterRootConstantStruct(middleEndconfigration);
+
+        m_padToAttributeMutator.RunMutationsForPadToAttributes(middleEndconfigration);
 
         if (!middleEndconfigration.m_skipAlignmentValidation)
         {
@@ -905,6 +915,45 @@ namespace AZ::ShaderCompiler
         throw AzslcIrException(IR_POTENTIAL_DX12_VS_VULKAN_ALIGNMENT_ERROR, errorMessage);
     }
 
+    IdAndKind& IntermediateRepresentation::GetCurrentScopeIdAndKind()
+    {
+        auto nameOfScope = m_scope.GetNameOfCurScope();
+        auto* idAndKindPtr = m_symbols.GetIdAndKindInfo(nameOfScope);
+        if (!idAndKindPtr)
+        {
+            throw std::logic_error("Internal error: current scope not registered");
+        }
+        return *idAndKindPtr;
+    }
+
+    IdentifierUID IntermediateRepresentation::GetLastMemberVariable(const IdentifierUID& uid)
+    {
+        auto kind = GetKind(uid);
+        ClassInfo* classInfo = nullptr; 
+        if (kind.IsOneOf(Kind::Struct, Kind::Class))
+        {
+            classInfo = GetSymbolSubAs<ClassInfo>(uid.GetName());
+        }
+        else if (kind.IsOneOf(Kind::ShaderResourceGroup))
+        {
+            auto srgInfo = GetSymbolSubAs<SRGInfo>(uid.GetName());
+            classInfo = &srgInfo->m_implicitStruct;
+        }
+
+        if (!classInfo)
+        {
+            return {};
+        }
+
+        const auto& memberList = classInfo->GetMemberFields();
+        if (memberList.empty())
+        {
+            return {};
+        }
+        return memberList[memberList.size() - 1];
+    }
+
+
     //////////////////////////////////////////////////////////////////////////
     // PreprocessorLineDirective overrides...
     const LineDirectiveInfo* IntermediateRepresentation::GetNearestPreprocessorLineDirective(size_t azslLineNumber) const
@@ -921,6 +970,17 @@ namespace AZ::ShaderCompiler
             return &lineBefore->second;
         }
         return nullptr;
+    }
+
+    void IntermediateRepresentation::OverrideAzslcExceptionFileAndLine(size_t azslLineNumber) const
+    {
+        const LineDirectiveInfo* lineInfo = GetNearestPreprocessorLineDirective(azslLineNumber);
+        if (!lineInfo)
+        {
+            return;
+        }
+        AzslcException::s_currentSourceFileName = lineInfo->m_containingFilename;
+        AzslcException::s_sourceFileLineNumber = GetLineNumberInOriginalSourceFile(*lineInfo, azslLineNumber);
     }
     ///////////////////////////////////////////////////////////////////////////
 
