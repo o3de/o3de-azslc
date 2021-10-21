@@ -408,14 +408,18 @@ int main(int argc, const char* argv[])
     auto maxSpacesOpt = cli.add_option("--max-spaces", maxSpaces, "Will choose register spaces that do not extend past this limit.");
 
     std::unordered_map<Warn::EnumType, bool> warningOpts;
-    cli.add_option("--W0", warningOpts[Warn::EnumType::W0], "Suppresses all warnings.");
-    cli.add_option("--W1", warningOpts[Warn::EnumType::W1], "Activate severe warnings (default).");
-    cli.add_option("--W2", warningOpts[Warn::EnumType::W2], "Activate warnings that may be significant.");
-    cli.add_option("--W3", warningOpts[Warn::EnumType::W3], "Activate low-confidence diagnostic warnings.");
-    cli.add_option("--Wx", warningOpts[Warn::EnumType::Wx], "Treat activated warnings as errors.");
-    cli.add_option("--Wx1", warningOpts[Warn::EnumType::Wx1], "Treat level-1 warnings as errors.");
-    cli.add_option("--Wx2", warningOpts[Warn::EnumType::Wx2], "Treat level-2 and below warnings as errors.");
-    cli.add_option("--Wx3", warningOpts[Warn::EnumType::Wx3], "Treat level-3 and below warnings as errors.");
+    for (auto e : Warn::Enumerate{})
+    {
+        warningOpts[e] = false;
+    }
+    cli.add_flag("--W0", warningOpts[Warn::EnumType::W0], "Suppresses all warnings.");
+    cli.add_flag("--W1", warningOpts[Warn::EnumType::W1], "Activate severe warnings (default).");
+    cli.add_flag("--W2", warningOpts[Warn::EnumType::W2], "Activate warnings that may be significant.");
+    cli.add_flag("--W3", warningOpts[Warn::EnumType::W3], "Activate low-confidence diagnostic warnings.");
+    cli.add_flag("--Wx", warningOpts[Warn::EnumType::Wx], "Treat activated warnings as errors.");
+    cli.add_flag("--Wx1", warningOpts[Warn::EnumType::Wx1], "Treat level-1 warnings as errors.");
+    cli.add_flag("--Wx2", warningOpts[Warn::EnumType::Wx2], "Treat level-2 and below warnings as errors.");
+    cli.add_flag("--Wx3", warningOpts[Warn::EnumType::Wx3], "Treat level-3 and below warnings as errors.");
 
     std::string minDescriptors;
     cli.add_option("--min-descriptors", minDescriptors, "Comma-separated list of limits corresponding to "
