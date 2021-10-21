@@ -408,7 +408,7 @@ int main(int argc, const char* argv[])
     auto maxSpacesOpt = cli.add_option("--max-spaces", maxSpaces, "Will choose register spaces that do not extend past this limit.");
 
     std::unordered_map<Warn::EnumType, bool> warningOpts;
-    for (auto e : Warn::Enumerate{})
+    for (const auto e : Warn::Enumerate{})
     {
         warningOpts[e] = false;
     }
