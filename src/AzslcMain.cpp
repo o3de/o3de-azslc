@@ -326,7 +326,7 @@ int main(int argc, const char* argv[])
     bool padRootConst = false;
     cli.add_flag("--pad-root-const", padRootConst, "Automatically append padding data to the root constant CB to keep it aligned to a 16-byte boundary.");
 
-    bool Zpc = true;
+    bool Zpc = false;
     cli.add_flag("--Zpc", Zpc, "Pack matrices in column-major order (default). Cannot be specified together with -Zpr.");
 
     bool Zpr = false;
