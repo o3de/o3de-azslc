@@ -460,6 +460,20 @@ namespace AZ::ShaderCompiler
         size_t numAddedVariables = 0;
 
         // 1st variable.
+        // This is why the 1st variable is needed:
+        // For non-ConstantBuffer packing the float4 is not automatically aligned to 16 bytes.
+        // Example:
+        // struct MyStructA
+        // {
+        //     float m_data;
+        //     float4 m_arr[2];
+        // };
+        // For ConstantBuffer case you'll get these offsets:
+        //     float m_data;                     ; Offset:    0
+        //     float4 m_arr[2];                  ; Offset:   16
+        // For StructuredBuffer case you'll get:
+        //     float m_data;                     ; Offset:    0
+        //     float4 m_arr[2];                  ; Offset:    4
         {
             const auto alignedOffset = Packing::AlignUp(startingOffset, 16);
             const auto deltaBytes = alignedOffset - startingOffset;
