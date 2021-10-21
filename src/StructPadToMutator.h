@@ -7,10 +7,6 @@
  */
 #pragma once
 
-/*
-#include "AzslcUtils.h"
-*/
-
 #include "GenericUtils.h"
 #include "AzslcKindInfo.h"
 

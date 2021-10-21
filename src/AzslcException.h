@@ -84,6 +84,7 @@ namespace AZ::ShaderCompiler
         IR_POTENTIAL_DX12_VS_VULKAN_ALIGNMENT_ERROR = 131u,
         IR_INVALID_PAD_TO_ARGUMENTS = 132u,
         IR_INVALID_PAD_TO_LOCATION = 133u,
+        IR_PAD_TO_CASE_REQUIRES_POWER_OF_TWO = 134u,
 
         // emitter error codes
         EMITTER_INVALID_ARRAY_DIMENSIONS = 256u,

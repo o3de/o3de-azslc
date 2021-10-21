@@ -48,7 +48,7 @@ namespace AZ::ShaderCompiler
             auto varUid = m_ir.GetLastMemberVariable(curScopeId);
             if (varUid.IsEmpty())
             {
-                auto errorMsg = FormatString("The [[pad_to(N)]] attribute must be added after a member variable inside 'struct' or 'class'."
+                auto errorMsg = FormatString("The [[pad_to(N)]] attribute must be added after a member variable inside 'struct'."
                                              " The current scope '%.*s' doesn't have a declared variable yet.",
                                              static_cast<int>(curScopeId.GetName().size()), curScopeId.GetName().data());
                 m_ir.ThrowAzslcIrException(IR_INVALID_PAD_TO_LOCATION, attrInfo.m_lineNumber, errorMsg);
@@ -63,7 +63,7 @@ namespace AZ::ShaderCompiler
             if (varInfoItor != varInfoUidToPadMap.end())
             {
                 // It appears that there are two consecutive [[pad_to(N)]] attributes. This is an error.
-                auto errorMsg = string("Two consecutive [[pad_to(N)]] attributes are not allowed inside 'struct' or 'class'");
+                auto errorMsg = string("Two consecutive [[pad_to(N)]] attributes are not allowed inside 'struct'.");
                 m_ir.ThrowAzslcIrException(IR_INVALID_PAD_TO_LOCATION, attrInfo.m_lineNumber, errorMsg);
             }
             varInfoUidToPadMap[varUid] = pad_to_value;
@@ -93,7 +93,7 @@ namespace AZ::ShaderCompiler
             auto classInfo = m_ir.GetSymbolSubAs<ClassInfo>(structUid.GetName());
             if (!classInfo)
             {
-                auto errorMsg = FormatString("Error during struct padding: couldn't find ClassInfo for struct/class %.*s", structUid.GetName().size(), structUid.GetName().data());
+                auto errorMsg = FormatString("Error during struct padding: couldn't find ClassInfo for struct %.*s", structUid.GetName().size(), structUid.GetName().data());
                 throw std::logic_error(errorMsg);
             }
             InsertStructPaddings(classInfo, structUid, varInfoUidToPadMap, middleEndconfigration);
@@ -188,17 +188,39 @@ namespace AZ::ShaderCompiler
                 continue;
             }
 
-            const auto padToBoundary = varItor->second;
-            const auto alignedOffset = Packing::AlignUp(nextMemberOffset, padToBoundary);
-            if (alignedOffset == nextMemberOffset)
+            const uint32_t padToBoundary = varItor->second;
+            uint32_t bytesToAdd = 0;
+            if (padToBoundary < nextMemberOffset)
             {
-                //Already aligned
+                // We will only AlignUp if padToBoundary is a power of two.
+                if (!IsPowerOfTwo(padToBoundary))
+                {
+                    //Runtime error.
+                    const string errorMsg = FormatString("Offset %u after Member variable %.*s of struct %.*s "
+                                                         "is bigger than requested boundary = [[pad_to(%u)]], and this case requires a power of two boundary.",
+                                                          nextMemberOffset,
+                                                          static_cast<int>(varUid.m_name.size()), varUid.m_name.data(),
+                                                          static_cast<int>(structUid.m_name.size()), structUid.m_name.data(),
+                                                          padToBoundary);
+                    const auto * varInfoPtr= m_ir.GetSymbolSubAs<VarInfo>(varUid.m_name);
+                    m_ir.ThrowAzslcIrException(IR_PAD_TO_CASE_REQUIRES_POWER_OF_TWO, varInfoPtr->GetOriginalLineNumber(), errorMsg);
+                }
+                const uint32_t alignedOffset = Packing::AlignUp(nextMemberOffset, padToBoundary);
+                bytesToAdd = alignedOffset - nextMemberOffset;
+            }
+            else
+            {
+                bytesToAdd = padToBoundary - nextMemberOffset;
+            }
+
+            if (!bytesToAdd)
+            {
+                // Nothing to do.
                 continue;
             }
 
-            const auto bytesToAdd = alignedOffset - nextMemberOffset;
             idx += InsertPaddingVariables(classInfo, structUid, idx+1, nextMemberOffset, bytesToAdd);
-            nextMemberOffset = alignedOffset;
+            nextMemberOffset += bytesToAdd;
         }
     }
 
@@ -264,7 +286,8 @@ namespace AZ::ShaderCompiler
                     // If array is a structure
                     if (IsProductType(varClass))
                     {
-                        size = CalculateUserDefinedMemberLayout(exportedType.m_typeId, emitRowMajor, layoutPacking, startAt = offset);
+                        startAt = offset;
+                        size = CalculateUserDefinedMemberLayout(exportedType.m_typeId, emitRowMajor, layoutPacking, startAt);
 
                         offset = Packing::PackNextChunk(layoutPacking, size, startAt);
 

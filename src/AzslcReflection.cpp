@@ -541,7 +541,8 @@ namespace AZ::ShaderCompiler
                     // If array is a structure
                     if (IsProductType(varClass))
                     {
-                        size = BuildUserDefinedMemberLayout(membersContainer, exportedType.m_typeId, options, layoutPacking, startAt = offset,
+                        startAt = offset;
+                        size = BuildUserDefinedMemberLayout(membersContainer, exportedType.m_typeId, options, layoutPacking, startAt,
                             (namePrefix.data() + shortName + strDimIndex + "."));
 
                         offset = Packing::PackNextChunk(layoutPacking, size, startAt);

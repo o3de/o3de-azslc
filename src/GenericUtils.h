@@ -509,6 +509,11 @@ namespace AZ
         }
         return result;
     }
+
+    inline bool IsPowerOfTwo(uint32_t value)
+    {
+        return (value > 0) && !(value & (value - 1));
+    }
 }
 
 #ifndef NDEBUG
