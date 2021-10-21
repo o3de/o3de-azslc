@@ -7,12 +7,12 @@
  */
 
 
-#include "StructPadToMutator.h"
+#include "PadToAttributeMutator.h"
 #include "AzslcIntermediateRepresentation.h"
 
 namespace AZ::ShaderCompiler
 {
-    void StructPadToMutator::ProcessPadToAttribute(const AttributeInfo& attrInfo)
+    void PadToAttributeMutator::ProcessPadToAttribute(const AttributeInfo& attrInfo)
     {
         //The pad_to(N) attribute only accepts one input argument.
         if (attrInfo.m_argList.size() != 1)
@@ -76,7 +76,7 @@ namespace AZ::ShaderCompiler
         }
     }
 
-    void StructPadToMutator::MutateStructs(const MiddleEndConfiguration& middleEndconfigration)
+    void PadToAttributeMutator::MutateStructs(const MiddleEndConfiguration& middleEndconfigration)
     {
         if (m_structsToPad.empty())
         {
@@ -100,7 +100,7 @@ namespace AZ::ShaderCompiler
         }
     }
 
-    vector<IdentifierUID> StructPadToMutator::GetSortedStructUidList(const MapOfStructUidToPaddingMap& structsToPad) const
+    vector<IdentifierUID> PadToAttributeMutator::GetSortedStructUidList(const MapOfStructUidToPaddingMap& structsToPad) const
     {
         vector<IdentifierUID> sortedList;
 
@@ -122,7 +122,7 @@ namespace AZ::ShaderCompiler
     }
 
 
-    void StructPadToMutator::StructUidSortVisitFunction(const IdentifierUID& structUid, unordered_set<IdentifierUID>& visitedStructs, vector<IdentifierUID>& sortedList) const
+    void PadToAttributeMutator::StructUidSortVisitFunction(const IdentifierUID& structUid, unordered_set<IdentifierUID>& visitedStructs, vector<IdentifierUID>& sortedList) const
     {
         if (visitedStructs.count(structUid))
         {
@@ -141,7 +141,7 @@ namespace AZ::ShaderCompiler
     }
 
 
-    vector<pair<IdentifierUID, IdentifierUID>> StructPadToMutator::GetVariablesOfStructTypeThatRequirePadding(const ClassInfo* classInfo) const
+    vector<pair<IdentifierUID, IdentifierUID>> PadToAttributeMutator::GetVariablesOfStructTypeThatRequirePadding(const ClassInfo* classInfo) const
     {
         vector<pair<IdentifierUID, IdentifierUID>> retList;
         const auto& memberFields = classInfo->GetMemberFields();
@@ -168,7 +168,7 @@ namespace AZ::ShaderCompiler
         return retList;
     }
 
-    void StructPadToMutator::InsertStructPaddings(ClassInfo* classInfo,
+    void PadToAttributeMutator::InsertStructPaddings(ClassInfo* classInfo,
                                                   const IdentifierUID& structUid,
                                                   const MapOfVarInfoUidToPadding& varInfoUidToPadMap,
                                                   const MiddleEndConfiguration& middleEndconfigration)
@@ -224,7 +224,7 @@ namespace AZ::ShaderCompiler
         }
     }
 
-    uint32_t StructPadToMutator::CalculateMemberLayout(const IdentifierUID& memberId,
+    uint32_t PadToAttributeMutator::CalculateMemberLayout(const IdentifierUID& memberId,
                                                        const bool isArrayItr,
                                                        const bool emitRowMajor,
                                                        const AZ::ShaderCompiler::Packing::Layout layoutPacking,
@@ -357,7 +357,7 @@ namespace AZ::ShaderCompiler
     }
 
 
-    uint32_t StructPadToMutator::CalculateUserDefinedMemberLayout(
+    uint32_t PadToAttributeMutator::CalculateUserDefinedMemberLayout(
                                                           const IdentifierUID& exportedTypeId,
                                                           const bool emitRowMajors,
                                                           const AZ::ShaderCompiler::Packing::Layout layoutPacking,
@@ -386,7 +386,7 @@ namespace AZ::ShaderCompiler
     }
 
 
-    size_t StructPadToMutator::InsertPaddingVariables(ClassInfo* classInfo, const IdentifierUID& structUid,
+    size_t PadToAttributeMutator::InsertPaddingVariables(ClassInfo* classInfo, const IdentifierUID& structUid,
                                                       size_t insertionIndex, uint32_t startingOffset, uint32_t numBytesToAdd)
     {
         auto getFloatTypeNameOfSize = +[](uint32_t sizeInBytes) -> const char *

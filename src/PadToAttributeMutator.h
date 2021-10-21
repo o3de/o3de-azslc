@@ -23,12 +23,12 @@ namespace AZ::ShaderCompiler
     //! 'N' must be a multiple of 4.
     //! [[pad_to(N)]] inserts dummy variables until the next variable in the struct
     //! starts at an offset aligned to N.
-    class StructPadToMutator final
+    class PadToAttributeMutator final
     {
     public:
-        StructPadToMutator() = delete;
-        explicit StructPadToMutator(IntermediateRepresentation& ir) : m_ir(ir) {}
-        ~StructPadToMutator() = default;
+        PadToAttributeMutator() = delete;
+        explicit PadToAttributeMutator(IntermediateRepresentation& ir) : m_ir(ir) {}
+        ~PadToAttributeMutator() = default;
 
         //! Called each time a [[pad_to(N)]] line is found when the input file is being parsed.
         //! Throws an exception in case of error.

@@ -97,7 +97,7 @@ namespace AZ::ShaderCompiler
         }
         else if (attrInfo.m_attribute == "pad_to")
         {
-            m_structPadToMutator.ProcessPadToAttribute(attrInfo);
+            m_padToAttributeMutator.ProcessPadToAttribute(attrInfo);
             return false; //Do not store this attribute
         }
         // The attribute has no special meaning to AZSLc, just pass it
@@ -125,7 +125,7 @@ namespace AZ::ShaderCompiler
 
         RegisterRootConstantStruct(middleEndconfigration);
 
-        m_structPadToMutator.MutateStructs(middleEndconfigration);
+        m_padToAttributeMutator.MutateStructs(middleEndconfigration);
 
         if (!middleEndconfigration.m_skipAlignmentValidation)
         {

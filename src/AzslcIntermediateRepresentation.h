@@ -11,7 +11,7 @@
 #include "AzslcTokenToAst.h"
 #include "AzslcKindInfo.h"
 #include "PreprocessorLineDirectiveFinder.h"
-#include "StructPadToMutator.h"
+#include "PadToAttributeMutator.h"
 
 namespace AZ::ShaderCompiler
 {
@@ -43,7 +43,7 @@ namespace AZ::ShaderCompiler
                      }
             , m_lexer{ lexer }
             , m_sema{&m_symbols, &m_scope, lexer, this}
-            , m_structPadToMutator(*this)
+            , m_padToAttributeMutator(*this)
         {
             // Default output format for all targets
             std::fill_n(m_metaData.m_outputFormatHint, kMaxRenderTargets, m_metaData.m_outputFormatHint[0]);
@@ -328,7 +328,7 @@ namespace AZ::ShaderCompiler
         IRMetaData m_metaData;
 
         // Helper to deal with the [[pad_to(N)]] attribute.
-        StructPadToMutator m_structPadToMutator;
+        PadToAttributeMutator m_padToAttributeMutator;
     };
 
     string ToYaml(const TypeRefInfo& tref, const IntermediateRepresentation& ir, string_view indent);
