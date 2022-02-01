@@ -9,9 +9,9 @@
 
 # Build
 
-mkdir build
-mkdir build/release
-mkdir build/debug
+BUILD_DIR='build'
+
+mkdir $BUILD_DIR
 
 CMAKE='cmake'
 if ! command -v $CMAKE &> /dev/null
@@ -21,33 +21,33 @@ then
     echo "$OLDCMAKE not found in PATH. Defaulting to: $CMAKE"
 fi
 
-$CMAKE -DMAKE_BUILD_TYPE=Release -S "src/" -B "build/release"
-pushd build/release
-echo "Building release..."
-make -j16
-ls
+$CMAKE -G "Xcode" -S "src/" -B $BUILD_DIR
+
+echo "Xcode project created successfully."
+
+echo "Will proceed to build in Release configuration..."
+$CMAKE --build $BUILD_DIR --target azslc --config Release -j 16
+
+pushd $BUILD_DIR/Release
 echo "Release version:"
 ./azslc --version
 popd
 
-$CMAKE -DMAKE_BUILD_TYPE=Debug -S "src/external/antlr4/runtime/Cpp/" -B "build/debug/external/antlr4/runtime/Cpp/"
-pushd build/debug/external/antlr4/runtime/Cpp
-make -j16
-popd
 
-$CMAKE -DMAKE_BUILD_TYPE=Debug -S "src/" -B "build/debug"
-pushd build/debug
-echo "Building debug..."
-make -j16
-ls
+echo "Will proceed to build in Debug configuration..."
+$CMAKE --build $BUILD_DIR --target azslc --config Debug -j 16
+
+pushd $BUILD_DIR/Debug
 echo "Debug version:"
 ./azslc --version
 popd
 
-# Deploy
+## Deploy
+echo "Deploying Release and Debug binaries..."
 mkdir bin
 mkdir bin/darwin
 mkdir bin/darwin/release
 mkdir bin/darwin/debug
-cp build/release/azslc bin/darwin/release/azslc
-cp build/debug/azslc bin/darwin/debug/azslc
+cp $BUILD_DIR/Release/azslc bin/darwin/release/azslc
+cp $BUILD_DIR/Debug/azslc bin/darwin/debug/azslc
+echo "Done!"
