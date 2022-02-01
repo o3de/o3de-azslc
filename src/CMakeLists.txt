@@ -14,7 +14,7 @@ FetchContent_Declare(
 FetchContent_Declare(
   antlr4
   GIT_REPOSITORY https://github.com/o3de/antlr4.git
-  GIT_TAG o3de-4.7.1
+  GIT_TAG o3de-4.9.3
   SOURCE_SUBDIR runtime/Cpp
   CMAKE_ARGS "-DCMAKE_BUILD_TYPE=Release"
 )
@@ -91,7 +91,8 @@ if (MSVC)
   target_compile_definitions(azslc
     PRIVATE
     _CRT_SECURE_NO_WARNINGS
-    _SILENCE_CXX17_CODECVT_HEADER_DEPRECATION_WARNING)
+    _SILENCE_CXX17_CODECVT_HEADER_DEPRECATION_WARNING
+    ANTLR4CPP_STATIC)
 elseif (UNIX AND NOT APPLE)
   target_link_libraries(azslc PRIVATE stdc++fs)
 endif()

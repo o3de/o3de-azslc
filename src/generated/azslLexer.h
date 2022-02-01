@@ -1,5 +1,5 @@
 
-// Generated from ../azslLexer.g4 by ANTLR 4.7.1
+// Generated from ../azslLexer.g4 by ANTLR 4.9.3
 
 #pragma once
 
@@ -104,7 +104,7 @@ public:
     PREPROCESSOR = 2
   };
 
-  azslLexer(antlr4::CharStream *input);
+  explicit azslLexer(antlr4::CharStream *input);
   ~azslLexer();
 
   virtual std::string getGrammarFileName() const override;
