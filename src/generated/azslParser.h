@@ -1,5 +1,5 @@
 
-// Generated from ../azslParser.g4 by ANTLR 4.7.1
+// Generated from ../azslParser.g4 by ANTLR 4.9.3
 
 #pragma once
 
@@ -152,7 +152,7 @@ public:
     RuleBorderColorEnum = 137
   };
 
-  azslParser(antlr4::TokenStream *input);
+  explicit azslParser(antlr4::TokenStream *input);
   ~azslParser();
 
   virtual std::string getGrammarFileName() const override;
@@ -303,8 +303,8 @@ public:
 
   class  CompilationUnitContext : public antlr4::ParserRuleContext {
   public:
-    azslParser::TopLevelDeclarationContext *topLevelDeclarationContext = nullptr;;
-    std::vector<TopLevelDeclarationContext *> Declarations;;
+    azslParser::TopLevelDeclarationContext *topLevelDeclarationContext = nullptr;
+    std::vector<TopLevelDeclarationContext *> Declarations;
     CompilationUnitContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
     antlr4::tree::TerminalNode *EOF();
@@ -383,11 +383,13 @@ public:
 
   class  NestedNameSpecifierContext : public antlr4::ParserRuleContext {
   public:
-    antlr4::Token *GlobalSROToken = nullptr;;
+    antlr4::Token *GlobalSROToken = nullptr;
     NestedNameSpecifierContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
     std::vector<antlr4::tree::TerminalNode *> Identifier();
     antlr4::tree::TerminalNode* Identifier(size_t i);
+    std::vector<antlr4::tree::TerminalNode *> ColonColon();
+    antlr4::tree::TerminalNode* ColonColon(size_t i);
 
     virtual void enterRule(antlr4::tree::ParseTreeListener *listener) override;
     virtual void exitRule(antlr4::tree::ParseTreeListener *listener) override;
@@ -412,8 +414,8 @@ public:
 
   class  ClassDefinitionContext : public antlr4::ParserRuleContext {
   public:
-    antlr4::Token *Name = nullptr;;
-    azslParser::BaseListContext *BaseListOpt = nullptr;;
+    antlr4::Token *Name = nullptr;
+    azslParser::BaseListContext *BaseListOpt = nullptr;
     ClassDefinitionContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
     antlr4::tree::TerminalNode *Class();
@@ -482,7 +484,7 @@ public:
 
   class  StructDefinitionContext : public antlr4::ParserRuleContext {
   public:
-    antlr4::Token *Name = nullptr;;
+    antlr4::Token *Name = nullptr;
     StructDefinitionContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
     antlr4::tree::TerminalNode *Struct();
@@ -549,8 +551,8 @@ public:
 
   class  EnumDefinitionContext : public antlr4::ParserRuleContext {
   public:
-    antlr4::Token *Name = nullptr;;
-    azslParser::EnumeratorListDefinitionContext *List = nullptr;;
+    antlr4::Token *Name = nullptr;
+    azslParser::EnumeratorListDefinitionContext *List = nullptr;
     EnumDefinitionContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
     EnumKeyContext *enumKey();
@@ -570,7 +572,7 @@ public:
   public:
     EnumKeyContext(antlr4::ParserRuleContext *parent, size_t invokingState);
    
-    EnumKeyContext() : antlr4::ParserRuleContext() { }
+    EnumKeyContext() = default;
     void copyFrom(EnumKeyContext *context);
     using antlr4::ParserRuleContext::copyFrom;
 
@@ -603,12 +605,14 @@ public:
 
   class  EnumeratorListDefinitionContext : public antlr4::ParserRuleContext {
   public:
-    azslParser::EnumeratorDeclaratorContext *enumeratorDeclaratorContext = nullptr;;
-    std::vector<EnumeratorDeclaratorContext *> Enumerators;;
+    azslParser::EnumeratorDeclaratorContext *enumeratorDeclaratorContext = nullptr;
+    std::vector<EnumeratorDeclaratorContext *> Enumerators;
     EnumeratorListDefinitionContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
     std::vector<EnumeratorDeclaratorContext *> enumeratorDeclarator();
     EnumeratorDeclaratorContext* enumeratorDeclarator(size_t i);
+    std::vector<antlr4::tree::TerminalNode *> Comma();
+    antlr4::tree::TerminalNode* Comma(size_t i);
 
     virtual void enterRule(antlr4::tree::ParseTreeListener *listener) override;
     virtual void exitRule(antlr4::tree::ParseTreeListener *listener) override;
@@ -619,11 +623,12 @@ public:
 
   class  EnumeratorDeclaratorContext : public antlr4::ParserRuleContext {
   public:
-    antlr4::Token *Name = nullptr;;
-    azslParser::ExpressionContext *Value = nullptr;;
+    antlr4::Token *Name = nullptr;
+    azslParser::ExpressionContext *Value = nullptr;
     EnumeratorDeclaratorContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
     antlr4::tree::TerminalNode *Identifier();
+    antlr4::tree::TerminalNode *Assign();
     ExpressionContext *expression();
 
     virtual void enterRule(antlr4::tree::ParseTreeListener *listener) override;
@@ -665,7 +670,7 @@ public:
 
   class  InterfaceDefinitionContext : public antlr4::ParserRuleContext {
   public:
-    antlr4::Token *Name = nullptr;;
+    antlr4::Token *Name = nullptr;
     InterfaceDefinitionContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
     antlr4::tree::TerminalNode *Interface();
@@ -699,10 +704,12 @@ public:
 
   class  ConstantBufferTemplatedContext : public antlr4::ParserRuleContext {
   public:
-    antlr4::Token *CBCoreType = nullptr;;
-    azslParser::TypeContext *GenericTypeName = nullptr;;
+    antlr4::Token *CBCoreType = nullptr;
+    azslParser::TypeContext *GenericTypeName = nullptr;
     ConstantBufferTemplatedContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
+    antlr4::tree::TerminalNode *Less();
+    antlr4::tree::TerminalNode *Greater();
     TypeContext *type();
     antlr4::tree::TerminalNode *ConstantBuffer();
     antlr4::tree::TerminalNode *ConstantBufferCamel();
@@ -747,7 +754,7 @@ public:
 
   class  FunctionParamContext : public antlr4::ParserRuleContext {
   public:
-    antlr4::Token *Name = nullptr;;
+    antlr4::Token *Name = nullptr;
     FunctionParamContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
     StorageFlagsContext *storageFlags();
@@ -766,7 +773,7 @@ public:
 
   class  HlslSemanticContext : public antlr4::ParserRuleContext {
   public:
-    azslParser::HlslSemanticNameContext *Name = nullptr;;
+    azslParser::HlslSemanticNameContext *Name = nullptr;
     HlslSemanticContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
     antlr4::tree::TerminalNode *Colon();
@@ -829,7 +836,7 @@ public:
   public:
     AttributeContext(antlr4::ParserRuleContext *parent, size_t invokingState);
    
-    AttributeContext() : antlr4::ParserRuleContext() { }
+    AttributeContext() = default;
     void copyFrom(AttributeContext *context);
     using antlr4::ParserRuleContext::copyFrom;
 
@@ -887,8 +894,8 @@ public:
 
   class  AttributeSpecifierSequenceContext : public antlr4::ParserRuleContext {
   public:
-    azslParser::AttributeContext *attributeContext = nullptr;;
-    std::vector<AttributeContext *> Attributes;;
+    azslParser::AttributeContext *attributeContext = nullptr;
+    std::vector<AttributeContext *> Attributes;
     AttributeSpecifierSequenceContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
     antlr4::tree::TerminalNode *LeftDoubleBracket();
@@ -922,8 +929,8 @@ public:
 
   class  BlockContext : public antlr4::ParserRuleContext {
   public:
-    azslParser::StatementContext *statementContext = nullptr;;
-    std::vector<StatementContext *> Stmts;;
+    azslParser::StatementContext *statementContext = nullptr;
+    std::vector<StatementContext *> Stmts;
     BlockContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
     antlr4::tree::TerminalNode *LeftBrace();
@@ -971,7 +978,7 @@ public:
   public:
     SwitchLabelContext(antlr4::ParserRuleContext *parent, size_t invokingState);
    
-    SwitchLabelContext() : antlr4::ParserRuleContext() { }
+    SwitchLabelContext() = default;
     void copyFrom(SwitchLabelContext *context);
     using antlr4::ParserRuleContext::copyFrom;
 
@@ -1040,7 +1047,7 @@ public:
   public:
     EmbeddedStatementContext(antlr4::ParserRuleContext *parent, size_t invokingState);
    
-    EmbeddedStatementContext() : antlr4::ParserRuleContext() { }
+    EmbeddedStatementContext() = default;
     void copyFrom(EmbeddedStatementContext *context);
     using antlr4::ParserRuleContext::copyFrom;
 
@@ -1231,7 +1238,7 @@ public:
 
   class  ElseClauseContext : public antlr4::ParserRuleContext {
   public:
-    azslParser::EmbeddedStatementContext *Stmt = nullptr;;
+    azslParser::EmbeddedStatementContext *Stmt = nullptr;
     ElseClauseContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
     antlr4::tree::TerminalNode *Else();
@@ -1248,7 +1255,7 @@ public:
   public:
     ExpressionContext(antlr4::ParserRuleContext *parent, size_t invokingState);
    
-    ExpressionContext() : antlr4::ParserRuleContext() { }
+    ExpressionContext() = default;
     void copyFrom(ExpressionContext *context);
     using antlr4::ParserRuleContext::copyFrom;
 
@@ -1427,7 +1434,7 @@ public:
   public:
     ExpressionExtContext(antlr4::ParserRuleContext *parent, size_t invokingState);
    
-    ExpressionExtContext() : antlr4::ParserRuleContext() { }
+    ExpressionExtContext() = default;
     void copyFrom(ExpressionExtContext *context);
     using antlr4::ParserRuleContext::copyFrom;
 
@@ -1597,8 +1604,8 @@ public:
 
   class  VariableDeclaratorsContext : public antlr4::ParserRuleContext {
   public:
-    azslParser::NamedVariableDeclaratorContext *namedVariableDeclaratorContext = nullptr;;
-    std::vector<NamedVariableDeclaratorContext *> VarDecls;;
+    azslParser::NamedVariableDeclaratorContext *namedVariableDeclaratorContext = nullptr;
+    std::vector<NamedVariableDeclaratorContext *> VarDecls;
     VariableDeclaratorsContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
     std::vector<NamedVariableDeclaratorContext *> namedVariableDeclarator();
@@ -1615,10 +1622,10 @@ public:
 
   class  UnnamedVariableDeclaratorContext : public antlr4::ParserRuleContext {
   public:
-    azslParser::ArrayRankSpecifierContext *arrayRankSpecifierContext = nullptr;;
-    std::vector<ArrayRankSpecifierContext *> ArrayRankSpecifiers;;
-    azslParser::HlslSemanticContext *SemanticOpt = nullptr;;
-    azslParser::RegisterAllocationContext *RegisterAllocation = nullptr;;
+    azslParser::ArrayRankSpecifierContext *arrayRankSpecifierContext = nullptr;
+    std::vector<ArrayRankSpecifierContext *> ArrayRankSpecifiers;
+    azslParser::HlslSemanticContext *SemanticOpt = nullptr;
+    azslParser::RegisterAllocationContext *RegisterAllocation = nullptr;
     UnnamedVariableDeclaratorContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
     PackOffsetNodeContext *packOffsetNode();
@@ -1637,7 +1644,7 @@ public:
 
   class  NamedVariableDeclaratorContext : public antlr4::ParserRuleContext {
   public:
-    antlr4::Token *Name = nullptr;;
+    antlr4::Token *Name = nullptr;
     NamedVariableDeclaratorContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
     UnnamedVariableDeclaratorContext *unnamedVariableDeclarator();
@@ -1654,6 +1661,7 @@ public:
   public:
     VariableInitializerContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
+    antlr4::tree::TerminalNode *Assign();
     StandardVariableInitializerContext *standardVariableInitializer();
     SamplerBodyDeclarationContext *samplerBodyDeclaration();
 
@@ -1666,10 +1674,12 @@ public:
 
   class  StandardVariableInitializerContext : public antlr4::ParserRuleContext {
   public:
-    azslParser::ExpressionContext *Expr = nullptr;;
+    azslParser::ExpressionContext *Expr = nullptr;
     StandardVariableInitializerContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
+    antlr4::tree::TerminalNode *LeftBrace();
     ArrayElementInitializersContext *arrayElementInitializers();
+    antlr4::tree::TerminalNode *RightBrace();
     ExpressionContext *expression();
 
     virtual void enterRule(antlr4::tree::ParseTreeListener *listener) override;
@@ -1697,7 +1707,7 @@ public:
 
   class  ArrayRankSpecifierContext : public antlr4::ParserRuleContext {
   public:
-    azslParser::ExpressionContext *Dimension = nullptr;;
+    azslParser::ExpressionContext *Dimension = nullptr;
     ArrayRankSpecifierContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
     antlr4::tree::TerminalNode *LeftBracket();
@@ -1713,9 +1723,9 @@ public:
 
   class  PackOffsetNodeContext : public antlr4::ParserRuleContext {
   public:
-    antlr4::Token *PackoffsetKeyword = nullptr;;
-    antlr4::Token *PackOffsetRegister = nullptr;;
-    antlr4::Token *PackOffsetComponent = nullptr;;
+    antlr4::Token *PackoffsetKeyword = nullptr;
+    antlr4::Token *PackOffsetRegister = nullptr;
+    antlr4::Token *PackOffsetComponent = nullptr;
     PackOffsetNodeContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
     antlr4::tree::TerminalNode *Colon();
@@ -1926,8 +1936,8 @@ public:
 
   class  PatchPredefinedTypeContext : public antlr4::ParserRuleContext {
   public:
-    azslParser::UserDefinedTypeContext *Name = nullptr;;
-    antlr4::Token *ControlPoints = nullptr;;
+    azslParser::UserDefinedTypeContext *Name = nullptr;
+    antlr4::Token *ControlPoints = nullptr;
     PatchPredefinedTypeContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
     PatchTypeContext *patchType();
@@ -2134,7 +2144,7 @@ public:
 
   class  MsTexturePredefinedTypeContext : public antlr4::ParserRuleContext {
   public:
-    antlr4::Token *Samples = nullptr;;
+    antlr4::Token *Samples = nullptr;
     MsTexturePredefinedTypeContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
     TextureTypeMSContext *textureTypeMS();
@@ -2194,7 +2204,7 @@ public:
 
   class  GenericVectorTypeContext : public antlr4::ParserRuleContext {
   public:
-    antlr4::Token *Size_ = nullptr;;
+    antlr4::Token *Size_ = nullptr;
     GenericVectorTypeContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
     antlr4::tree::TerminalNode *Vector();
@@ -2367,8 +2377,8 @@ public:
 
   class  GenericMatrixPredefinedTypeContext : public antlr4::ParserRuleContext {
   public:
-    antlr4::Token *Rows_ = nullptr;;
-    antlr4::Token *Cols_ = nullptr;;
+    antlr4::Token *Rows_ = nullptr;
+    antlr4::Token *Cols_ = nullptr;
     GenericMatrixPredefinedTypeContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
     antlr4::tree::TerminalNode *Matrix();
@@ -2389,7 +2399,7 @@ public:
 
   class  RegisterAllocationContext : public antlr4::ParserRuleContext {
   public:
-    antlr4::Token *Address = nullptr;;
+    antlr4::Token *Address = nullptr;
     RegisterAllocationContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
     antlr4::tree::TerminalNode *Colon();
@@ -2407,9 +2417,9 @@ public:
 
   class  SamplerStatePropertyContext : public antlr4::ParserRuleContext {
   public:
-    antlr4::Token *Name = nullptr;;
-    antlr4::Token *EqualsToken = nullptr;;
-    azslParser::ExpressionContext *Expr = nullptr;;
+    antlr4::Token *Name = nullptr;
+    antlr4::Token *EqualsToken = nullptr;
+    azslParser::ExpressionContext *Expr = nullptr;
     SamplerStatePropertyContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
     antlr4::tree::TerminalNode *Semi();
@@ -2444,8 +2454,8 @@ public:
 
   class  LeadingTypeFunctionSignatureContext : public antlr4::ParserRuleContext {
   public:
-    azslParser::UserDefinedTypeContext *ClassName = nullptr;;
-    antlr4::Token *Name = nullptr;;
+    azslParser::UserDefinedTypeContext *ClassName = nullptr;
+    antlr4::Token *Name = nullptr;
     LeadingTypeFunctionSignatureContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
     StorageFlagsContext *storageFlags();
@@ -2525,7 +2535,7 @@ public:
 
   class  AssociatedTypeDeclarationContext : public antlr4::ParserRuleContext {
   public:
-    antlr4::Token *Name = nullptr;;
+    antlr4::Token *Name = nullptr;
     AssociatedTypeDeclarationContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
     antlr4::tree::TerminalNode *KW_AssociatedType();
@@ -2542,8 +2552,8 @@ public:
 
   class  TypedefStatementContext : public antlr4::ParserRuleContext {
   public:
-    azslParser::FunctionTypeContext *ExistingType = nullptr;;
-    antlr4::Token *NewTypeName = nullptr;;
+    azslParser::FunctionTypeContext *ExistingType = nullptr;
+    antlr4::Token *NewTypeName = nullptr;
     TypedefStatementContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
     antlr4::tree::TerminalNode *KW_Typedef();
@@ -2560,11 +2570,12 @@ public:
 
   class  TypealiasStatementContext : public antlr4::ParserRuleContext {
   public:
-    antlr4::Token *NewTypeName = nullptr;;
-    azslParser::FunctionTypeContext *ExistingType = nullptr;;
+    antlr4::Token *NewTypeName = nullptr;
+    azslParser::FunctionTypeContext *ExistingType = nullptr;
     TypealiasStatementContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
     antlr4::tree::TerminalNode *KW_TypeAlias();
+    antlr4::tree::TerminalNode *Assign();
     antlr4::tree::TerminalNode *Semi();
     antlr4::tree::TerminalNode *Identifier();
     FunctionTypeContext *functionType();
@@ -2592,13 +2603,16 @@ public:
 
   class  TypeofExpressionContext : public antlr4::ParserRuleContext {
   public:
-    azslParser::ExpressionExtContext *Expr = nullptr;;
-    azslParser::IdExpressionContext *SubQualification = nullptr;;
+    azslParser::ExpressionExtContext *Expr = nullptr;
+    azslParser::IdExpressionContext *SubQualification = nullptr;
     TypeofExpressionContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
     antlr4::tree::TerminalNode *KW_Typeof();
+    antlr4::tree::TerminalNode *LeftParen();
+    antlr4::tree::TerminalNode *RightParen();
     FunctionTypeContext *functionType();
     ExpressionExtContext *expressionExt();
+    antlr4::tree::TerminalNode *ColonColon();
     IdExpressionContext *idExpression();
 
     virtual void enterRule(antlr4::tree::ParseTreeListener *listener) override;
@@ -2612,8 +2626,12 @@ public:
   public:
     GenericParameterListContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
+    antlr4::tree::TerminalNode *Less();
     std::vector<GenericTypeDefinitionContext *> genericTypeDefinition();
     GenericTypeDefinitionContext* genericTypeDefinition(size_t i);
+    antlr4::tree::TerminalNode *Greater();
+    std::vector<antlr4::tree::TerminalNode *> Comma();
+    antlr4::tree::TerminalNode* Comma(size_t i);
 
     virtual void enterRule(antlr4::tree::ParseTreeListener *listener) override;
     virtual void exitRule(antlr4::tree::ParseTreeListener *listener) override;
@@ -2624,7 +2642,7 @@ public:
 
   class  GenericTypeDefinitionContext : public antlr4::ParserRuleContext {
   public:
-    antlr4::Token *GenericTypeName = nullptr;;
+    antlr4::Token *GenericTypeName = nullptr;
     GenericTypeDefinitionContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
     antlr4::tree::TerminalNode *Identifier();
@@ -2641,6 +2659,7 @@ public:
   public:
     GenericConstraintContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
+    antlr4::tree::TerminalNode *Colon();
     UserDefinedTypeContext *userDefinedType();
 
     virtual void enterRule(antlr4::tree::ParseTreeListener *listener) override;
@@ -2721,13 +2740,16 @@ public:
 
   class  CompilerExtensionStatementContext : public antlr4::ParserRuleContext {
   public:
-    antlr4::Token *Message = nullptr;;
+    antlr4::Token *Message = nullptr;
     CompilerExtensionStatementContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
     antlr4::tree::TerminalNode *KW_ext_print_message();
+    antlr4::tree::TerminalNode *LeftParen();
+    antlr4::tree::TerminalNode *RightParen();
     antlr4::tree::TerminalNode *Semi();
     antlr4::tree::TerminalNode *StringLiteral();
     antlr4::tree::TerminalNode *KW_ext_print_symbol();
+    antlr4::tree::TerminalNode *Comma();
     antlr4::tree::TerminalNode *KW_ext_prtsym_fully_qualified();
     antlr4::tree::TerminalNode *KW_ext_prtsym_least_qualified();
     antlr4::tree::TerminalNode *KW_ext_prtsym_constint_value();
@@ -2743,8 +2765,8 @@ public:
 
   class  SrgDefinitionContext : public antlr4::ParserRuleContext {
   public:
-    antlr4::Token *Name = nullptr;;
-    antlr4::Token *Semantic = nullptr;;
+    antlr4::Token *Name = nullptr;
+    antlr4::Token *Semantic = nullptr;
     SrgDefinitionContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
     antlr4::tree::TerminalNode *ShaderResourceGroup();
@@ -2753,6 +2775,7 @@ public:
     std::vector<antlr4::tree::TerminalNode *> Identifier();
     antlr4::tree::TerminalNode* Identifier(size_t i);
     antlr4::tree::TerminalNode *Partial();
+    antlr4::tree::TerminalNode *Colon();
     std::vector<SrgMemberDeclarationContext *> srgMemberDeclaration();
     SrgMemberDeclarationContext* srgMemberDeclaration(size_t i);
 
@@ -2799,7 +2822,7 @@ public:
 
   class  SrgSemanticContext : public antlr4::ParserRuleContext {
   public:
-    antlr4::Token *Name = nullptr;;
+    antlr4::Token *Name = nullptr;
     SrgSemanticContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
     antlr4::tree::TerminalNode *ShaderResourceGroupSemantic();
@@ -2846,12 +2869,13 @@ public:
 
   class  SrgSemanticMemberDeclarationContext : public antlr4::ParserRuleContext {
   public:
-    antlr4::Token *Frequency = nullptr;;
-    azslParser::LiteralContext *FrequencyValue = nullptr;;
-    antlr4::Token *VariantFallback = nullptr;;
-    azslParser::LiteralContext *VariantFallbackValue = nullptr;;
+    antlr4::Token *Frequency = nullptr;
+    azslParser::LiteralContext *FrequencyValue = nullptr;
+    antlr4::Token *VariantFallback = nullptr;
+    azslParser::LiteralContext *VariantFallbackValue = nullptr;
     SrgSemanticMemberDeclarationContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
+    antlr4::tree::TerminalNode *Assign();
     antlr4::tree::TerminalNode *Semi();
     antlr4::tree::TerminalNode *FrequencyId();
     LiteralContext *literal();
@@ -2910,7 +2934,9 @@ public:
     MaxAnisotropyOptionContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
     antlr4::tree::TerminalNode *MAX_ANISOTROPY();
+    antlr4::tree::TerminalNode *Assign();
     antlr4::tree::TerminalNode *IntegerLiteral();
+    antlr4::tree::TerminalNode *Semi();
 
     virtual void enterRule(antlr4::tree::ParseTreeListener *listener) override;
     virtual void exitRule(antlr4::tree::ParseTreeListener *listener) override;
@@ -2924,7 +2950,9 @@ public:
     MinFilterOptionContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
     antlr4::tree::TerminalNode *MIN_FILTER();
+    antlr4::tree::TerminalNode *Assign();
     FilterModeEnumContext *filterModeEnum();
+    antlr4::tree::TerminalNode *Semi();
 
     virtual void enterRule(antlr4::tree::ParseTreeListener *listener) override;
     virtual void exitRule(antlr4::tree::ParseTreeListener *listener) override;
@@ -2938,7 +2966,9 @@ public:
     MagFilterOptionContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
     antlr4::tree::TerminalNode *MAG_FILTER();
+    antlr4::tree::TerminalNode *Assign();
     FilterModeEnumContext *filterModeEnum();
+    antlr4::tree::TerminalNode *Semi();
 
     virtual void enterRule(antlr4::tree::ParseTreeListener *listener) override;
     virtual void exitRule(antlr4::tree::ParseTreeListener *listener) override;
@@ -2952,7 +2982,9 @@ public:
     MipFilterOptionContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
     antlr4::tree::TerminalNode *MIP_FILTER();
+    antlr4::tree::TerminalNode *Assign();
     FilterModeEnumContext *filterModeEnum();
+    antlr4::tree::TerminalNode *Semi();
 
     virtual void enterRule(antlr4::tree::ParseTreeListener *listener) override;
     virtual void exitRule(antlr4::tree::ParseTreeListener *listener) override;
@@ -2966,7 +2998,9 @@ public:
     ReductionTypeOptionContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
     antlr4::tree::TerminalNode *REDUCTION_TYPE();
+    antlr4::tree::TerminalNode *Assign();
     ReductionTypeEnumContext *reductionTypeEnum();
+    antlr4::tree::TerminalNode *Semi();
 
     virtual void enterRule(antlr4::tree::ParseTreeListener *listener) override;
     virtual void exitRule(antlr4::tree::ParseTreeListener *listener) override;
@@ -2980,7 +3014,9 @@ public:
     ComparisonFunctionOptionContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
     antlr4::tree::TerminalNode *COMPARISON_FUNC();
+    antlr4::tree::TerminalNode *Assign();
     ComparisonFunctionEnumContext *comparisonFunctionEnum();
+    antlr4::tree::TerminalNode *Semi();
 
     virtual void enterRule(antlr4::tree::ParseTreeListener *listener) override;
     virtual void exitRule(antlr4::tree::ParseTreeListener *listener) override;
@@ -2994,7 +3030,9 @@ public:
     AddressUOptionContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
     antlr4::tree::TerminalNode *ADDRESS_U();
+    antlr4::tree::TerminalNode *Assign();
     AddressModeEnumContext *addressModeEnum();
+    antlr4::tree::TerminalNode *Semi();
 
     virtual void enterRule(antlr4::tree::ParseTreeListener *listener) override;
     virtual void exitRule(antlr4::tree::ParseTreeListener *listener) override;
@@ -3008,7 +3046,9 @@ public:
     AddressVOptionContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
     antlr4::tree::TerminalNode *ADDRESS_V();
+    antlr4::tree::TerminalNode *Assign();
     AddressModeEnumContext *addressModeEnum();
+    antlr4::tree::TerminalNode *Semi();
 
     virtual void enterRule(antlr4::tree::ParseTreeListener *listener) override;
     virtual void exitRule(antlr4::tree::ParseTreeListener *listener) override;
@@ -3022,7 +3062,9 @@ public:
     AddressWOptionContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
     antlr4::tree::TerminalNode *ADDRESS_W();
+    antlr4::tree::TerminalNode *Assign();
     AddressModeEnumContext *addressModeEnum();
+    antlr4::tree::TerminalNode *Semi();
 
     virtual void enterRule(antlr4::tree::ParseTreeListener *listener) override;
     virtual void exitRule(antlr4::tree::ParseTreeListener *listener) override;
@@ -3036,7 +3078,9 @@ public:
     MinLodOptionContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
     antlr4::tree::TerminalNode *MIN_LOD();
+    antlr4::tree::TerminalNode *Assign();
     antlr4::tree::TerminalNode *FloatLiteral();
+    antlr4::tree::TerminalNode *Semi();
 
     virtual void enterRule(antlr4::tree::ParseTreeListener *listener) override;
     virtual void exitRule(antlr4::tree::ParseTreeListener *listener) override;
@@ -3050,7 +3094,9 @@ public:
     MaxLodOptionContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
     antlr4::tree::TerminalNode *MAX_LOD();
+    antlr4::tree::TerminalNode *Assign();
     antlr4::tree::TerminalNode *FloatLiteral();
+    antlr4::tree::TerminalNode *Semi();
 
     virtual void enterRule(antlr4::tree::ParseTreeListener *listener) override;
     virtual void exitRule(antlr4::tree::ParseTreeListener *listener) override;
@@ -3064,7 +3110,9 @@ public:
     MipLodBiasOptionContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
     antlr4::tree::TerminalNode *MIP_LOD_BIAS();
+    antlr4::tree::TerminalNode *Assign();
     antlr4::tree::TerminalNode *FloatLiteral();
+    antlr4::tree::TerminalNode *Semi();
 
     virtual void enterRule(antlr4::tree::ParseTreeListener *listener) override;
     virtual void exitRule(antlr4::tree::ParseTreeListener *listener) override;
@@ -3078,7 +3126,9 @@ public:
     BorderColorOptionContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
     antlr4::tree::TerminalNode *BORDER_COLOR();
+    antlr4::tree::TerminalNode *Assign();
     BorderColorEnumContext *borderColorEnum();
+    antlr4::tree::TerminalNode *Semi();
 
     virtual void enterRule(antlr4::tree::ParseTreeListener *listener) override;
     virtual void exitRule(antlr4::tree::ParseTreeListener *listener) override;
