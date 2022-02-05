@@ -17,6 +17,8 @@ FetchContent_Declare(
   GIT_TAG o3de-4.9.3
   SOURCE_SUBDIR runtime/Cpp
   CMAKE_ARGS "-DCMAKE_BUILD_TYPE=Release"
+  GIT_SHALLOW TRUE
+  GIT_PROGRESS TRUE
 )
 
 FetchContent_MakeAvailable(cli11 antlr4)
