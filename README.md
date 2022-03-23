@@ -1,4 +1,4 @@
-# Amazon Shading Language Compiler
+# Amazon Shading Lang uage Compiler
 AZSLc is a stand-alone command line compiler for the Amazon Shading Language.
 It converts Amazon Shading Language (AZSL) shaders to High Level Shading Language Shader Model 6+ (HLSL) shaders.
 
