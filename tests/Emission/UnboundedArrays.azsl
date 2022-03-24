@@ -1,7 +1,4 @@
-// This sample makes sure unbounded arrays are supported across all register classes t,u,s,b,
-// the extension is ".azsl_manual" instead of ".azsl" because it is required to run manually with --use-spaces to pass.
-// otherwise the test automation system will pick it up and attempt to compile it without --use-spaces.
-// and it's used for full emission validation.
+// This sample makes sure unbounded arrays are supported across all register classes t,u,s,b.
 // For this shader to compile it is necessary to use --use-spaces.
 
 ShaderResourceGroupSemantic slot1

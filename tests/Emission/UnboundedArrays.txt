@@ -1,3 +1,6 @@
+/*
+    Cmdargs: ['--use-spaces']
+*/
 # list lines expected to have tokens matching the patterns in the strings. each space is a separation.
 
 "Texture2D < float4 > SRG1_m_texSRVa : register ( t0 , space0 ) ;"

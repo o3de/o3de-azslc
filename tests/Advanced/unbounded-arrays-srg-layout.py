@@ -88,7 +88,7 @@ def doTests(compiler, silent, azdxcpath):
     #  because at that time it will still be set to the working directory of the calling script
     workDir = os.getcwd()
 
-    if verify(os.path.join(workDir, "../Samples/UnboundedArrays.azsl_manual"), compiler, silent) : result += 1
+    if verify(os.path.join(workDir, "../Emission/UnboundedArrays.azsl"), compiler, silent) : result += 1
     else: resultFailed += 1
 
 if __name__ == "__main__":

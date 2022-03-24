@@ -28,24 +28,6 @@ def doTests(compiler, silent, azdxcpath):
     #  because at that time it will still be set to the working directory of the calling script
     workDir = os.getcwd().replace('\\', '/')
 
-    if testhelper.verifyEmissionPatterns(os.path.abspath(os.path.join(workDir, "../Samples/Variants.azsl")), compiler, silent, []) : result += 1
-    else: resultFailed += 1
-
-    if testhelper.verifyEmissionPatterns(os.path.abspath(os.path.join(workDir, "../Samples/RootSig.azsl")), compiler, silent, ["--root-sig", "--namespace", "dx"]) : result += 1
-    else: resultFailed += 1
-
-    if testhelper.verifyEmissionPatterns(os.path.abspath(os.path.join(workDir, "../Samples/RootSigSpace.azsl")), compiler, silent, ["--use-spaces", "--root-sig", "--namespace", "dx"]) : result += 1
-    else: resultFailed += 1
-
-    if testhelper.verifyEmissionPatterns(os.path.abspath(os.path.join(workDir, "../Samples/RootSigUnique.azsl")), compiler, silent, ["--unique-idx", "--root-sig", "--namespace", "dx"]) : result += 1
-    else: resultFailed += 1
-
-    if testhelper.verifyEmissionPatterns(os.path.abspath(os.path.join(workDir, "../Samples/RootSigUniqueSpace.azsl")), compiler, silent, ["--unique-idx", "--use-spaces", "--root-sig", "--namespace", "dx"]) : result += 1
-    else: resultFailed += 1
-
-    if testhelper.verifyEmissionPatterns(os.path.abspath(os.path.join(workDir, "../Samples/UnboundedArrays.azsl_manual")), compiler, silent, ["--use-spaces",]) : result += 1
-    else: resultFailed += 1
-
     for base, dirs, files in os.walk(os.path.join(workDir, "../Emission/")):
         for f in files:
             if f.endswith(".azsl"):
