@@ -1,4 +1,6 @@
-# Root signature produced with azslc.exe RootSig.azsl --unique-idx --use-spaces --root-sig
+/*
+    Cmdargs: ['--unique-idx', '--use-spaces', '--root-sig', '--namespace', 'dx']
+*/
 "CBV ( b8 , space = 0"
 "CBV ( b8 , space = 2"
 "CBV ( b7 , space = 3"

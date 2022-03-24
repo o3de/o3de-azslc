@@ -1,4 +1,6 @@
-# Root signature produced with azslc.exe RootSig.azsl --unique-idx --root-sig
+/*
+    Cmdargs: ['--unique-idx', '--root-sig', '--namespace', 'dx']
+*/
 "CBV ( b8 , space = 0"
 "CBV ( b22 , space = 0"
 "CBV ( b30 , space = 0"

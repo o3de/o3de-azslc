@@ -36,25 +36,6 @@ def doTests(compiler, silent, azdxcpath):
     # You can get it once doTests() is called, but not during initialization of the module,
     #  because at that time it will still be set to the working directory of the calling script
     workDir = os.getcwd().replace('\\', '/')
-
-    # expect success when using --use-spaces
-    sampleFilePath = os.path.abspath(os.path.join(workDir, "../Samples/UnboundedArrays.azsl_manual"))
-    if testhelper.verifyEmissionPatterns(sampleFilePath, compiler, silent, ["--use-spaces",]) : result += 1
-    else: resultFailed += 1
-    
-    # expect to fail without --use-spaces
-    stderr, failed = testfuncs.buildAndGetError(sampleFilePath, compiler, silent, [])
-    if failed:
-        result += 1
-        if not silent:
-            stderr = stderr.decode('utf-8')
-            print (fg.CYAN + style.BRIGHT +
-               "unbounded-arrays-emission-tester.py: "+
-               "Good, got expected error when NOT using --use-spaces: " + stderr + style.RESET_ALL)
-    else:
-        resultFailed += 1
-        if not silent:
-            print(style.BRIGHT + fg.RED + "failed unbounded-arrays-emission-tester.py: was expecting error." + style.RESET_ALL)
             
     # expect to fail with --unique-idx
     sampleFilePath = os.path.abspath(os.path.join(workDir, "../Semantic/unbounded-arrays1.azsl"))

@@ -137,7 +137,7 @@ def doTests(compiler, silent, azdxcpath):
     #  because at that time it will still be set to the working directory of the calling script
     workDir = os.getcwd()
 
-    if verifyOptionsEmission(os.path.join(workDir, "../Samples/Variants.azsl"), compiler, silent) : result += 1
+    if verifyOptionsEmission(os.path.join(workDir, "../Emission/Variants.azsl"), compiler, silent) : result += 1
     else: resultFailed += 1
 
     if verifyOptionsEmissionIntegerRanges(os.path.join(workDir, "../Samples/VariantsRanges.azsl"), compiler, silent) : result += 1
