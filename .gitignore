@@ -6,6 +6,7 @@ bin/*
 src/generated/*.interp
 src/generated/*.tokens
 src/generated/java/
+src/dist
 .vs
 build
 /src/.antlr/azslLexer.interp

@@ -9,7 +9,6 @@
 
 #include "AzslcScopeTracker.h"
 #include "PreprocessorLineDirectiveFinder.h"
-#include "AzslcUnboundedArraysValidator.h"
 
 namespace AZ::ShaderCompiler
 {
@@ -423,7 +422,6 @@ namespace AZ::ShaderCompiler
         ScopeTracker*     m_scope;
         azslLexer*        m_lexer;
         PreprocessorLineDirectiveFinder* m_preprocessorLineDirectiveFinder;
-        UnboundedArraysValidator m_unboundedArraysValidator;
 
         //! cached property informing of the presence of at least one input attachment use.
         bool              m_subpassInputSeen = false;

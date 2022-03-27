@@ -228,10 +228,17 @@ namespace AZ::ShaderCompiler
         }
     }
 
-    void MultiBindingLocationMaker::SignalRegisterIncrement(BindingType regType, int count /* = 1*/)
+    void MultiBindingLocationMaker::SignalRegisterIncrement(BindingType regType, int count, bool isUnbounded)
     {
         m_untainted.m_registerPos[regType] += count;
         m_merged.m_registerPos[regType] += count;
+
+        if (isUnbounded)
+        {
+            m_untainted.m_unboundedSpillSpace = m_unboundedSpillSpace;
+            m_merged.m_unboundedSpillSpace = m_unboundedSpillSpace;
+            ++m_unboundedSpillSpace;
+        }
     }
 
     BindingPair MultiBindingLocationMaker::GetCurrent(BindingType regType)
@@ -573,9 +580,19 @@ namespace AZ::ShaderCompiler
         }
 
         auto regType = RootParamTypeToBindingType(paramType);
-        auto srgElementDesc = RootSigDesc::SrgParamDesc{ id, paramType, bindInfo.GetCurrent(regType), count, -1, isUnboundedArray};
+
+        auto srgElementDesc = RootSigDesc::SrgParamDesc{
+            id,
+            paramType,
+            bindInfo.GetCurrent(regType),
+            count,
+            -1,
+            bindInfo.m_unboundedSpillSpace,
+            isUnboundedArray };
+
         rootSig.m_descriptorMap.emplace(id, srgElementDesc);
-        bindInfo.SignalRegisterIncrement(regType, count);
+        bindInfo.SignalRegisterIncrement(regType, count, isUnboundedArray);
+
         return srgElementDesc;
     }
 
@@ -588,7 +605,10 @@ namespace AZ::ShaderCompiler
 
     RootSigDesc Backend::BuildSignatureDescription(const Options& options, int num32BitConst) const
     {
-        MultiBindingLocationMaker bindInfo{ options };
+        // We start at an arbitrarily high number to avoid conflicts with spaces occupied by any user declarations
+        m_unboundedSpillSpace = 1000;
+
+        MultiBindingLocationMaker bindInfo{ options, m_unboundedSpillSpace };
         RootSigDesc rootSig;
 
         auto allSrgs = m_ir->m_symbols.GetOrderedSymbolsOfSubType_2<SRGInfo>();

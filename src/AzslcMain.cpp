@@ -526,13 +526,6 @@ int main(int argc, const char* argv[])
             std::for_each(namespaces.begin(), namespaces.end(),
                 [&](const string& space) { ir.AddAttributeNamespaceFilter(space); });
 
-            UnboundedArraysValidator::Options unboundedArraysValidationOptions = { useSpaces, uniqueIdx };
-            if (*maxSpacesOpt)
-            {
-                unboundedArraysValidationOptions.m_maxSpaces = maxSpaces;
-            }
-            ir.m_sema.m_unboundedArraysValidator.SetOptions(unboundedArraysValidationOptions);
-
             // semantic logic and validation
             walker.walk(&semanticListener, tree);
 

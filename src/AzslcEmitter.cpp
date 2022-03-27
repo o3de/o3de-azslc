@@ -1043,7 +1043,7 @@ namespace AZ::ShaderCompiler
         // note: instead of redoing this work ad-hoc, EmitText could be used directly on the ext type.
         const auto genericType = "<" + GetTranslatedName(varInfo->m_typeInfoExt.m_genericParameter, UsageContext::ReferenceSite) + ">";
 
-        const string spaceX = (options.m_useLogicalSpaces) ? ", space" + std::to_string(bindInfo.m_registerBinding.m_pair[bindSet].m_logicalSpace) : "";
+        const string spaceX = (options.m_useLogicalSpaces) ? ", space" + std::to_string(ResolveBindingSpace(bindInfo, bindSet)) : "";
         m_out << "ConstantBuffer " << genericType << " " << cbName;
         if (bindInfo.m_isUnboundedArray)
         {
@@ -1066,7 +1066,7 @@ namespace AZ::ShaderCompiler
 
         EmitEmptyLinesToLineNumber(varInfo->GetOriginalLineNumber());
 
-        const string spaceX = (options.m_useLogicalSpaces) ? ", space" + std::to_string(bindInfo.m_registerBinding.m_pair[bindSet].m_logicalSpace) : "";
+        const string spaceX = (options.m_useLogicalSpaces) ? ", space" + std::to_string(ResolveBindingSpace(bindInfo, bindSet)) : "";
         m_out << (varInfo->m_samplerState->m_isComparison ? "SamplerComparisonState " : "SamplerState ")
               << ReplaceSeparators(sId.m_name, Underscore);
         if (bindInfo.m_isUnboundedArray)
@@ -1112,9 +1112,10 @@ namespace AZ::ShaderCompiler
         string varType = GetTranslatedName(varInfo->m_typeInfoExt, UsageContext::DeclarationSite);
         auto   registerTypeLetter = ToLower(BindingType::ToStr(RootParamTypeToBindingType(bindInfo.m_type)));
         optional<string> stringifiedLogicalSpace;
+
         if (options.m_useLogicalSpaces)
         {
-            stringifiedLogicalSpace = std::to_string(bindInfo.m_registerBinding.m_pair[bindSet].m_logicalSpace);
+            stringifiedLogicalSpace = std::to_string(ResolveBindingSpace(bindInfo, bindSet));
         }
 
         EmitEmptyLinesToLineNumber(varInfo->GetOriginalLineNumber());
@@ -1363,4 +1364,17 @@ namespace AZ::ShaderCompiler
             m_out << "\n";
         }
     }
+
+    int CodeEmitter::ResolveBindingSpace(const RootSigDesc::SrgParamDesc& bindInfo, BindingPair::Set bindSet) const
+    {
+        if (bindInfo.m_isUnboundedArray && GetPlatformEmitter().UnboundedArraysUseSpillSpace())
+        {
+            return bindInfo.m_spillSpace;
+        }
+        else
+        {
+            return bindInfo.m_registerBinding.m_pair[bindSet].m_logicalSpace;
+        }
+    }
+
 }
