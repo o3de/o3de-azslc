@@ -105,6 +105,12 @@ For Windows, run either `launch_tests.bat` or `launch_tests_debug.bat` to launch
 
 For MacOSX, run either `launch_tests.sh` or `launch_tests_debug.sh` to launch the test suite.
 
+## Developer Run-Book
+
+See also this wiki page for helpful information about contributing to AZSLc.
+
+https://github.com/o3de/o3de-azslc/wiki/AZSLc-Developer's-Runbook
+
 ## License
 
 For terms please see the LICENSE*.TXT file at the root of this distribution.
