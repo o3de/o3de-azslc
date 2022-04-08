@@ -136,8 +136,14 @@ namespace AZ::ShaderCompiler
             return (m_metaData.m_attributeNamespaceFilters.find(attr) != m_metaData.m_attributeNamespaceFilters.end());
         }
 
-        void AddAttributeNamespaceFilter(string_view attr)
+        void AddAttributeNamespaceFilter(const string& attr)
         {
+            std::regex validNamespace(R"__([a-zA-Z_]+)__");
+            if (!std::regex_match(attr, validNamespace))
+            {
+                throw std::runtime_error("Invalid namespace '" + attr + "'");
+            }
+
             m_metaData.m_attributeNamespaceFilters.emplace(attr);
         }
 

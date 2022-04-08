@@ -56,6 +56,7 @@ def verifyEmissionPattern(azslFile, patternsFileName, compilerPath, silent, argL
     Compiles @azslFile and validates all the predicates in @patternsFileName.
     """
     if not os.path.exists(patternsFileName):
+        print ("Pattern file not found: " + patternsFileName)
         return False
     arg = []
     with io.open(patternsFileName, "r", encoding="latin-1") as f:
