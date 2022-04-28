@@ -631,13 +631,23 @@ namespace AZ::ShaderCompiler
         m_out << GetVariantList(options);
     }
 
-    static void ReflectBinding(Json::Value& output, const RootSigDesc::SrgParamDesc& bindInfo)
+    void CodeReflection::ReflectBinding(Json::Value& output, const RootSigDesc::SrgParamDesc& bindInfo) const
     {
         output["count"] = (bindInfo.m_isUnboundedArray) ? -1 : bindInfo.m_registerRange;
         output["index"] = bindInfo.m_registerBinding.m_pair[BindingPair::Set::Untainted].m_registerIndex;
-        output["space"] = bindInfo.m_registerBinding.m_pair[BindingPair::Set::Untainted].m_logicalSpace;
         output["index-merged"] = bindInfo.m_registerBinding.m_pair[BindingPair::Set::Merged].m_registerIndex;
-        output["space-merged"] = bindInfo.m_registerBinding.m_pair[BindingPair::Set::Merged].m_logicalSpace;
+
+        if (bindInfo.m_isUnboundedArray && GetPlatformEmitter().UnboundedArraysUseSpillSpace())
+        {
+            output["space"] = bindInfo.m_spillSpace;
+            output["space-merged"] = bindInfo.m_spillSpace;
+        }
+        else
+        {
+            output["space"] = bindInfo.m_registerBinding.m_pair[BindingPair::Set::Untainted].m_logicalSpace;
+            output["space-merged"] = bindInfo.m_registerBinding.m_pair[BindingPair::Set::Merged].m_logicalSpace;
+        }
+
     }
 
     void CodeReflection::DumpSRGLayout(const Options& options) const
@@ -724,6 +734,7 @@ namespace AZ::ShaderCompiler
                 dataView["id"]     = ExtractLeaf(tId.m_name).data();
                 dataView["type"]   = viewName;
                 dataView["usage"]  = (isReadWriteView) ? "ReadWrite" : "Read";
+
                 ReflectBinding(dataView, bindInfo);
                 dataView["stride"] = strideSize;
 
@@ -946,7 +957,7 @@ namespace AZ::ShaderCompiler
                     return allEntriesJson;
                 };
 
-                auto makeJsonNodeForOneResource = [&dependencyListToJson](const set<IdentifierUID>& dependencyList,
+                auto makeJsonNodeForOneResource = [this, &dependencyListToJson](const set<IdentifierUID>& dependencyList,
                     const RootSigDesc::SrgParamDesc& binding,
                     const Json::Value& allConstants)
                 {
