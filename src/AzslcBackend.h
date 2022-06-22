@@ -63,6 +63,9 @@ namespace AZ::ShaderCompiler
             BindingPair m_registerBinding;
             int m_registerRange = -1;
             int m_num32BitConstants = -1;
+
+            int m_spillSpace = -1;
+
             // This flag is added so m_registerRange can take the value
             // of 1 and at the same time We do not forget that m_uid refers
             // to an unbounded array.
@@ -97,6 +100,10 @@ namespace AZ::ShaderCompiler
         int GetAccumulated(BindingType r) const;
 
         int m_space = 0;  //<! logical space
+
+        // See: MultiBindingLocationMarker::m_unboundedSpillSpace
+        int m_unboundedSpillSpace;
+
         int m_registerPos[BindingType::EndEnumeratorSentinel_] = {0};   //!< register index, one by type.
         int m_accumulated[BindingType::EndEnumeratorSentinel_] = {0};  //!< Counter for total usage independently from space increments
         int m_accumulatedUnused[BindingType::EndEnumeratorSentinel_] = {0};  //!< Counter for holes created by indices unification
@@ -108,21 +115,28 @@ namespace AZ::ShaderCompiler
     class MultiBindingLocationMaker
     {
     public:
-        MultiBindingLocationMaker(const Options& options)
-            : m_options(options)
+        MultiBindingLocationMaker(const Options& options, int& unboundedSpillSpace)
+            : m_options{ options }
+            , m_unboundedSpillSpace{ unboundedSpillSpace }
         {}
 
         void SignalIncrementSpace(std::function<void(int, int)> warningMessageFunctionForMinDescOvershoot);
 
         void SignalUnifyIndices();
         
-        void SignalRegisterIncrement(BindingType regType, int count = 1);
+        void SignalRegisterIncrement(BindingType regType, int count, bool isUnbounded);
 
         BindingPair GetCurrent(BindingType regType);
 
         SingleBindingLocationTracker m_untainted;
         SingleBindingLocationTracker m_merged;
         Options m_options;
+
+        // On some platforms (DX12), descriptor arrays occupy an individual register slot, and spaces are used
+        // to prevent overlapping ranges. When an unbounded array is encountered, we immediately assign it to
+        // the value of this member variable and increment. This is initialized in the constructor because the
+        // space we spill to must not collide with any other SRG declared in the shader.
+        int& m_unboundedSpillSpace;
     };
 
     //! This class intends to be a base umbrella for compiler back-end services.
@@ -173,6 +187,9 @@ namespace AZ::ShaderCompiler
         std::ostream&               m_out;
         IntermediateRepresentation* m_ir;
         TokenStream*                m_tokens;
+
+        // See MultiBindingLocationMaker::m_unboundedSpillSpace
+        mutable int m_unboundedSpillSpace;
     };
 
     // independent utility functions
