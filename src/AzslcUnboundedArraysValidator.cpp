@@ -76,23 +76,6 @@ namespace AZ::ShaderCompiler
 
         if (!CanBeDeclaredAsUnboundedArray(typeClass))
         {
-            // The only possibility of error is if --use-spaces is false,
-            // and there's already an unbounded array of type 'b' declared in another SRG.
-            if (!m_options.m_useSpacesEnabled)
-            {
-                // We use register 0 because if --use-spaces was not specified in the command line
-                // then there's only one space for all registers and its index is 0, aka "space0".
-                const ArrayOfUnboundedUids& arrayOfUnboundedUids = m_unboundedUidsPerSpace[0];
-                const IdentifierUID& unboundedUid = arrayOfUnboundedUids[BindingType::B];
-                if (!unboundedUid.IsEmpty())
-                {
-                    if (errorMessage)
-                    {
-                        *errorMessage = ConcatString("The unbounded resource [", unboundedUid.GetName(), "], doesn't allow [", varUid.GetName(), "] to be added to the register space");
-                    }
-                    return false;
-                }
-            }
             return true;
         }
 
@@ -125,18 +108,16 @@ namespace AZ::ShaderCompiler
         auto findIt = m_srgToSpaceIndex.find(srgUid);
         if (findIt == m_srgToSpaceIndex.end())
         {
-            if (m_options.m_useSpacesEnabled)
+            if (m_options.m_maxSpaces - 1 > m_maxSpaceIndex)
             {
-                if (m_options.m_maxSpaces - 1 > m_maxSpaceIndex)
-                {
-                    spaceIndex = static_cast<SpaceIndex>(m_srgToSpaceIndex.size());
-                    m_maxSpaceIndex = std::max(spaceIndex, m_maxSpaceIndex);
-                }
-                else
-                {
-                    spaceIndex = m_maxSpaceIndex;
-                }
+                spaceIndex = static_cast<SpaceIndex>(m_srgToSpaceIndex.size());
+                m_maxSpaceIndex = std::max(spaceIndex, m_maxSpaceIndex);
             }
+            else
+            {
+                spaceIndex = m_maxSpaceIndex;
+            }
+
             // We are using resize() instead of push_back() because if the size doesn't change resize() is no-op.
             m_unboundedUidsPerSpace.resize(static_cast<size_t>(m_maxSpaceIndex) + 1);
             m_srgToSpaceIndex.emplace(srgUid, spaceIndex);
@@ -152,35 +133,16 @@ namespace AZ::ShaderCompiler
     {
         if (m_options.m_useUniqueIndicesEnabled)
         {
-            if (m_options.m_useSpacesEnabled)
+            // We allow only one unbounded array per SRG. But if, for a given SRG and unbounded array was already
+            // registered then it is an error to add another variable that consumes register resources.
+            IdentifierUID unboundedArrayUid = GetFirstUnboundedArrayFromSrg(srgUid);
+            if (!unboundedArrayUid.IsEmpty())
             {
-                // if --unique-idx is true, and --use-spaces is true, we allow only one
-                // unbounded array per SRG. But if, for a given SRG and unbounded array was already
-                // registered then it is an error to add another variable that consumes register resources.
-                IdentifierUID unboundedArrayUid = GetFirstUnboundedArrayFromSrg(srgUid);
-                if (!unboundedArrayUid.IsEmpty())
+                if (errorMessage)
                 {
-                    if (errorMessage)
-                    {
-                        *errorMessage = ConcatString("The unbounded resource [", unboundedArrayUid.GetName(), "], doesn't allow [", varUid.GetName(), "] to be added to the register space");
-                    }
-                    return false;
+                    *errorMessage = ConcatString("The unbounded resource [", unboundedArrayUid.GetName(), "], doesn't allow [", varUid.GetName(), "] to be added to the register space");
                 }
-            }
-            else
-            {
-                // if --unique-idx is true, and --use-spaces is false, we allow only one
-                // unbounded array across all SRGs. If an unbounded array was already
-                // registered in any SRG then it is an error to add another variable that consumes register resources.
-                IdentifierUID unboundedArrayUid = GetFirstUnboundedArrayAcrossAllSrgs();
-                if (!unboundedArrayUid.IsEmpty())
-                {
-                    if (errorMessage)
-                    {
-                        *errorMessage = ConcatString("The unbounded resource [", unboundedArrayUid.GetName(), "], doesn't allow [", varUid.GetName(), "] to be added to the register space");
-                    }
-                    return false;
-                }
+                return false;
             }
         }
         return true;
@@ -200,21 +162,6 @@ namespace AZ::ShaderCompiler
             if (!uid.IsEmpty())
             {
                 return uid;
-            }
-        }
-        return {};
-    }
-
-    IdentifierUID UnboundedArraysValidator::GetFirstUnboundedArrayAcrossAllSrgs() const
-    {
-        for (const auto& arrayOfUnboundedUids : m_unboundedUidsPerSpace)
-        {
-            for (const auto& uid : arrayOfUnboundedUids)
-            {
-                if (!uid.IsEmpty())
-                {
-                    return uid;
-                }
             }
         }
         return {};

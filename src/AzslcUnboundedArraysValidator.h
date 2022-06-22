@@ -20,11 +20,6 @@ namespace AZ::ShaderCompiler
 
         struct Options
         {
-            //! Takes the value of --use-spaces command line option.
-            //! When false, only one unbounded array of each type (b, t, u, s) can be daclared
-            //! across all SRGs.
-            //! When true, each SRG can have a its own unique set of unbounded arrays for b, t, u, s.
-            bool m_useSpacesEnabled = false;
             //! Takes the value of --unique-idx command line option.
             //! When false each register resource type b, t, u, s can have its own unbounded array per register space.
             //! When true only one of b, t, u, s can have the unbounded array.
@@ -67,14 +62,9 @@ namespace AZ::ShaderCompiler
 
         IdentifierUID GetFirstUnboundedArrayFromSrg(const IdentifierUID& srgUid) const;
 
-        IdentifierUID GetFirstUnboundedArrayAcrossAllSrgs() const;
-
         using SpaceIndex = uint32_t; // represents register space0, space1, ...
 
         //! Returns the space index that corresponds to the given SRG.
-        //! Calculating the correct space index depends on the commmand
-        //! line options --use-spaces (Options.m_useSpacesEnabled), and
-        //! --max-spaces (Options.m_maxSpaces).
         //! The calculated space index is stored in m_srgToSpaceIndex the first time
         //! this function is called for any given SRG.
         SpaceIndex GetSpaceIndexForSrg(const IdentifierUID& srgUid);

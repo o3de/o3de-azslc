@@ -22,7 +22,7 @@ result = 0  # to define for sub-tests
 resultFailed = 0
 def doTests(compiler, silent, azdxcpath):
     """
-    This test does a thorough validation of --use-spaces when with a limited amount
+    This test does a thorough validation of separate register spaces per SRG when a limited amount
     of spaces is defined with the command line argument --max-spaces.
     """
     global result
@@ -39,7 +39,7 @@ def doTests(compiler, silent, azdxcpath):
     numExpectedFailures = 0
     for maxSpaces in range(maxMaxSpaces):
         maxSpaces += 1
-        stderr, failed = testfuncs.buildAndGetError(sampleFilePath, compiler, True, ["--use-spaces", "--max-spaces", "%d" % maxSpaces])
+        stderr, failed = testfuncs.buildAndGetError(sampleFilePath, compiler, True, ["--max-spaces", "%d" % maxSpaces])
         if failed:
             stderr = stderr.decode('utf-8')
             srgA = "SRG%d" % maxSpaces

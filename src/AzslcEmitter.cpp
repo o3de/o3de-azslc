@@ -973,7 +973,7 @@ namespace AZ::ShaderCompiler
                 const QualifiedName implicitCB = MakeSrgConstantsCBName(srgId);
                 EmitStruct(srgInfo.m_implicitStruct, implicitStruct, options);
 
-                const auto spaceX = (options.m_useLogicalSpaces) ? ", space" + std::to_string(bindInfo.m_registerBinding.m_pair[bindSet].m_logicalSpace) : "";
+                const auto spaceX = ", space" + std::to_string(bindInfo.m_registerBinding.m_pair[bindSet].m_logicalSpace);
                 const auto implicitStructForEmission = GetTranslatedName(implicitStruct, UsageContext::ReferenceSite);
                 const auto implicitCBForEmission = GetTranslatedName(implicitCB, UsageContext::DeclarationSite);
                 m_out << "ConstantBuffer<" << implicitStructForEmission << "> " << implicitCBForEmission << " : register(b" << bindInfo.m_registerBinding.m_pair[bindSet].m_registerIndex << spaceX << ");\n\n";
@@ -1043,7 +1043,7 @@ namespace AZ::ShaderCompiler
         // note: instead of redoing this work ad-hoc, EmitText could be used directly on the ext type.
         const auto genericType = "<" + GetTranslatedName(varInfo->m_typeInfoExt.m_genericParameter, UsageContext::ReferenceSite) + ">";
 
-        const string spaceX = (options.m_useLogicalSpaces) ? ", space" + std::to_string(bindInfo.m_registerBinding.m_pair[bindSet].m_logicalSpace) : "";
+        const string spaceX = ", space" + std::to_string(bindInfo.m_registerBinding.m_pair[bindSet].m_logicalSpace);
         m_out << "ConstantBuffer " << genericType << " " << cbName;
         if (bindInfo.m_isUnboundedArray)
         {
@@ -1066,7 +1066,7 @@ namespace AZ::ShaderCompiler
 
         EmitEmptyLinesToLineNumber(varInfo->GetOriginalLineNumber());
 
-        const string spaceX = (options.m_useLogicalSpaces) ? ", space" + std::to_string(bindInfo.m_registerBinding.m_pair[bindSet].m_logicalSpace) : "";
+        const string spaceX = ", space" + std::to_string(bindInfo.m_registerBinding.m_pair[bindSet].m_logicalSpace);
         m_out << (varInfo->m_samplerState->m_isComparison ? "SamplerComparisonState " : "SamplerState ")
               << ReplaceSeparators(sId.m_name, Underscore);
         if (bindInfo.m_isUnboundedArray)
@@ -1111,11 +1111,7 @@ namespace AZ::ShaderCompiler
         auto*  varInfo = m_ir->GetSymbolSubAs<VarInfo>(tId.m_name);
         string varType = GetTranslatedName(varInfo->m_typeInfoExt, UsageContext::DeclarationSite);
         auto   registerTypeLetter = ToLower(BindingType::ToStr(RootParamTypeToBindingType(bindInfo.m_type)));
-        optional<string> stringifiedLogicalSpace;
-        if (options.m_useLogicalSpaces)
-        {
-            stringifiedLogicalSpace = std::to_string(bindInfo.m_registerBinding.m_pair[bindSet].m_logicalSpace);
-        }
+        optional<string> stringifiedLogicalSpace = std::to_string(bindInfo.m_registerBinding.m_pair[bindSet].m_logicalSpace);
 
         EmitEmptyLinesToLineNumber(varInfo->GetOriginalLineNumber());
 
