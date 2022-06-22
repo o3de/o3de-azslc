@@ -307,11 +307,8 @@ int main(int argc, const char* argv[])
     std::string output;
     cli.add_option("-o", output, "Output file (writes to stdout if omitted).");
 
-    bool useSpaces = false;
-    cli.add_flag("--use-spaces", useSpaces, "Use a logical space index per SRG.");
-
     bool uniqueIdx = false;
-    cli.add_flag("--unique-idx", uniqueIdx, "Use unique indices for all registers. e.g. b0, t0, u0, s0 becomes b0, t1, u2, s3.");
+    cli.add_flag("--unique-idx", uniqueIdx, "Use unique indices for all registers. e.g. b0, t0, u0, s0 becomes b0, t1, u2, s3. Use on platforms that don't differentiate registers by resource type.");
 
     bool cbBody = false;
     cli.add_flag("--cb-body", cbBody, "Emit ConstantBuffer body rather than using <T>.");
@@ -526,7 +523,7 @@ int main(int argc, const char* argv[])
             std::for_each(namespaces.begin(), namespaces.end(),
                 [&](const string& space) { ir.AddAttributeNamespaceFilter(space); });
 
-            UnboundedArraysValidator::Options unboundedArraysValidationOptions = { useSpaces, uniqueIdx };
+            UnboundedArraysValidator::Options unboundedArraysValidationOptions = { uniqueIdx };
             if (*maxSpacesOpt)
             {
                 unboundedArraysValidationOptions.m_maxSpaces = maxSpaces;
@@ -537,7 +534,6 @@ int main(int argc, const char* argv[])
             walker.walk(&semanticListener, tree);
 
             Options emitOptions;
-            emitOptions.m_useLogicalSpaces = useSpaces;
             emitOptions.m_useUniqueIndices = uniqueIdx;
             emitOptions.m_emitConstantBufferBody = cbBody;
             emitOptions.m_emitRootSig = rootSig;

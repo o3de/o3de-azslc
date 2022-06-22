@@ -23,11 +23,9 @@ resultFailed = 0
 def doTests(compiler, silent, azdxcpath):
     """
     This test validates:
-        1. Usage of --use-spaces when more than one SRG declare unbounded arrays.
-        2. Makes sure shader compilation fails if unbounded arrays of the same type of resource are declared
-           in different SRGs but --use-spaces is not used for compilation.
-        3. Expect the same shaders to fail if --unique-idx is used.
-        4. unbounded-arrays-unique-idx-should-pass.azsl with --unique-idx used to fail in v1.7.19, should pass now.
+        1. Compilation fails if an SRG has multiple unbounded arrays when --unique-idx is used.
+        2. unbounded-arrays-unique-idx-should-pass.azsl with --unique-idx used to fail in v1.7.19, should pass now.
+        2. unbounded-arrays-unique-idx-should-pass-2srgs.azsl with --unique-idx should pass too, because each SRG gets a unique register space.
     """
     global result
     global resultFailed
@@ -56,7 +54,11 @@ def doTests(compiler, silent, azdxcpath):
     sampleFilePath = os.path.abspath(os.path.join(workDir, "../Semantic/unbounded-arrays-unique-idx-should-pass.azsl"))
     if testhelper.verifyEmissionPatterns(sampleFilePath, compiler, silent, ["--unique-idx",]) : result += 1
     else: resultFailed += 1
-
+    
+    # expect success when using --unique-idx
+    sampleFilePath = os.path.abspath(os.path.join(workDir, "../Semantic/unbounded-arrays-unique-idx-should-pass-2srgs.azsl"))
+    if testhelper.verifyEmissionPatterns(sampleFilePath, compiler, silent, ["--unique-idx",]) : result += 1
+    else: resultFailed += 1
 
     testhelper.printFailedTestList(silent)
     

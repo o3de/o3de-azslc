@@ -58,6 +58,7 @@ def launchCompiler(compilerPath, options, silent):
     '''returns a tuple (standard-output-text, process-return-code)'''
     arglist = [compilerPath]
     arglist.extend(options)
+    print ("    Running: ", ' '.join(arglist))
     process = subprocess.Popen(arglist, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     out, err = process.communicate()
     if not silent:
@@ -174,6 +175,6 @@ def verifyAllPredicates(predicates, j, silent=True):
         allok = allok and ok
     if not allok and not silent:
         print ("dump as parsed:")
-        pp = pprint.PrettyPrinter(indent=2)
+        pp = pprint.PrettyPrinter(indent=2, width=160)
         pp.pprint(j)
     return allok

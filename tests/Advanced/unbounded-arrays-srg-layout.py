@@ -19,7 +19,7 @@ import testfuncs
 # in the json srg layout.
 
 def verify(thefile, compilerPath, silent):
-    j, ok = testfuncs.buildAndGetJson(thefile, compilerPath, silent, ["--srg", "--use-spaces"])
+    j, ok = testfuncs.buildAndGetJson(thefile, compilerPath, silent, ["--srg"])
 
     if ok:
         predicates = []

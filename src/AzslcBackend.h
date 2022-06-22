@@ -27,7 +27,6 @@ namespace AZ::ShaderCompiler
     //! This structure is typically filled from parsed user settings from the command line
     struct Options
     {
-        bool m_useLogicalSpaces = false;
         bool m_useUniqueIndices = false;
         bool m_emitConstantBufferBody = false;
         bool m_emitRootSig = false;

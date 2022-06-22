@@ -639,7 +639,7 @@ def verifyStructsPackingOpenGL(thefile, compilerPath, silent):
     return True if ok else False
 
 def verifyPackingRelaxedUseSpaces(thefile, compilerPath, silent):
-    j, ok = testfuncs.buildAndGetJson(thefile, compilerPath, silent, ["--srg", "--use-spaces"])
+    j, ok = testfuncs.buildAndGetJson(thefile, compilerPath, silent, ["--srg"])
 
     if ok:
         predicates = []
@@ -750,35 +750,35 @@ def verifyPackingRelaxedNoSpaces(thefile, compilerPath, silent):
         # Shader Resource Group 1
         predicates.append(lambda: j["ShaderResourceGroups"][1]["inputsForBufferViews"][0]["type"]    == "ConstantBuffer<Light>")
         predicates.append(lambda: j["ShaderResourceGroups"][1]["inputsForBufferViews"][0]["count"]   == 1)
-        predicates.append(lambda: j["ShaderResourceGroups"][1]["inputsForBufferViews"][0]["index"]   == 3)
-        predicates.append(lambda: j["ShaderResourceGroups"][1]["inputsForBufferViews"][0]["space"]   == 0)
+        predicates.append(lambda: j["ShaderResourceGroups"][1]["inputsForBufferViews"][0]["index"]   == 0)
+        predicates.append(lambda: j["ShaderResourceGroups"][1]["inputsForBufferViews"][0]["space"]   == 1)
         predicates.append(lambda: j["ShaderResourceGroups"][1]["inputsForBufferViews"][0]["stride"]  == 144)
 
         predicates.append(lambda: j["ShaderResourceGroups"][1]["inputsForBufferViews"][1]["type"]    == "Buffer<float3>")
         predicates.append(lambda: j["ShaderResourceGroups"][1]["inputsForBufferViews"][1]["count"]   == 2)
-        predicates.append(lambda: j["ShaderResourceGroups"][1]["inputsForBufferViews"][1]["index"]   == 2)
-        predicates.append(lambda: j["ShaderResourceGroups"][1]["inputsForBufferViews"][1]["space"]   == 0)
+        predicates.append(lambda: j["ShaderResourceGroups"][1]["inputsForBufferViews"][1]["index"]   == 0)
+        predicates.append(lambda: j["ShaderResourceGroups"][1]["inputsForBufferViews"][1]["space"]   == 1)
         predicates.append(lambda: j["ShaderResourceGroups"][1]["inputsForBufferViews"][1]["stride"]  == 12)
 
         predicates.append(lambda: j["ShaderResourceGroups"][1]["inputsForBufferViews"][2]["type"]    == "StructuredBuffer<S>")
         predicates.append(lambda: j["ShaderResourceGroups"][1]["inputsForBufferViews"][2]["count"]   == 2)
-        predicates.append(lambda: j["ShaderResourceGroups"][1]["inputsForBufferViews"][2]["index"]   == 4)
-        predicates.append(lambda: j["ShaderResourceGroups"][1]["inputsForBufferViews"][2]["space"]   == 0)
+        predicates.append(lambda: j["ShaderResourceGroups"][1]["inputsForBufferViews"][2]["index"]   == 2)
+        predicates.append(lambda: j["ShaderResourceGroups"][1]["inputsForBufferViews"][2]["space"]   == 1)
         predicates.append(lambda: j["ShaderResourceGroups"][1]["inputsForBufferViews"][2]["stride"]  == 16)
 
         # Shader Resource Group 2
         predicates.append(lambda: j["ShaderResourceGroups"][2]["inputsForImageViews"][0]["id"]       == "m_texCube1")
         predicates.append(lambda: j["ShaderResourceGroups"][2]["inputsForImageViews"][0]["type"]     == "TextureCube")
         predicates.append(lambda: j["ShaderResourceGroups"][2]["inputsForImageViews"][0]["count"]    == 1)
-        predicates.append(lambda: j["ShaderResourceGroups"][2]["inputsForImageViews"][0]["index"]    == 6)
-        predicates.append(lambda: j["ShaderResourceGroups"][2]["inputsForImageViews"][0]["space"]    == 0)
+        predicates.append(lambda: j["ShaderResourceGroups"][2]["inputsForImageViews"][0]["index"]    == 0)
+        predicates.append(lambda: j["ShaderResourceGroups"][2]["inputsForImageViews"][0]["space"]    == 2)
         predicates.append(lambda: j["ShaderResourceGroups"][2]["inputsForImageViews"][0]["stride"]  == 16)
 
         predicates.append(lambda: j["ShaderResourceGroups"][2]["inputsForImageViews"][1]["id"]       == "m_tex2d1")
         predicates.append(lambda: j["ShaderResourceGroups"][2]["inputsForImageViews"][1]["type"]     == "Texture2D<float3>")
         predicates.append(lambda: j["ShaderResourceGroups"][2]["inputsForImageViews"][1]["count"]    == 1)
-        predicates.append(lambda: j["ShaderResourceGroups"][2]["inputsForImageViews"][1]["index"]    == 7)
-        predicates.append(lambda: j["ShaderResourceGroups"][2]["inputsForImageViews"][1]["space"]    == 0)
+        predicates.append(lambda: j["ShaderResourceGroups"][2]["inputsForImageViews"][1]["index"]    == 1)
+        predicates.append(lambda: j["ShaderResourceGroups"][2]["inputsForImageViews"][1]["space"]    == 2)
         predicates.append(lambda: j["ShaderResourceGroups"][2]["inputsForImageViews"][1]["stride"]  == 12)
 
 
@@ -829,35 +829,35 @@ def verifyPackingRelaxedUniqueIdx(thefile, compilerPath, silent):
         # Shader Resource Group 1
         predicates.append(lambda: j["ShaderResourceGroups"][1]["inputsForBufferViews"][0]["type"]    == "ConstantBuffer<Light>")
         predicates.append(lambda: j["ShaderResourceGroups"][1]["inputsForBufferViews"][0]["count"]   == 1)
-        predicates.append(lambda: j["ShaderResourceGroups"][1]["inputsForBufferViews"][0]["index"]   == 9)
-        predicates.append(lambda: j["ShaderResourceGroups"][1]["inputsForBufferViews"][0]["space"]   == 0)
+        predicates.append(lambda: j["ShaderResourceGroups"][1]["inputsForBufferViews"][0]["index"]   == 4)
+        predicates.append(lambda: j["ShaderResourceGroups"][1]["inputsForBufferViews"][0]["space"]   == 1)
         predicates.append(lambda: j["ShaderResourceGroups"][1]["inputsForBufferViews"][0]["stride"]  == 144)
 
         predicates.append(lambda: j["ShaderResourceGroups"][1]["inputsForBufferViews"][1]["type"]    == "Buffer<float3>")
         predicates.append(lambda: j["ShaderResourceGroups"][1]["inputsForBufferViews"][1]["count"]   == 2)
-        predicates.append(lambda: j["ShaderResourceGroups"][1]["inputsForBufferViews"][1]["index"]   == 5)
-        predicates.append(lambda: j["ShaderResourceGroups"][1]["inputsForBufferViews"][1]["space"]   == 0)
+        predicates.append(lambda: j["ShaderResourceGroups"][1]["inputsForBufferViews"][1]["index"]   == 0)
+        predicates.append(lambda: j["ShaderResourceGroups"][1]["inputsForBufferViews"][1]["space"]   == 1)
         predicates.append(lambda: j["ShaderResourceGroups"][1]["inputsForBufferViews"][1]["stride"]  == 12)
 
         predicates.append(lambda: j["ShaderResourceGroups"][1]["inputsForBufferViews"][2]["type"]    == "StructuredBuffer<S>")
         predicates.append(lambda: j["ShaderResourceGroups"][1]["inputsForBufferViews"][2]["count"]   == 2)
-        predicates.append(lambda: j["ShaderResourceGroups"][1]["inputsForBufferViews"][2]["index"]   == 7)
-        predicates.append(lambda: j["ShaderResourceGroups"][1]["inputsForBufferViews"][2]["space"]   == 0)
+        predicates.append(lambda: j["ShaderResourceGroups"][1]["inputsForBufferViews"][2]["index"]   == 2)
+        predicates.append(lambda: j["ShaderResourceGroups"][1]["inputsForBufferViews"][2]["space"]   == 1)
         predicates.append(lambda: j["ShaderResourceGroups"][1]["inputsForBufferViews"][2]["stride"]  == 16)
 
         # Shader Resource Group 2
         predicates.append(lambda: j["ShaderResourceGroups"][2]["inputsForImageViews"][0]["id"]       == "m_texCube1")
         predicates.append(lambda: j["ShaderResourceGroups"][2]["inputsForImageViews"][0]["type"]     == "TextureCube")
         predicates.append(lambda: j["ShaderResourceGroups"][2]["inputsForImageViews"][0]["count"]    == 1)
-        predicates.append(lambda: j["ShaderResourceGroups"][2]["inputsForImageViews"][0]["index"]    == 10)
-        predicates.append(lambda: j["ShaderResourceGroups"][2]["inputsForImageViews"][0]["space"]    == 0)
+        predicates.append(lambda: j["ShaderResourceGroups"][2]["inputsForImageViews"][0]["index"]    == 0)
+        predicates.append(lambda: j["ShaderResourceGroups"][2]["inputsForImageViews"][0]["space"]    == 2)
         predicates.append(lambda: j["ShaderResourceGroups"][2]["inputsForImageViews"][0]["stride"]  == 16)
 
         predicates.append(lambda: j["ShaderResourceGroups"][2]["inputsForImageViews"][1]["id"]       == "m_tex2d1")
         predicates.append(lambda: j["ShaderResourceGroups"][2]["inputsForImageViews"][1]["type"]     == "Texture2D<float3>")
         predicates.append(lambda: j["ShaderResourceGroups"][2]["inputsForImageViews"][1]["count"]    == 1)
-        predicates.append(lambda: j["ShaderResourceGroups"][2]["inputsForImageViews"][1]["index"]    == 11)
-        predicates.append(lambda: j["ShaderResourceGroups"][2]["inputsForImageViews"][1]["space"]    == 0)
+        predicates.append(lambda: j["ShaderResourceGroups"][2]["inputsForImageViews"][1]["index"]    == 1)
+        predicates.append(lambda: j["ShaderResourceGroups"][2]["inputsForImageViews"][1]["space"]    == 2)
         predicates.append(lambda: j["ShaderResourceGroups"][2]["inputsForImageViews"][1]["stride"]  == 12)
 
 
@@ -866,7 +866,7 @@ def verifyPackingRelaxedUniqueIdx(thefile, compilerPath, silent):
     return True if ok else False
 
 def verifyPackingRelaxedUniqueIdxUseSpaces(thefile, compilerPath, silent):
-    j, ok = testfuncs.buildAndGetJson(thefile, compilerPath, silent, ["--srg", "--unique-idx", "--use-spaces"])
+    j, ok = testfuncs.buildAndGetJson(thefile, compilerPath, silent, ["--srg", "--unique-idx"])
 
     if ok:
         predicates = []
@@ -1306,8 +1306,8 @@ def verifyPackingDirectXInlineConstants(thefile, compilerPath, silent):
 
         # Inline constant buffer reflection data validation
         predicates.append(lambda: j["RootConstantBuffer"]["bufferForRootConstants"]["count"]                    ==    1)
-        predicates.append(lambda: j["RootConstantBuffer"]["bufferForRootConstants"]["index"]                    ==    1)
-        predicates.append(lambda: j["RootConstantBuffer"]["bufferForRootConstants"]["space"]                    ==    0)
+        predicates.append(lambda: j["RootConstantBuffer"]["bufferForRootConstants"]["index"]                    ==    0)
+        predicates.append(lambda: j["RootConstantBuffer"]["bufferForRootConstants"]["space"]                    ==    1)
         predicates.append(lambda: j["RootConstantBuffer"]["bufferForRootConstants"]["usage"]                    ==    "Read")
         predicates.append(lambda: j["RootConstantBuffer"]["bufferForRootConstants"]["sizeInBytes"]              ==    60)
         predicates.append(lambda: j["RootConstantBuffer"]["bufferForRootConstants"]["id"]                       ==    "Root_Constants")
@@ -1342,8 +1342,8 @@ def verifyPackingMetalInlineConstants(thefile, compilerPath, silent):
 
         # Inline constant buffer reflection data validation
         predicates.append(lambda: j["RootConstantBuffer"]["bufferForRootConstants"]["count"]                    ==    1)
-        predicates.append(lambda: j["RootConstantBuffer"]["bufferForRootConstants"]["index"]                    ==    1)
-        predicates.append(lambda: j["RootConstantBuffer"]["bufferForRootConstants"]["space"]                    ==    0)
+        predicates.append(lambda: j["RootConstantBuffer"]["bufferForRootConstants"]["index"]                    ==    0)
+        predicates.append(lambda: j["RootConstantBuffer"]["bufferForRootConstants"]["space"]                    ==    1)
         predicates.append(lambda: j["RootConstantBuffer"]["bufferForRootConstants"]["usage"]                    ==    "Read")
         predicates.append(lambda: j["RootConstantBuffer"]["bufferForRootConstants"]["sizeInBytes"]              ==    64)
         predicates.append(lambda: j["RootConstantBuffer"]["bufferForRootConstants"]["id"]                       ==    "Root_Constants")

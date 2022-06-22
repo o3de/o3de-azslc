@@ -203,19 +203,16 @@ namespace AZ::ShaderCompiler
 
     void MultiBindingLocationMaker::SignalIncrementSpace(std::function<void(int, int)> warningMessageFunctionForMinDescOvershoot)
     {
-        if (m_options.m_useLogicalSpaces)
+        if (m_options.m_minAvailableDescriptors.m_spaces >= 0
+            && m_untainted.m_space >= m_options.m_minAvailableDescriptors.m_spaces)
         {
-            if (m_options.m_minAvailableDescriptors.m_spaces >= 0
-                && m_untainted.m_space >= m_options.m_minAvailableDescriptors.m_spaces)
-            {
-                warningMessageFunctionForMinDescOvershoot(m_untainted.m_space, m_options.m_minAvailableDescriptors.m_spaces);
-            }
+            warningMessageFunctionForMinDescOvershoot(m_untainted.m_space, m_options.m_minAvailableDescriptors.m_spaces);
+        }
 
-            m_untainted.IncrementSpace();
-            if (m_options.m_maxSpaces > m_merged.m_space + 1) // example: (1 > 0 + 1)  <=>  (1 > 1)  <=>  (false)  --> never increment space. stay at 0. which respects max-spaces=1
-            {
-                m_merged.IncrementSpace();
-            }
+        m_untainted.IncrementSpace();
+        if (m_options.m_maxSpaces > m_merged.m_space + 1) // example: (1 > 0 + 1)  <=>  (1 > 1)  <=>  (false)  --> never increment space. stay at 0. which respects max-spaces=1
+        {
+            m_merged.IncrementSpace();
         }
     }
 

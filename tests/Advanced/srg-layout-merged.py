@@ -14,7 +14,7 @@ from clr import *
 import testfuncs
 
 def verify(thefile, compilerPath, silent):
-    j, ok = testfuncs.buildAndGetJson(thefile, compilerPath, silent, ["--namespace=vk", "--srg", "--use-spaces", "--max-spaces=2"])
+    j, ok = testfuncs.buildAndGetJson(thefile, compilerPath, silent, ["--namespace=vk", "--srg", "--max-spaces=2"])
 
     if ok:
         predicates = []

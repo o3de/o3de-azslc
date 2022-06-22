@@ -3,7 +3,7 @@
 
 "struct SRG_S"
 "float4 albedo ;"
-"StructuredBuffer < SRG_S > SRG_m_buf : register ( t0 ) ;"
+"StructuredBuffer < SRG_S > SRG_m_buf : register ( t0 , space0 ) ;"
 "struct Thingie_vd_S"
 "void Thingie ( )"
 ":: Thingie_vd_S s ;"

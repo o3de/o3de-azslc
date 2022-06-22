@@ -17,3 +17,4 @@ float4 MainPS() : SV_Target0
     float4 useFloat = varFloat4;
     return useFloat; 
 }
+    

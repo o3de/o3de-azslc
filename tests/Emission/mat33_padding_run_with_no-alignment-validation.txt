@@ -60,7 +60,7 @@
 "float3x3 SRG1_m_srg_mat25 ;"
 "int SRG1_m_i26 ;"
 "} ;"
-"ConstantBuffer < :: SRG1_SRGConstantsStruct > SRG1_SRGConstantBuffer : register ( b0 ) ;"
+"ConstantBuffer < :: SRG1_SRGConstantsStruct > SRG1_SRGConstantBuffer : register ( b0 , space0 ) ;"
 "float4 MainPS ( float2 uv : TEXCOORD0 ) : SV_Target0"
 "{"
 "float3x3 anotherMatrix ;"

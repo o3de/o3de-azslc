@@ -1,4 +1,4 @@
-// This file requires --use-spaces and (--max-spaces >= 4) to pass.
+// This file requires a separate register space per SRG and (--max-spaces >= 4) to pass.
 
 ShaderResourceGroupSemantic slot1
 {
