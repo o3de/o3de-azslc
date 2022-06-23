@@ -1137,8 +1137,7 @@ namespace AZ::ShaderCompiler
         auto*  varInfo = m_ir->GetSymbolSubAs<VarInfo>(tId.m_name);
         string varType = GetTranslatedName(varInfo->m_typeInfoExt, UsageContext::DeclarationSite);
         auto   registerTypeLetter = ToLower(BindingType::ToStr(RootParamTypeToBindingType(bindInfo.m_type)));
-        optional<string> stringifiedLogicalSpace;
-        stringifiedLogicalSpace = std::to_string(bindInfo.m_registerBinding.m_pair[bindSet].m_logicalSpace);
+        optional<string> stringifiedLogicalSpace = std::to_string(bindInfo.m_registerBinding.m_pair[bindSet].m_logicalSpace);
 
         EmitEmptyLinesToLineNumber(varInfo->GetOriginalLineNumber());
 
