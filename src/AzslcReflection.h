@@ -43,8 +43,6 @@ namespace AZ::ShaderCompiler
         void DumpResourceBindingDependencies(const Options& options) const;
 
     private:
-        // Serialize a binding to Json
-        void ReflectBinding(Json::Value& output, const RootSigDesc::SrgParamDesc& bindInfo) const;
 
         //! Builds member variable packing information and adds it to the membersContainer
         uint32_t BuildMemberLayout(Json::Value& membersContainer, string_view namePrefix, const IdentifierUID& memberId, const bool isArrayItr, const Options& options, const AZ::ShaderCompiler::Packing::Layout layoutPacking, uint32_t& offset) const;

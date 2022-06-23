@@ -631,7 +631,7 @@ namespace AZ::ShaderCompiler
         m_out << GetVariantList(options);
     }
 
-    void CodeReflection::ReflectBinding(Json::Value& output, const RootSigDesc::SrgParamDesc& bindInfo) const
+    static void ReflectBinding(Json::Value& output, const RootSigDesc::SrgParamDesc& bindInfo)
     {
         output["count"] = (bindInfo.m_isUnboundedArray) ? -1 : bindInfo.m_registerRange;
         output["index"] = bindInfo.m_registerBinding.m_pair[BindingPair::Set::Untainted].m_registerIndex;
@@ -947,7 +947,7 @@ namespace AZ::ShaderCompiler
                     return allEntriesJson;
                 };
 
-                auto makeJsonNodeForOneResource = [this, &dependencyListToJson](const set<IdentifierUID>& dependencyList,
+                auto makeJsonNodeForOneResource = [&dependencyListToJson](const set<IdentifierUID>& dependencyList,
                     const RootSigDesc::SrgParamDesc& binding,
                     const Json::Value& allConstants)
                 {

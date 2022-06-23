@@ -101,9 +101,6 @@ namespace AZ::ShaderCompiler
 
         int m_space = 0;  //<! logical space
 
-        // See: MultiBindingLocationMarker::m_unboundedSpillSpace
-        int m_unboundedSpillSpace;
-
         int m_registerPos[BindingType::EndEnumeratorSentinel_] = {0};   //!< register index, one by type.
         int m_accumulated[BindingType::EndEnumeratorSentinel_] = {0};  //!< Counter for total usage independently from space increments
         int m_accumulatedUnused[BindingType::EndEnumeratorSentinel_] = {0};  //!< Counter for holes created by indices unification
@@ -116,7 +113,7 @@ namespace AZ::ShaderCompiler
     {
     public:
         MultiBindingLocationMaker(const Options& options)
-            : m_options{ options }
+            : m_options(options)
         {}
 
         void SignalIncrementSpace(std::function<void(int, int)> warningMessageFunctionForMinDescOvershoot);

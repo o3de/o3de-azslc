@@ -64,10 +64,7 @@ namespace AZ::ShaderCompiler
     {
         if (isUnboundedArray)
         {
-            if (m_options.m_useUnboundedSpacesEnabled)
-            {
-                ++m_unboundedSpillSpace;
-            }
+            ++m_unboundedSpillSpace;
 
             return CheckUnboundedArrayFieldCanBeAddedToSrg(srgUid, srgInfo, varUid, varInfo, typeClass, errorMessage);
         }
