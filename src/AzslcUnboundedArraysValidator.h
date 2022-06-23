@@ -9,6 +9,7 @@
 
 #include "GenericUtils.h"
 #include "AzslcKindInfo.h"
+#include "AzslcRegisters.h"
 
 namespace AZ::ShaderCompiler
 {
@@ -20,6 +21,10 @@ namespace AZ::ShaderCompiler
 
         struct Options
         {
+            //! Takes the value of --use-unbounded-spaces command line option.
+            //! When false, each unbounded array will use the same register space as the SRG that contains it.
+            //! When true, each unbounded array will use a unique register space.
+            bool m_useUnboundedSpacesEnabled = false;
             //! Takes the value of --unique-idx command line option.
             //! When false each register resource type b, t, u, s can have its own unbounded array per register space.
             //! When true only one of b, t, u, s can have the unbounded array.
@@ -62,8 +67,6 @@ namespace AZ::ShaderCompiler
 
         IdentifierUID GetFirstUnboundedArrayFromSrg(const IdentifierUID& srgUid) const;
 
-        using SpaceIndex = uint32_t; // represents register space0, space1, ...
-
         //! Returns the space index that corresponds to the given SRG.
         //! The calculated space index is stored in m_srgToSpaceIndex the first time
         //! this function is called for any given SRG.
@@ -82,7 +85,9 @@ namespace AZ::ShaderCompiler
         //! type, therefore we can detect if the user is trying to declare another resource after an unbounded
         //! array, which is forbidden.
         //! The size of this array is managed in GetSpaceIndexForSrg().
-        vector<ArrayOfUnboundedUids> m_unboundedUidsPerSpace;
+        map<SpaceIndex, ArrayOfUnboundedUids> m_unboundedUidsPerSpace;
+
+        SpaceIndex m_unboundedSpillSpace = FirstUnboundedSpace - 1; // -1 because the first thing we do is increment
 
     };
 } // namespace AZ::ShaderCompiler

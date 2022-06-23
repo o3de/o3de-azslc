@@ -40,7 +40,7 @@ namespace AZ::ShaderCompiler
 
         // Only types that can be declared as unbounded array consume register space.
         BindingType bindingType = GetBindingType(varInfo.m_typeInfoExt);
-        auto spaceIndex = GetSpaceIndexForSrg(srgUid);
+        auto spaceIndex = m_options.m_useUnboundedSpacesEnabled ? m_unboundedSpillSpace : GetSpaceIndexForSrg(srgUid);
         ArrayOfUnboundedUids& arrayOfUnboundedUids = m_unboundedUidsPerSpace[spaceIndex];
         const IdentifierUID& unboundedUid = arrayOfUnboundedUids[bindingType];
         if (!unboundedUid.IsEmpty())
@@ -64,9 +64,13 @@ namespace AZ::ShaderCompiler
     {
         if (isUnboundedArray)
         {
+            if (m_options.m_useUnboundedSpacesEnabled)
+            {
+                ++m_unboundedSpillSpace;
+            }
+
             return CheckUnboundedArrayFieldCanBeAddedToSrg(srgUid, srgInfo, varUid, varInfo, typeClass, errorMessage);
         }
-        auto spaceIndex = GetSpaceIndexForSrg(srgUid);
 
         if (m_unboundedUidsPerSpace.empty())
         {
@@ -85,8 +89,9 @@ namespace AZ::ShaderCompiler
         }
 
         // Only types that can be declared as unbounded array consume register space.
-        const ArrayOfUnboundedUids& arrayOfUnboundedUids = m_unboundedUidsPerSpace[spaceIndex];
         BindingType bindingType = GetBindingType(varInfo.m_typeInfoExt);
+        auto spaceIndex = GetSpaceIndexForSrg(srgUid);
+        const ArrayOfUnboundedUids& arrayOfUnboundedUids = m_unboundedUidsPerSpace[spaceIndex];
         const IdentifierUID& unboundedUid = arrayOfUnboundedUids[bindingType];
         if (!unboundedUid.IsEmpty())
         {
@@ -102,7 +107,7 @@ namespace AZ::ShaderCompiler
         return true;
     }
 
-    UnboundedArraysValidator::SpaceIndex UnboundedArraysValidator::GetSpaceIndexForSrg(const IdentifierUID& srgUid)
+    SpaceIndex UnboundedArraysValidator::GetSpaceIndexForSrg(const IdentifierUID& srgUid)
     {
         SpaceIndex spaceIndex = 0;
         auto findIt = m_srgToSpaceIndex.find(srgUid);
@@ -118,8 +123,6 @@ namespace AZ::ShaderCompiler
                 spaceIndex = m_maxSpaceIndex;
             }
 
-            // We are using resize() instead of push_back() because if the size doesn't change resize() is no-op.
-            m_unboundedUidsPerSpace.resize(static_cast<size_t>(m_maxSpaceIndex) + 1);
             m_srgToSpaceIndex.emplace(srgUid, spaceIndex);
         }
         else
@@ -156,8 +159,9 @@ namespace AZ::ShaderCompiler
             return {};
         }
         SpaceIndex spaceIndex = itor->second;
-        const ArrayOfUnboundedUids& arrayOfUnboundedUids = m_unboundedUidsPerSpace[spaceIndex];
-        for (const auto& uid : arrayOfUnboundedUids)
+
+        auto spaceIter = m_unboundedUidsPerSpace.find(spaceIndex);
+        for (const auto& uid : spaceIter->second)
         {
             if (!uid.IsEmpty())
             {
