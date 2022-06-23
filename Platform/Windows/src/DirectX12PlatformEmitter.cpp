@@ -124,6 +124,6 @@ namespace AZ::ShaderCompiler
         rootAttrList.insert(rootAttrList.begin(), "\"RootFlags(0)");
 
         return Decorate("#define sig ", Join(rootAttrList.begin(), rootAttrList.end(), ", \" \\\n"), "\"\n\n");
-
     }
+
 }

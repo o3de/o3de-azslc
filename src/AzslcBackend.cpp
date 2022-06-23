@@ -571,15 +571,23 @@ namespace AZ::ShaderCompiler
 
         auto regType = RootParamTypeToBindingType(paramType);
 
-        BindingPair binding = bindInfo.GetCurrent(regType);
+        BindingPair binding;
         if (isUnboundedArray && options.m_useUnboundedSpaces)
         {
             binding.m_pair[BindingPair::Set::Untainted].m_logicalSpace = m_unboundedSpillSpace;
             binding.m_pair[BindingPair::Set::Merged].m_logicalSpace = m_unboundedSpillSpace;
             ++m_unboundedSpillSpace;
+
+            // Since every unbounded array is getting its own register space, they can all use register 0.
+            binding.m_pair[BindingPair::Set::Untainted].m_registerIndex = 0;
+            binding.m_pair[BindingPair::Set::Merged].m_registerIndex = 0;
+        }
+        else
+        {
+            binding = bindInfo.GetCurrent(regType);
+            bindInfo.SignalIncrementRegister(regType, count);
         }
 
-        bindInfo.SignalIncrementRegister(regType, count);
 
         auto srgElementDesc = RootSigDesc::SrgParamDesc{ id, paramType, binding, count, -1, isUnboundedArray};
 
