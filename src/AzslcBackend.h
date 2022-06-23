@@ -24,7 +24,7 @@ namespace AZ::ShaderCompiler
         int m_textures = -1;
         int m_buffers = -1;
     };
-    
+
     //! This structure is typically filled from parsed user settings from the command line
     struct Options
     {
@@ -100,7 +100,6 @@ namespace AZ::ShaderCompiler
         int GetAccumulated(BindingType r) const;
 
         int m_space = 0;  //<! logical space
-
         int m_registerPos[BindingType::EndEnumeratorSentinel_] = {0};   //!< register index, one by type.
         int m_accumulated[BindingType::EndEnumeratorSentinel_] = {0};  //!< Counter for total usage independently from space increments
         int m_accumulatedUnused[BindingType::EndEnumeratorSentinel_] = {0};  //!< Counter for holes created by indices unification

@@ -724,7 +724,6 @@ namespace AZ::ShaderCompiler
                 dataView["id"]     = ExtractLeaf(tId.m_name).data();
                 dataView["type"]   = viewName;
                 dataView["usage"]  = (isReadWriteView) ? "ReadWrite" : "Read";
-
                 ReflectBinding(dataView, bindInfo);
                 dataView["stride"] = strideSize;
 
