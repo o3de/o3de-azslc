@@ -317,7 +317,7 @@ int main(int argc, const char* argv[])
     cli.add_flag("--cb-body", cbBody, "Emit ConstantBuffer body rather than using <T>.");
 
     bool rootSig = false;
-    cli.add_flag("--root-sig", rootSig, "Emit RootSignature for parameter binding in the shader.");
+    cli.add_flag("--root-sig", rootSig, "Emit RootSignature for parameter binding in the shader. --namespace must also be used to select a specific API.");
 
     int rootConst = 0;
     auto rootConstOpt = cli.add_option("--root-const", rootConst, "Maximum size in bytes of the root constants buffer.");
@@ -468,6 +468,11 @@ int main(int argc, const char* argv[])
         if (!in.good())
         {
             throw std::runtime_error("input file could not be opened");
+        }
+
+        if (rootSig && namespaces.empty())
+        {
+            throw std::runtime_error("--root-sig requested but no API was selected. Use a --namespace option as well.");
         }
 
         const string inputFileName = useStdin ? "" : inputFile;
