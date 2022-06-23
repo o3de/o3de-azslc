@@ -74,7 +74,5 @@ namespace AZ::ShaderCompiler
         //! Aligns the size for the data containing the root constants.
         //! @param size  The size of stride
         virtual uint32_t AlignRootConstants(uint32_t size) const;
-
-        virtual bool UnboundedArraysUseSpillSpace() const { return false; }
     };
 }

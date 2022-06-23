@@ -71,14 +71,11 @@ namespace AZ::ShaderCompiler
             {
                 if (param.m_type != RootParamType::SrgConstantCB && param.m_type != RootParamType::RootConstantCB) // already treated in the previous loop
                 {
-                    // In DX12, unbounded arrays are assigned their own space instead of using the space assigned to the SRG
-                    int space = param.m_isUnboundedArray ? param.m_spillSpace : param.m_registerBinding.m_pair[querySet].m_logicalSpace;
-
                     std::stringstream rootParam;
                     rootParam << RootParamType::ToStr(param.m_type)
                         << "(" << ToLower(BindingType::ToStr(RootParamTypeToBindingType(param.m_type)));  // eg "CBV(b" or "SRV(t" or "Sampler(s"
                     rootParam << std::to_string(param.m_registerBinding.m_pair[querySet].m_registerIndex)
-                        << ", space = " << std::to_string(space)
+                        << ", space = " << std::to_string(param.m_registerBinding.m_pair[querySet].m_logicalSpace)
                         << ", numDescriptors = " << std::to_string(param.m_registerRange) << ")";
 
                     const auto* memberInfo = codeEmitter.GetIR()->GetSymbolSubAs<VarInfo>(param.m_uid.m_name);
