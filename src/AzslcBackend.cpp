@@ -225,17 +225,10 @@ namespace AZ::ShaderCompiler
         }
     }
 
-    void MultiBindingLocationMaker::SignalRegisterIncrement(BindingType regType, int count, bool isUnbounded)
+    void MultiBindingLocationMaker::SignalIncrementRegister(BindingType regType, int count)
     {
         m_untainted.m_registerPos[regType] += count;
         m_merged.m_registerPos[regType] += count;
-
-        if (isUnbounded)
-        {
-            m_untainted.m_unboundedSpillSpace = m_unboundedSpillSpace;
-            m_merged.m_unboundedSpillSpace = m_unboundedSpillSpace;
-            ++m_unboundedSpillSpace;
-        }
     }
 
     BindingPair MultiBindingLocationMaker::GetCurrent(BindingType regType)
@@ -545,7 +538,7 @@ namespace AZ::ShaderCompiler
         }
     }
 
-    RootSigDesc::SrgParamDesc Backend::ReflectOneExternalResource(IdentifierUID id, MultiBindingLocationMaker& bindInfo, RootSigDesc& rootSig) const
+    RootSigDesc::SrgParamDesc Backend::ReflectOneExternalResource(const Options& options, IdentifierUID id, MultiBindingLocationMaker& bindInfo, RootSigDesc& rootSig) const
     {
         Kind kind = m_ir->GetKind(id);
         int count = 1;
@@ -578,31 +571,33 @@ namespace AZ::ShaderCompiler
 
         auto regType = RootParamTypeToBindingType(paramType);
 
-        auto srgElementDesc = RootSigDesc::SrgParamDesc{
-            id,
-            paramType,
-            bindInfo.GetCurrent(regType),
-            count,
-            -1,
-            bindInfo.m_unboundedSpillSpace,
-            isUnboundedArray };
+        BindingPair binding = bindInfo.GetCurrent(regType);
+        if (isUnboundedArray && options.m_useUnboundedSpaces)
+        {
+            binding.m_pair[BindingPair::Set::Untainted].m_logicalSpace = m_unboundedSpillSpace;
+            binding.m_pair[BindingPair::Set::Merged].m_logicalSpace = m_unboundedSpillSpace;
+            ++m_unboundedSpillSpace;
+        }
+
+        bindInfo.SignalIncrementRegister(regType, count);
+
+        auto srgElementDesc = RootSigDesc::SrgParamDesc{ id, paramType, binding, count, -1, isUnboundedArray};
 
         rootSig.m_descriptorMap.emplace(id, srgElementDesc);
-        bindInfo.SignalRegisterIncrement(regType, count, isUnboundedArray);
 
         return srgElementDesc;
     }
 
-    RootSigDesc::SrgParamDesc Backend::ReflectOneExternalResourceAndWrapWithUnifyIndices(IdentifierUID id, MultiBindingLocationMaker& bindInfo, RootSigDesc& rootSig) const
+    RootSigDesc::SrgParamDesc Backend::ReflectOneExternalResourceAndWrapWithUnifyIndices(const Options& options, IdentifierUID id, MultiBindingLocationMaker& bindInfo, RootSigDesc& rootSig) const
     {
-        auto paramDesc = ReflectOneExternalResource(id, bindInfo, rootSig);
+        auto paramDesc = ReflectOneExternalResource(options, id, bindInfo, rootSig);
         bindInfo.SignalUnifyIndices();
         return paramDesc;
     }
 
     RootSigDesc Backend::BuildSignatureDescription(const Options& options, int num32BitConst) const
     {
-        MultiBindingLocationMaker bindInfo{ options, m_unboundedSpillSpace };
+        MultiBindingLocationMaker bindInfo{ options };
         RootSigDesc rootSig;
 
         auto allSrgs = m_ir->m_symbols.GetOrderedSymbolsOfSubType_2<SRGInfo>();
@@ -633,7 +628,7 @@ namespace AZ::ShaderCompiler
                     continue;
                 }
                 srgDesc.m_parameters.push_back(
-                    ReflectOneExternalResourceAndWrapWithUnifyIndices(tId, bindInfo, rootSig) );
+                    ReflectOneExternalResourceAndWrapWithUnifyIndices(options, tId, bindInfo, rootSig) );
             }
             for (const auto sId : srgInfo->m_samplers)
             {
@@ -644,7 +639,7 @@ namespace AZ::ShaderCompiler
                     continue;
                 }
                 srgDesc.m_parameters.push_back(
-                    ReflectOneExternalResourceAndWrapWithUnifyIndices(sId, bindInfo, rootSig) );
+                    ReflectOneExternalResourceAndWrapWithUnifyIndices(options, sId, bindInfo, rootSig) );
             }
 
             bool hasSrgConstants = !srgInfo->m_implicitStruct.GetMemberFields().empty();
@@ -652,14 +647,14 @@ namespace AZ::ShaderCompiler
             if (hasSrgConstants || (hasConstantBuffers && options.m_emitConstantBufferBody))
             {
                 srgDesc.m_parameters.push_back(
-                    ReflectOneExternalResourceAndWrapWithUnifyIndices(srgUid, bindInfo, rootSig));
+                    ReflectOneExternalResourceAndWrapWithUnifyIndices(options, srgUid, bindInfo, rootSig));
             }
             if (!options.m_emitConstantBufferBody)  // emitCB is the SM5- "cbufer{}" block syntax. !emitCB is the "ConstantBuffer<>" SM5.1+ syntax
             {
                 for (const auto cId : srgInfo->m_CBs)
                 {
                     srgDesc.m_parameters.push_back(
-                        ReflectOneExternalResourceAndWrapWithUnifyIndices(cId, bindInfo, rootSig));
+                        ReflectOneExternalResourceAndWrapWithUnifyIndices(options, cId, bindInfo, rootSig));
                 }
             }
 
@@ -674,7 +669,7 @@ namespace AZ::ShaderCompiler
                 // Only srgInfo->m_unboundedArrays[0] is reflected because the "AzslcSemanticOrchestrator" already
                 // makes sure that only one unbounded array is declared inside the SRG when --unique-idx is enabled.
                 srgDesc.m_parameters.push_back(
-                    ReflectOneExternalResourceAndWrapWithUnifyIndices(srgInfo->m_unboundedArrays[0], bindInfo, rootSig));
+                    ReflectOneExternalResourceAndWrapWithUnifyIndices(options, srgInfo->m_unboundedArrays[0], bindInfo, rootSig));
             }
 
             bindInfo.SignalIncrementSpace(/*overshoot callback:*/[&, srgInfo = srgInfo, srgUid = srgUid](int numSpaces, int spacesAvailable)

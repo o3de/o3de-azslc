@@ -635,19 +635,9 @@ namespace AZ::ShaderCompiler
     {
         output["count"] = (bindInfo.m_isUnboundedArray) ? -1 : bindInfo.m_registerRange;
         output["index"] = bindInfo.m_registerBinding.m_pair[BindingPair::Set::Untainted].m_registerIndex;
+        output["space"] = bindInfo.m_registerBinding.m_pair[BindingPair::Set::Untainted].m_logicalSpace;
         output["index-merged"] = bindInfo.m_registerBinding.m_pair[BindingPair::Set::Merged].m_registerIndex;
-
-        if (bindInfo.m_isUnboundedArray && GetPlatformEmitter().UnboundedArraysUseSpillSpace())
-        {
-            output["space"] = bindInfo.m_spillSpace;
-            output["space-merged"] = bindInfo.m_spillSpace;
-        }
-        else
-        {
-            output["space"] = bindInfo.m_registerBinding.m_pair[BindingPair::Set::Untainted].m_logicalSpace;
-            output["space-merged"] = bindInfo.m_registerBinding.m_pair[BindingPair::Set::Merged].m_logicalSpace;
-        }
-
+        output["space-merged"] = bindInfo.m_registerBinding.m_pair[BindingPair::Set::Merged].m_logicalSpace;
     }
 
     void CodeReflection::DumpSRGLayout(const Options& options) const

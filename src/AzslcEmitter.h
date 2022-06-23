@@ -228,8 +228,5 @@ namespace AZ::ShaderCompiler
         // whether We are using a regular std::ostream or an instance of NewLineCounterStream.
         template <class StreamLike>
         void GetTextInStreamInternal(misc::Interval interval, StreamLike& output, bool emitNewLines) const;
-
-        // Given an SRG parameter, determines the space it belongs to based on the platform
-        int ResolveBindingSpace(const RootSigDesc::SrgParamDesc& bindInfo, BindingPair::Set bindSet) const;
     };
 }

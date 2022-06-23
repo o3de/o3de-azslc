@@ -66,8 +66,6 @@ namespace AZ::ShaderCompiler
             int m_registerRange = -1;
             int m_num32BitConstants = -1;
 
-            SpaceIndex m_spillSpace = FirstUnboundedSpace;
-
             // This flag is added so m_registerRange can take the value
             // of 1 and at the same time We do not forget that m_uid refers
             // to an unbounded array.
@@ -117,28 +115,21 @@ namespace AZ::ShaderCompiler
     class MultiBindingLocationMaker
     {
     public:
-        MultiBindingLocationMaker(const Options& options, SpaceIndex& unboundedSpillSpace)
+        MultiBindingLocationMaker(const Options& options)
             : m_options{ options }
-            , m_unboundedSpillSpace{ unboundedSpillSpace }
         {}
 
         void SignalIncrementSpace(std::function<void(int, int)> warningMessageFunctionForMinDescOvershoot);
 
         void SignalUnifyIndices();
         
-        void SignalRegisterIncrement(BindingType regType, int count, bool isUnbounded);
+        void SignalIncrementRegister(BindingType regType, int count);
 
         BindingPair GetCurrent(BindingType regType);
 
         SingleBindingLocationTracker m_untainted;
         SingleBindingLocationTracker m_merged;
         Options m_options;
-
-        // On some platforms (DX12), descriptor arrays occupy an individual register slot, and spaces are used
-        // to prevent overlapping ranges. When an unbounded array is encountered, we immediately assign it to
-        // the value of this member variable and increment. This is initialized in the constructor because the
-        // space we spill to must not collide with any other SRG declared in the shader.
-        SpaceIndex& m_unboundedSpillSpace;
     };
 
     //! This class intends to be a base umbrella for compiler back-end services.
@@ -174,9 +165,9 @@ namespace AZ::ShaderCompiler
 
         RootSigDesc BuildSignatureDescription(const Options& options, int num32BitConst) const;
 
-        RootSigDesc::SrgParamDesc ReflectOneExternalResource(IdentifierUID id, MultiBindingLocationMaker& bindInfo, RootSigDesc& rootSig) const;
+        RootSigDesc::SrgParamDesc ReflectOneExternalResource(const Options& options, IdentifierUID id, MultiBindingLocationMaker& bindInfo, RootSigDesc& rootSig) const;
 
-        RootSigDesc::SrgParamDesc ReflectOneExternalResourceAndWrapWithUnifyIndices(IdentifierUID id, MultiBindingLocationMaker& bindInfo, RootSigDesc& rootSig) const;
+        RootSigDesc::SrgParamDesc ReflectOneExternalResourceAndWrapWithUnifyIndices(const Options& options, IdentifierUID id, MultiBindingLocationMaker& bindInfo, RootSigDesc& rootSig) const;
 
         void AppendOptionRange(Json::Value& varOption, const IdentifierUID& varUid, const AZ::ShaderCompiler::VarInfo* varInfo, const Options& options) const;
 
@@ -189,8 +180,11 @@ namespace AZ::ShaderCompiler
         std::ostream&               m_out;
         IntermediateRepresentation* m_ir;
         TokenStream*                m_tokens;
-
-        // See MultiBindingLocationMaker::m_unboundedSpillSpace
+        
+        // On some platforms (DX12), descriptor arrays occupy an individual register slot, and spaces are used
+        // to prevent overlapping ranges. When an unbounded array is encountered, we immediately assign it to
+        // the value of this member variable and increment. This is initialized in the constructor because the
+        // space we spill to must not collide with any other SRG declared in the shader.
         mutable SpaceIndex m_unboundedSpillSpace = FirstUnboundedSpace;
     };
 
