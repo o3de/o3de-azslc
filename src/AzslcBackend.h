@@ -10,6 +10,7 @@
 #include "AzslcListener.h"
 
 #include "jsoncpp/dist/json/json.h"
+#include "AzslcRegisters.h"
 
 namespace AZ::ShaderCompiler
 {
@@ -23,11 +24,12 @@ namespace AZ::ShaderCompiler
         int m_textures = -1;
         int m_buffers = -1;
     };
-
+    
     //! This structure is typically filled from parsed user settings from the command line
     struct Options
     {
         bool m_useUniqueIndices = false;
+        bool m_useUnboundedSpaces = false;
         bool m_emitConstantBufferBody = false;
         bool m_emitRootSig = false;
         bool m_emitRowMajor = false;     //!< False by default (HLSL standard)
@@ -64,7 +66,7 @@ namespace AZ::ShaderCompiler
             int m_registerRange = -1;
             int m_num32BitConstants = -1;
 
-            int m_spillSpace = -1;
+            SpaceIndex m_spillSpace = FirstUnboundedSpace;
 
             // This flag is added so m_registerRange can take the value
             // of 1 and at the same time We do not forget that m_uid refers
@@ -115,7 +117,7 @@ namespace AZ::ShaderCompiler
     class MultiBindingLocationMaker
     {
     public:
-        MultiBindingLocationMaker(const Options& options, int& unboundedSpillSpace)
+        MultiBindingLocationMaker(const Options& options, SpaceIndex& unboundedSpillSpace)
             : m_options{ options }
             , m_unboundedSpillSpace{ unboundedSpillSpace }
         {}
@@ -136,7 +138,7 @@ namespace AZ::ShaderCompiler
         // to prevent overlapping ranges. When an unbounded array is encountered, we immediately assign it to
         // the value of this member variable and increment. This is initialized in the constructor because the
         // space we spill to must not collide with any other SRG declared in the shader.
-        int& m_unboundedSpillSpace;
+        SpaceIndex& m_unboundedSpillSpace;
     };
 
     //! This class intends to be a base umbrella for compiler back-end services.
@@ -189,7 +191,7 @@ namespace AZ::ShaderCompiler
         TokenStream*                m_tokens;
 
         // See MultiBindingLocationMaker::m_unboundedSpillSpace
-        mutable int m_unboundedSpillSpace;
+        mutable SpaceIndex m_unboundedSpillSpace = FirstUnboundedSpace;
     };
 
     // independent utility functions

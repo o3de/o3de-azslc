@@ -602,9 +602,6 @@ namespace AZ::ShaderCompiler
 
     RootSigDesc Backend::BuildSignatureDescription(const Options& options, int num32BitConst) const
     {
-        // We start at an arbitrarily high number to avoid conflicts with spaces occupied by any user declarations
-        m_unboundedSpillSpace = 1000;
-
         MultiBindingLocationMaker bindInfo{ options, m_unboundedSpillSpace };
         RootSigDesc rootSig;
 

@@ -760,7 +760,7 @@ namespace AZ::ShaderCompiler
                 const auto& samplerInfo = *srgMemberInfo->m_samplerState;
 
                 Json::Value samplerJson(Json::objectValue);
-                samplerJson["Id"] = sId.GetNameLeaf();
+                samplerJson["id"] = sId.GetNameLeaf();
                 samplerJson["isDynamic"] = samplerInfo.m_isDynamic;
                 ReflectBinding(samplerJson, bindInfo);
 
