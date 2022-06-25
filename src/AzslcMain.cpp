@@ -310,9 +310,6 @@ int main(int argc, const char* argv[])
     bool uniqueIdx = false;
     cli.add_flag("--unique-idx", uniqueIdx, "Use unique indices for all registers. e.g. b0, t0, u0, s0 becomes b0, t1, u2, s3. Use on platforms that don't differentiate registers by resource type.");
     
-    bool useUnboundedSpaces = false;
-    cli.add_flag("--use-unbounded-spaces", useUnboundedSpaces, "Use a unique logical register space per unbounded array. This is useful on platforms where unbounded arrays consume all available registers.");
-
     bool cbBody = false;
     cli.add_flag("--cb-body", cbBody, "Emit ConstantBuffer body rather than using <T>.");
 
@@ -534,7 +531,6 @@ int main(int argc, const char* argv[])
                 [&](const string& space) { ir.AddAttributeNamespaceFilter(space); });
 
             UnboundedArraysValidator::Options unboundedArraysValidationOptions;
-            unboundedArraysValidationOptions.m_useUnboundedSpacesEnabled = useUnboundedSpaces;
             unboundedArraysValidationOptions.m_useUniqueIndicesEnabled = uniqueIdx;
             if (*maxSpacesOpt)
             {
@@ -547,7 +543,6 @@ int main(int argc, const char* argv[])
 
             Options emitOptions;
             emitOptions.m_useUniqueIndices = uniqueIdx;
-            emitOptions.m_useUnboundedSpaces = useUnboundedSpaces;
             emitOptions.m_emitConstantBufferBody = cbBody;
             emitOptions.m_emitRootSig = rootSig;
             emitOptions.m_padRootConstantCB = padRootConst;

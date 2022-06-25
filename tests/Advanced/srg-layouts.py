@@ -945,7 +945,7 @@ def verifyPackingRelaxedUniqueIdxUseSpaces(thefile, compilerPath, silent):
     return True if ok else False
     
 def verifyPackingUnboundedSpillSpaces(thefile, compilerPath, silent):
-    j, ok = testfuncs.buildAndGetJson(thefile, compilerPath, silent, ["--srg", "--use-unbounded-spaces"])
+    j, ok = testfuncs.buildAndGetJson(thefile, compilerPath, silent, ["--srg"])
 
     if ok:
         predicates = []
