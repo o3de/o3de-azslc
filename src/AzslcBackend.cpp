@@ -538,7 +538,7 @@ namespace AZ::ShaderCompiler
         }
     }
 
-    RootSigDesc::SrgParamDesc Backend::ReflectOneExternalResource(const Options& options, IdentifierUID id, MultiBindingLocationMaker& bindInfo, RootSigDesc& rootSig) const
+    RootSigDesc::SrgParamDesc Backend::ReflectOneExternalResource(IdentifierUID id, MultiBindingLocationMaker& bindInfo, RootSigDesc& rootSig) const
     {
         Kind kind = m_ir->GetKind(id);
         int count = 1;
@@ -602,9 +602,9 @@ namespace AZ::ShaderCompiler
         return srgElementDesc;
     }
 
-    RootSigDesc::SrgParamDesc Backend::ReflectOneExternalResourceAndWrapWithUnifyIndices(const Options& options, IdentifierUID id, MultiBindingLocationMaker& bindInfo, RootSigDesc& rootSig) const
+    RootSigDesc::SrgParamDesc Backend::ReflectOneExternalResourceAndWrapWithUnifyIndices(IdentifierUID id, MultiBindingLocationMaker& bindInfo, RootSigDesc& rootSig) const
     {
-        auto paramDesc = ReflectOneExternalResource(options, id, bindInfo, rootSig);
+        auto paramDesc = ReflectOneExternalResource(id, bindInfo, rootSig);
         bindInfo.SignalUnifyIndices();
         return paramDesc;
     }
@@ -642,7 +642,7 @@ namespace AZ::ShaderCompiler
                     continue;
                 }
                 srgDesc.m_parameters.push_back(
-                    ReflectOneExternalResourceAndWrapWithUnifyIndices(options, tId, bindInfo, rootSig) );
+                    ReflectOneExternalResourceAndWrapWithUnifyIndices(tId, bindInfo, rootSig) );
             }
             for (const auto sId : srgInfo->m_samplers)
             {
@@ -653,7 +653,7 @@ namespace AZ::ShaderCompiler
                     continue;
                 }
                 srgDesc.m_parameters.push_back(
-                    ReflectOneExternalResourceAndWrapWithUnifyIndices(options, sId, bindInfo, rootSig) );
+                    ReflectOneExternalResourceAndWrapWithUnifyIndices(sId, bindInfo, rootSig) );
             }
 
             bool hasSrgConstants = !srgInfo->m_implicitStruct.GetMemberFields().empty();
@@ -661,14 +661,14 @@ namespace AZ::ShaderCompiler
             if (hasSrgConstants || (hasConstantBuffers && options.m_emitConstantBufferBody))
             {
                 srgDesc.m_parameters.push_back(
-                    ReflectOneExternalResourceAndWrapWithUnifyIndices(options, srgUid, bindInfo, rootSig));
+                    ReflectOneExternalResourceAndWrapWithUnifyIndices(srgUid, bindInfo, rootSig));
             }
             if (!options.m_emitConstantBufferBody)  // emitCB is the SM5- "cbufer{}" block syntax. !emitCB is the "ConstantBuffer<>" SM5.1+ syntax
             {
                 for (const auto cId : srgInfo->m_CBs)
                 {
                     srgDesc.m_parameters.push_back(
-                        ReflectOneExternalResourceAndWrapWithUnifyIndices(options, cId, bindInfo, rootSig));
+                        ReflectOneExternalResourceAndWrapWithUnifyIndices(cId, bindInfo, rootSig));
                 }
             }
 
@@ -683,7 +683,7 @@ namespace AZ::ShaderCompiler
                 // Only srgInfo->m_unboundedArrays[0] is reflected because the "AzslcSemanticOrchestrator" already
                 // makes sure that only one unbounded array is declared inside the SRG when --unique-idx is enabled.
                 srgDesc.m_parameters.push_back(
-                    ReflectOneExternalResourceAndWrapWithUnifyIndices(options, srgInfo->m_unboundedArrays[0], bindInfo, rootSig));
+                    ReflectOneExternalResourceAndWrapWithUnifyIndices(srgInfo->m_unboundedArrays[0], bindInfo, rootSig));
             }
 
             bindInfo.SignalIncrementSpace(/*overshoot callback:*/[&, srgInfo = srgInfo, srgUid = srgUid](int numSpaces, int spacesAvailable)
