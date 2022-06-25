@@ -29,7 +29,6 @@ namespace AZ::ShaderCompiler
     struct Options
     {
         bool m_useUniqueIndices = false;
-        bool m_useUnboundedSpaces = false;
         bool m_emitConstantBufferBody = false;
         bool m_emitRootSig = false;
         bool m_emitRowMajor = false;     //!< False by default (HLSL standard)

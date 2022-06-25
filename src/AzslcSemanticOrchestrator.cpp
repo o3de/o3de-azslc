@@ -691,9 +691,14 @@ namespace AZ::ShaderCompiler
         assert(typeClass != TypeClass::Alias);
 
         string errorMessage;
-        if (!m_unboundedArraysValidator.CheckFieldCanBeAddedToSrg(isUnboundedArray, srgUid, srgInfo, varUid, varInfo, typeClass, &errorMessage))
+        if (!m_unboundedArraysValidator.CheckFieldCanBeAddedToSrg(isUnboundedArray, srgUid, varUid, varInfo, typeClass, &errorMessage))
         {
             ThrowAzslcOrchestratorException(ORCHESTRATOR_UNBOUNDED_RESOURCE_ISSUE, ctx->start, errorMessage);
+        }
+
+        if (isUnboundedArray)
+        {
+            srgInfo.m_unboundedArrays.push_back(varUid);
         }
 
         if (typeClass == TypeClass::ConstantBuffer)

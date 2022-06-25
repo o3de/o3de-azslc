@@ -19,7 +19,7 @@ namespace AZ::ShaderCompiler
         m_options = options;
     }
 
-    bool UnboundedArraysValidator::CheckUnboundedArrayFieldCanBeAddedToSrg(const IdentifierUID& srgUid, SRGInfo& srgInfo, const IdentifierUID& varUid, const VarInfo& varInfo, TypeClass typeClass,
+    bool UnboundedArraysValidator::CheckUnboundedArrayFieldCanBeAddedToSrg(const IdentifierUID& srgUid, const IdentifierUID& varUid, const VarInfo& varInfo, TypeClass typeClass,
         string* errorMessage)
     {
         if (!CanBeDeclaredAsUnboundedArray(typeClass))
@@ -31,74 +31,25 @@ namespace AZ::ShaderCompiler
             return false;
         }
 
-        srgInfo.m_unboundedArrays.push_back(varUid);
-
-        if (!CheckResourceCanBeAddedToSrgWhenUniqueIndicesIsEnabled(srgUid, varUid, errorMessage))
-        {
-            return false;
-        }
-
-        // Only types that can be declared as unbounded array consume register space.
-        BindingType bindingType = GetBindingType(varInfo.m_typeInfoExt);
-        auto spaceIndex = m_options.m_useUnboundedSpacesEnabled ? m_unboundedSpillSpace : GetSpaceIndexForSrg(srgUid);
-        ArrayOfUnboundedUids& arrayOfUnboundedUids = m_unboundedUidsPerSpace[spaceIndex];
-        const IdentifierUID& unboundedUid = arrayOfUnboundedUids[bindingType];
-        if (!unboundedUid.IsEmpty())
-        {
-            // An unbounded array was already declared for this resource type. We can not add
-            // another declaration of this type in this register space.
-            if (errorMessage)
-            {
-                *errorMessage = ConcatString("More than one unbounded resource (", unboundedUid.GetName(), " and ", varUid.GetName(), ") in register space");
-            }
-            return false;
-        }
-
-        // Register the unbounded array.
-        arrayOfUnboundedUids[bindingType] = varUid;
         return true;
     }
 
-    bool UnboundedArraysValidator::CheckFieldCanBeAddedToSrg(bool isUnboundedArray, const IdentifierUID& srgUid, SRGInfo& srgInfo, const IdentifierUID& varUid, const VarInfo& varInfo, TypeClass typeClass,
+    bool UnboundedArraysValidator::CheckFieldCanBeAddedToSrg(bool isUnboundedArray, const IdentifierUID& srgUid, const IdentifierUID& varUid, const VarInfo& varInfo, TypeClass typeClass,
         string* errorMessage)
     {
         if (isUnboundedArray)
         {
-            ++m_unboundedSpillSpace;
-
-            return CheckUnboundedArrayFieldCanBeAddedToSrg(srgUid, srgInfo, varUid, varInfo, typeClass, errorMessage);
+            return CheckUnboundedArrayFieldCanBeAddedToSrg(srgUid, varUid, varInfo, typeClass, errorMessage);
         }
 
-        if (m_unboundedUidsPerSpace.empty())
-        {
-            // All good. No unbounded array of any kind has been registered so far.
-            return true;
-        }
-
-        if (!CanBeDeclaredAsUnboundedArray(typeClass))
-        {
-            return true;
-        }
-
-        if (!CheckResourceCanBeAddedToSrgWhenUniqueIndicesIsEnabled(srgUid, varUid, errorMessage))
-        {
-            return false;
-        }
-
-        // Only types that can be declared as unbounded array consume register space.
-        BindingType bindingType = GetBindingType(varInfo.m_typeInfoExt);
         auto spaceIndex = GetSpaceIndexForSrg(srgUid);
-        const ArrayOfUnboundedUids& arrayOfUnboundedUids = m_unboundedUidsPerSpace[spaceIndex];
-        const IdentifierUID& unboundedUid = arrayOfUnboundedUids[bindingType];
-        if (!unboundedUid.IsEmpty())
+        if (spaceIndex >= FirstUnboundedSpace)
         {
-            // An unbounded array was already declared for this resource type. We can not add
-            // another declaration of this type in this register space.
             if (errorMessage)
             {
-                *errorMessage = ConcatString("The unbounded resource [", unboundedUid.GetName(), "], doesn't allow [", varUid.GetName(), "] to be added to the register space");
+                *errorMessage = ConcatString("The number of SRG register spaces overflowed into the spaces reserved for unbounded arrays.");
+                return false;
             }
-            return false;
         }
 
         return true;
@@ -129,43 +80,5 @@ namespace AZ::ShaderCompiler
         return spaceIndex;
     }
 
-    bool UnboundedArraysValidator::CheckResourceCanBeAddedToSrgWhenUniqueIndicesIsEnabled(const IdentifierUID& srgUid, const IdentifierUID& varUid, string* errorMessage) const
-    {
-        if (m_options.m_useUniqueIndicesEnabled)
-        {
-            // We allow only one unbounded array per SRG. But if, for a given SRG and unbounded array was already
-            // registered then it is an error to add another variable that consumes register resources.
-            IdentifierUID unboundedArrayUid = GetFirstUnboundedArrayFromSrg(srgUid);
-            if (!unboundedArrayUid.IsEmpty())
-            {
-                if (errorMessage)
-                {
-                    *errorMessage = ConcatString("The unbounded resource [", unboundedArrayUid.GetName(), "], doesn't allow [", varUid.GetName(), "] to be added to the register space");
-                }
-                return false;
-            }
-        }
-        return true;
-    }
-
-    IdentifierUID UnboundedArraysValidator::GetFirstUnboundedArrayFromSrg(const IdentifierUID& srgUid) const
-    {
-        const auto& itor = m_srgToSpaceIndex.find(srgUid);
-        if (itor == m_srgToSpaceIndex.end())
-        {
-            return {};
-        }
-        SpaceIndex spaceIndex = itor->second;
-
-        auto spaceIter = m_unboundedUidsPerSpace.find(spaceIndex);
-        for (const auto& uid : spaceIter->second)
-        {
-            if (!uid.IsEmpty())
-            {
-                return uid;
-            }
-        }
-        return {};
-    }
 
 } // namespace AZ::ShaderCompiler

@@ -572,8 +572,14 @@ namespace AZ::ShaderCompiler
         auto regType = RootParamTypeToBindingType(paramType);
 
         BindingPair binding;
-        if (isUnboundedArray && options.m_useUnboundedSpaces)
+        if (isUnboundedArray)
         {
+            // Use a unique register space for every unbounded array because in DirectX 12 unbounded arrays consume
+            // all remaining registers for that resource type. By making a unique space for each unbounded array
+            // we support an unlimited number of them.
+            // Note that this does not impact other platforms, where register spaces don't matter (DXC ignores them)
+            // and unbounded arrays do not consume all remaining registers.
+
             binding.m_pair[BindingPair::Set::Untainted].m_logicalSpace = m_unboundedSpillSpace;
             binding.m_pair[BindingPair::Set::Merged].m_logicalSpace = m_unboundedSpillSpace;
             ++m_unboundedSpillSpace;

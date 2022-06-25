@@ -1,5 +1,5 @@
 /*
-    Cmdargs: ['--use-unbounded-spaces', '--root-sig', '--namespace', 'dx']
+    Cmdargs: ['--root-sig', '--namespace', 'dx']
 */
 "Texture2D < float4 > SRG1_m_texSRVa [] : register ( t0 , space1000 ) "
 "Texture2D < float4 > SRG1_m_texSRVb [] : register ( t0 , space1001 ) "
