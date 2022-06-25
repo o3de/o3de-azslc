@@ -160,9 +160,9 @@ namespace AZ::ShaderCompiler
 
         RootSigDesc BuildSignatureDescription(const Options& options, int num32BitConst) const;
 
-        RootSigDesc::SrgParamDesc ReflectOneExternalResource(const Options& options, IdentifierUID id, MultiBindingLocationMaker& bindInfo, RootSigDesc& rootSig) const;
+        RootSigDesc::SrgParamDesc ReflectOneExternalResource(IdentifierUID id, MultiBindingLocationMaker& bindInfo, RootSigDesc& rootSig) const;
 
-        RootSigDesc::SrgParamDesc ReflectOneExternalResourceAndWrapWithUnifyIndices(const Options& options, IdentifierUID id, MultiBindingLocationMaker& bindInfo, RootSigDesc& rootSig) const;
+        RootSigDesc::SrgParamDesc ReflectOneExternalResourceAndWrapWithUnifyIndices(IdentifierUID id, MultiBindingLocationMaker& bindInfo, RootSigDesc& rootSig) const;
 
         void AppendOptionRange(Json::Value& varOption, const IdentifierUID& varUid, const AZ::ShaderCompiler::VarInfo* varInfo, const Options& options) const;
 
