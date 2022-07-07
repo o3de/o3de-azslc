@@ -571,7 +571,7 @@ namespace AZ::ShaderCompiler
 
         auto regType = RootParamTypeToBindingType(paramType);
 
-        BindingPair binding;
+        BindingPair binding = bindInfo.GetCurrent(regType);
         if (isUnboundedArray)
         {
             // Use a unique register space for every unbounded array because in DirectX 12 unbounded arrays consume
@@ -579,21 +579,16 @@ namespace AZ::ShaderCompiler
             // we support an unlimited number of them.
             // Note that this does not impact other platforms, where register spaces don't matter (DXC ignores them)
             // and unbounded arrays do not consume all remaining registers.
-
+            // Also, on dx12 don't necessarily need to call SignalIncrementRegister() in this case, and could instead
+            // just use register 0 because the register space is unique, but since other platforms ignore the register
+            // space it's easier to also increment the register on all platforms.
+            
             binding.m_pair[BindingPair::Set::Untainted].m_logicalSpace = m_unboundedSpillSpace;
             binding.m_pair[BindingPair::Set::Merged].m_logicalSpace = m_unboundedSpillSpace;
             ++m_unboundedSpillSpace;
-
-            // Since every unbounded array is getting its own register space, they can all use register 0.
-            binding.m_pair[BindingPair::Set::Untainted].m_registerIndex = 0;
-            binding.m_pair[BindingPair::Set::Merged].m_registerIndex = 0;
-        }
-        else
-        {
-            binding = bindInfo.GetCurrent(regType);
-            bindInfo.SignalIncrementRegister(regType, count);
         }
 
+        bindInfo.SignalIncrementRegister(regType, count);
 
         auto srgElementDesc = RootSigDesc::SrgParamDesc{ id, paramType, binding, count, -1, isUnboundedArray};
 
