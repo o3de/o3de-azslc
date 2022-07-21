@@ -476,7 +476,7 @@ HexadecimalDigitSequence
 
 fragment
 IntegerSuffix
-    :   [uU]?[lL]?
+    :   [uU]?[lL]?[lL]?
     |   [lL]?[uU]?
     ;
 
