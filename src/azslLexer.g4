@@ -125,6 +125,8 @@ Rootconstant : 'rootconstant';   // Amazon extension
 Inout : 'inout' | 'in out';
 InputPatch : 'InputPatch';
 Int : 'int';
+Int32_t : 'int32_t';
+Int64_t : 'int64_t';
 Int1 : 'int1';
 Int2 : 'int2';
 Int3 : 'int3';
@@ -214,6 +216,8 @@ Uniform : 'uniform';
 // so that rule: Uint : 'uint' | 'unsigned int' | 'dword' # can't be used because it's non-trivialness makes it a non-citizen.
 // I tried to recompose the rule with fragments, but fragment also are not listed in the vocabulary. (_literalNames)
 Uint : 'uint';
+Uint32_t : 'uint32_t';
+Uint64_t : 'uint64_t';
 UnsignedInt : 'unsigned int';
 Uint1 : 'uint1';
 Uint2 : 'uint2';
@@ -476,7 +480,7 @@ HexadecimalDigitSequence
 
 fragment
 IntegerSuffix
-    :   [uU]?[lL]?
+    :   [uU]?[lL]?[lL]?
     |   [lL]?[uU]?
     ;
 
