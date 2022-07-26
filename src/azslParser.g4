@@ -26,7 +26,7 @@ topLevelDeclaration:
     |   attributedSrgDefinition         // AZSLc specific
     |   attributedSrgSemantic           // AZSLc specific
     |   Semi
-;
+;       
 
 // Amazon: AZSL has scopes, and identifiers can be qualified
 idExpression:
@@ -511,7 +511,11 @@ samplerStatePredefinedType:
 scalarType:
         Bool
     |   Int
+    |   Int32_t
+    |   Int64_t
     |   Uint
+    |   Uint32_t
+    |   Uint64_t
     |   UnsignedInt
     |   Dword
     |   Half

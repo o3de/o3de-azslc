@@ -746,11 +746,13 @@ namespace AZ::ShaderCompiler
 
         inline uint32_t PackedSizeof(int indexInAzslPredefined_Scalar)
         {
-            // the array is generated but it's expected to look like: {"bool", "double", "dword", "float", "half", "int", "uint", "unsigned int"}
+            // the array is generated but it's expected to look like: {"bool", "double", "dword", "float", "half", "int", "int32_t", "int64_t", "uint", "uint32_t", "uint64_t", "unsigned int"}
             // just update that code if it changes one day, the assert will pop.
-            if (indexInAzslPredefined_Scalar == 1)
+            if (indexInAzslPredefined_Scalar == 1 || indexInAzslPredefined_Scalar == 7 || indexInAzslPredefined_Scalar == 10)
             {
                 assert(string_view{"double"} == AZ::ShaderCompiler::Predefined::Scalar[1]);
+				assert(string_view{"int64_t"} == AZ::ShaderCompiler::Predefined::Scalar[7]);
+				assert(string_view{"uint64_t"} == AZ::ShaderCompiler::Predefined::Scalar[10]);
                 // Shader packing reference:
                 // https://docs.microsoft.com/en-us/windows/desktop/direct3dhlsl/dx-graphics-hlsl-packing-rules
                 return 8;

@@ -6,3 +6,4 @@ MyT func5();
 MyT func6(MyT);
 MyT func7(MyT arg1);
 float4x4 func8(double arg1, float3x3 arg2, int, bool);
+uint64_t func9(int32_t arg1, int64_t arg2, uint32_t arg3, uint64_t arg4);

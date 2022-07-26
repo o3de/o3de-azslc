@@ -171,14 +171,18 @@ static constexpr std::array<const char*, 4> Sampler = {
 "SamplerState",
 "sampler"};
 
-static constexpr std::array<const char*, 8> Scalar = {
+static constexpr std::array<const char*, 12> Scalar = {
 "bool",
 "double",
 "dword",
 "float",
 "half",
 "int",
+"int32_t",
+"int64_t",
 "uint",
+"uint32_t",
+"uint64_t",
 "unsigned int"};
 
 static constexpr std::array<const char*, 3> StreamOutput = {
@@ -259,7 +263,7 @@ static constexpr auto All = std::make_tuple(Bag<3>{"Buffer", Buffer},
                                             Bag<2>{"OtherPredefined", OtherPredefined},
                                             Bag<1>{"OtherViewBufferType", OtherViewBufferType},
                                             Bag<4>{"Sampler", Sampler},
-                                            Bag<8>{"Scalar", Scalar},
+                                            Bag<12>{"Scalar", Scalar},
                                             Bag<3>{"StreamOutput", StreamOutput},
                                             Bag<5>{"StructuredBuffer", StructuredBuffer},
                                             Bag<19>{"Texture", Texture},

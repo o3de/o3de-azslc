@@ -27,6 +27,13 @@ ShaderResourceGroup ExampleSRG : ExampleBinding
         float  a;  // Offset  0
         float4 b;  // Offset 16
     };
+
+	struct U {
+		int32_t  a; // Offset 0
+		int64_t  b; // Offset 4
+		uint32_t c; // Offset 12
+		uint64_t d; // Offset 16
+	};
     
     // Note! dxc's SpirV generation has the following error:
     // fatal error: generated SPIR-V is invalid: Structure id 5 decorated as BufferBlock for variable 
@@ -43,6 +50,7 @@ ShaderResourceGroup ExampleSRG : ExampleBinding
         Sac      ac;           // Offset  64 (+32)
         S        s;            // Offset  80 (+16)
         float    a_float;      // Offset 112 (+32)
+		U        u;            // Offset 116/128 (+4/16)
     };
 
     T m_CB;
