@@ -21,6 +21,8 @@ ShaderResourceGroupSemantic UpdateSrgTwo
 struct GlobalStruct
 {
     float4 m_diffuseColor;
+	uint64_t m_bitMask1;
+	uint64_t m_bitMask2;
 };
 
 ShaderResourceGroup MySRGTwo : UpdateSrgTwo

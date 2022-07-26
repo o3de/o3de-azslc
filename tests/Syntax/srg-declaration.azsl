@@ -89,6 +89,10 @@ ShaderResourceGroup PerBuffer : UpdatePerBuffer
     RasterizerOrderedBuffer<int4>                      m_bufferView;
     RasterizerOrderedByteAddressBuffer                 m_bufferView;
     RasterizerOrderedStructuredBuffer<UserStruct>      m_bufferView;
+	RWStructuredBuffer<int32_t>                       m_bufferView;
+	RWStructuredBuffer<uint32_t>                       m_bufferView;
+	RWStructuredBuffer<int64_t>                       m_bufferView;
+	RWStructuredBuffer<uint64_t>                       m_bufferView;
 };
 
 ShaderResourceGroup PerSampler : UpdatePerSampler
@@ -235,6 +239,8 @@ ShaderResourceGroup PerCB : UpdatePerCB
         half4x3                          m_sameNameVariable;
         half4x4                          m_sameNameVariable;
         int                              m_sameNameVariable;
+		int32_t                          m_sameNameVariable;
+		int64_t                          m_sameNameVariable;
         int1                             m_sameNameVariable;
         int2                             m_sameNameVariable;
         int3                             m_sameNameVariable;
@@ -256,6 +262,8 @@ ShaderResourceGroup PerCB : UpdatePerCB
         int4x3                           m_sameNameVariable;
         int4x4                           m_sameNameVariable;
         uint                             m_sameNameVariable;
+		uint32_t                         m_sameNameVariable;
+		uint64_t                         m_sameNameVariable;
         uint1                            m_sameNameVariable;
         uint2                            m_sameNameVariable;
         uint3                            m_sameNameVariable;
