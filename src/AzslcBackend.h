@@ -10,6 +10,7 @@
 #include "AzslcListener.h"
 
 #include "jsoncpp/dist/json/json.h"
+#include "AzslcRegisters.h"
 
 namespace AZ::ShaderCompiler
 {
@@ -63,6 +64,7 @@ namespace AZ::ShaderCompiler
             BindingPair m_registerBinding;
             int m_registerRange = -1;
             int m_num32BitConstants = -1;
+
             // This flag is added so m_registerRange can take the value
             // of 1 and at the same time We do not forget that m_uid refers
             // to an unbounded array.
@@ -116,7 +118,7 @@ namespace AZ::ShaderCompiler
 
         void SignalUnifyIndices();
         
-        void SignalRegisterIncrement(BindingType regType, int count = 1);
+        void SignalIncrementRegister(BindingType regType, int count);
 
         BindingPair GetCurrent(BindingType regType);
 
@@ -173,6 +175,12 @@ namespace AZ::ShaderCompiler
         std::ostream&               m_out;
         IntermediateRepresentation* m_ir;
         TokenStream*                m_tokens;
+        
+        // On some platforms (DX12), descriptor arrays occupy an individual register slot, and spaces are used
+        // to prevent overlapping ranges. When an unbounded array is encountered, we immediately assign it to
+        // the value of this member variable and increment. This is initialized in the constructor because the
+        // space we spill to must not collide with any other SRG declared in the shader.
+        mutable SpaceIndex m_unboundedSpillSpace = FirstUnboundedSpace;
     };
 
     // independent utility functions
