@@ -7,8 +7,6 @@
  */
 #pragma once
 
-#include <optional>
-
 #include "AzslcUtils.h"
 
 namespace AZ::ShaderCompiler

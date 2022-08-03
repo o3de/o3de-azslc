@@ -10,11 +10,13 @@
 // setup of low level library includes in this file.
 // if not defined -> fallback to std
 
-#ifdef _WIN32
+#ifdef _WIN32 
 // I don't recommend custom lib utilities on windows because they don't have natvis and are hard to debug.
-#else
+#elif __APPLE__
 #define USE_TINY_OPTIONAL
 #define USE_MPARK_VARIANT
+#else
+// Use the proper std lib
 #endif
 
 #include <cassert>
@@ -136,9 +138,7 @@ namespace AZ
     template <typename SetType>
     void SetMerge(SetType& dest, SetType& src)
     {
-#ifdef _WIN32
-        dest.merge(src); // when you have correct libraries.
-#else
+#ifdef __APPLE__
         for (auto it = src.begin(); it != src.end(); )
         {
             if (dest.find(*it) == dest.end())
@@ -151,6 +151,8 @@ namespace AZ
                 ++it;
             }
         }
+#else
+		dest.merge(src); // when you have correct libraries.
 #endif
     }
 }
