@@ -39,7 +39,7 @@ def findDXC(silent):
         if not silent: print (fg.YELLOW+ style.BRIGHT+ "Will only test dxc.exe on Windows 10."+ style.RESET_ALL)
         return None
 
-    windowsKitsDir = "C:/Program Files (x86)/Windows Kits/10/bin"
+    windowsKitsDir = os.path.expandvars("%ProgramFiles(x86)%/Windows Kits/10/bin")
     if not os.path.isdir(windowsKitsDir):
         if not silent: print (fg.YELLOW+ style.BRIGHT+ "Expected {}, but did not find it.".format(windowsKitsDir)+ style.RESET_ALL)
         return None
@@ -54,7 +54,7 @@ def findDXC(silent):
         return None
 
     return dxcLocations[0]
-    
+
 '''Returns the path to the Spirv-Cross compiler, or None if it can't be found'''
 def findSpirvCross(spirvCrossPath, silent):
     if not os.path.isdir(spirvCrossPath):
@@ -126,7 +126,7 @@ def buildDXC(thefile, compilerPath, silent, extraIncList, azslcArgs, dxcArgs, az
     if os.path.exists(sbinPS):  os.remove(sbinPS)
 
     stdout, ok = testfuncs.buildAndGet(thefile, compilerPath, silent, azslcArgs)
-    if not ok: 
+    if not ok:
         if not silent: print (fg.RED+ style.BRIGHT+ "Failed to generate .hlsl file with AZSLc."+ style.RESET_ALL)
         return buildFailed
 
@@ -134,7 +134,7 @@ def buildDXC(thefile, compilerPath, silent, extraIncList, azslcArgs, dxcArgs, az
     f = open(codeOut, "wb+")
     for incFile in extraIncList:
         fInFullname = os.path.join(os.path.dirname(thefile), incFile)
-        if not os.path.exists(fInFullname): 
+        if not os.path.exists(fInFullname):
             if not silent: print (fg.RED+ style.BRIGHT+ "Include file {} doesn't exist!".format(fInFullname)+ style.RESET_ALL)
             return buildFailed
         fIn = open(fInFullname, "rb")
@@ -142,7 +142,7 @@ def buildDXC(thefile, compilerPath, silent, extraIncList, azslcArgs, dxcArgs, az
         fIn.close()
     f.write(stdout)
     f.close()
-        
+
     dxcCompileArgs = [dxcPath, "-T", "vs_6_2", "-E", "MainVS"] + dxcArgs + ["-Fo", sbinVS, codeOut]
     process = subprocess.Popen(dxcCompileArgs, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     out, err = process.communicate()
@@ -150,7 +150,7 @@ def buildDXC(thefile, compilerPath, silent, extraIncList, azslcArgs, dxcArgs, az
     if not os.path.exists(sbinVS):
         if not silent: print (fg.RED + style.BRIGHT + "Failed to compile MainVS with dxc.exe(for "+OutFormat+")." + style.RESET_ALL)
         return buildFailed
-    
+
     dxcCompileArgs = [dxcPath, "-T", "ps_6_2", "-E", "MainPS"] + dxcArgs + ["-Fo", sbinPS, codeOut]
     process = subprocess.Popen(dxcCompileArgs, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     out, err = process.communicate()
@@ -172,12 +172,12 @@ def buildDXCCompute(thefile, compilerPath, silent, extraIncList, azslcArgs, dxcA
     inFile, inFileExt = os.path.splitext(thefile)
     codeOut  = inFile + ".hlsl"
     sbinCS   = inFile + "CS." + OutFormat
-    
+
     if os.path.exists(codeOut): os.remove(codeOut)
     if os.path.exists(sbinCS):  os.remove(sbinCS)
 
     stdout, ok = testfuncs.buildAndGet(thefile, compilerPath, silent, azslcArgs)
-    if not ok: 
+    if not ok:
         if not silent: print (fg.RED+ style.BRIGHT+ "Failed to generate .hlsl file with AZSLc."+ style.RESET_ALL)
         return buildFailed
 
@@ -185,7 +185,7 @@ def buildDXCCompute(thefile, compilerPath, silent, extraIncList, azslcArgs, dxcA
     f = open(codeOut, "wb+")
     for incFile in extraIncList:
         fInFullname = os.path.join(os.path.dirname(thefile), incFile)
-        if not os.path.exists(fInFullname): 
+        if not os.path.exists(fInFullname):
             if not silent: print (fg.RED+ style.BRIGHT+ "Include file {} doesn't exist!".format(fInFullname)+ style.RESET_ALL)
             return buildFailed
         fIn = io.open(fInFullname, "r", encoding="latin-1")
@@ -201,6 +201,6 @@ def buildDXCCompute(thefile, compilerPath, silent, extraIncList, azslcArgs, dxcA
     if not os.path.exists(sbinCS):
         if not silent: print (fg.RED+ style.BRIGHT+ "Failed to compile MainCS with dxc.exe."+ style.RESET_ALL)
         return buildFailed
-    
+
     if not silent: print (fg.GREEN+style.BRIGHT+ "["+thefile+"."+ OutFormat + "]" + style.RESET_ALL)
     return buildSucceeded
