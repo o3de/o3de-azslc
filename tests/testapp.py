@@ -23,7 +23,7 @@ class testResult:
         self.numPass = p
         self.numTodo = t
         self.numFail = f
-        self.numEC = m
+        self.numEC = m   #EC = error code
 
     def add(self, other):
         self.numPass += other.numPass
@@ -185,6 +185,13 @@ def runAll(testsRoot, paths, compiler, verboseLevel, az3rdParty):
 
 if __name__ == "__main__":
     os.system('') # activate VT100 mode for windows console
+
+    try:
+        import yaml
+    except ImportError as err:
+        print ( fg.YELLOW + style.BRIGHT + "It seems your python environment lacks pyyaml. Run first through project-root's \"test.and.py\" (or pip install it)" + style.RESET_ALL )
+        if input("Continue (may result in false failures)? y/n:").lower() != "y":
+            exit(0)
 
     parser = ArgumentParser()
     parser.add_argument(
