@@ -145,10 +145,9 @@ def buildAndGetError(thefile, compilerPath, silent, extraArgs):
 def dumpKeywords(compilerPath):
     '''returns tuple: (categorized-tokens-in-algebraic-form, ok-bool)'''
     import clr
-    silent = False
-    stdout, stderr, code = launchCompiler(compilerPath, ["--listpredefined"], silent)
+    stdout, stderr, code = launchCompiler(compilerPath, ["--listpredefined"], False)
     if code != 0:
-        if not silent: print (clr.fg.RED + "compilation failed" + clr.style.RESET_ALL)
+        print (clr.fg.RED + "compilation failed" + clr.style.RESET_ALL)
         return (None, False)
     else:
         tokens = parseYaml(stdout)
