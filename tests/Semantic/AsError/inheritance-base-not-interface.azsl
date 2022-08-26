@@ -6,5 +6,5 @@ class child : i1, s1
 {  
 };
 
-// Semantic Error 17: line 5::0 'base /s1 is not an interface (it is a Struct)'
+// Semantic Error 17: line 5::0 'base /s1 is not an interface or class (it is a Struct)'
 // #EC 17

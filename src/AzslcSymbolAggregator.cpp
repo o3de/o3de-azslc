@@ -125,6 +125,14 @@ namespace AZ::ShaderCompiler
         assert(IsRooted(scope));
         // Iterative lookup of the closest reachable symbol
         // by going further toward global.
+        // e.g try to locate: /Typ/Sub/Sym/name; if not found: /Typ/Sub/name; if not found: /Typ/name; ...
+        // this is the classic symbol shadowing scheme: closer symbols (less qualification distance) shadow more "global" symbols.
+        //   say:
+        //      int a;
+        //      class C {
+        //          int a;
+        //          void f() { a; }  // refers to /C/a  but would refer to /a if `C` didn't have a member a. /C/a shadows /a
+        //      };
         string_view path = scope;
         bool exit = false;
         do

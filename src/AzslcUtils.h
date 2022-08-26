@@ -1184,6 +1184,7 @@ namespace AZ::ShaderCompiler
         ExtractedTypeExt m_genericParam; // note: could be made recursive one day. use unique_ptr here
         ArrayDimensions  m_genericDimensions; // can expand generic dimensions too later. for MSTexture, IO patch, matrix<t,N,M> etc...
     };
+
     // Compose middleEnd configurations, wraps minimal user options from command line.
     struct MiddleEndConfiguration
     {

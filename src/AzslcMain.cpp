@@ -21,9 +21,9 @@ namespace StdFs = std::filesystem;
 // Correspond to the supported version of the AZSL language.
 #define AZSLC_MAJOR "1"
 // For large features or milestones. Minor version allows for breaking changes. Existing tests can change.
-#define AZSLC_MINOR "7"
+#define AZSLC_MINOR "8"   // introduction of class inheritance
 // For small features or bug fixes. They cannot introduce breaking changes. Existing tests shouldn't change.
-#define AZSLC_REVISION "35" // Upgrade from Antlr 4.7.1 to Antlr 4.9.3
+#define AZSLC_REVISION "0"
 namespace AZ::ShaderCompiler
 {
     DiagnosticStream verboseCout;

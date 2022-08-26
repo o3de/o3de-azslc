@@ -1352,11 +1352,12 @@ namespace AZ::ShaderCompiler
         // Get iterator into the symbol database from current scope name. (current scope should be the currently closing class)
         // Access the KindInfo from iter->second, and "cast" the `anyInfo` variant to ClassInfo:
         auto& classSubInfo = GetCurrentScopeSubInfoAs<ClassInfo>();
+        // this class original AST node:
+        auto declNode = get<AstClassDeclNode*>(classSubInfo.m_declNodeVt);
         // Semantic validation. Iterate each base UID as registered in the ClassInfo:
+        int concreteBase = 0; // this can only be 0 or 1.
         for (auto b : classSubInfo.m_bases)
         {
-            // this class original AST node:
-            auto declNode = get<AstClassDeclNode*>(classSubInfo.m_declNodeVt);
             // get line location diagnostic message of its declaration keyword in source:
             verboseCout << "  base: " << b.m_name << "\n";
             // Fetch the base from name in the database
@@ -1364,19 +1365,30 @@ namespace AZ::ShaderCompiler
             assert(infoBase); // can't be undeclared since it already threw an error in RegisterBases.
             // wannabe is "want-to-be-a-base"
             auto& [baseUid, wannabeInfo] = *infoBase;
-            if (wannabeInfo.GetKind() != Kind::Interface)
+            if (!wannabeInfo.IsKindOneOf(Kind::Interface, Kind::Class))
             {
                 ThrowAzslcOrchestratorException(ORCHESTRATOR_INVALID_INTERFACE, declNode->Class()->getSymbol(),
-                    ConcatString("base ", baseUid.m_name, " is not an interface (it is a "s,
+                    ConcatString("base ", baseUid.m_name, " is not an interface or class (it is a "s,
                         Kind::ToStr(wannabeInfo.GetKind()).data(), ")"));
             }
-            auto& baseInterfaceInfo = wannabeInfo.GetSubRefAs<ClassInfo>();
-            for (auto basemember : baseInterfaceInfo.GetOrderedMembers())
-            {  // Check that any member present in base is present in this class
-                if (!classSubInfo.HasMember(basemember.GetNameLeaf()))
-                {
-                    ThrowAzslcOrchestratorException(ORCHESTRATOR_CLASS_REDEFINE, declNode->Class()->getSymbol(),
-                        ConcatString("class ", m_scope->m_currentScopeUID.m_name, " does not redefine ", basemember.m_name));
+            concreteBase += wannabeInfo.GetKind() == Kind::Class;
+            if (concreteBase > 1)
+            {
+                ThrowAzslcOrchestratorException(ORCHESTRATOR_INVALID_INTERFACE, declNode->Class()->getSymbol(),
+                                                ConcatString("class ", declNode->Name->getText(),
+                                                             " has multiple concrete bases. Only 1 concrete base allowed"s));
+            }
+            // verify interfaces full implementation
+            if (wannabeInfo.GetKind() == Kind::Interface)
+            {
+                auto& baseInfoAsClass = wannabeInfo.GetSubRefAs<ClassInfo>();
+                for (auto basemember : baseInfoAsClass.GetOrderedMembers())
+                {  // Check that any member present in base is present in this class
+                    if (!classSubInfo.HasMember(basemember.GetNameLeaf()))
+                    {
+                        ThrowAzslcOrchestratorException(ORCHESTRATOR_CLASS_REDEFINE, declNode->Class()->getSymbol(),
+                                                        ConcatString("class ", m_scope->m_currentScopeUID.m_name, " does not redefine ", basemember.m_name));
+                    }
                 }
             }
         }
@@ -1398,8 +1410,7 @@ namespace AZ::ShaderCompiler
             // let's do a bit of sanity check on that symbol
             Kind baseKind = baseFuncKind.GetKind();
             if (baseKind != Kind::Function)
-            {   // today, it is impossible to reach that diagnostic, since the grammar doesn't allow it.
-                // but we are envisioning Properties as a future possible Kind in interfaces.
+            {
                 auto baseKindStr = Kind::ToStr(baseKind).data();
                 ThrowAzslcOrchestratorException(ORCHESTRATOR_HIDING_SYMBOL_BASE, ctx->Identifier()->getSymbol(),
                     ConcatString("function ", thisFuncId.m_name, " is hiding a symbol of a base, that is not of Function kind, but is ", baseKindStr));
@@ -1671,20 +1682,20 @@ namespace AZ::ShaderCompiler
         auto maybeSymbol = LookupSymbol(uqName);
         if (!maybeSymbol)
         {
-            ThrowAzslcOrchestratorException(ORCHESTRATOR_DEPORTED_METHOD_DEFINITION, idExp->start,
+            ThrowAzslcOrchestratorException(ORCHESTRATOR_CONSTANT_FOLDING_FAULT, idExp->start,
                 ConcatString("in expected constant expression: identifier ", uqName, " not found"));
         }
         auto& [id, symbol] = *maybeSymbol;
         auto what = symbol.GetKind();
         if (what != Kind::Variable)
         {
-            ThrowAzslcOrchestratorException(ORCHESTRATOR_DEPORTED_METHOD_DEFINITION, idExp->start,
+            ThrowAzslcOrchestratorException(ORCHESTRATOR_CONSTANT_FOLDING_FAULT, idExp->start,
                 ConcatString("in expected constant expression: identifier ", uqName, " did not refer to a variable, but a ", Kind::ToStr(what).data()));
         }
         auto const& var = symbol.GetSubRefAs<VarInfo>();
         if (holds_alternative<monostate>(var.m_constVal))
         {
-            ThrowAzslcOrchestratorException(ORCHESTRATOR_DEPORTED_METHOD_DEFINITION, idExp->start,
+            ThrowAzslcOrchestratorException(ORCHESTRATOR_CONSTANT_FOLDING_FAULT, idExp->start,
                 ConcatString("in expected constant expression: variable ", id.m_name, " couldn't be folded to a constant (tip: use --semantic --verbose to diagnose why)"));
         }
         return var.m_constVal;
@@ -1822,7 +1833,7 @@ namespace AZ::ShaderCompiler
         {
             if (policy == OnNotFoundOrWrongKind::Diagnose)
             {
-                ThrowAzslcOrchestratorException(ORCHESTRATOR_DEPORTED_METHOD_DEFINITION,
+                ThrowAzslcOrchestratorException(ORCHESTRATOR_TYPE_LOOKUP_FAULT,
                     sourceline, none, ConcatString(" type ", string{ typeName }, " requested but not found."));
             }
             else
@@ -1838,7 +1849,7 @@ namespace AZ::ShaderCompiler
         {
             if (policy == OnNotFoundOrWrongKind::Diagnose)
             {
-                ThrowAzslcOrchestratorException(ORCHESTRATOR_DEPORTED_METHOD_DEFINITION,
+                ThrowAzslcOrchestratorException(ORCHESTRATOR_TYPE_LOOKUP_FAULT,
                     sourceline, none, ConcatString(" type ", typeName.data(),
                         " requested but found as ", Kind::ToStr(kind.GetKind()).data()));
             }
@@ -1920,7 +1931,7 @@ namespace AZ::ShaderCompiler
             {
                 auto maybeBaseClass = m_symbols->GetIdAndKindInfo(base.m_name);
                 if (maybeBaseClass
-                    && maybeBaseClass->second.GetKind() == Kind::Interface)  // bases must be interfaces but we don't assume it's enforced prior to calls to this function
+                    && maybeBaseClass->second.IsKindOneOf(Kind::Interface, Kind::Class))  // bases must be interfaces or classes, but we don't assume it's enforced prior to calls to this function
                 {
                     const auto& baseClassInfo = maybeBaseClass->second.GetSubRefAs<ClassInfo>();
                     bool baseHasSameNameMember = baseClassInfo.HasMember(hidingCandidate.GetNameLeaf());

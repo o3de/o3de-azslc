@@ -299,7 +299,7 @@ namespace AZ::ShaderCompiler
             {
                 if (idkind->second.GetKind() == Kind::TypeAlias)
                 {
-                    // recurse until not an alias !
+                    // recurse until not an alias!
                     typeRef = LookupType(UnqualifiedNameView{GetTypeName(idkind)}, policy);
                 }
                 else
