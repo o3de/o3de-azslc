@@ -112,7 +112,8 @@ namespace AZ::ShaderCompiler
         if (IsRooted(name))
         {   // It is possible that fully-qualified symbols find their way inside unqualified-tainted names.
             // For the reason mentioned in the comment decorating ExtractNameFromIdExpression() function. please refer.
-            return GetIdAndKindInfo(QualifiedNameView{name});
+            // Even fully qualified inputs must go through lookup resolution (to solve inherited access)
+            return LookupSymbol(QualifiedNameView{"/"}, UnqualifiedNameView{Slice(name, 1, -1)});
         }
         // try as floating symbol in priority (predefined are found at any scope)
         IdAndKind* got = GetIdAndKindInfo(QualifiedName{"?"s + name.data()});
@@ -123,10 +124,6 @@ namespace AZ::ShaderCompiler
         assert(!IsLeafDecoratedByArguments(name)); // refer to ../Documentation/function-overloading/research.txt
         // from now on scope matters
         assert(IsRooted(scope));
-        // get some information about the lookup starting scope:
-        IdAndKind* scopeSym = GetIdAndKindInfo(scope);
-        auto* scopeAsClass = scopeSym ? scopeSym->second.GetSubAs<ClassInfo>() : nullptr;
-        bool needsDeepLookup = scopeAsClass && !scopeAsClass->m_bases.empty();
         // Iterative lookup of the closest reachable symbol
         // by going further toward global.
         // e.g try to locate: /Typ/Sub/Sym/name; if not found: /Typ/Sub/name; if not found: /Typ/name; ...
@@ -144,13 +141,17 @@ namespace AZ::ShaderCompiler
             auto attempt = QualifiedName{JoinPath(path, name)};
             got = GetIdAndKindInfo(attempt);
             exit = path == "/";
-            if (!got && needsDeepLookup)
+            if (!got)
             {
-                for (auto& b : scopeAsClass->m_bases)
+                if (auto* scopeAsClass = GetAsSub<ClassInfo>(IdentifierUID{GetParentName(attempt)})) // get enclosing class
                 {
-                    got = LookupSymbol(b.GetName(), name);
+                    // classes need deep lookup, because may have bases. classes don't save in the symbol-table all the fields they render accessible.
+                    // Because multiple bases (upways and sideways) can shadow each-other's fields; caching inheritated fields would require complicated mangling.
+                    for (auto it = scopeAsClass->GetBases().begin(); it != scopeAsClass->GetBases().end() && !got; ++it)
+                    {
+                        got = LookupSymbol(it->GetName(), ExtractLeaf(attempt));
+                    }
                 }
-                needsDeepLookup = false;  // upward lookup only happens once
             }
             path = LevelUp(path);
         } while (!got && !exit);
