@@ -123,6 +123,10 @@ namespace AZ::ShaderCompiler
         assert(!IsLeafDecoratedByArguments(name)); // refer to ../Documentation/function-overloading/research.txt
         // from now on scope matters
         assert(IsRooted(scope));
+        // get some information about the lookup starting scope:
+        IdAndKind* scopeSym = GetIdAndKindInfo(scope);
+        auto* scopeAsClass = scopeSym ? scopeSym->second.GetSubAs<ClassInfo>() : nullptr;
+        bool needsDeepLookup = scopeAsClass && !scopeAsClass->m_bases.empty();
         // Iterative lookup of the closest reachable symbol
         // by going further toward global.
         // e.g try to locate: /Typ/Sub/Sym/name; if not found: /Typ/Sub/name; if not found: /Typ/name; ...
@@ -140,6 +144,14 @@ namespace AZ::ShaderCompiler
             auto attempt = QualifiedName{JoinPath(path, name)};
             got = GetIdAndKindInfo(attempt);
             exit = path == "/";
+            if (!got && needsDeepLookup)
+            {
+                for (auto& b : scopeAsClass->m_bases)
+                {
+                    got = LookupSymbol(b.GetName(), name);
+                }
+                needsDeepLookup = false;  // upward lookup only happens once
+            }
             path = LevelUp(path);
         } while (!got && !exit);
         return got;
