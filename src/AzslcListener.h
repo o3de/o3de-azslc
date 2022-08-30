@@ -46,6 +46,7 @@ namespace AZ::ShaderCompiler
         void exitFunctionParam(azslParser::FunctionParamContext* ctx) override;
         void enterNamedVariableDeclarator(azslParser::NamedVariableDeclaratorContext* ctx) override;
         void enterBaseList(azslParser::BaseListContext* ctx) override;
+        void exitBaseList(azslParser::BaseListContext* ctx) override;
         void enterCompilerExtensionStatement(azslParser::CompilerExtensionStatementContext* ctx) override;
         void enterGlobalAttribute(azslParser::GlobalAttributeContext* ctx) override;
         void enterAttachedAttribute(azslParser::AttachedAttributeContext* ctx) override;

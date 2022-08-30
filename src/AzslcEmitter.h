@@ -222,11 +222,14 @@ namespace AZ::ShaderCompiler
         mutable NewLineCounterStream m_out;
         void EmitEmptyLinesToLineNumber(size_t originalLineNumber) const;
 
-        // This template takes over the previous implementation of
-        // void GetTextInStream(misc::Interval interval, std::ostream& output) const override;
-        // The idea is that by using the template We only have to write the same code once
-        // whether We are using a regular std::ostream or an instance of NewLineCounterStream.
+        //! This template takes over the previous implementation of
+        //! void GetTextInStream(misc::Interval interval, std::ostream& output) const override;
+        //! The idea is that by using the template We only have to write the same code once
+        //! whether We are using a regular std::ostream or an instance of NewLineCounterStream.
         template <class StreamLike>
         void GetTextInStreamInternal(misc::Interval interval, StreamLike& output, bool emitNewLines) const;
+
+        //! This is a readability function for class emission code. Serves for HLSL declarator of classes
+        string EmitInheritanceList(const ClassInfo& clInfo);
     };
 }

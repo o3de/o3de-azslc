@@ -209,7 +209,7 @@ namespace AZ
         return haystack;
     }
 
-    template <typename Iter>
+    template< typename Iter >
     string Join(Iter begin, Iter end, string_view separator = "")
     {
         if (begin == end)
@@ -230,11 +230,32 @@ namespace AZ
         return std::find_if(begin, end, p) != end;
     }
 
-    //! closest possible form of python's `in` keyword
+    /// argument in rangeV3-style version:
+    template< typename Container >
+    string Join(const Container& c, string_view separator = "")
+    {
+        return Join(c.begin(), c.end(), separator);
+    }
+
+    /// argument in rangeV3-style version:
+    template< typename Container, typename Predicate >
+    bool Contains(const Container& c, Predicate p)
+    {
+        return Contains(c.begin(), c.end(), p);
+    }
+
+    /// closest possible form of python's `in` keyword
     template< typename Element, typename Container >
     bool IsIn(const Element& element, const Container& container)
     {
         return std::find(container.begin(), container.end(), element) != container.end();
+    }
+
+    /// generate a new container with copy-and-mutated elements
+    template< typename Container, typename ContainerOut, typename Functor >
+    void TransformCopy(const Container& in, ContainerOut& out, Functor mutator)
+    {
+        std::transform(in.begin(), in.end(), std::back_inserter(out), mutator);
     }
 
     inline string Unescape(string_view escapedText)

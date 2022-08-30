@@ -17,6 +17,15 @@ class top
 
 top gettop();
 
+class A
+{
+	int a;
+};
+
+class B : A
+{
+};
+
 struct Half{};
 struct Double{};
 half   returnThings(Half);
@@ -176,6 +185,11 @@ void h()
     __azslc_print_message("@check predicate ");
     __azslc_print_symbol(typeof(top::inner), __azslc_prtsym_fully_qualified);
     __azslc_print_message(" == '/top/inner'\n");
+
+	// class inheritance: parent member access using scope resolution operator
+    __azslc_print_message("@check predicate ");
+    __azslc_print_symbol(typeof(B::a), __azslc_prtsym_least_qualified);
+    __azslc_print_message(" == 'int'\n");
 
     // function call, the return type is returned
     __azslc_print_message("@check predicate ");
@@ -424,7 +438,7 @@ void h()
     __azslc_print_message("@check predicate ");
     __azslc_print_symbol(typeof(uint()), __azslc_prtsym_least_qualified);
     __azslc_print_message(" == 'uint'\n");
-    
+
     // comma expression:
     int INTVAR;
     double DOUBLEVAR;

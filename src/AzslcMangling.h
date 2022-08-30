@@ -354,6 +354,12 @@ namespace AZ::ShaderCompiler
         return QualifiedNameView{GetParentName(string_view{path})};
     }
 
+    //! Overload for when you work with QualifiedName type
+    inline QualifiedNameView GetParentName(const QualifiedName& path)
+    {
+        return QualifiedNameView{GetParentName(QualifiedNameView{path})};
+    }
+
     struct PathPart
     {
         string_view m_slice;

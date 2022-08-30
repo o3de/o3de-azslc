@@ -105,6 +105,29 @@ namespace AZ::ShaderCompiler
             m_ordered.insert(itor, newUid);
         }
 
+        bool HasBase(const IdentifierUID& query) const
+        {
+            return std::find(m_bases.begin(), m_bases.end(), query) != m_bases.end();
+        }
+
+        bool HasAnyBases() const
+        {
+            return !m_bases.empty();
+        }
+
+        void PushBase(const IdentifierUID& newBase)
+        {
+            if (!HasBase(newBase))
+            {
+                m_bases.push_back(newBase);
+            }
+        }
+
+        const vector<IdentifierUID>& GetBases() const
+        {
+            return m_bases;
+        }
+
         const vector<IdentifierUID>& GetMemberFields() const
         {
             return m_memberFields;
@@ -185,7 +208,6 @@ namespace AZ::ShaderCompiler
         }
 
         Kind                           m_kind;   // which of class/struct/interface/srgsemantic ? (repetition of data in the upper KindInfo)
-        unordered_set< IdentifierUID > m_bases;
 
         using DeclNode = variant< AstClassDeclNode*, AstStructDeclNode*, AstEnumDeclNode*, AstInterfaceDeclNode*, AstSRGSemanticDeclNode* >;
         DeclNode                       m_declNodeVt;
@@ -197,6 +219,7 @@ namespace AZ::ShaderCompiler
         unordered_set< IdentifierUID > m_members;      //!< Fast lookup
         vector< IdentifierUID >        m_memberFields; //!< Only the member fields, in order of declaration. All member fields are members.
         vector< IdentifierUID >        m_ordered;      //!< Ordered. all contained symbols
+        vector< IdentifierUID >        m_bases;
     };
     
     //! an extended type information gathers:

@@ -90,11 +90,11 @@ namespace AZ::ShaderCompiler
 
             if (!descriptorTable.empty())
             {
-                rootAttrList.push_back(Decorate("            \"DescriptorTable(", Join(descriptorTable.begin(), descriptorTable.end()       , ", \" \\\n                            \""), ", visibility=SHADER_VISIBILITY_ALL)"));
+                rootAttrList.push_back(Decorate("            \"DescriptorTable(", Join(descriptorTable, ", \" \\\n                            \""), ", visibility=SHADER_VISIBILITY_ALL)"));
             }
             if (!samplerTable.empty())
             {
-                rootAttrList.push_back(Decorate("            \"DescriptorTable(", Join(samplerTable.begin(), samplerTable.end(), ", \" \\\n                            \""), ", visibility=SHADER_VISIBILITY_ALL)"));
+                rootAttrList.push_back(Decorate("            \"DescriptorTable(", Join(samplerTable, ", \" \\\n                            \""), ", visibility=SHADER_VISIBILITY_ALL)"));
             }
         }
 
@@ -123,7 +123,7 @@ namespace AZ::ShaderCompiler
 
         rootAttrList.insert(rootAttrList.begin(), "\"RootFlags(0)");
 
-        return Decorate("#define sig ", Join(rootAttrList.begin(), rootAttrList.end(), ", \" \\\n"), "\"\n\n");
+        return Decorate("#define sig ", Join(rootAttrList, ", \" \\\n"), "\"\n\n");
     }
     
 }

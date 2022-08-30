@@ -914,6 +914,11 @@ namespace AZ::ShaderCompiler
     {
         using namespace std::string_literals;
 
+        // reconstruct the "/C" in "class C : b0, b1..." (since the current scope is not yet /C)
+        auto* classDefCtx = polymorphic_downcast<AstClassDeclNode*>(ctx->parent);
+        IdentifierUID targetClassUid{MakeFullyQualified(UnqualifiedNameView{classDefCtx->Name->getText()})};
+        auto* targetClassInfo = m_symbols->GetAsSub<ClassInfo>(targetClassUid);
+
         for (auto& idexpr : ctx->idExpression())
         {
             UnqualifiedName baseName = ExtractNameFromIdExpression(idexpr);
@@ -923,8 +928,8 @@ namespace AZ::ShaderCompiler
                 ThrowAzslcOrchestratorException(ORCHESTRATOR_UNSPECIFIED_BASE_SYMBOL,
                     ctx->start, ConcatString("Base symbol "s, baseName, " not found"));
             }
-            auto& curClassInfo = GetCurrentScopeSubInfoAs<ClassInfo>();
-            curClassInfo.m_bases.emplace(baseSymbol->first);
+            // register base in the class info IR
+            targetClassInfo->PushBase(baseSymbol->first);
         }
     }
 
@@ -1356,7 +1361,7 @@ namespace AZ::ShaderCompiler
         auto declNode = get<AstClassDeclNode*>(classSubInfo.m_declNodeVt);
         // Semantic validation. Iterate each base UID as registered in the ClassInfo:
         int concreteBase = 0; // this can only be 0 or 1.
-        for (auto b : classSubInfo.m_bases)
+        for (auto b : classSubInfo.GetBases())
         {
             // get line location diagnostic message of its declaration keyword in source:
             verboseCout << "  base: " << b.m_name << "\n";
@@ -1927,7 +1932,7 @@ namespace AZ::ShaderCompiler
             // get currently parsed class info:
             auto& curClassInfo = GetCurrentParentScopeSubInfoAs<ClassInfo>();
             // look for a match in any base
-            for (const IdentifierUID& base : curClassInfo.m_bases)
+            for (const IdentifierUID& base : curClassInfo.GetBases())
             {
                 auto maybeBaseClass = m_symbols->GetIdAndKindInfo(base.m_name);
                 if (maybeBaseClass

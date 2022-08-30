@@ -50,7 +50,7 @@ namespace AZ::ShaderCompiler
 
     void ScopeTracker::UpdateCurScopeUID()
     {
-        auto& [uid, Kind] = *m_symFinder(m_currentScopePath);
+        auto& [uid, _] = *m_symFinder(m_currentScopePath);
         // ↓ in this case please make sure you register the scope identifier before calling EnterScope. yes it is a sequential coupling antipattern, sorry for now
         assert(IsRooted(m_currentScopePath));
         m_currentScopeUID = uid;
