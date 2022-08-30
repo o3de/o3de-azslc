@@ -1,0 +1,12 @@
+class A
+{
+	float4 color : COLOR;
+	class A  // this creates a trap of spurious lookup find if we search for A in B when we ought to search for A in /
+	{
+	    int4 i;
+	};
+};
+
+class B : A
+{
+};
