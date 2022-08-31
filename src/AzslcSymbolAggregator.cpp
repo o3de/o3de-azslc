@@ -247,11 +247,13 @@ namespace AZ::ShaderCompiler
     {
         auto disambiguatorChar = '#';
         // query for symbol kind; because that function is specific to this algorithm, it's ok locally only.
-        auto isFunctionOrVariable = [this, disambiguatorChar](string_view name)
+        auto isFunctionOrVariableOrType = [this, disambiguatorChar](string_view name)
         {
             name = Slice(name, 0, name.find_first_of(disambiguatorChar));
             KindInfo& ki = GetIdAndKindInfo(QualifiedNameView{name})->second;
-            return std::make_pair(ki.IsKindOneOf(Kind::Function, Kind::OverloadSet), ki.IsKindOneOf(Kind::Variable));
+            return std::make_tuple(ki.IsKindOneOf(Kind::Function, Kind::OverloadSet),
+                                   ki.IsKindOneOf(Kind::Variable),
+                                   IsKindOneOfTypeRelated(ki.GetKind()));
         };
         // instanciate an empty solver and fill it up with the elastic symbols from the aggregator to reorder them
         DependencySolver<IdentifierUID, 50_maxdep_pernode> solver;
@@ -287,11 +289,14 @@ namespace AZ::ShaderCompiler
                 }
                 // establish a horizontal link between symbols of the same level to preserve the apparition order
                 bool sameParentAsLast = GetParentName(disambiguated.GetName()) == GetParentName(lastSymbolAtCurrentLevel.top().GetName());
-                bool lastIsFunction = isFunctionOrVariable(lastSymbolAtCurrentLevel.top().GetName()).first;
+                bool parentIsT = std::get<2>(isFunctionOrVariableOrType(GetParentName(disambiguated.GetName())));
+                bool lastIsFunction = std::get<0>(isFunctionOrVariableOrType(lastSymbolAtCurrentLevel.top().GetName()));
+                bool curIsT = std::get<2>(isFunctionOrVariableOrType(disambiguated.GetName()));
+                bool isNestedType = curIsT && symbolDepth > 0;
                 // verifying !lastIsFunction, permits to break dependency cycles.
-                if (sameParentAsLast && !lastIsFunction)
+                if (sameParentAsLast && !lastIsFunction && !(isNestedType && parentIsT))  // in "class C { int a; struct S{}; };"  `S` cannot depend on `a` otherwise `a` is pulled out of C
                 {
-                    solver.AddDependency(disambiguated, lastSymbolAtCurrentLevel.top());
+                    solver.AddDependency(disambiguated, lastSymbolAtCurrentLevel.top());  // make link:  ● 'g_fog' ← ● 'class C'
                 }
                 lastSymbolAtCurrentLevel.top() = disambiguated;
             }
@@ -301,10 +306,10 @@ namespace AZ::ShaderCompiler
                 // establish vertical links
                 string path;
                 IdentifierUID parent;
-                ForEachPathPart(disambiguated.GetName(), [this, &solver, &path, &parent, &isFunctionOrVariable](PathPart part)
+                ForEachPathPart(disambiguated.GetName(), [this, &solver, &path, &parent, &isFunctionOrVariableOrType](PathPart part)
                                 {
                                     path = JoinPath(path, part.m_slice);
-                                    auto [isFunc, isVar] = isFunctionOrVariable(path);
+                                    auto [isFunc, isVar, _] = isFunctionOrVariableOrType(path);
                                     IdentifierUID current{QualifiedNameView{path}};
                                     bool parentIsEmptyOrRoot = parent.IsEmpty() || parent.GetName() == "/";
                                     if (!parentIsEmptyOrRoot)
