@@ -142,6 +142,11 @@ namespace AZ::ShaderCompiler
                         }
                     }
 
+                    if (auto* semantic = param.m_semanticCtx)
+                    {
+                        m_out << " " + semantic->getText();
+                    }
+
                     if (param.m_defaultValueExpression)
                     {
                         EmitText(param.m_defaultValueExpression->getSourceInterval());
