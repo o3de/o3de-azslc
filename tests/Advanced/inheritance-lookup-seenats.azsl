@@ -6,6 +6,7 @@ class A
 	    int4 i;
 	};
 };
+// note: in C++ it's a forbidden construct. gcc: error: 'A::A' has the same name as the class in which it is declared
 
 class B : A
 {
