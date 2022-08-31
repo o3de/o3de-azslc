@@ -136,7 +136,7 @@ namespace AZ::ShaderCompiler
                 {
                     return false;
                 }
-                auto[semanticName, semanticIndex, isSystemValue] = ExtractHlslSemantic(hlslSemantic);
+                auto [semanticName, semanticIndex, isSystemValue] = ExtractHlslSemantic(hlslSemantic);
                 if (!BuildOMElement(jsonVal, attrVarInfo.m_typeInfoExt, semanticName.c_str(), semanticIndex, isSystemValue))
                 {
                     return false;

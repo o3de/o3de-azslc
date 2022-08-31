@@ -606,7 +606,7 @@ namespace AZ::ShaderCompiler
         {
             // We need to register each newly registered parameter variable ID, in the list of the function subinfo too:
             auto& funcSub = GetCurrentScopeSubInfoAs<FunctionInfo>();
-            funcSub.PushParameter(uid, varInfo.m_typeInfoExt, varInfo.m_typeQualifier, varInfo.m_declNode->ArrayRankSpecifiers, ctx->variableInitializer());
+            funcSub.PushParameter(uid, varInfo.m_typeInfoExt, varInfo.m_typeQualifier, varInfo.m_declNode);
         }
 
         bool isExtern = !varInfo.StorageFlagIsLocalLinkage(global || enclosedBySRG);
@@ -664,7 +664,7 @@ namespace AZ::ShaderCompiler
         ArrayDimensions arrayDims;
         TryFoldArrayDimensions(ctx->unnamedVariableDeclarator(), arrayDims);
         auto paramType = CreateExtendedTypeInfo(ctx->type(), arrayDims, Packing::MatrixMajor::Default);
-        GetCurrentScopeSubInfoAs<FunctionInfo>().PushParameter({}, paramType, typeQualifier, ctx->unnamedVariableDeclarator()->ArrayRankSpecifiers, ctx->unnamedVariableDeclarator()->variableInitializer());
+        GetCurrentScopeSubInfoAs<FunctionInfo>().PushParameter({}, paramType, typeQualifier, ctx->unnamedVariableDeclarator());
     }
 
     // Helper to avoid code redundancy for a message that is used in three different places.
