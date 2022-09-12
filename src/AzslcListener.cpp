@@ -64,7 +64,10 @@ namespace AZ::ShaderCompiler
     void SemaCheckListener::enterClassDefinition(azslParser::ClassDefinitionContext* ctx)
     {
         m_ir->m_sema.RegisterClass(ctx);
-        m_ir->m_scope.EnterScope(ctx->Name->getText(), ctx->LeftBrace()->getSourceInterval().a);
+        if (!ctx->baseList())  // if there is a base list, we can't enter the scope that early. it has to be at base list exit.
+        {
+            m_ir->m_scope.EnterScope(ctx->Name->getText(), ctx->LeftBrace()->getSourceInterval().a);
+        }
     }
 
     void SemaCheckListener::enterEnumDefinition(azslParser::EnumDefinitionContext* ctx)
@@ -278,7 +281,16 @@ namespace AZ::ShaderCompiler
 
     void SemaCheckListener::enterBaseList(azslParser::BaseListContext* ctx)
     {
+
         m_ir->m_sema.RegisterBases(ctx);
+    }
+
+    void SemaCheckListener::exitBaseList(azslParser::BaseListContext* ctx)
+    {
+        // if there was a base list, we deferred entering in scope
+        auto* classDefCtx = polymorphic_downcast<AstClassDeclNode*>(ctx->parent);  // baseList is only used in that context
+        m_ir->m_scope.EnterScope(classDefCtx->Name->getText(),
+                                 classDefCtx->LeftBrace()->getSourceInterval().a);
     }
 
     void SemaCheckListener::enterCompilerExtensionStatement(azslParser::CompilerExtensionStatementContext* ctx)

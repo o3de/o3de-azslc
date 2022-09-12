@@ -84,7 +84,7 @@ namespace AZ::ShaderCompiler
 
         if (!attr.m_argList.empty())
         {
-            out << "(" << Join(attr.m_argList.begin(), attr.m_argList.end(), ", ") << ")";
+            out << "(" << Join(attr.m_argList, ", ") << ")";
         }
         return out;
     }
@@ -122,6 +122,7 @@ namespace AZ::ShaderCompiler
             switch (iteratedSymbolKind)
             {
                 // top-level enums, structs and classes, as well as immediate-type-declaration enum/structs (`struct S{} s;`)
+            case Kind::Interface:
             case Kind::Struct:
             case Kind::Class:
             case Kind::Enum:
@@ -357,7 +358,7 @@ namespace AZ::ShaderCompiler
             }
         }
 
-        // DXC has made an error the definition of typedef in classes -> move them all to global
+        // DXC has made into an error the definition of typedef in classes -> move them all to global
         for (auto& [typeAliasUid, typeAliasInfo] : m_ir->GetOrderedSymbolsOfSubType_2<TypeAliasInfo>())
         {
             if (!IsGlobal(typeAliasUid.GetName()))
@@ -486,22 +487,48 @@ namespace AZ::ShaderCompiler
         EmitPreprocessorLineDirective(origSourceLine);
     }
 
-    void CodeEmitter::EmitStruct(const ClassInfo& classInfo, string_view structName, const Options& options)
+    string CodeEmitter::EmitInheritanceList(const ClassInfo& clInfo)
+    {
+        string hlsl = clInfo.HasAnyBases() ? " : " : "";
+        vector<string> mutatedBaseNames;
+        TransformCopy(clInfo.GetBases(), mutatedBaseNames,
+                      [&](const IdentifierUID& uid)
+                      {
+                          return GetTranslatedName(uid, UsageContext::ReferenceSite);
+                      });
+        hlsl += Join(mutatedBaseNames, ", ");
+        return hlsl;
+    }
+
+    void CodeEmitter::EmitStruct(const ClassInfo& classInfo, string_view structuredSymName, const Options& options)
     {
         EmitEmptyLinesToLineNumber(classInfo.GetOriginalLineNumber());
 
-        const bool hasName = (structName.length() > 0);
+        auto HlslStructuredDelcTagFromKind = [](Kind k)
+        {
+            switch (k)
+            {
+            case Kind::Struct: return "struct";
+            case Kind::Class: return "class";
+            case Kind::Interface: return "interface";
+            default: return " ";
+            }
+        };
+
+        const bool hasName = (structuredSymName.length() > 0);
         const auto tabs = "    ";
         if (hasName)
         {
-            EmitAllAttachedAttributes(IdentifierUID { QualifiedNameView{structName} });
-
-            m_out << (classInfo.m_kind == Kind::Struct ? "struct " : "class ") << GetTranslatedName(QualifiedNameView{structName}, UsageContext::DeclarationSite) << "\n{\n";
+            EmitAllAttachedAttributes(IdentifierUID { QualifiedNameView{structuredSymName} });
+            m_out << HlslStructuredDelcTagFromKind(classInfo.m_kind) << " "
+                  << GetTranslatedName(QualifiedNameView{structuredSymName}, UsageContext::DeclarationSite)
+                  << EmitInheritanceList(classInfo)
+                  << "\n{\n"; // conclusion of "class X : ::Stuff {"
         }
 
         for (const IdentifierUID& memberUid : classInfo.GetOrderedMembers())
         {
-            if (structName.empty() || m_translations.GetLandingScope(memberUid.GetName()) == structName)
+            if (structuredSymName.empty() || m_translations.GetLandingScope(memberUid.GetName()) == structuredSymName)
             {
                 auto& [uid, info] = *m_ir->GetIdAndKindInfo(memberUid.GetName());
                 if (info.IsKindOneOf(Kind::Class, Kind::Struct, Kind::Interface))
@@ -712,7 +739,6 @@ namespace AZ::ShaderCompiler
                                || emitAsDefinition && AlreadyEmittedFunctionDefinition(uid);
         bool undefinedFunction = funcSub.IsUndefinedFunction();
         if (riskDoubleEmission
-            || funcSub.m_isVirtual   // interface's methods (isVirtual) are a declarative construct of AZSL and don't appear in HLSL.
             || undefinedFunction && emitAsDefinition)
         {
             return;

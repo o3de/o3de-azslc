@@ -18,7 +18,7 @@ namespace AZ::ShaderCompiler
     //! Picture a sort of BOOST_STRONG_TYPEDEF. But that keeps compatibility with a 'view' type
     struct QualifiedName : string
     {
-        // I need to declare explicitly a default constructor, since the declaration of a copy constructor hereunder would otherwise delete it.
+        // Need to declare explicitly a default constructor, since the declaration of a copy constructor hereunder would otherwise delete it.
         QualifiedName() = default;
 
         // Provide implicit compatibility from string_view for sheer convenience
@@ -352,6 +352,12 @@ namespace AZ::ShaderCompiler
     inline QualifiedNameView GetParentName(QualifiedNameView path)
     {
         return QualifiedNameView{GetParentName(string_view{path})};
+    }
+
+    //! Overload for when you work with QualifiedName type
+    inline QualifiedNameView GetParentName(const QualifiedName& path)
+    {
+        return QualifiedNameView{GetParentName(QualifiedNameView{path})};
     }
 
     struct PathPart

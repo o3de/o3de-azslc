@@ -310,8 +310,8 @@ namespace AZ::ShaderCompiler
         string ToString(const string& prefix = "[", const string& separator = "][", const string& suffix = "]") const
         {
             vector<string> asStrs;
-            std::transform(m_dimensions.begin(), m_dimensions.end(), std::back_inserter(asStrs),
-                           [](int d) -> string { return d == Unknown ? "?" : d == Unbounded ? "" : std::to_string(d); });
+            TransformCopy(m_dimensions, asStrs,
+                          [](int d) -> string { return d == Unknown ? "?" : d == Unbounded ? "" : std::to_string(d); });
             return asStrs.empty() ? "" : prefix + Join(asStrs.begin(), asStrs.end(), separator) + suffix;
         }
 
@@ -1184,6 +1184,7 @@ namespace AZ::ShaderCompiler
         ExtractedTypeExt m_genericParam; // note: could be made recursive one day. use unique_ptr here
         ArrayDimensions  m_genericDimensions; // can expand generic dimensions too later. for MSTexture, IO patch, matrix<t,N,M> etc...
     };
+
     // Compose middleEnd configurations, wraps minimal user options from command line.
     struct MiddleEndConfiguration
     {

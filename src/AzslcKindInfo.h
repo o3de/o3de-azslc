@@ -105,6 +105,29 @@ namespace AZ::ShaderCompiler
             m_ordered.insert(itor, newUid);
         }
 
+        bool HasBase(const IdentifierUID& query) const
+        {
+            return std::find(m_bases.begin(), m_bases.end(), query) != m_bases.end();
+        }
+
+        bool HasAnyBases() const
+        {
+            return !m_bases.empty();
+        }
+
+        void PushBase(const IdentifierUID& newBase)
+        {
+            if (!HasBase(newBase))
+            {
+                m_bases.push_back(newBase);
+            }
+        }
+
+        const vector<IdentifierUID>& GetBases() const
+        {
+            return m_bases;
+        }
+
         const vector<IdentifierUID>& GetMemberFields() const
         {
             return m_memberFields;
@@ -185,7 +208,6 @@ namespace AZ::ShaderCompiler
         }
 
         Kind                           m_kind;   // which of class/struct/interface/srgsemantic ? (repetition of data in the upper KindInfo)
-        unordered_set< IdentifierUID > m_bases;
 
         using DeclNode = variant< AstClassDeclNode*, AstStructDeclNode*, AstEnumDeclNode*, AstInterfaceDeclNode*, AstSRGSemanticDeclNode* >;
         DeclNode                       m_declNodeVt;
@@ -197,6 +219,7 @@ namespace AZ::ShaderCompiler
         unordered_set< IdentifierUID > m_members;      //!< Fast lookup
         vector< IdentifierUID >        m_memberFields; //!< Only the member fields, in order of declaration. All member fields are members.
         vector< IdentifierUID >        m_ordered;      //!< Ordered. all contained symbols
+        vector< IdentifierUID >        m_bases;
     };
     
     //! an extended type information gathers:
@@ -346,7 +369,7 @@ namespace AZ::ShaderCompiler
         // returns an ArrayDimensions struct const ref.
         inline const auto&         GetArrayDimensions() const;
         // Returns the line number, in the AZSL file, where this symbol is declared. 
-        inline size_t GetOriginalLineNumber () const;
+        inline size_t              GetOriginalLineNumber () const;
 
         AstUnnamedVarDecl*         m_declNode = nullptr;
         UnqualifiedName            m_identifier;
@@ -657,14 +680,15 @@ namespace AZ::ShaderCompiler
         }
 
         //! add a parameter
-        void PushParameter(IdentifierUID varName, const ExtendedTypeInfo& typeInfo, TypeQualifier typeQualifier, const std::vector<azslParser::ArrayRankSpecifierContext*>& arrayRankSpecifiers, AstVarInitializer* initCtx)
+        void PushParameter(IdentifierUID varName, const ExtendedTypeInfo& typeInfo, TypeQualifier typeQualifier, AstUnnamedVarDecl* unnamedCtx)
         {
             Parameter param;
             param.m_varId = varName;
             param.m_typeInfo = typeInfo;
             param.m_typeQualifier = typeQualifier;
-            param.m_arrayRankSpecifiers = arrayRankSpecifiers;
-            param.m_defaultValueExpression = initCtx;
+            param.m_semanticCtx = unnamedCtx->SemanticOpt;
+            param.m_arrayRankSpecifiers = unnamedCtx->ArrayRankSpecifiers;
+            param.m_defaultValueExpression = unnamedCtx->variableInitializer();
             m_parameters[m_currentList].push_back(param);
         }
 
@@ -756,6 +780,7 @@ namespace AZ::ShaderCompiler
             IdentifierUID m_varId;
             ExtendedTypeInfo m_typeInfo;
             TypeQualifier m_typeQualifier;
+            azslParser::HlslSemanticContext* m_semanticCtx = nullptr;
             std::vector<azslParser::ArrayRankSpecifierContext*> m_arrayRankSpecifiers;
             AstVarInitializer* m_defaultValueExpression = nullptr;
         };

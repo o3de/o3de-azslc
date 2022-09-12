@@ -42,7 +42,7 @@ def found(needle, haystack):
         lastEnd = matchObject.end()
         return True
     return False
-    
+
 # pars the argument mentioned in the shader source file Ex : Cmdargs: --namespace=vk   or Cmdargs: ['--unique-idx', '--root-sig', '--root-const', '0']
 def parse_strlist(sl):
     clean = re.sub("[\[\],\s]","",sl)
@@ -89,7 +89,7 @@ def verifyEmissionPattern(azslFile, patternsFileName, compilerPath, silent, argL
         reset()
         ok = testfuncs.verifyAllPredicates(predicates, shaderCode, silent)
     return ok
-    
+
 # read the output of the compiler and tries to match some regex on it
 # to verify that the output looks like what we expect.
 def verifyEmissionPatterns(thefile, compilerPath, silent, argList):
@@ -104,19 +104,19 @@ def verifyEmissionPatterns(thefile, compilerPath, silent, argList):
         patterFileName = file
         if not verifyEmissionPattern(thefile, patterFileName, compilerPath, silent, argList):
             localFailList.append(patterFileName)
-        else: 
+        else:
             result = result + 1
     if len(localFailList) > 0:
         failList.extend(localFailList)
         return 0
     else:
         return result
-        
+
 def printFailedTestList(silent):
     global failList
     if not silent and len(failList) > 0:
         print(style.BRIGHT + fg.RED + "failed files: " + fg.WHITE + str(failList) + style.RESET_ALL)
-        
+
     failList = [] # since the module is imported for other platforms too, reset the list
 
 def compileAndExpectError(thefile, compilerPath, silent, argList):
