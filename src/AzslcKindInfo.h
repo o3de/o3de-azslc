@@ -996,7 +996,7 @@ namespace AZ::ShaderCompiler
 
     // usings for data model. of particular relevance for the SymbolTable.
     using IdToKindMap            = unordered_map< IdentifierUID, KindInfo >;
-    using IdAndKind              = IdToKindMap::value_type;  // nicely destructurable ! assign it like this: `auto& [uid, kind] = GetIdAndKind..`
+    using IdAndKind              = IdToKindMap::value_type;  // nicely destructurable! assign it like this: `auto& [uid, kind] = GetIdAndKind..`
 
 
     struct GetSubKindInfoTypeName_Visitor
@@ -1126,7 +1126,7 @@ namespace AZ::ShaderCompiler
     {
         const string errorMessage = ConcatString(
             "redeclaration of ", symbolName, " with a different kind: ", Kind::ToStr(newKind),
-            " but was ", Kind::ToStr(kindInfo.GetKind()), GetFirstSeenLineMessage(kindInfo));
+            " but was ", Kind::ToStr(kindInfo.GetKind()), ", ", GetFirstSeenLineMessage(kindInfo));
         throw AzslcOrchestratorException(ORCHESTRATOR_ODR_VIOLATION, lineNumber, none, errorMessage);
     }
 

@@ -12,14 +12,14 @@ namespace AZ::ShaderCompiler
 {
     namespace  // utility helpers to raise the abstraction level of SemanticOrchestrator's methods.
     {
-        Packing::MatrixMajor ExtractMatrixMajorness(VarInfo& varInfo)
+        Packing::MatrixMajor ExtractMatrixMajorness(TypeQualifier variableQualificationFlags)
         {
             Packing::MatrixMajor major = Packing::MatrixMajor::Default;
-            if (varInfo.CheckHasStorageFlag(StorageFlag::RowMajor))
+            if (TypeHasStorageFlag(variableQualificationFlags, StorageFlag::RowMajor))
             {
                 major = Packing::MatrixMajor::RowMajor;
             }
-            else if (varInfo.CheckHasStorageFlag(StorageFlag::ColumnMajor))
+            else if (TypeHasStorageFlag(variableQualificationFlags, StorageFlag::ColumnMajor))
             {
                 major = Packing::MatrixMajor::ColumnMajor;
             }
@@ -486,28 +486,38 @@ namespace AZ::ShaderCompiler
     IdAndKind* SemanticOrchestrator::RegisterVar(Token* nameIdentifier, AstUnnamedVarDecl* ctx)
     {
         azslParser::FunctionParamContext* paramCtx = nullptr;
-        auto typeCtx           = ExtractTypeFromVariableDeclarator(ctx, &paramCtx);
-        auto&& idText          = nameIdentifier->getText();
-        size_t line            = nameIdentifier->getLine();
-        const string verboseMessage = ConcatString(line, ": var decl: ", idText, "\n");
-        verboseCout << verboseMessage;
-        auto uqNameView        = UnqualifiedNameView{idText};
-        auto& varSymbol        = AddIdentifier(uqNameView, Kind::Variable, line);
-        auto& [uid, info]      = varSymbol;
-        // now fillup what we can about that variable in the IR:
-        VarInfo& varInfo       = info.GetSubRefAs<VarInfo>();
-        // discover the storage flags:
-        varInfo.m_typeQualifier = ExtractTypeQualifiers(ctx, &varInfo.m_unknownQualifiers);
-        varInfo.m_declNode   = ctx;
-        varInfo.m_identifier = uqNameView;
-        // discover array dimensions
+        auto typeCtx                    = ExtractTypeFromVariableDeclarator(ctx, &paramCtx);
+        auto&& idText                   = nameIdentifier->getText();
+        size_t line                     = nameIdentifier->getLine();
+        verboseCout << ConcatString(line, ": var decl: ", idText, "\n");
+        auto uqNameView                 = UnqualifiedNameView{idText};
+        // Register the variable in the symbol table early:
+        IdAndKind& symbolRef            = AddIdentifier(uqNameView, Kind::Variable, line);
+        auto& [uid, kindInfo]           = symbolRef;
+        VarInfo& varInfo                = kindInfo.GetSubRefAs<VarInfo>();
+        // Discover the storage flags:
+        varInfo.m_typeQualifier         = ExtractTypeQualifiers(ctx, &varInfo.m_unknownQualifiers);
+        // Discover array dimensions:
         ArrayDimensions arrayDims;
         TryFoldArrayDimensions(ctx, arrayDims);
-        // discover matrix majorness
-        Packing::MatrixMajor major = ExtractMatrixMajorness(varInfo);
-        // finally make the structure to hold all type information from the type context (will lookup/resolve type/typeof and compose the data)
-        varInfo.m_typeInfoExt = CreateExtendedTypeInfo(typeCtx, arrayDims, major);
+        // Discover matrix majorness:
+        Packing::MatrixMajor major      = ExtractMatrixMajorness(varInfo.m_typeQualifier);
+        // Finally make the structure to hold all type information from the type context:
+        // (this will perform a lookup/resolve type/typeof and compose the data)
+        //
+        //  note: this syntax: "A A;" is allowed in C++/HLSL but not in AZSL.
+        // Because originally in C you can disambiguate lookup using a repetition of the type tag: "struct A A;"
+        // To make it work (I argue that it's undesirable though), it would require:
+        //  - an evolution of the grammar to tolerate tags
+        //  - an inversion between CreateExtendedTypeInfo call AddIdentifier call
+        //  - an evolution in the mangling to be able to store 2 symbols of the same name in the same scope
+        //        E.g "/!A" for type ::A (bang mark would mirror built-ins "?float")
+        varInfo.m_typeInfoExt           = CreateExtendedTypeInfo(typeCtx, arrayDims, major);
         assert(!varInfo.m_typeInfoExt.IsEmpty());
+        // now fillup what we can, and already know, about that variable in the IR:
+        varInfo.m_declNode              = ctx;
+        varInfo.m_identifier            = uqNameView;
+
         if (!varInfo.m_typeInfoExt.IsClassFound())
         {
             PrintWarning(Warn::W2, typeCtx->start, "variable type ", typeCtx->getText(), " not understood.",
@@ -653,7 +663,7 @@ namespace AZ::ShaderCompiler
         //  note to maintainers: do NOT try to avoid bloat in the verbose stream, by protecting this in `if (ctx->variableInitializer())`
         //                       it will result in the "static no-init-assignment zero initialization" case being <failed> instead of 0.
         varInfo.m_constVal = FoldEvalStaticConstExprNumericValue(varInfo);
-        return &varSymbol;
+        return &symbolRef;
     }
 
     void SemanticOrchestrator::RegisterNamelessFunctionParameter(azslParser::FunctionParamContext* ctx)
