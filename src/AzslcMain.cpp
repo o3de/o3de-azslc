@@ -398,7 +398,7 @@ int main(int argc, const char* argv[])
     cli.add_flag("-r", visitRecursively, "(Option of --visitsym) Visit recursively.");
 
     bool listPredefined = false;
-    cli.add_flag("--listpredefined", "Output a list of all predefined types in AZSLang.");
+    cli.add_flag("--listpredefined", listPredefined, "Output a list of all predefined types in AZSLang.");
 
     int maxSpaces = std::numeric_limits<int>::max();
     auto maxSpacesOpt = cli.add_option("--max-spaces", maxSpaces, "Will choose register spaces that do not extend past this limit.");
