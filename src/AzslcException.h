@@ -297,27 +297,19 @@ namespace AZ::ShaderCompiler
             size_t charPositionInLine, const string &msg, std::exception_ptr e) override
         {
             string errorMessage;
+            size_t adjustedLine = line;
             const LineDirectiveInfo* lineDirectiveInfo = m_lineDirectiveFinder.GetNearestPreprocessorLineDirective(line);
-            if (!lineDirectiveInfo)
+            if (lineDirectiveInfo)
             {
-                errorMessage = std::move(AzslcException::MakeErrorMessage(ToString(line),
-                    ToString(charPositionInLine + 1),
-                    "syntax",
-                    true,
-                    ToString(static_cast<int>(PARSER_SYNTAX_ERROR)),
-                    msg));
-            }
-            else
-            {
-                auto absoluteLineNumberInIncludedFile = m_lineDirectiveFinder.GetLineNumberInOriginalSourceFile(*lineDirectiveInfo, line);
+                adjustedLine = m_lineDirectiveFinder.GetLineNumberInOriginalSourceFile(*lineDirectiveInfo, line);
                 AzslcException::s_currentSourceFileName = lineDirectiveInfo->m_containingFilename;
-                errorMessage = std::move(AzslcException::MakeErrorMessage(ToString(absoluteLineNumberInIncludedFile),
-                    ToString(charPositionInLine + 1),
-                    "syntax",
-                    true,
-                    ToString(static_cast<int>(PARSER_SYNTAX_ERROR)),
-                    msg));
             }
+            errorMessage = std::move(AzslcException::MakeErrorMessage(ToString(line),
+                                                                      ToString(charPositionInLine + 1),
+                                                                      "syntax",
+                                                                      true,
+                                                                      ToString(PARSER_SYNTAX_ERROR),
+                                                                      msg));
 
             antlr4::ParseCancellationException parseException(errorMessage);
             if (e)
