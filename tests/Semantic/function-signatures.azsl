@@ -1,3 +1,5 @@
+struct MyT{};
+
 int func1();
 void func2();
 float func3(int arg1);
@@ -13,6 +15,19 @@ bool func12(inout int i);
 float4 func13() : SV_Target0;
 float4 func14(in float2 : TEXCOORD0) : SV_Target0;
 float4 func15(in float2 uv : TEXCOORD0) : SV_Target0;
+
 [shader( "raygeneration" )]
 void func16();
-float4 main( TriVertex in_ ) : SV_POSITION;
+
+struct TriVertex{ float3 p : POSITION; };
+float4 main( TriVertex in_ ) : SV_POSITION {return 0;}
+
+struct P { float3 c; };
+struct Attributes { float2 bary; };
+[shader( "closesthit" )]
+void closest(inout P payload : SV_RayPayload,
+			 Attributes attrib);
+
+[shader("anyhit")]
+void closest(inout P payload : SV_RayPayload,
+			 in BuiltInTriangleIntersectionAttributes myAttr);

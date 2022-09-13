@@ -669,8 +669,6 @@ namespace AZ::ShaderCompiler
     void SemanticOrchestrator::RegisterNamelessFunctionParameter(azslParser::FunctionParamContext* ctx)
     {
         TypeQualifier typeQualifier = ExtractTypeQualifiers(ctx->storageFlags());
-        CheckQualifersAreOnlyInlineOrStatic(typeQualifier, ctx->start->getLine());  // throws a diagnostic if needed
-
         ArrayDimensions arrayDims;
         TryFoldArrayDimensions(ctx->unnamedVariableDeclarator(), arrayDims);
         auto paramType = CreateExtendedTypeInfo(ctx->type(), arrayDims, Packing::MatrixMajor::Default);
