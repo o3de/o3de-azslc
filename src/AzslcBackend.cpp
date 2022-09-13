@@ -355,7 +355,7 @@ namespace AZ::ShaderCompiler
                 if (!rangeAttribute)
                 {
                     throw AzslcEmitterException(EMITTER_INTEGER_HAS_NO_RANGE,
-                                                none, none, ConcatString("Option (", varUid.m_name, ") must specify a range with a minimum and maximum values"));
+                                                none, none, ConcatString("Option (", varUid.m_name, ") must decorate declaration with an attribute [range(minimum value, maximum value)]"));
                 }
 
                 if (rangeAttribute->m_argList.size() != 2)
