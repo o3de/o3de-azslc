@@ -128,6 +128,7 @@ Rootconstant : 'rootconstant';   // Amazon extension
 Inout : 'inout' | 'in out';
 InputPatch : 'InputPatch';
 Int : 'int';
+Int16_t : 'int16_t';
 Int32_t : 'int32_t';
 Int64_t : 'int64_t';
 Int1 : 'int1';
@@ -222,12 +223,9 @@ TriangleStream : 'TriangleStream';
 Uniform : 'uniform';
 // For the --listpredefined option to work, we absolutely need all types to exist in (simple) rules
 // that can return strings from Vocabulary::getLiteralName()
-// so that rule: Uint : 'uint' | 'unsigned int' | 'dword' # can't be used because it's non-trivialness makes it a non-citizen.
+// so that rule: Uint : 'uint' | 'dword' # can't be used because it's non-trivialness makes it a non-citizen.
 // I tried to recompose the rule with fragments, but fragment also are not listed in the vocabulary. (_literalNames)
 Uint : 'uint';
-Uint32_t : 'uint32_t';
-Uint64_t : 'uint64_t';
-UnsignedInt : 'unsigned int';
 Uint1 : 'uint1';
 Uint2 : 'uint2';
 Uint3 : 'uint3';
@@ -248,7 +246,11 @@ Uint4x1 : 'uint4x1';
 Uint4x2 : 'uint4x2';
 Uint4x3 : 'uint4x3';
 Uint4x4 : 'uint4x4';
+Uint16_t : 'uint16_t';
+Uint32_t : 'uint32_t';
+Uint64_t : 'uint64_t';
 UNorm : 'unorm';
+Unsigned : 'unsigned';
 Dword : 'dword';
 // Amazon addition: DXC didn't advertise it, but the vector/matrix forms of dword are now accepted
 Dword1 : 'dword1';

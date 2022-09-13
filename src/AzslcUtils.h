@@ -746,23 +746,34 @@ namespace AZ::ShaderCompiler
 
         inline uint32_t PackedSizeof(int indexInAzslPredefined_Scalar)
         {
-            // the array is generated but it's expected to look like: {"bool", "double", "dword", "float", "half", "int", "int32_t", "int64_t", "uint", "uint32_t", "uint64_t", "unsigned int"}
+            // the array is generated but it's expected to look like:
+            // {"bool", "double", "dword", "float", "half", "int", "int16_t", "int32_t", "int64_t", "uint", "uint16_t", "uint32_t", "uint64_t"}
             // just update that code if it changes one day, the assert will pop.
-            if (indexInAzslPredefined_Scalar == 1 || indexInAzslPredefined_Scalar == 7 || indexInAzslPredefined_Scalar == 10)
+            if (indexInAzslPredefined_Scalar == 1 || indexInAzslPredefined_Scalar == 8 || indexInAzslPredefined_Scalar == 12)
             {
                 assert(string_view{"double"} == AZ::ShaderCompiler::Predefined::Scalar[1]);
-				assert(string_view{"int64_t"} == AZ::ShaderCompiler::Predefined::Scalar[7]);
-				assert(string_view{"uint64_t"} == AZ::ShaderCompiler::Predefined::Scalar[10]);
+				assert(string_view{"int64_t"} == AZ::ShaderCompiler::Predefined::Scalar[8]);
+				assert(string_view{"uint64_t"} == AZ::ShaderCompiler::Predefined::Scalar[12]);
                 // Shader packing reference:
                 // https://docs.microsoft.com/en-us/windows/desktop/direct3dhlsl/dx-graphics-hlsl-packing-rules
                 return 8;
+            }
+            else if (indexInAzslPredefined_Scalar == 4 || indexInAzslPredefined_Scalar == 6 || indexInAzslPredefined_Scalar == 10)
+            {
+                // https://github.com/microsoft/DirectXShaderCompiler/wiki/Buffer-Packing
+                //   extract: "with -enable-16bit-types: HLSL half type maps to native 16-bit float16_t type"
+                //            "native 16-bit types have storage size of 16-bits (as expected)"
+                assert(string_view{"half"} == AZ::ShaderCompiler::Predefined::Scalar[4]);
+                assert(string_view{"int16_t"} == AZ::ShaderCompiler::Predefined::Scalar[6]);
+                assert(string_view{"uint16_t"} == AZ::ShaderCompiler::Predefined::Scalar[10]);
+                return 2;
             }
             else if (indexInAzslPredefined_Scalar < 0)
             {
                 return 0;  // non-predefined case, surely meaning UDT.
             }
             assert(indexInAzslPredefined_Scalar < AZ::ShaderCompiler::Predefined::Scalar.size()); // #craefulgang.
-            return 4;
+            return 4;  // bool is 32 too.
         }
     };
 

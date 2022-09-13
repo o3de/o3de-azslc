@@ -190,15 +190,16 @@ azslParser::CompilationUnitContext* azslParser::compilationUnit() {
       | (1ULL << (azslParser::Inout - 65))
       | (1ULL << (azslParser::InputPatch - 65))
       | (1ULL << (azslParser::Int - 65))
+      | (1ULL << (azslParser::Int16_t - 65))
       | (1ULL << (azslParser::Int32_t - 65))
       | (1ULL << (azslParser::Int64_t - 65))
       | (1ULL << (azslParser::Int1 - 65))
       | (1ULL << (azslParser::Int2 - 65))
       | (1ULL << (azslParser::Int3 - 65))
       | (1ULL << (azslParser::Int4 - 65))
-      | (1ULL << (azslParser::Int1x1 - 65))
-      | (1ULL << (azslParser::Int1x2 - 65)))) != 0) || ((((_la - 129) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 129)) & ((1ULL << (azslParser::Int1x3 - 129))
+      | (1ULL << (azslParser::Int1x1 - 65)))) != 0) || ((((_la - 129) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 129)) & ((1ULL << (azslParser::Int1x2 - 129))
+      | (1ULL << (azslParser::Int1x3 - 129))
       | (1ULL << (azslParser::Int1x4 - 129))
       | (1ULL << (azslParser::Int2x1 - 129))
       | (1ULL << (azslParser::Int2x2 - 129))
@@ -250,13 +251,14 @@ azslParser::CompilationUnitContext* azslParser::compilationUnit() {
       | (1ULL << (azslParser::Sampler - 129))
       | (1ULL << (azslParser::SamplerCapitalS - 129))
       | (1ULL << (azslParser::SamplerComparisonState - 129))
+      | (1ULL << (azslParser::SamplerStateCamel - 129))
       | (1ULL << (azslParser::SamplerState - 129))
       | (1ULL << (azslParser::Shared - 129))
       | (1ULL << (azslParser::SNorm - 129))
       | (1ULL << (azslParser::Static - 129))
-      | (1ULL << (azslParser::Struct - 129))
-      | (1ULL << (azslParser::StructuredBuffer - 129)))) != 0) || ((((_la - 193) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 193)) & ((1ULL << (azslParser::SubpassInput - 193))
+      | (1ULL << (azslParser::Struct - 129)))) != 0) || ((((_la - 193) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 193)) & ((1ULL << (azslParser::StructuredBuffer - 193))
+      | (1ULL << (azslParser::SubpassInput - 193))
       | (1ULL << (azslParser::SubpassInputMS - 193))
       | (1ULL << (azslParser::Texture1D - 193))
       | (1ULL << (azslParser::Texture1DArray - 193))
@@ -272,9 +274,6 @@ azslParser::CompilationUnitContext* azslParser::compilationUnit() {
       | (1ULL << (azslParser::TriangleStream - 193))
       | (1ULL << (azslParser::Uniform - 193))
       | (1ULL << (azslParser::Uint - 193))
-      | (1ULL << (azslParser::Uint32_t - 193))
-      | (1ULL << (azslParser::Uint64_t - 193))
-      | (1ULL << (azslParser::UnsignedInt - 193))
       | (1ULL << (azslParser::Uint1 - 193))
       | (1ULL << (azslParser::Uint2 - 193))
       | (1ULL << (azslParser::Uint3 - 193))
@@ -295,7 +294,11 @@ azslParser::CompilationUnitContext* azslParser::compilationUnit() {
       | (1ULL << (azslParser::Uint4x2 - 193))
       | (1ULL << (azslParser::Uint4x3 - 193))
       | (1ULL << (azslParser::Uint4x4 - 193))
+      | (1ULL << (azslParser::Uint16_t - 193))
+      | (1ULL << (azslParser::Uint32_t - 193))
+      | (1ULL << (azslParser::Uint64_t - 193))
       | (1ULL << (azslParser::UNorm - 193))
+      | (1ULL << (azslParser::Unsigned - 193))
       | (1ULL << (azslParser::Dword - 193))
       | (1ULL << (azslParser::Dword1 - 193))
       | (1ULL << (azslParser::Dword2 - 193))
@@ -315,10 +318,10 @@ azslParser::CompilationUnitContext* azslParser::compilationUnit() {
       | (1ULL << (azslParser::Dword3x4 - 193))
       | (1ULL << (azslParser::Dword4x1 - 193))
       | (1ULL << (azslParser::Dword4x2 - 193))
-      | (1ULL << (azslParser::Dword4x3 - 193))
-      | (1ULL << (azslParser::Dword4x4 - 193))
-      | (1ULL << (azslParser::Vector - 193)))) != 0) || ((((_la - 257) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 257)) & ((1ULL << (azslParser::Volatile - 257))
+      | (1ULL << (azslParser::Dword4x3 - 193)))) != 0) || ((((_la - 257) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 257)) & ((1ULL << (azslParser::Dword4x4 - 257))
+      | (1ULL << (azslParser::Vector - 257))
+      | (1ULL << (azslParser::Volatile - 257))
       | (1ULL << (azslParser::Void - 257))
       | (1ULL << (azslParser::StateObjectConfig - 257))
       | (1ULL << (azslParser::LocalRootSignature - 257))
@@ -330,19 +333,19 @@ azslParser::CompilationUnitContext* azslParser::compilationUnit() {
       | (1ULL << (azslParser::TriangleHitGroup - 257))
       | (1ULL << (azslParser::ProceduralPrimitiveHitGroup - 257))
       | (1ULL << (azslParser::LeftBracket - 257))
-      | (1ULL << (azslParser::LeftDoubleBracket - 257)))) != 0) || ((((_la - 333) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 333)) & ((1ULL << (azslParser::ColonColon - 333))
-      | (1ULL << (azslParser::Semi - 333))
-      | (1ULL << (azslParser::KW_TypeAlias - 333))
-      | (1ULL << (azslParser::KW_Typedef - 333))
-      | (1ULL << (azslParser::KW_Typeof - 333))
-      | (1ULL << (azslParser::KW_ext_print_message - 333))
-      | (1ULL << (azslParser::KW_ext_print_symbol - 333))
-      | (1ULL << (azslParser::ShaderResourceGroupSemantic - 333))
-      | (1ULL << (azslParser::ShaderResourceGroup - 333))
-      | (1ULL << (azslParser::Indices - 333))
-      | (1ULL << (azslParser::Vertices - 333))
-      | (1ULL << (azslParser::Identifier - 333)))) != 0)) {
+      | (1ULL << (azslParser::LeftDoubleBracket - 257)))) != 0) || ((((_la - 335) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 335)) & ((1ULL << (azslParser::ColonColon - 335))
+      | (1ULL << (azslParser::Semi - 335))
+      | (1ULL << (azslParser::KW_TypeAlias - 335))
+      | (1ULL << (azslParser::KW_Typedef - 335))
+      | (1ULL << (azslParser::KW_Typeof - 335))
+      | (1ULL << (azslParser::KW_ext_print_message - 335))
+      | (1ULL << (azslParser::KW_ext_print_symbol - 335))
+      | (1ULL << (azslParser::ShaderResourceGroupSemantic - 335))
+      | (1ULL << (azslParser::ShaderResourceGroup - 335))
+      | (1ULL << (azslParser::Indices - 335))
+      | (1ULL << (azslParser::Vertices - 335))
+      | (1ULL << (azslParser::Identifier - 335)))) != 0)) {
       setState(276);
       antlrcpp::downCast<CompilationUnitContext *>(_localctx)->topLevelDeclarationContext = topLevelDeclaration();
       antlrcpp::downCast<CompilationUnitContext *>(_localctx)->Declarations.push_back(antlrcpp::downCast<CompilationUnitContext *>(_localctx)->topLevelDeclarationContext);
@@ -1046,15 +1049,16 @@ azslParser::ClassDefinitionContext* azslParser::classDefinition() {
       | (1ULL << (azslParser::Inout - 65))
       | (1ULL << (azslParser::InputPatch - 65))
       | (1ULL << (azslParser::Int - 65))
+      | (1ULL << (azslParser::Int16_t - 65))
       | (1ULL << (azslParser::Int32_t - 65))
       | (1ULL << (azslParser::Int64_t - 65))
       | (1ULL << (azslParser::Int1 - 65))
       | (1ULL << (azslParser::Int2 - 65))
       | (1ULL << (azslParser::Int3 - 65))
       | (1ULL << (azslParser::Int4 - 65))
-      | (1ULL << (azslParser::Int1x1 - 65))
-      | (1ULL << (azslParser::Int1x2 - 65)))) != 0) || ((((_la - 129) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 129)) & ((1ULL << (azslParser::Int1x3 - 129))
+      | (1ULL << (azslParser::Int1x1 - 65)))) != 0) || ((((_la - 129) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 129)) & ((1ULL << (azslParser::Int1x2 - 129))
+      | (1ULL << (azslParser::Int1x3 - 129))
       | (1ULL << (azslParser::Int1x4 - 129))
       | (1ULL << (azslParser::Int2x1 - 129))
       | (1ULL << (azslParser::Int2x2 - 129))
@@ -1105,13 +1109,14 @@ azslParser::ClassDefinitionContext* azslParser::classDefinition() {
       | (1ULL << (azslParser::Sampler - 129))
       | (1ULL << (azslParser::SamplerCapitalS - 129))
       | (1ULL << (azslParser::SamplerComparisonState - 129))
+      | (1ULL << (azslParser::SamplerStateCamel - 129))
       | (1ULL << (azslParser::SamplerState - 129))
       | (1ULL << (azslParser::Shared - 129))
       | (1ULL << (azslParser::SNorm - 129))
       | (1ULL << (azslParser::Static - 129))
-      | (1ULL << (azslParser::Struct - 129))
-      | (1ULL << (azslParser::StructuredBuffer - 129)))) != 0) || ((((_la - 193) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 193)) & ((1ULL << (azslParser::SubpassInput - 193))
+      | (1ULL << (azslParser::Struct - 129)))) != 0) || ((((_la - 193) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 193)) & ((1ULL << (azslParser::StructuredBuffer - 193))
+      | (1ULL << (azslParser::SubpassInput - 193))
       | (1ULL << (azslParser::SubpassInputMS - 193))
       | (1ULL << (azslParser::Texture1D - 193))
       | (1ULL << (azslParser::Texture1DArray - 193))
@@ -1127,9 +1132,6 @@ azslParser::ClassDefinitionContext* azslParser::classDefinition() {
       | (1ULL << (azslParser::TriangleStream - 193))
       | (1ULL << (azslParser::Uniform - 193))
       | (1ULL << (azslParser::Uint - 193))
-      | (1ULL << (azslParser::Uint32_t - 193))
-      | (1ULL << (azslParser::Uint64_t - 193))
-      | (1ULL << (azslParser::UnsignedInt - 193))
       | (1ULL << (azslParser::Uint1 - 193))
       | (1ULL << (azslParser::Uint2 - 193))
       | (1ULL << (azslParser::Uint3 - 193))
@@ -1150,7 +1152,11 @@ azslParser::ClassDefinitionContext* azslParser::classDefinition() {
       | (1ULL << (azslParser::Uint4x2 - 193))
       | (1ULL << (azslParser::Uint4x3 - 193))
       | (1ULL << (azslParser::Uint4x4 - 193))
+      | (1ULL << (azslParser::Uint16_t - 193))
+      | (1ULL << (azslParser::Uint32_t - 193))
+      | (1ULL << (azslParser::Uint64_t - 193))
       | (1ULL << (azslParser::UNorm - 193))
+      | (1ULL << (azslParser::Unsigned - 193))
       | (1ULL << (azslParser::Dword - 193))
       | (1ULL << (azslParser::Dword1 - 193))
       | (1ULL << (azslParser::Dword2 - 193))
@@ -1170,10 +1176,10 @@ azslParser::ClassDefinitionContext* azslParser::classDefinition() {
       | (1ULL << (azslParser::Dword3x4 - 193))
       | (1ULL << (azslParser::Dword4x1 - 193))
       | (1ULL << (azslParser::Dword4x2 - 193))
-      | (1ULL << (azslParser::Dword4x3 - 193))
-      | (1ULL << (azslParser::Dword4x4 - 193))
-      | (1ULL << (azslParser::Vector - 193)))) != 0) || ((((_la - 257) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 257)) & ((1ULL << (azslParser::Volatile - 257))
+      | (1ULL << (azslParser::Dword4x3 - 193)))) != 0) || ((((_la - 257) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 257)) & ((1ULL << (azslParser::Dword4x4 - 257))
+      | (1ULL << (azslParser::Vector - 257))
+      | (1ULL << (azslParser::Volatile - 257))
       | (1ULL << (azslParser::Void - 257))
       | (1ULL << (azslParser::StateObjectConfig - 257))
       | (1ULL << (azslParser::LocalRootSignature - 257))
@@ -1185,14 +1191,14 @@ azslParser::ClassDefinitionContext* azslParser::classDefinition() {
       | (1ULL << (azslParser::TriangleHitGroup - 257))
       | (1ULL << (azslParser::ProceduralPrimitiveHitGroup - 257))
       | (1ULL << (azslParser::LeftBracket - 257))
-      | (1ULL << (azslParser::LeftDoubleBracket - 257)))) != 0) || ((((_la - 333) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 333)) & ((1ULL << (azslParser::ColonColon - 333))
-      | (1ULL << (azslParser::KW_TypeAlias - 333))
-      | (1ULL << (azslParser::KW_Typedef - 333))
-      | (1ULL << (azslParser::KW_Typeof - 333))
-      | (1ULL << (azslParser::Indices - 333))
-      | (1ULL << (azslParser::Vertices - 333))
-      | (1ULL << (azslParser::Identifier - 333)))) != 0)) {
+      | (1ULL << (azslParser::LeftDoubleBracket - 257)))) != 0) || ((((_la - 335) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 335)) & ((1ULL << (azslParser::ColonColon - 335))
+      | (1ULL << (azslParser::KW_TypeAlias - 335))
+      | (1ULL << (azslParser::KW_Typedef - 335))
+      | (1ULL << (azslParser::KW_Typeof - 335))
+      | (1ULL << (azslParser::Indices - 335))
+      | (1ULL << (azslParser::Vertices - 335))
+      | (1ULL << (azslParser::Identifier - 335)))) != 0)) {
       setState(324);
       classMemberDeclaration();
       setState(329);
@@ -1650,15 +1656,16 @@ azslParser::StructDefinitionContext* azslParser::structDefinition() {
       | (1ULL << (azslParser::Inout - 65))
       | (1ULL << (azslParser::InputPatch - 65))
       | (1ULL << (azslParser::Int - 65))
+      | (1ULL << (azslParser::Int16_t - 65))
       | (1ULL << (azslParser::Int32_t - 65))
       | (1ULL << (azslParser::Int64_t - 65))
       | (1ULL << (azslParser::Int1 - 65))
       | (1ULL << (azslParser::Int2 - 65))
       | (1ULL << (azslParser::Int3 - 65))
       | (1ULL << (azslParser::Int4 - 65))
-      | (1ULL << (azslParser::Int1x1 - 65))
-      | (1ULL << (azslParser::Int1x2 - 65)))) != 0) || ((((_la - 129) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 129)) & ((1ULL << (azslParser::Int1x3 - 129))
+      | (1ULL << (azslParser::Int1x1 - 65)))) != 0) || ((((_la - 129) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 129)) & ((1ULL << (azslParser::Int1x2 - 129))
+      | (1ULL << (azslParser::Int1x3 - 129))
       | (1ULL << (azslParser::Int1x4 - 129))
       | (1ULL << (azslParser::Int2x1 - 129))
       | (1ULL << (azslParser::Int2x2 - 129))
@@ -1709,13 +1716,14 @@ azslParser::StructDefinitionContext* azslParser::structDefinition() {
       | (1ULL << (azslParser::Sampler - 129))
       | (1ULL << (azslParser::SamplerCapitalS - 129))
       | (1ULL << (azslParser::SamplerComparisonState - 129))
+      | (1ULL << (azslParser::SamplerStateCamel - 129))
       | (1ULL << (azslParser::SamplerState - 129))
       | (1ULL << (azslParser::Shared - 129))
       | (1ULL << (azslParser::SNorm - 129))
       | (1ULL << (azslParser::Static - 129))
-      | (1ULL << (azslParser::Struct - 129))
-      | (1ULL << (azslParser::StructuredBuffer - 129)))) != 0) || ((((_la - 193) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 193)) & ((1ULL << (azslParser::SubpassInput - 193))
+      | (1ULL << (azslParser::Struct - 129)))) != 0) || ((((_la - 193) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 193)) & ((1ULL << (azslParser::StructuredBuffer - 193))
+      | (1ULL << (azslParser::SubpassInput - 193))
       | (1ULL << (azslParser::SubpassInputMS - 193))
       | (1ULL << (azslParser::Texture1D - 193))
       | (1ULL << (azslParser::Texture1DArray - 193))
@@ -1731,9 +1739,6 @@ azslParser::StructDefinitionContext* azslParser::structDefinition() {
       | (1ULL << (azslParser::TriangleStream - 193))
       | (1ULL << (azslParser::Uniform - 193))
       | (1ULL << (azslParser::Uint - 193))
-      | (1ULL << (azslParser::Uint32_t - 193))
-      | (1ULL << (azslParser::Uint64_t - 193))
-      | (1ULL << (azslParser::UnsignedInt - 193))
       | (1ULL << (azslParser::Uint1 - 193))
       | (1ULL << (azslParser::Uint2 - 193))
       | (1ULL << (azslParser::Uint3 - 193))
@@ -1754,7 +1759,11 @@ azslParser::StructDefinitionContext* azslParser::structDefinition() {
       | (1ULL << (azslParser::Uint4x2 - 193))
       | (1ULL << (azslParser::Uint4x3 - 193))
       | (1ULL << (azslParser::Uint4x4 - 193))
+      | (1ULL << (azslParser::Uint16_t - 193))
+      | (1ULL << (azslParser::Uint32_t - 193))
+      | (1ULL << (azslParser::Uint64_t - 193))
       | (1ULL << (azslParser::UNorm - 193))
+      | (1ULL << (azslParser::Unsigned - 193))
       | (1ULL << (azslParser::Dword - 193))
       | (1ULL << (azslParser::Dword1 - 193))
       | (1ULL << (azslParser::Dword2 - 193))
@@ -1774,10 +1783,10 @@ azslParser::StructDefinitionContext* azslParser::structDefinition() {
       | (1ULL << (azslParser::Dword3x4 - 193))
       | (1ULL << (azslParser::Dword4x1 - 193))
       | (1ULL << (azslParser::Dword4x2 - 193))
-      | (1ULL << (azslParser::Dword4x3 - 193))
-      | (1ULL << (azslParser::Dword4x4 - 193))
-      | (1ULL << (azslParser::Vector - 193)))) != 0) || ((((_la - 257) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 257)) & ((1ULL << (azslParser::Volatile - 257))
+      | (1ULL << (azslParser::Dword4x3 - 193)))) != 0) || ((((_la - 257) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 257)) & ((1ULL << (azslParser::Dword4x4 - 257))
+      | (1ULL << (azslParser::Vector - 257))
+      | (1ULL << (azslParser::Volatile - 257))
       | (1ULL << (azslParser::Void - 257))
       | (1ULL << (azslParser::StateObjectConfig - 257))
       | (1ULL << (azslParser::LocalRootSignature - 257))
@@ -1789,14 +1798,14 @@ azslParser::StructDefinitionContext* azslParser::structDefinition() {
       | (1ULL << (azslParser::TriangleHitGroup - 257))
       | (1ULL << (azslParser::ProceduralPrimitiveHitGroup - 257))
       | (1ULL << (azslParser::LeftBracket - 257))
-      | (1ULL << (azslParser::LeftDoubleBracket - 257)))) != 0) || ((((_la - 333) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 333)) & ((1ULL << (azslParser::ColonColon - 333))
-      | (1ULL << (azslParser::KW_TypeAlias - 333))
-      | (1ULL << (azslParser::KW_Typedef - 333))
-      | (1ULL << (azslParser::KW_Typeof - 333))
-      | (1ULL << (azslParser::Indices - 333))
-      | (1ULL << (azslParser::Vertices - 333))
-      | (1ULL << (azslParser::Identifier - 333)))) != 0)) {
+      | (1ULL << (azslParser::LeftDoubleBracket - 257)))) != 0) || ((((_la - 335) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 335)) & ((1ULL << (azslParser::ColonColon - 335))
+      | (1ULL << (azslParser::KW_TypeAlias - 335))
+      | (1ULL << (azslParser::KW_Typedef - 335))
+      | (1ULL << (azslParser::KW_Typeof - 335))
+      | (1ULL << (azslParser::Indices - 335))
+      | (1ULL << (azslParser::Vertices - 335))
+      | (1ULL << (azslParser::Identifier - 335)))) != 0)) {
       setState(355);
       structMemberDeclaration();
       setState(360);
@@ -2766,15 +2775,16 @@ azslParser::InterfaceDefinitionContext* azslParser::interfaceDefinition() {
       | (1ULL << (azslParser::Inout - 65))
       | (1ULL << (azslParser::InputPatch - 65))
       | (1ULL << (azslParser::Int - 65))
+      | (1ULL << (azslParser::Int16_t - 65))
       | (1ULL << (azslParser::Int32_t - 65))
       | (1ULL << (azslParser::Int64_t - 65))
       | (1ULL << (azslParser::Int1 - 65))
       | (1ULL << (azslParser::Int2 - 65))
       | (1ULL << (azslParser::Int3 - 65))
       | (1ULL << (azslParser::Int4 - 65))
-      | (1ULL << (azslParser::Int1x1 - 65))
-      | (1ULL << (azslParser::Int1x2 - 65)))) != 0) || ((((_la - 129) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 129)) & ((1ULL << (azslParser::Int1x3 - 129))
+      | (1ULL << (azslParser::Int1x1 - 65)))) != 0) || ((((_la - 129) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 129)) & ((1ULL << (azslParser::Int1x2 - 129))
+      | (1ULL << (azslParser::Int1x3 - 129))
       | (1ULL << (azslParser::Int1x4 - 129))
       | (1ULL << (azslParser::Int2x1 - 129))
       | (1ULL << (azslParser::Int2x2 - 129))
@@ -2825,13 +2835,14 @@ azslParser::InterfaceDefinitionContext* azslParser::interfaceDefinition() {
       | (1ULL << (azslParser::Sampler - 129))
       | (1ULL << (azslParser::SamplerCapitalS - 129))
       | (1ULL << (azslParser::SamplerComparisonState - 129))
+      | (1ULL << (azslParser::SamplerStateCamel - 129))
       | (1ULL << (azslParser::SamplerState - 129))
       | (1ULL << (azslParser::Shared - 129))
       | (1ULL << (azslParser::SNorm - 129))
       | (1ULL << (azslParser::Static - 129))
-      | (1ULL << (azslParser::Struct - 129))
-      | (1ULL << (azslParser::StructuredBuffer - 129)))) != 0) || ((((_la - 193) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 193)) & ((1ULL << (azslParser::SubpassInput - 193))
+      | (1ULL << (azslParser::Struct - 129)))) != 0) || ((((_la - 193) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 193)) & ((1ULL << (azslParser::StructuredBuffer - 193))
+      | (1ULL << (azslParser::SubpassInput - 193))
       | (1ULL << (azslParser::SubpassInputMS - 193))
       | (1ULL << (azslParser::Texture1D - 193))
       | (1ULL << (azslParser::Texture1DArray - 193))
@@ -2847,9 +2858,6 @@ azslParser::InterfaceDefinitionContext* azslParser::interfaceDefinition() {
       | (1ULL << (azslParser::TriangleStream - 193))
       | (1ULL << (azslParser::Uniform - 193))
       | (1ULL << (azslParser::Uint - 193))
-      | (1ULL << (azslParser::Uint32_t - 193))
-      | (1ULL << (azslParser::Uint64_t - 193))
-      | (1ULL << (azslParser::UnsignedInt - 193))
       | (1ULL << (azslParser::Uint1 - 193))
       | (1ULL << (azslParser::Uint2 - 193))
       | (1ULL << (azslParser::Uint3 - 193))
@@ -2870,7 +2878,11 @@ azslParser::InterfaceDefinitionContext* azslParser::interfaceDefinition() {
       | (1ULL << (azslParser::Uint4x2 - 193))
       | (1ULL << (azslParser::Uint4x3 - 193))
       | (1ULL << (azslParser::Uint4x4 - 193))
+      | (1ULL << (azslParser::Uint16_t - 193))
+      | (1ULL << (azslParser::Uint32_t - 193))
+      | (1ULL << (azslParser::Uint64_t - 193))
       | (1ULL << (azslParser::UNorm - 193))
+      | (1ULL << (azslParser::Unsigned - 193))
       | (1ULL << (azslParser::Dword - 193))
       | (1ULL << (azslParser::Dword1 - 193))
       | (1ULL << (azslParser::Dword2 - 193))
@@ -2890,10 +2902,10 @@ azslParser::InterfaceDefinitionContext* azslParser::interfaceDefinition() {
       | (1ULL << (azslParser::Dword3x4 - 193))
       | (1ULL << (azslParser::Dword4x1 - 193))
       | (1ULL << (azslParser::Dword4x2 - 193))
-      | (1ULL << (azslParser::Dword4x3 - 193))
-      | (1ULL << (azslParser::Dword4x4 - 193))
-      | (1ULL << (azslParser::Vector - 193)))) != 0) || ((((_la - 257) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 257)) & ((1ULL << (azslParser::Volatile - 257))
+      | (1ULL << (azslParser::Dword4x3 - 193)))) != 0) || ((((_la - 257) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 257)) & ((1ULL << (azslParser::Dword4x4 - 257))
+      | (1ULL << (azslParser::Vector - 257))
+      | (1ULL << (azslParser::Volatile - 257))
       | (1ULL << (azslParser::Void - 257))
       | (1ULL << (azslParser::StateObjectConfig - 257))
       | (1ULL << (azslParser::LocalRootSignature - 257))
@@ -2905,13 +2917,13 @@ azslParser::InterfaceDefinitionContext* azslParser::interfaceDefinition() {
       | (1ULL << (azslParser::TriangleHitGroup - 257))
       | (1ULL << (azslParser::ProceduralPrimitiveHitGroup - 257))
       | (1ULL << (azslParser::LeftBracket - 257))
-      | (1ULL << (azslParser::LeftDoubleBracket - 257)))) != 0) || ((((_la - 333) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 333)) & ((1ULL << (azslParser::ColonColon - 333))
-      | (1ULL << (azslParser::KW_AssociatedType - 333))
-      | (1ULL << (azslParser::KW_Typeof - 333))
-      | (1ULL << (azslParser::Indices - 333))
-      | (1ULL << (azslParser::Vertices - 333))
-      | (1ULL << (azslParser::Identifier - 333)))) != 0)) {
+      | (1ULL << (azslParser::LeftDoubleBracket - 257)))) != 0) || ((((_la - 335) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 335)) & ((1ULL << (azslParser::ColonColon - 335))
+      | (1ULL << (azslParser::KW_AssociatedType - 335))
+      | (1ULL << (azslParser::KW_Typeof - 335))
+      | (1ULL << (azslParser::Indices - 335))
+      | (1ULL << (azslParser::Vertices - 335))
+      | (1ULL << (azslParser::Identifier - 335)))) != 0)) {
       setState(424);
       interfaceMemberDeclaration();
       setState(429);
@@ -3333,6 +3345,7 @@ azslParser::FunctionParamsContext* azslParser::functionParams() {
       case azslParser::Inout:
       case azslParser::InputPatch:
       case azslParser::Int:
+      case azslParser::Int16_t:
       case azslParser::Int32_t:
       case azslParser::Int64_t:
       case azslParser::Int1:
@@ -3392,6 +3405,7 @@ azslParser::FunctionParamsContext* azslParser::functionParams() {
       case azslParser::Sampler:
       case azslParser::SamplerCapitalS:
       case azslParser::SamplerComparisonState:
+      case azslParser::SamplerStateCamel:
       case azslParser::SamplerState:
       case azslParser::Shared:
       case azslParser::SNorm:
@@ -3414,9 +3428,6 @@ azslParser::FunctionParamsContext* azslParser::functionParams() {
       case azslParser::TriangleStream:
       case azslParser::Uniform:
       case azslParser::Uint:
-      case azslParser::Uint32_t:
-      case azslParser::Uint64_t:
-      case azslParser::UnsignedInt:
       case azslParser::Uint1:
       case azslParser::Uint2:
       case azslParser::Uint3:
@@ -3437,7 +3448,11 @@ azslParser::FunctionParamsContext* azslParser::functionParams() {
       case azslParser::Uint4x2:
       case azslParser::Uint4x3:
       case azslParser::Uint4x4:
+      case azslParser::Uint16_t:
+      case azslParser::Uint32_t:
+      case azslParser::Uint64_t:
       case azslParser::UNorm:
+      case azslParser::Unsigned:
       case azslParser::Dword:
       case azslParser::Dword1:
       case azslParser::Dword2:
@@ -3717,10 +3732,10 @@ azslParser::HlslSemanticNameContext* azslParser::hlslSemanticName() {
     enterOuterAlt(_localctx, 1);
     setState(472);
     _la = _input->LA(1);
-    if (!(((((_la - 366) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 366)) & ((1ULL << (azslParser::HLSLSemanticStream - 366))
-      | (1ULL << (azslParser::HLSLSemanticSystem - 366))
-      | (1ULL << (azslParser::Identifier - 366)))) != 0))) {
+    if (!(((((_la - 368) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 368)) & ((1ULL << (azslParser::HLSLSemanticStream - 368))
+      | (1ULL << (azslParser::HLSLSemanticSystem - 368))
+      | (1ULL << (azslParser::Identifier - 368)))) != 0))) {
     _errHandler->recoverInline(this);
     }
     else {
@@ -4468,15 +4483,16 @@ azslParser::BlockContext* azslParser::block() {
       | (1ULL << (azslParser::Inout - 65))
       | (1ULL << (azslParser::InputPatch - 65))
       | (1ULL << (azslParser::Int - 65))
+      | (1ULL << (azslParser::Int16_t - 65))
       | (1ULL << (azslParser::Int32_t - 65))
       | (1ULL << (azslParser::Int64_t - 65))
       | (1ULL << (azslParser::Int1 - 65))
       | (1ULL << (azslParser::Int2 - 65))
       | (1ULL << (azslParser::Int3 - 65))
       | (1ULL << (azslParser::Int4 - 65))
-      | (1ULL << (azslParser::Int1x1 - 65))
-      | (1ULL << (azslParser::Int1x2 - 65)))) != 0) || ((((_la - 129) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 129)) & ((1ULL << (azslParser::Int1x3 - 129))
+      | (1ULL << (azslParser::Int1x1 - 65)))) != 0) || ((((_la - 129) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 129)) & ((1ULL << (azslParser::Int1x2 - 129))
+      | (1ULL << (azslParser::Int1x3 - 129))
       | (1ULL << (azslParser::Int1x4 - 129))
       | (1ULL << (azslParser::Int2x1 - 129))
       | (1ULL << (azslParser::Int2x2 - 129))
@@ -4528,13 +4544,14 @@ azslParser::BlockContext* azslParser::block() {
       | (1ULL << (azslParser::Sampler - 129))
       | (1ULL << (azslParser::SamplerCapitalS - 129))
       | (1ULL << (azslParser::SamplerComparisonState - 129))
+      | (1ULL << (azslParser::SamplerStateCamel - 129))
       | (1ULL << (azslParser::SamplerState - 129))
       | (1ULL << (azslParser::Shared - 129))
       | (1ULL << (azslParser::SNorm - 129))
       | (1ULL << (azslParser::Static - 129))
-      | (1ULL << (azslParser::Struct - 129))
-      | (1ULL << (azslParser::StructuredBuffer - 129)))) != 0) || ((((_la - 193) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 193)) & ((1ULL << (azslParser::SubpassInput - 193))
+      | (1ULL << (azslParser::Struct - 129)))) != 0) || ((((_la - 193) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 193)) & ((1ULL << (azslParser::StructuredBuffer - 193))
+      | (1ULL << (azslParser::SubpassInput - 193))
       | (1ULL << (azslParser::SubpassInputMS - 193))
       | (1ULL << (azslParser::Switch - 193))
       | (1ULL << (azslParser::Texture1D - 193))
@@ -4551,9 +4568,6 @@ azslParser::BlockContext* azslParser::block() {
       | (1ULL << (azslParser::TriangleStream - 193))
       | (1ULL << (azslParser::Uniform - 193))
       | (1ULL << (azslParser::Uint - 193))
-      | (1ULL << (azslParser::Uint32_t - 193))
-      | (1ULL << (azslParser::Uint64_t - 193))
-      | (1ULL << (azslParser::UnsignedInt - 193))
       | (1ULL << (azslParser::Uint1 - 193))
       | (1ULL << (azslParser::Uint2 - 193))
       | (1ULL << (azslParser::Uint3 - 193))
@@ -4574,7 +4588,11 @@ azslParser::BlockContext* azslParser::block() {
       | (1ULL << (azslParser::Uint4x2 - 193))
       | (1ULL << (azslParser::Uint4x3 - 193))
       | (1ULL << (azslParser::Uint4x4 - 193))
+      | (1ULL << (azslParser::Uint16_t - 193))
+      | (1ULL << (azslParser::Uint32_t - 193))
+      | (1ULL << (azslParser::Uint64_t - 193))
       | (1ULL << (azslParser::UNorm - 193))
+      | (1ULL << (azslParser::Unsigned - 193))
       | (1ULL << (azslParser::Dword - 193))
       | (1ULL << (azslParser::Dword1 - 193))
       | (1ULL << (azslParser::Dword2 - 193))
@@ -4594,10 +4612,10 @@ azslParser::BlockContext* azslParser::block() {
       | (1ULL << (azslParser::Dword3x4 - 193))
       | (1ULL << (azslParser::Dword4x1 - 193))
       | (1ULL << (azslParser::Dword4x2 - 193))
-      | (1ULL << (azslParser::Dword4x3 - 193))
-      | (1ULL << (azslParser::Dword4x4 - 193))
-      | (1ULL << (azslParser::Vector - 193)))) != 0) || ((((_la - 257) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 257)) & ((1ULL << (azslParser::Volatile - 257))
+      | (1ULL << (azslParser::Dword4x3 - 193)))) != 0) || ((((_la - 257) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 257)) & ((1ULL << (azslParser::Dword4x4 - 257))
+      | (1ULL << (azslParser::Vector - 257))
+      | (1ULL << (azslParser::Volatile - 257))
       | (1ULL << (azslParser::While - 257))
       | (1ULL << (azslParser::StateObjectConfig - 257))
       | (1ULL << (azslParser::LocalRootSignature - 257))
@@ -4613,26 +4631,26 @@ azslParser::BlockContext* azslParser::block() {
       | (1ULL << (azslParser::LeftBrace - 257))
       | (1ULL << (azslParser::LeftDoubleBracket - 257))
       | (1ULL << (azslParser::Plus - 257))
-      | (1ULL << (azslParser::PlusPlus - 257))
-      | (1ULL << (azslParser::Minus - 257))
-      | (1ULL << (azslParser::MinusMinus - 257)))) != 0) || ((((_la - 329) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 329)) & ((1ULL << (azslParser::Not - 329))
-      | (1ULL << (azslParser::Tilde - 329))
-      | (1ULL << (azslParser::ColonColon - 329))
-      | (1ULL << (azslParser::Semi - 329))
-      | (1ULL << (azslParser::True - 329))
-      | (1ULL << (azslParser::False - 329))
-      | (1ULL << (azslParser::KW_TypeAlias - 329))
-      | (1ULL << (azslParser::KW_Typedef - 329))
-      | (1ULL << (azslParser::KW_Typeof - 329))
-      | (1ULL << (azslParser::KW_ext_print_message - 329))
-      | (1ULL << (azslParser::KW_ext_print_symbol - 329))
-      | (1ULL << (azslParser::Indices - 329))
-      | (1ULL << (azslParser::Vertices - 329))
-      | (1ULL << (azslParser::Identifier - 329))
-      | (1ULL << (azslParser::IntegerLiteral - 329))
-      | (1ULL << (azslParser::FloatLiteral - 329))
-      | (1ULL << (azslParser::StringLiteral - 329)))) != 0)) {
+      | (1ULL << (azslParser::PlusPlus - 257)))) != 0) || ((((_la - 321) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 321)) & ((1ULL << (azslParser::Minus - 321))
+      | (1ULL << (azslParser::MinusMinus - 321))
+      | (1ULL << (azslParser::Not - 321))
+      | (1ULL << (azslParser::Tilde - 321))
+      | (1ULL << (azslParser::ColonColon - 321))
+      | (1ULL << (azslParser::Semi - 321))
+      | (1ULL << (azslParser::True - 321))
+      | (1ULL << (azslParser::False - 321))
+      | (1ULL << (azslParser::KW_TypeAlias - 321))
+      | (1ULL << (azslParser::KW_Typedef - 321))
+      | (1ULL << (azslParser::KW_Typeof - 321))
+      | (1ULL << (azslParser::KW_ext_print_message - 321))
+      | (1ULL << (azslParser::KW_ext_print_symbol - 321))
+      | (1ULL << (azslParser::Indices - 321))
+      | (1ULL << (azslParser::Vertices - 321))
+      | (1ULL << (azslParser::Identifier - 321))
+      | (1ULL << (azslParser::IntegerLiteral - 321))
+      | (1ULL << (azslParser::FloatLiteral - 321))
+      | (1ULL << (azslParser::StringLiteral - 321)))) != 0)) {
       setState(527);
       antlrcpp::downCast<BlockContext *>(_localctx)->statementContext = statement();
       antlrcpp::downCast<BlockContext *>(_localctx)->Stmts.push_back(antlrcpp::downCast<BlockContext *>(_localctx)->statementContext);
@@ -5113,15 +5131,16 @@ azslParser::SwitchSectionContext* azslParser::switchSection() {
       | (1ULL << (azslParser::Inout - 65))
       | (1ULL << (azslParser::InputPatch - 65))
       | (1ULL << (azslParser::Int - 65))
+      | (1ULL << (azslParser::Int16_t - 65))
       | (1ULL << (azslParser::Int32_t - 65))
       | (1ULL << (azslParser::Int64_t - 65))
       | (1ULL << (azslParser::Int1 - 65))
       | (1ULL << (azslParser::Int2 - 65))
       | (1ULL << (azslParser::Int3 - 65))
       | (1ULL << (azslParser::Int4 - 65))
-      | (1ULL << (azslParser::Int1x1 - 65))
-      | (1ULL << (azslParser::Int1x2 - 65)))) != 0) || ((((_la - 129) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 129)) & ((1ULL << (azslParser::Int1x3 - 129))
+      | (1ULL << (azslParser::Int1x1 - 65)))) != 0) || ((((_la - 129) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 129)) & ((1ULL << (azslParser::Int1x2 - 129))
+      | (1ULL << (azslParser::Int1x3 - 129))
       | (1ULL << (azslParser::Int1x4 - 129))
       | (1ULL << (azslParser::Int2x1 - 129))
       | (1ULL << (azslParser::Int2x2 - 129))
@@ -5173,13 +5192,14 @@ azslParser::SwitchSectionContext* azslParser::switchSection() {
       | (1ULL << (azslParser::Sampler - 129))
       | (1ULL << (azslParser::SamplerCapitalS - 129))
       | (1ULL << (azslParser::SamplerComparisonState - 129))
+      | (1ULL << (azslParser::SamplerStateCamel - 129))
       | (1ULL << (azslParser::SamplerState - 129))
       | (1ULL << (azslParser::Shared - 129))
       | (1ULL << (azslParser::SNorm - 129))
       | (1ULL << (azslParser::Static - 129))
-      | (1ULL << (azslParser::Struct - 129))
-      | (1ULL << (azslParser::StructuredBuffer - 129)))) != 0) || ((((_la - 193) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 193)) & ((1ULL << (azslParser::SubpassInput - 193))
+      | (1ULL << (azslParser::Struct - 129)))) != 0) || ((((_la - 193) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 193)) & ((1ULL << (azslParser::StructuredBuffer - 193))
+      | (1ULL << (azslParser::SubpassInput - 193))
       | (1ULL << (azslParser::SubpassInputMS - 193))
       | (1ULL << (azslParser::Switch - 193))
       | (1ULL << (azslParser::Texture1D - 193))
@@ -5196,9 +5216,6 @@ azslParser::SwitchSectionContext* azslParser::switchSection() {
       | (1ULL << (azslParser::TriangleStream - 193))
       | (1ULL << (azslParser::Uniform - 193))
       | (1ULL << (azslParser::Uint - 193))
-      | (1ULL << (azslParser::Uint32_t - 193))
-      | (1ULL << (azslParser::Uint64_t - 193))
-      | (1ULL << (azslParser::UnsignedInt - 193))
       | (1ULL << (azslParser::Uint1 - 193))
       | (1ULL << (azslParser::Uint2 - 193))
       | (1ULL << (azslParser::Uint3 - 193))
@@ -5219,7 +5236,11 @@ azslParser::SwitchSectionContext* azslParser::switchSection() {
       | (1ULL << (azslParser::Uint4x2 - 193))
       | (1ULL << (azslParser::Uint4x3 - 193))
       | (1ULL << (azslParser::Uint4x4 - 193))
+      | (1ULL << (azslParser::Uint16_t - 193))
+      | (1ULL << (azslParser::Uint32_t - 193))
+      | (1ULL << (azslParser::Uint64_t - 193))
       | (1ULL << (azslParser::UNorm - 193))
+      | (1ULL << (azslParser::Unsigned - 193))
       | (1ULL << (azslParser::Dword - 193))
       | (1ULL << (azslParser::Dword1 - 193))
       | (1ULL << (azslParser::Dword2 - 193))
@@ -5239,10 +5260,10 @@ azslParser::SwitchSectionContext* azslParser::switchSection() {
       | (1ULL << (azslParser::Dword3x4 - 193))
       | (1ULL << (azslParser::Dword4x1 - 193))
       | (1ULL << (azslParser::Dword4x2 - 193))
-      | (1ULL << (azslParser::Dword4x3 - 193))
-      | (1ULL << (azslParser::Dword4x4 - 193))
-      | (1ULL << (azslParser::Vector - 193)))) != 0) || ((((_la - 257) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 257)) & ((1ULL << (azslParser::Volatile - 257))
+      | (1ULL << (azslParser::Dword4x3 - 193)))) != 0) || ((((_la - 257) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 257)) & ((1ULL << (azslParser::Dword4x4 - 257))
+      | (1ULL << (azslParser::Vector - 257))
+      | (1ULL << (azslParser::Volatile - 257))
       | (1ULL << (azslParser::While - 257))
       | (1ULL << (azslParser::StateObjectConfig - 257))
       | (1ULL << (azslParser::LocalRootSignature - 257))
@@ -5258,26 +5279,26 @@ azslParser::SwitchSectionContext* azslParser::switchSection() {
       | (1ULL << (azslParser::LeftBrace - 257))
       | (1ULL << (azslParser::LeftDoubleBracket - 257))
       | (1ULL << (azslParser::Plus - 257))
-      | (1ULL << (azslParser::PlusPlus - 257))
-      | (1ULL << (azslParser::Minus - 257))
-      | (1ULL << (azslParser::MinusMinus - 257)))) != 0) || ((((_la - 329) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 329)) & ((1ULL << (azslParser::Not - 329))
-      | (1ULL << (azslParser::Tilde - 329))
-      | (1ULL << (azslParser::ColonColon - 329))
-      | (1ULL << (azslParser::Semi - 329))
-      | (1ULL << (azslParser::True - 329))
-      | (1ULL << (azslParser::False - 329))
-      | (1ULL << (azslParser::KW_TypeAlias - 329))
-      | (1ULL << (azslParser::KW_Typedef - 329))
-      | (1ULL << (azslParser::KW_Typeof - 329))
-      | (1ULL << (azslParser::KW_ext_print_message - 329))
-      | (1ULL << (azslParser::KW_ext_print_symbol - 329))
-      | (1ULL << (azslParser::Indices - 329))
-      | (1ULL << (azslParser::Vertices - 329))
-      | (1ULL << (azslParser::Identifier - 329))
-      | (1ULL << (azslParser::IntegerLiteral - 329))
-      | (1ULL << (azslParser::FloatLiteral - 329))
-      | (1ULL << (azslParser::StringLiteral - 329)))) != 0));
+      | (1ULL << (azslParser::PlusPlus - 257)))) != 0) || ((((_la - 321) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 321)) & ((1ULL << (azslParser::Minus - 321))
+      | (1ULL << (azslParser::MinusMinus - 321))
+      | (1ULL << (azslParser::Not - 321))
+      | (1ULL << (azslParser::Tilde - 321))
+      | (1ULL << (azslParser::ColonColon - 321))
+      | (1ULL << (azslParser::Semi - 321))
+      | (1ULL << (azslParser::True - 321))
+      | (1ULL << (azslParser::False - 321))
+      | (1ULL << (azslParser::KW_TypeAlias - 321))
+      | (1ULL << (azslParser::KW_Typedef - 321))
+      | (1ULL << (azslParser::KW_Typeof - 321))
+      | (1ULL << (azslParser::KW_ext_print_message - 321))
+      | (1ULL << (azslParser::KW_ext_print_symbol - 321))
+      | (1ULL << (azslParser::Indices - 321))
+      | (1ULL << (azslParser::Vertices - 321))
+      | (1ULL << (azslParser::Identifier - 321))
+      | (1ULL << (azslParser::IntegerLiteral - 321))
+      | (1ULL << (azslParser::FloatLiteral - 321))
+      | (1ULL << (azslParser::StringLiteral - 321)))) != 0));
    
   }
   catch (RecognitionException &e) {
@@ -6099,15 +6120,16 @@ azslParser::EmbeddedStatementContext* azslParser::embeddedStatement() {
         | (1ULL << (azslParser::Inout - 65))
         | (1ULL << (azslParser::InputPatch - 65))
         | (1ULL << (azslParser::Int - 65))
+        | (1ULL << (azslParser::Int16_t - 65))
         | (1ULL << (azslParser::Int32_t - 65))
         | (1ULL << (azslParser::Int64_t - 65))
         | (1ULL << (azslParser::Int1 - 65))
         | (1ULL << (azslParser::Int2 - 65))
         | (1ULL << (azslParser::Int3 - 65))
         | (1ULL << (azslParser::Int4 - 65))
-        | (1ULL << (azslParser::Int1x1 - 65))
-        | (1ULL << (azslParser::Int1x2 - 65)))) != 0) || ((((_la - 129) & ~ 0x3fULL) == 0) &&
-        ((1ULL << (_la - 129)) & ((1ULL << (azslParser::Int1x3 - 129))
+        | (1ULL << (azslParser::Int1x1 - 65)))) != 0) || ((((_la - 129) & ~ 0x3fULL) == 0) &&
+        ((1ULL << (_la - 129)) & ((1ULL << (azslParser::Int1x2 - 129))
+        | (1ULL << (azslParser::Int1x3 - 129))
         | (1ULL << (azslParser::Int1x4 - 129))
         | (1ULL << (azslParser::Int2x1 - 129))
         | (1ULL << (azslParser::Int2x2 - 129))
@@ -6158,13 +6180,14 @@ azslParser::EmbeddedStatementContext* azslParser::embeddedStatement() {
         | (1ULL << (azslParser::Sampler - 129))
         | (1ULL << (azslParser::SamplerCapitalS - 129))
         | (1ULL << (azslParser::SamplerComparisonState - 129))
+        | (1ULL << (azslParser::SamplerStateCamel - 129))
         | (1ULL << (azslParser::SamplerState - 129))
         | (1ULL << (azslParser::Shared - 129))
         | (1ULL << (azslParser::SNorm - 129))
         | (1ULL << (azslParser::Static - 129))
-        | (1ULL << (azslParser::Struct - 129))
-        | (1ULL << (azslParser::StructuredBuffer - 129)))) != 0) || ((((_la - 193) & ~ 0x3fULL) == 0) &&
-        ((1ULL << (_la - 193)) & ((1ULL << (azslParser::SubpassInput - 193))
+        | (1ULL << (azslParser::Struct - 129)))) != 0) || ((((_la - 193) & ~ 0x3fULL) == 0) &&
+        ((1ULL << (_la - 193)) & ((1ULL << (azslParser::StructuredBuffer - 193))
+        | (1ULL << (azslParser::SubpassInput - 193))
         | (1ULL << (azslParser::SubpassInputMS - 193))
         | (1ULL << (azslParser::Texture1D - 193))
         | (1ULL << (azslParser::Texture1DArray - 193))
@@ -6180,9 +6203,6 @@ azslParser::EmbeddedStatementContext* azslParser::embeddedStatement() {
         | (1ULL << (azslParser::TriangleStream - 193))
         | (1ULL << (azslParser::Uniform - 193))
         | (1ULL << (azslParser::Uint - 193))
-        | (1ULL << (azslParser::Uint32_t - 193))
-        | (1ULL << (azslParser::Uint64_t - 193))
-        | (1ULL << (azslParser::UnsignedInt - 193))
         | (1ULL << (azslParser::Uint1 - 193))
         | (1ULL << (azslParser::Uint2 - 193))
         | (1ULL << (azslParser::Uint3 - 193))
@@ -6203,7 +6223,11 @@ azslParser::EmbeddedStatementContext* azslParser::embeddedStatement() {
         | (1ULL << (azslParser::Uint4x2 - 193))
         | (1ULL << (azslParser::Uint4x3 - 193))
         | (1ULL << (azslParser::Uint4x4 - 193))
+        | (1ULL << (azslParser::Uint16_t - 193))
+        | (1ULL << (azslParser::Uint32_t - 193))
+        | (1ULL << (azslParser::Uint64_t - 193))
         | (1ULL << (azslParser::UNorm - 193))
+        | (1ULL << (azslParser::Unsigned - 193))
         | (1ULL << (azslParser::Dword - 193))
         | (1ULL << (azslParser::Dword1 - 193))
         | (1ULL << (azslParser::Dword2 - 193))
@@ -6223,10 +6247,10 @@ azslParser::EmbeddedStatementContext* azslParser::embeddedStatement() {
         | (1ULL << (azslParser::Dword3x4 - 193))
         | (1ULL << (azslParser::Dword4x1 - 193))
         | (1ULL << (azslParser::Dword4x2 - 193))
-        | (1ULL << (azslParser::Dword4x3 - 193))
-        | (1ULL << (azslParser::Dword4x4 - 193))
-        | (1ULL << (azslParser::Vector - 193)))) != 0) || ((((_la - 257) & ~ 0x3fULL) == 0) &&
-        ((1ULL << (_la - 257)) & ((1ULL << (azslParser::Volatile - 257))
+        | (1ULL << (azslParser::Dword4x3 - 193)))) != 0) || ((((_la - 257) & ~ 0x3fULL) == 0) &&
+        ((1ULL << (_la - 257)) & ((1ULL << (azslParser::Dword4x4 - 257))
+        | (1ULL << (azslParser::Vector - 257))
+        | (1ULL << (azslParser::Volatile - 257))
         | (1ULL << (azslParser::StateObjectConfig - 257))
         | (1ULL << (azslParser::LocalRootSignature - 257))
         | (1ULL << (azslParser::GlobalRootSignature - 257))
@@ -6240,21 +6264,21 @@ azslParser::EmbeddedStatementContext* azslParser::embeddedStatement() {
         | (1ULL << (azslParser::LeftBracket - 257))
         | (1ULL << (azslParser::LeftDoubleBracket - 257))
         | (1ULL << (azslParser::Plus - 257))
-        | (1ULL << (azslParser::PlusPlus - 257))
-        | (1ULL << (azslParser::Minus - 257))
-        | (1ULL << (azslParser::MinusMinus - 257)))) != 0) || ((((_la - 329) & ~ 0x3fULL) == 0) &&
-        ((1ULL << (_la - 329)) & ((1ULL << (azslParser::Not - 329))
-        | (1ULL << (azslParser::Tilde - 329))
-        | (1ULL << (azslParser::ColonColon - 329))
-        | (1ULL << (azslParser::True - 329))
-        | (1ULL << (azslParser::False - 329))
-        | (1ULL << (azslParser::KW_Typeof - 329))
-        | (1ULL << (azslParser::Indices - 329))
-        | (1ULL << (azslParser::Vertices - 329))
-        | (1ULL << (azslParser::Identifier - 329))
-        | (1ULL << (azslParser::IntegerLiteral - 329))
-        | (1ULL << (azslParser::FloatLiteral - 329))
-        | (1ULL << (azslParser::StringLiteral - 329)))) != 0)) {
+        | (1ULL << (azslParser::PlusPlus - 257)))) != 0) || ((((_la - 321) & ~ 0x3fULL) == 0) &&
+        ((1ULL << (_la - 321)) & ((1ULL << (azslParser::Minus - 321))
+        | (1ULL << (azslParser::MinusMinus - 321))
+        | (1ULL << (azslParser::Not - 321))
+        | (1ULL << (azslParser::Tilde - 321))
+        | (1ULL << (azslParser::ColonColon - 321))
+        | (1ULL << (azslParser::True - 321))
+        | (1ULL << (azslParser::False - 321))
+        | (1ULL << (azslParser::KW_Typeof - 321))
+        | (1ULL << (azslParser::Indices - 321))
+        | (1ULL << (azslParser::Vertices - 321))
+        | (1ULL << (azslParser::Identifier - 321))
+        | (1ULL << (azslParser::IntegerLiteral - 321))
+        | (1ULL << (azslParser::FloatLiteral - 321))
+        | (1ULL << (azslParser::StringLiteral - 321)))) != 0)) {
         setState(636);
         forInitializer();
       }
@@ -6350,6 +6374,7 @@ azslParser::EmbeddedStatementContext* azslParser::embeddedStatement() {
         | (1ULL << (azslParser::Half4x3 - 68))
         | (1ULL << (azslParser::Half4x4 - 68))
         | (1ULL << (azslParser::Int - 68))
+        | (1ULL << (azslParser::Int16_t - 68))
         | (1ULL << (azslParser::Int32_t - 68))
         | (1ULL << (azslParser::Int64_t - 68))
         | (1ULL << (azslParser::Int1 - 68))
@@ -6359,9 +6384,9 @@ azslParser::EmbeddedStatementContext* azslParser::embeddedStatement() {
         | (1ULL << (azslParser::Int1x1 - 68))
         | (1ULL << (azslParser::Int1x2 - 68))
         | (1ULL << (azslParser::Int1x3 - 68))
-        | (1ULL << (azslParser::Int1x4 - 68))
-        | (1ULL << (azslParser::Int2x1 - 68)))) != 0) || ((((_la - 132) & ~ 0x3fULL) == 0) &&
-        ((1ULL << (_la - 132)) & ((1ULL << (azslParser::Int2x2 - 132))
+        | (1ULL << (azslParser::Int1x4 - 68)))) != 0) || ((((_la - 132) & ~ 0x3fULL) == 0) &&
+        ((1ULL << (_la - 132)) & ((1ULL << (azslParser::Int2x1 - 132))
+        | (1ULL << (azslParser::Int2x2 - 132))
         | (1ULL << (azslParser::Int2x3 - 132))
         | (1ULL << (azslParser::Int2x4 - 132))
         | (1ULL << (azslParser::Int3x1 - 132))
@@ -6372,67 +6397,67 @@ azslParser::EmbeddedStatementContext* azslParser::embeddedStatement() {
         | (1ULL << (azslParser::Int4x2 - 132))
         | (1ULL << (azslParser::Int4x3 - 132))
         | (1ULL << (azslParser::Int4x4 - 132))
-        | (1ULL << (azslParser::Matrix - 132)))) != 0) || ((((_la - 210) & ~ 0x3fULL) == 0) &&
-        ((1ULL << (_la - 210)) & ((1ULL << (azslParser::Uint - 210))
-        | (1ULL << (azslParser::Uint32_t - 210))
-        | (1ULL << (azslParser::Uint64_t - 210))
-        | (1ULL << (azslParser::UnsignedInt - 210))
-        | (1ULL << (azslParser::Uint1 - 210))
-        | (1ULL << (azslParser::Uint2 - 210))
-        | (1ULL << (azslParser::Uint3 - 210))
-        | (1ULL << (azslParser::Uint4 - 210))
-        | (1ULL << (azslParser::Uint1x1 - 210))
-        | (1ULL << (azslParser::Uint1x2 - 210))
-        | (1ULL << (azslParser::Uint1x3 - 210))
-        | (1ULL << (azslParser::Uint1x4 - 210))
-        | (1ULL << (azslParser::Uint2x1 - 210))
-        | (1ULL << (azslParser::Uint2x2 - 210))
-        | (1ULL << (azslParser::Uint2x3 - 210))
-        | (1ULL << (azslParser::Uint2x4 - 210))
-        | (1ULL << (azslParser::Uint3x1 - 210))
-        | (1ULL << (azslParser::Uint3x2 - 210))
-        | (1ULL << (azslParser::Uint3x3 - 210))
-        | (1ULL << (azslParser::Uint3x4 - 210))
-        | (1ULL << (azslParser::Uint4x1 - 210))
-        | (1ULL << (azslParser::Uint4x2 - 210))
-        | (1ULL << (azslParser::Uint4x3 - 210))
-        | (1ULL << (azslParser::Uint4x4 - 210))
-        | (1ULL << (azslParser::Dword - 210))
-        | (1ULL << (azslParser::Dword1 - 210))
-        | (1ULL << (azslParser::Dword2 - 210))
-        | (1ULL << (azslParser::Dword3 - 210))
-        | (1ULL << (azslParser::Dword4 - 210))
-        | (1ULL << (azslParser::Dword1x1 - 210))
-        | (1ULL << (azslParser::Dword1x2 - 210))
-        | (1ULL << (azslParser::Dword1x3 - 210))
-        | (1ULL << (azslParser::Dword1x4 - 210))
-        | (1ULL << (azslParser::Dword2x1 - 210))
-        | (1ULL << (azslParser::Dword2x2 - 210))
-        | (1ULL << (azslParser::Dword2x3 - 210))
-        | (1ULL << (azslParser::Dword2x4 - 210))
-        | (1ULL << (azslParser::Dword3x1 - 210))
-        | (1ULL << (azslParser::Dword3x2 - 210))
-        | (1ULL << (azslParser::Dword3x3 - 210))
-        | (1ULL << (azslParser::Dword3x4 - 210))
-        | (1ULL << (azslParser::Dword4x1 - 210))
-        | (1ULL << (azslParser::Dword4x2 - 210))
-        | (1ULL << (azslParser::Dword4x3 - 210))
-        | (1ULL << (azslParser::Dword4x4 - 210))
-        | (1ULL << (azslParser::Vector - 210)))) != 0) || ((((_la - 304) & ~ 0x3fULL) == 0) &&
-        ((1ULL << (_la - 304)) & ((1ULL << (azslParser::LeftParen - 304))
-        | (1ULL << (azslParser::Plus - 304))
-        | (1ULL << (azslParser::PlusPlus - 304))
-        | (1ULL << (azslParser::Minus - 304))
-        | (1ULL << (azslParser::MinusMinus - 304))
-        | (1ULL << (azslParser::Not - 304))
-        | (1ULL << (azslParser::Tilde - 304))
-        | (1ULL << (azslParser::ColonColon - 304))
-        | (1ULL << (azslParser::True - 304))
-        | (1ULL << (azslParser::False - 304)))) != 0) || ((((_la - 370) & ~ 0x3fULL) == 0) &&
-        ((1ULL << (_la - 370)) & ((1ULL << (azslParser::Identifier - 370))
-        | (1ULL << (azslParser::IntegerLiteral - 370))
-        | (1ULL << (azslParser::FloatLiteral - 370))
-        | (1ULL << (azslParser::StringLiteral - 370)))) != 0)) {
+        | (1ULL << (azslParser::Matrix - 132)))) != 0) || ((((_la - 211) & ~ 0x3fULL) == 0) &&
+        ((1ULL << (_la - 211)) & ((1ULL << (azslParser::Uint - 211))
+        | (1ULL << (azslParser::Uint1 - 211))
+        | (1ULL << (azslParser::Uint2 - 211))
+        | (1ULL << (azslParser::Uint3 - 211))
+        | (1ULL << (azslParser::Uint4 - 211))
+        | (1ULL << (azslParser::Uint1x1 - 211))
+        | (1ULL << (azslParser::Uint1x2 - 211))
+        | (1ULL << (azslParser::Uint1x3 - 211))
+        | (1ULL << (azslParser::Uint1x4 - 211))
+        | (1ULL << (azslParser::Uint2x1 - 211))
+        | (1ULL << (azslParser::Uint2x2 - 211))
+        | (1ULL << (azslParser::Uint2x3 - 211))
+        | (1ULL << (azslParser::Uint2x4 - 211))
+        | (1ULL << (azslParser::Uint3x1 - 211))
+        | (1ULL << (azslParser::Uint3x2 - 211))
+        | (1ULL << (azslParser::Uint3x3 - 211))
+        | (1ULL << (azslParser::Uint3x4 - 211))
+        | (1ULL << (azslParser::Uint4x1 - 211))
+        | (1ULL << (azslParser::Uint4x2 - 211))
+        | (1ULL << (azslParser::Uint4x3 - 211))
+        | (1ULL << (azslParser::Uint4x4 - 211))
+        | (1ULL << (azslParser::Uint16_t - 211))
+        | (1ULL << (azslParser::Uint32_t - 211))
+        | (1ULL << (azslParser::Uint64_t - 211))
+        | (1ULL << (azslParser::Dword - 211))
+        | (1ULL << (azslParser::Dword1 - 211))
+        | (1ULL << (azslParser::Dword2 - 211))
+        | (1ULL << (azslParser::Dword3 - 211))
+        | (1ULL << (azslParser::Dword4 - 211))
+        | (1ULL << (azslParser::Dword1x1 - 211))
+        | (1ULL << (azslParser::Dword1x2 - 211))
+        | (1ULL << (azslParser::Dword1x3 - 211))
+        | (1ULL << (azslParser::Dword1x4 - 211))
+        | (1ULL << (azslParser::Dword2x1 - 211))
+        | (1ULL << (azslParser::Dword2x2 - 211))
+        | (1ULL << (azslParser::Dword2x3 - 211))
+        | (1ULL << (azslParser::Dword2x4 - 211))
+        | (1ULL << (azslParser::Dword3x1 - 211))
+        | (1ULL << (azslParser::Dword3x2 - 211))
+        | (1ULL << (azslParser::Dword3x3 - 211))
+        | (1ULL << (azslParser::Dword3x4 - 211))
+        | (1ULL << (azslParser::Dword4x1 - 211))
+        | (1ULL << (azslParser::Dword4x2 - 211))
+        | (1ULL << (azslParser::Dword4x3 - 211))
+        | (1ULL << (azslParser::Dword4x4 - 211))
+        | (1ULL << (azslParser::Vector - 211)))) != 0) || ((((_la - 306) & ~ 0x3fULL) == 0) &&
+        ((1ULL << (_la - 306)) & ((1ULL << (azslParser::LeftParen - 306))
+        | (1ULL << (azslParser::Plus - 306))
+        | (1ULL << (azslParser::PlusPlus - 306))
+        | (1ULL << (azslParser::Minus - 306))
+        | (1ULL << (azslParser::MinusMinus - 306))
+        | (1ULL << (azslParser::Not - 306))
+        | (1ULL << (azslParser::Tilde - 306))
+        | (1ULL << (azslParser::ColonColon - 306))
+        | (1ULL << (azslParser::True - 306))
+        | (1ULL << (azslParser::False - 306)))) != 0) || ((((_la - 372) & ~ 0x3fULL) == 0) &&
+        ((1ULL << (_la - 372)) & ((1ULL << (azslParser::Identifier - 372))
+        | (1ULL << (azslParser::IntegerLiteral - 372))
+        | (1ULL << (azslParser::FloatLiteral - 372))
+        | (1ULL << (azslParser::StringLiteral - 372)))) != 0)) {
         setState(640);
         antlrcpp::downCast<ForStatementContext *>(_localctx)->Condition = expressionExt(0);
       }
@@ -6528,6 +6553,7 @@ azslParser::EmbeddedStatementContext* azslParser::embeddedStatement() {
         | (1ULL << (azslParser::Half4x3 - 68))
         | (1ULL << (azslParser::Half4x4 - 68))
         | (1ULL << (azslParser::Int - 68))
+        | (1ULL << (azslParser::Int16_t - 68))
         | (1ULL << (azslParser::Int32_t - 68))
         | (1ULL << (azslParser::Int64_t - 68))
         | (1ULL << (azslParser::Int1 - 68))
@@ -6537,9 +6563,9 @@ azslParser::EmbeddedStatementContext* azslParser::embeddedStatement() {
         | (1ULL << (azslParser::Int1x1 - 68))
         | (1ULL << (azslParser::Int1x2 - 68))
         | (1ULL << (azslParser::Int1x3 - 68))
-        | (1ULL << (azslParser::Int1x4 - 68))
-        | (1ULL << (azslParser::Int2x1 - 68)))) != 0) || ((((_la - 132) & ~ 0x3fULL) == 0) &&
-        ((1ULL << (_la - 132)) & ((1ULL << (azslParser::Int2x2 - 132))
+        | (1ULL << (azslParser::Int1x4 - 68)))) != 0) || ((((_la - 132) & ~ 0x3fULL) == 0) &&
+        ((1ULL << (_la - 132)) & ((1ULL << (azslParser::Int2x1 - 132))
+        | (1ULL << (azslParser::Int2x2 - 132))
         | (1ULL << (azslParser::Int2x3 - 132))
         | (1ULL << (azslParser::Int2x4 - 132))
         | (1ULL << (azslParser::Int3x1 - 132))
@@ -6550,67 +6576,67 @@ azslParser::EmbeddedStatementContext* azslParser::embeddedStatement() {
         | (1ULL << (azslParser::Int4x2 - 132))
         | (1ULL << (azslParser::Int4x3 - 132))
         | (1ULL << (azslParser::Int4x4 - 132))
-        | (1ULL << (azslParser::Matrix - 132)))) != 0) || ((((_la - 210) & ~ 0x3fULL) == 0) &&
-        ((1ULL << (_la - 210)) & ((1ULL << (azslParser::Uint - 210))
-        | (1ULL << (azslParser::Uint32_t - 210))
-        | (1ULL << (azslParser::Uint64_t - 210))
-        | (1ULL << (azslParser::UnsignedInt - 210))
-        | (1ULL << (azslParser::Uint1 - 210))
-        | (1ULL << (azslParser::Uint2 - 210))
-        | (1ULL << (azslParser::Uint3 - 210))
-        | (1ULL << (azslParser::Uint4 - 210))
-        | (1ULL << (azslParser::Uint1x1 - 210))
-        | (1ULL << (azslParser::Uint1x2 - 210))
-        | (1ULL << (azslParser::Uint1x3 - 210))
-        | (1ULL << (azslParser::Uint1x4 - 210))
-        | (1ULL << (azslParser::Uint2x1 - 210))
-        | (1ULL << (azslParser::Uint2x2 - 210))
-        | (1ULL << (azslParser::Uint2x3 - 210))
-        | (1ULL << (azslParser::Uint2x4 - 210))
-        | (1ULL << (azslParser::Uint3x1 - 210))
-        | (1ULL << (azslParser::Uint3x2 - 210))
-        | (1ULL << (azslParser::Uint3x3 - 210))
-        | (1ULL << (azslParser::Uint3x4 - 210))
-        | (1ULL << (azslParser::Uint4x1 - 210))
-        | (1ULL << (azslParser::Uint4x2 - 210))
-        | (1ULL << (azslParser::Uint4x3 - 210))
-        | (1ULL << (azslParser::Uint4x4 - 210))
-        | (1ULL << (azslParser::Dword - 210))
-        | (1ULL << (azslParser::Dword1 - 210))
-        | (1ULL << (azslParser::Dword2 - 210))
-        | (1ULL << (azslParser::Dword3 - 210))
-        | (1ULL << (azslParser::Dword4 - 210))
-        | (1ULL << (azslParser::Dword1x1 - 210))
-        | (1ULL << (azslParser::Dword1x2 - 210))
-        | (1ULL << (azslParser::Dword1x3 - 210))
-        | (1ULL << (azslParser::Dword1x4 - 210))
-        | (1ULL << (azslParser::Dword2x1 - 210))
-        | (1ULL << (azslParser::Dword2x2 - 210))
-        | (1ULL << (azslParser::Dword2x3 - 210))
-        | (1ULL << (azslParser::Dword2x4 - 210))
-        | (1ULL << (azslParser::Dword3x1 - 210))
-        | (1ULL << (azslParser::Dword3x2 - 210))
-        | (1ULL << (azslParser::Dword3x3 - 210))
-        | (1ULL << (azslParser::Dword3x4 - 210))
-        | (1ULL << (azslParser::Dword4x1 - 210))
-        | (1ULL << (azslParser::Dword4x2 - 210))
-        | (1ULL << (azslParser::Dword4x3 - 210))
-        | (1ULL << (azslParser::Dword4x4 - 210))
-        | (1ULL << (azslParser::Vector - 210)))) != 0) || ((((_la - 304) & ~ 0x3fULL) == 0) &&
-        ((1ULL << (_la - 304)) & ((1ULL << (azslParser::LeftParen - 304))
-        | (1ULL << (azslParser::Plus - 304))
-        | (1ULL << (azslParser::PlusPlus - 304))
-        | (1ULL << (azslParser::Minus - 304))
-        | (1ULL << (azslParser::MinusMinus - 304))
-        | (1ULL << (azslParser::Not - 304))
-        | (1ULL << (azslParser::Tilde - 304))
-        | (1ULL << (azslParser::ColonColon - 304))
-        | (1ULL << (azslParser::True - 304))
-        | (1ULL << (azslParser::False - 304)))) != 0) || ((((_la - 370) & ~ 0x3fULL) == 0) &&
-        ((1ULL << (_la - 370)) & ((1ULL << (azslParser::Identifier - 370))
-        | (1ULL << (azslParser::IntegerLiteral - 370))
-        | (1ULL << (azslParser::FloatLiteral - 370))
-        | (1ULL << (azslParser::StringLiteral - 370)))) != 0)) {
+        | (1ULL << (azslParser::Matrix - 132)))) != 0) || ((((_la - 211) & ~ 0x3fULL) == 0) &&
+        ((1ULL << (_la - 211)) & ((1ULL << (azslParser::Uint - 211))
+        | (1ULL << (azslParser::Uint1 - 211))
+        | (1ULL << (azslParser::Uint2 - 211))
+        | (1ULL << (azslParser::Uint3 - 211))
+        | (1ULL << (azslParser::Uint4 - 211))
+        | (1ULL << (azslParser::Uint1x1 - 211))
+        | (1ULL << (azslParser::Uint1x2 - 211))
+        | (1ULL << (azslParser::Uint1x3 - 211))
+        | (1ULL << (azslParser::Uint1x4 - 211))
+        | (1ULL << (azslParser::Uint2x1 - 211))
+        | (1ULL << (azslParser::Uint2x2 - 211))
+        | (1ULL << (azslParser::Uint2x3 - 211))
+        | (1ULL << (azslParser::Uint2x4 - 211))
+        | (1ULL << (azslParser::Uint3x1 - 211))
+        | (1ULL << (azslParser::Uint3x2 - 211))
+        | (1ULL << (azslParser::Uint3x3 - 211))
+        | (1ULL << (azslParser::Uint3x4 - 211))
+        | (1ULL << (azslParser::Uint4x1 - 211))
+        | (1ULL << (azslParser::Uint4x2 - 211))
+        | (1ULL << (azslParser::Uint4x3 - 211))
+        | (1ULL << (azslParser::Uint4x4 - 211))
+        | (1ULL << (azslParser::Uint16_t - 211))
+        | (1ULL << (azslParser::Uint32_t - 211))
+        | (1ULL << (azslParser::Uint64_t - 211))
+        | (1ULL << (azslParser::Dword - 211))
+        | (1ULL << (azslParser::Dword1 - 211))
+        | (1ULL << (azslParser::Dword2 - 211))
+        | (1ULL << (azslParser::Dword3 - 211))
+        | (1ULL << (azslParser::Dword4 - 211))
+        | (1ULL << (azslParser::Dword1x1 - 211))
+        | (1ULL << (azslParser::Dword1x2 - 211))
+        | (1ULL << (azslParser::Dword1x3 - 211))
+        | (1ULL << (azslParser::Dword1x4 - 211))
+        | (1ULL << (azslParser::Dword2x1 - 211))
+        | (1ULL << (azslParser::Dword2x2 - 211))
+        | (1ULL << (azslParser::Dword2x3 - 211))
+        | (1ULL << (azslParser::Dword2x4 - 211))
+        | (1ULL << (azslParser::Dword3x1 - 211))
+        | (1ULL << (azslParser::Dword3x2 - 211))
+        | (1ULL << (azslParser::Dword3x3 - 211))
+        | (1ULL << (azslParser::Dword3x4 - 211))
+        | (1ULL << (azslParser::Dword4x1 - 211))
+        | (1ULL << (azslParser::Dword4x2 - 211))
+        | (1ULL << (azslParser::Dword4x3 - 211))
+        | (1ULL << (azslParser::Dword4x4 - 211))
+        | (1ULL << (azslParser::Vector - 211)))) != 0) || ((((_la - 306) & ~ 0x3fULL) == 0) &&
+        ((1ULL << (_la - 306)) & ((1ULL << (azslParser::LeftParen - 306))
+        | (1ULL << (azslParser::Plus - 306))
+        | (1ULL << (azslParser::PlusPlus - 306))
+        | (1ULL << (azslParser::Minus - 306))
+        | (1ULL << (azslParser::MinusMinus - 306))
+        | (1ULL << (azslParser::Not - 306))
+        | (1ULL << (azslParser::Tilde - 306))
+        | (1ULL << (azslParser::ColonColon - 306))
+        | (1ULL << (azslParser::True - 306))
+        | (1ULL << (azslParser::False - 306)))) != 0) || ((((_la - 372) & ~ 0x3fULL) == 0) &&
+        ((1ULL << (_la - 372)) & ((1ULL << (azslParser::Identifier - 372))
+        | (1ULL << (azslParser::IntegerLiteral - 372))
+        | (1ULL << (azslParser::FloatLiteral - 372))
+        | (1ULL << (azslParser::StringLiteral - 372)))) != 0)) {
         setState(644);
         antlrcpp::downCast<ForStatementContext *>(_localctx)->iterator = expressionExt(0);
       }
@@ -6746,6 +6772,7 @@ azslParser::EmbeddedStatementContext* azslParser::embeddedStatement() {
         | (1ULL << (azslParser::Half4x3 - 68))
         | (1ULL << (azslParser::Half4x4 - 68))
         | (1ULL << (azslParser::Int - 68))
+        | (1ULL << (azslParser::Int16_t - 68))
         | (1ULL << (azslParser::Int32_t - 68))
         | (1ULL << (azslParser::Int64_t - 68))
         | (1ULL << (azslParser::Int1 - 68))
@@ -6755,9 +6782,9 @@ azslParser::EmbeddedStatementContext* azslParser::embeddedStatement() {
         | (1ULL << (azslParser::Int1x1 - 68))
         | (1ULL << (azslParser::Int1x2 - 68))
         | (1ULL << (azslParser::Int1x3 - 68))
-        | (1ULL << (azslParser::Int1x4 - 68))
-        | (1ULL << (azslParser::Int2x1 - 68)))) != 0) || ((((_la - 132) & ~ 0x3fULL) == 0) &&
-        ((1ULL << (_la - 132)) & ((1ULL << (azslParser::Int2x2 - 132))
+        | (1ULL << (azslParser::Int1x4 - 68)))) != 0) || ((((_la - 132) & ~ 0x3fULL) == 0) &&
+        ((1ULL << (_la - 132)) & ((1ULL << (azslParser::Int2x1 - 132))
+        | (1ULL << (azslParser::Int2x2 - 132))
         | (1ULL << (azslParser::Int2x3 - 132))
         | (1ULL << (azslParser::Int2x4 - 132))
         | (1ULL << (azslParser::Int3x1 - 132))
@@ -6768,67 +6795,67 @@ azslParser::EmbeddedStatementContext* azslParser::embeddedStatement() {
         | (1ULL << (azslParser::Int4x2 - 132))
         | (1ULL << (azslParser::Int4x3 - 132))
         | (1ULL << (azslParser::Int4x4 - 132))
-        | (1ULL << (azslParser::Matrix - 132)))) != 0) || ((((_la - 210) & ~ 0x3fULL) == 0) &&
-        ((1ULL << (_la - 210)) & ((1ULL << (azslParser::Uint - 210))
-        | (1ULL << (azslParser::Uint32_t - 210))
-        | (1ULL << (azslParser::Uint64_t - 210))
-        | (1ULL << (azslParser::UnsignedInt - 210))
-        | (1ULL << (azslParser::Uint1 - 210))
-        | (1ULL << (azslParser::Uint2 - 210))
-        | (1ULL << (azslParser::Uint3 - 210))
-        | (1ULL << (azslParser::Uint4 - 210))
-        | (1ULL << (azslParser::Uint1x1 - 210))
-        | (1ULL << (azslParser::Uint1x2 - 210))
-        | (1ULL << (azslParser::Uint1x3 - 210))
-        | (1ULL << (azslParser::Uint1x4 - 210))
-        | (1ULL << (azslParser::Uint2x1 - 210))
-        | (1ULL << (azslParser::Uint2x2 - 210))
-        | (1ULL << (azslParser::Uint2x3 - 210))
-        | (1ULL << (azslParser::Uint2x4 - 210))
-        | (1ULL << (azslParser::Uint3x1 - 210))
-        | (1ULL << (azslParser::Uint3x2 - 210))
-        | (1ULL << (azslParser::Uint3x3 - 210))
-        | (1ULL << (azslParser::Uint3x4 - 210))
-        | (1ULL << (azslParser::Uint4x1 - 210))
-        | (1ULL << (azslParser::Uint4x2 - 210))
-        | (1ULL << (azslParser::Uint4x3 - 210))
-        | (1ULL << (azslParser::Uint4x4 - 210))
-        | (1ULL << (azslParser::Dword - 210))
-        | (1ULL << (azslParser::Dword1 - 210))
-        | (1ULL << (azslParser::Dword2 - 210))
-        | (1ULL << (azslParser::Dword3 - 210))
-        | (1ULL << (azslParser::Dword4 - 210))
-        | (1ULL << (azslParser::Dword1x1 - 210))
-        | (1ULL << (azslParser::Dword1x2 - 210))
-        | (1ULL << (azslParser::Dword1x3 - 210))
-        | (1ULL << (azslParser::Dword1x4 - 210))
-        | (1ULL << (azslParser::Dword2x1 - 210))
-        | (1ULL << (azslParser::Dword2x2 - 210))
-        | (1ULL << (azslParser::Dword2x3 - 210))
-        | (1ULL << (azslParser::Dword2x4 - 210))
-        | (1ULL << (azslParser::Dword3x1 - 210))
-        | (1ULL << (azslParser::Dword3x2 - 210))
-        | (1ULL << (azslParser::Dword3x3 - 210))
-        | (1ULL << (azslParser::Dword3x4 - 210))
-        | (1ULL << (azslParser::Dword4x1 - 210))
-        | (1ULL << (azslParser::Dword4x2 - 210))
-        | (1ULL << (azslParser::Dword4x3 - 210))
-        | (1ULL << (azslParser::Dword4x4 - 210))
-        | (1ULL << (azslParser::Vector - 210)))) != 0) || ((((_la - 304) & ~ 0x3fULL) == 0) &&
-        ((1ULL << (_la - 304)) & ((1ULL << (azslParser::LeftParen - 304))
-        | (1ULL << (azslParser::Plus - 304))
-        | (1ULL << (azslParser::PlusPlus - 304))
-        | (1ULL << (azslParser::Minus - 304))
-        | (1ULL << (azslParser::MinusMinus - 304))
-        | (1ULL << (azslParser::Not - 304))
-        | (1ULL << (azslParser::Tilde - 304))
-        | (1ULL << (azslParser::ColonColon - 304))
-        | (1ULL << (azslParser::True - 304))
-        | (1ULL << (azslParser::False - 304)))) != 0) || ((((_la - 370) & ~ 0x3fULL) == 0) &&
-        ((1ULL << (_la - 370)) & ((1ULL << (azslParser::Identifier - 370))
-        | (1ULL << (azslParser::IntegerLiteral - 370))
-        | (1ULL << (azslParser::FloatLiteral - 370))
-        | (1ULL << (azslParser::StringLiteral - 370)))) != 0)) {
+        | (1ULL << (azslParser::Matrix - 132)))) != 0) || ((((_la - 211) & ~ 0x3fULL) == 0) &&
+        ((1ULL << (_la - 211)) & ((1ULL << (azslParser::Uint - 211))
+        | (1ULL << (azslParser::Uint1 - 211))
+        | (1ULL << (azslParser::Uint2 - 211))
+        | (1ULL << (azslParser::Uint3 - 211))
+        | (1ULL << (azslParser::Uint4 - 211))
+        | (1ULL << (azslParser::Uint1x1 - 211))
+        | (1ULL << (azslParser::Uint1x2 - 211))
+        | (1ULL << (azslParser::Uint1x3 - 211))
+        | (1ULL << (azslParser::Uint1x4 - 211))
+        | (1ULL << (azslParser::Uint2x1 - 211))
+        | (1ULL << (azslParser::Uint2x2 - 211))
+        | (1ULL << (azslParser::Uint2x3 - 211))
+        | (1ULL << (azslParser::Uint2x4 - 211))
+        | (1ULL << (azslParser::Uint3x1 - 211))
+        | (1ULL << (azslParser::Uint3x2 - 211))
+        | (1ULL << (azslParser::Uint3x3 - 211))
+        | (1ULL << (azslParser::Uint3x4 - 211))
+        | (1ULL << (azslParser::Uint4x1 - 211))
+        | (1ULL << (azslParser::Uint4x2 - 211))
+        | (1ULL << (azslParser::Uint4x3 - 211))
+        | (1ULL << (azslParser::Uint4x4 - 211))
+        | (1ULL << (azslParser::Uint16_t - 211))
+        | (1ULL << (azslParser::Uint32_t - 211))
+        | (1ULL << (azslParser::Uint64_t - 211))
+        | (1ULL << (azslParser::Dword - 211))
+        | (1ULL << (azslParser::Dword1 - 211))
+        | (1ULL << (azslParser::Dword2 - 211))
+        | (1ULL << (azslParser::Dword3 - 211))
+        | (1ULL << (azslParser::Dword4 - 211))
+        | (1ULL << (azslParser::Dword1x1 - 211))
+        | (1ULL << (azslParser::Dword1x2 - 211))
+        | (1ULL << (azslParser::Dword1x3 - 211))
+        | (1ULL << (azslParser::Dword1x4 - 211))
+        | (1ULL << (azslParser::Dword2x1 - 211))
+        | (1ULL << (azslParser::Dword2x2 - 211))
+        | (1ULL << (azslParser::Dword2x3 - 211))
+        | (1ULL << (azslParser::Dword2x4 - 211))
+        | (1ULL << (azslParser::Dword3x1 - 211))
+        | (1ULL << (azslParser::Dword3x2 - 211))
+        | (1ULL << (azslParser::Dword3x3 - 211))
+        | (1ULL << (azslParser::Dword3x4 - 211))
+        | (1ULL << (azslParser::Dword4x1 - 211))
+        | (1ULL << (azslParser::Dword4x2 - 211))
+        | (1ULL << (azslParser::Dword4x3 - 211))
+        | (1ULL << (azslParser::Dword4x4 - 211))
+        | (1ULL << (azslParser::Vector - 211)))) != 0) || ((((_la - 306) & ~ 0x3fULL) == 0) &&
+        ((1ULL << (_la - 306)) & ((1ULL << (azslParser::LeftParen - 306))
+        | (1ULL << (azslParser::Plus - 306))
+        | (1ULL << (azslParser::PlusPlus - 306))
+        | (1ULL << (azslParser::Minus - 306))
+        | (1ULL << (azslParser::MinusMinus - 306))
+        | (1ULL << (azslParser::Not - 306))
+        | (1ULL << (azslParser::Tilde - 306))
+        | (1ULL << (azslParser::ColonColon - 306))
+        | (1ULL << (azslParser::True - 306))
+        | (1ULL << (azslParser::False - 306)))) != 0) || ((((_la - 372) & ~ 0x3fULL) == 0) &&
+        ((1ULL << (_la - 372)) & ((1ULL << (azslParser::Identifier - 372))
+        | (1ULL << (azslParser::IntegerLiteral - 372))
+        | (1ULL << (azslParser::FloatLiteral - 372))
+        | (1ULL << (azslParser::StringLiteral - 372)))) != 0)) {
         setState(656);
         antlrcpp::downCast<ReturnStatementContext *>(_localctx)->Expr = expressionExt(0);
       }
@@ -7774,13 +7801,13 @@ azslParser::PrefixUnaryOperatorContext* azslParser::prefixUnaryOperator() {
     enterOuterAlt(_localctx, 1);
     setState(737);
     _la = _input->LA(1);
-    if (!(((((_la - 317) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 317)) & ((1ULL << (azslParser::Plus - 317))
-      | (1ULL << (azslParser::PlusPlus - 317))
-      | (1ULL << (azslParser::Minus - 317))
-      | (1ULL << (azslParser::MinusMinus - 317))
-      | (1ULL << (azslParser::Not - 317))
-      | (1ULL << (azslParser::Tilde - 317)))) != 0))) {
+    if (!(((((_la - 319) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 319)) & ((1ULL << (azslParser::Plus - 319))
+      | (1ULL << (azslParser::PlusPlus - 319))
+      | (1ULL << (azslParser::Minus - 319))
+      | (1ULL << (azslParser::MinusMinus - 319))
+      | (1ULL << (azslParser::Not - 319))
+      | (1ULL << (azslParser::Tilde - 319)))) != 0))) {
     _errHandler->recoverInline(this);
     }
     else {
@@ -7909,25 +7936,25 @@ azslParser::BinaryOperatorContext* azslParser::binaryOperator() {
     enterOuterAlt(_localctx, 1);
     setState(739);
     _la = _input->LA(1);
-    if (!(((((_la - 311) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 311)) & ((1ULL << (azslParser::Less - 311))
-      | (1ULL << (azslParser::LessEqual - 311))
-      | (1ULL << (azslParser::Greater - 311))
-      | (1ULL << (azslParser::GreaterEqual - 311))
-      | (1ULL << (azslParser::LeftShift - 311))
-      | (1ULL << (azslParser::RightShift - 311))
-      | (1ULL << (azslParser::Plus - 311))
-      | (1ULL << (azslParser::Minus - 311))
-      | (1ULL << (azslParser::Star - 311))
-      | (1ULL << (azslParser::Div - 311))
-      | (1ULL << (azslParser::Mod - 311))
-      | (1ULL << (azslParser::And - 311))
-      | (1ULL << (azslParser::Or - 311))
-      | (1ULL << (azslParser::AndAnd - 311))
-      | (1ULL << (azslParser::OrOr - 311))
-      | (1ULL << (azslParser::Caret - 311))
-      | (1ULL << (azslParser::Equal - 311))
-      | (1ULL << (azslParser::NotEqual - 311)))) != 0))) {
+    if (!(((((_la - 313) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 313)) & ((1ULL << (azslParser::Less - 313))
+      | (1ULL << (azslParser::LessEqual - 313))
+      | (1ULL << (azslParser::Greater - 313))
+      | (1ULL << (azslParser::GreaterEqual - 313))
+      | (1ULL << (azslParser::LeftShift - 313))
+      | (1ULL << (azslParser::RightShift - 313))
+      | (1ULL << (azslParser::Plus - 313))
+      | (1ULL << (azslParser::Minus - 313))
+      | (1ULL << (azslParser::Star - 313))
+      | (1ULL << (azslParser::Div - 313))
+      | (1ULL << (azslParser::Mod - 313))
+      | (1ULL << (azslParser::And - 313))
+      | (1ULL << (azslParser::Or - 313))
+      | (1ULL << (azslParser::AndAnd - 313))
+      | (1ULL << (azslParser::OrOr - 313))
+      | (1ULL << (azslParser::Caret - 313))
+      | (1ULL << (azslParser::Equal - 313))
+      | (1ULL << (azslParser::NotEqual - 313)))) != 0))) {
     _errHandler->recoverInline(this);
     }
     else {
@@ -8028,18 +8055,18 @@ azslParser::AssignmentOperatorContext* azslParser::assignmentOperator() {
     enterOuterAlt(_localctx, 1);
     setState(741);
     _la = _input->LA(1);
-    if (!(((((_la - 336) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 336)) & ((1ULL << (azslParser::Assign - 336))
-      | (1ULL << (azslParser::StarAssign - 336))
-      | (1ULL << (azslParser::DivAssign - 336))
-      | (1ULL << (azslParser::ModAssign - 336))
-      | (1ULL << (azslParser::PlusAssign - 336))
-      | (1ULL << (azslParser::MinusAssign - 336))
-      | (1ULL << (azslParser::LeftShiftAssign - 336))
-      | (1ULL << (azslParser::RightShiftAssign - 336))
-      | (1ULL << (azslParser::AndAssign - 336))
-      | (1ULL << (azslParser::XorAssign - 336))
-      | (1ULL << (azslParser::OrAssign - 336)))) != 0))) {
+    if (!(((((_la - 338) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 338)) & ((1ULL << (azslParser::Assign - 338))
+      | (1ULL << (azslParser::StarAssign - 338))
+      | (1ULL << (azslParser::DivAssign - 338))
+      | (1ULL << (azslParser::ModAssign - 338))
+      | (1ULL << (azslParser::PlusAssign - 338))
+      | (1ULL << (azslParser::MinusAssign - 338))
+      | (1ULL << (azslParser::LeftShiftAssign - 338))
+      | (1ULL << (azslParser::RightShiftAssign - 338))
+      | (1ULL << (azslParser::AndAssign - 338))
+      | (1ULL << (azslParser::XorAssign - 338))
+      | (1ULL << (azslParser::OrAssign - 338)))) != 0))) {
     _errHandler->recoverInline(this);
     }
     else {
@@ -8198,6 +8225,7 @@ azslParser::ArgumentListContext* azslParser::argumentList() {
       | (1ULL << (azslParser::Half4x3 - 68))
       | (1ULL << (azslParser::Half4x4 - 68))
       | (1ULL << (azslParser::Int - 68))
+      | (1ULL << (azslParser::Int16_t - 68))
       | (1ULL << (azslParser::Int32_t - 68))
       | (1ULL << (azslParser::Int64_t - 68))
       | (1ULL << (azslParser::Int1 - 68))
@@ -8207,9 +8235,9 @@ azslParser::ArgumentListContext* azslParser::argumentList() {
       | (1ULL << (azslParser::Int1x1 - 68))
       | (1ULL << (azslParser::Int1x2 - 68))
       | (1ULL << (azslParser::Int1x3 - 68))
-      | (1ULL << (azslParser::Int1x4 - 68))
-      | (1ULL << (azslParser::Int2x1 - 68)))) != 0) || ((((_la - 132) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 132)) & ((1ULL << (azslParser::Int2x2 - 132))
+      | (1ULL << (azslParser::Int1x4 - 68)))) != 0) || ((((_la - 132) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 132)) & ((1ULL << (azslParser::Int2x1 - 132))
+      | (1ULL << (azslParser::Int2x2 - 132))
       | (1ULL << (azslParser::Int2x3 - 132))
       | (1ULL << (azslParser::Int2x4 - 132))
       | (1ULL << (azslParser::Int3x1 - 132))
@@ -8220,67 +8248,67 @@ azslParser::ArgumentListContext* azslParser::argumentList() {
       | (1ULL << (azslParser::Int4x2 - 132))
       | (1ULL << (azslParser::Int4x3 - 132))
       | (1ULL << (azslParser::Int4x4 - 132))
-      | (1ULL << (azslParser::Matrix - 132)))) != 0) || ((((_la - 210) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 210)) & ((1ULL << (azslParser::Uint - 210))
-      | (1ULL << (azslParser::Uint32_t - 210))
-      | (1ULL << (azslParser::Uint64_t - 210))
-      | (1ULL << (azslParser::UnsignedInt - 210))
-      | (1ULL << (azslParser::Uint1 - 210))
-      | (1ULL << (azslParser::Uint2 - 210))
-      | (1ULL << (azslParser::Uint3 - 210))
-      | (1ULL << (azslParser::Uint4 - 210))
-      | (1ULL << (azslParser::Uint1x1 - 210))
-      | (1ULL << (azslParser::Uint1x2 - 210))
-      | (1ULL << (azslParser::Uint1x3 - 210))
-      | (1ULL << (azslParser::Uint1x4 - 210))
-      | (1ULL << (azslParser::Uint2x1 - 210))
-      | (1ULL << (azslParser::Uint2x2 - 210))
-      | (1ULL << (azslParser::Uint2x3 - 210))
-      | (1ULL << (azslParser::Uint2x4 - 210))
-      | (1ULL << (azslParser::Uint3x1 - 210))
-      | (1ULL << (azslParser::Uint3x2 - 210))
-      | (1ULL << (azslParser::Uint3x3 - 210))
-      | (1ULL << (azslParser::Uint3x4 - 210))
-      | (1ULL << (azslParser::Uint4x1 - 210))
-      | (1ULL << (azslParser::Uint4x2 - 210))
-      | (1ULL << (azslParser::Uint4x3 - 210))
-      | (1ULL << (azslParser::Uint4x4 - 210))
-      | (1ULL << (azslParser::Dword - 210))
-      | (1ULL << (azslParser::Dword1 - 210))
-      | (1ULL << (azslParser::Dword2 - 210))
-      | (1ULL << (azslParser::Dword3 - 210))
-      | (1ULL << (azslParser::Dword4 - 210))
-      | (1ULL << (azslParser::Dword1x1 - 210))
-      | (1ULL << (azslParser::Dword1x2 - 210))
-      | (1ULL << (azslParser::Dword1x3 - 210))
-      | (1ULL << (azslParser::Dword1x4 - 210))
-      | (1ULL << (azslParser::Dword2x1 - 210))
-      | (1ULL << (azslParser::Dword2x2 - 210))
-      | (1ULL << (azslParser::Dword2x3 - 210))
-      | (1ULL << (azslParser::Dword2x4 - 210))
-      | (1ULL << (azslParser::Dword3x1 - 210))
-      | (1ULL << (azslParser::Dword3x2 - 210))
-      | (1ULL << (azslParser::Dword3x3 - 210))
-      | (1ULL << (azslParser::Dword3x4 - 210))
-      | (1ULL << (azslParser::Dword4x1 - 210))
-      | (1ULL << (azslParser::Dword4x2 - 210))
-      | (1ULL << (azslParser::Dword4x3 - 210))
-      | (1ULL << (azslParser::Dword4x4 - 210))
-      | (1ULL << (azslParser::Vector - 210)))) != 0) || ((((_la - 304) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 304)) & ((1ULL << (azslParser::LeftParen - 304))
-      | (1ULL << (azslParser::Plus - 304))
-      | (1ULL << (azslParser::PlusPlus - 304))
-      | (1ULL << (azslParser::Minus - 304))
-      | (1ULL << (azslParser::MinusMinus - 304))
-      | (1ULL << (azslParser::Not - 304))
-      | (1ULL << (azslParser::Tilde - 304))
-      | (1ULL << (azslParser::ColonColon - 304))
-      | (1ULL << (azslParser::True - 304))
-      | (1ULL << (azslParser::False - 304)))) != 0) || ((((_la - 370) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 370)) & ((1ULL << (azslParser::Identifier - 370))
-      | (1ULL << (azslParser::IntegerLiteral - 370))
-      | (1ULL << (azslParser::FloatLiteral - 370))
-      | (1ULL << (azslParser::StringLiteral - 370)))) != 0)) {
+      | (1ULL << (azslParser::Matrix - 132)))) != 0) || ((((_la - 211) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 211)) & ((1ULL << (azslParser::Uint - 211))
+      | (1ULL << (azslParser::Uint1 - 211))
+      | (1ULL << (azslParser::Uint2 - 211))
+      | (1ULL << (azslParser::Uint3 - 211))
+      | (1ULL << (azslParser::Uint4 - 211))
+      | (1ULL << (azslParser::Uint1x1 - 211))
+      | (1ULL << (azslParser::Uint1x2 - 211))
+      | (1ULL << (azslParser::Uint1x3 - 211))
+      | (1ULL << (azslParser::Uint1x4 - 211))
+      | (1ULL << (azslParser::Uint2x1 - 211))
+      | (1ULL << (azslParser::Uint2x2 - 211))
+      | (1ULL << (azslParser::Uint2x3 - 211))
+      | (1ULL << (azslParser::Uint2x4 - 211))
+      | (1ULL << (azslParser::Uint3x1 - 211))
+      | (1ULL << (azslParser::Uint3x2 - 211))
+      | (1ULL << (azslParser::Uint3x3 - 211))
+      | (1ULL << (azslParser::Uint3x4 - 211))
+      | (1ULL << (azslParser::Uint4x1 - 211))
+      | (1ULL << (azslParser::Uint4x2 - 211))
+      | (1ULL << (azslParser::Uint4x3 - 211))
+      | (1ULL << (azslParser::Uint4x4 - 211))
+      | (1ULL << (azslParser::Uint16_t - 211))
+      | (1ULL << (azslParser::Uint32_t - 211))
+      | (1ULL << (azslParser::Uint64_t - 211))
+      | (1ULL << (azslParser::Dword - 211))
+      | (1ULL << (azslParser::Dword1 - 211))
+      | (1ULL << (azslParser::Dword2 - 211))
+      | (1ULL << (azslParser::Dword3 - 211))
+      | (1ULL << (azslParser::Dword4 - 211))
+      | (1ULL << (azslParser::Dword1x1 - 211))
+      | (1ULL << (azslParser::Dword1x2 - 211))
+      | (1ULL << (azslParser::Dword1x3 - 211))
+      | (1ULL << (azslParser::Dword1x4 - 211))
+      | (1ULL << (azslParser::Dword2x1 - 211))
+      | (1ULL << (azslParser::Dword2x2 - 211))
+      | (1ULL << (azslParser::Dword2x3 - 211))
+      | (1ULL << (azslParser::Dword2x4 - 211))
+      | (1ULL << (azslParser::Dword3x1 - 211))
+      | (1ULL << (azslParser::Dword3x2 - 211))
+      | (1ULL << (azslParser::Dword3x3 - 211))
+      | (1ULL << (azslParser::Dword3x4 - 211))
+      | (1ULL << (azslParser::Dword4x1 - 211))
+      | (1ULL << (azslParser::Dword4x2 - 211))
+      | (1ULL << (azslParser::Dword4x3 - 211))
+      | (1ULL << (azslParser::Dword4x4 - 211))
+      | (1ULL << (azslParser::Vector - 211)))) != 0) || ((((_la - 306) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 306)) & ((1ULL << (azslParser::LeftParen - 306))
+      | (1ULL << (azslParser::Plus - 306))
+      | (1ULL << (azslParser::PlusPlus - 306))
+      | (1ULL << (azslParser::Minus - 306))
+      | (1ULL << (azslParser::MinusMinus - 306))
+      | (1ULL << (azslParser::Not - 306))
+      | (1ULL << (azslParser::Tilde - 306))
+      | (1ULL << (azslParser::ColonColon - 306))
+      | (1ULL << (azslParser::True - 306))
+      | (1ULL << (azslParser::False - 306)))) != 0) || ((((_la - 372) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 372)) & ((1ULL << (azslParser::Identifier - 372))
+      | (1ULL << (azslParser::IntegerLiteral - 372))
+      | (1ULL << (azslParser::FloatLiteral - 372))
+      | (1ULL << (azslParser::StringLiteral - 372)))) != 0)) {
       setState(744);
       arguments();
     }
@@ -8957,6 +8985,7 @@ azslParser::StandardVariableInitializerContext* azslParser::standardVariableInit
       case azslParser::Half4x3:
       case azslParser::Half4x4:
       case azslParser::Int:
+      case azslParser::Int16_t:
       case azslParser::Int32_t:
       case azslParser::Int64_t:
       case azslParser::Int1:
@@ -8981,9 +9010,6 @@ azslParser::StandardVariableInitializerContext* azslParser::standardVariableInit
       case azslParser::Int4x4:
       case azslParser::Matrix:
       case azslParser::Uint:
-      case azslParser::Uint32_t:
-      case azslParser::Uint64_t:
-      case azslParser::UnsignedInt:
       case azslParser::Uint1:
       case azslParser::Uint2:
       case azslParser::Uint3:
@@ -9004,6 +9030,9 @@ azslParser::StandardVariableInitializerContext* azslParser::standardVariableInit
       case azslParser::Uint4x2:
       case azslParser::Uint4x3:
       case azslParser::Uint4x4:
+      case azslParser::Uint16_t:
+      case azslParser::Uint32_t:
+      case azslParser::Uint64_t:
       case azslParser::Dword:
       case azslParser::Dword1:
       case azslParser::Dword2:
@@ -9290,6 +9319,7 @@ azslParser::ArrayRankSpecifierContext* azslParser::arrayRankSpecifier() {
       | (1ULL << (azslParser::Half4x3 - 68))
       | (1ULL << (azslParser::Half4x4 - 68))
       | (1ULL << (azslParser::Int - 68))
+      | (1ULL << (azslParser::Int16_t - 68))
       | (1ULL << (azslParser::Int32_t - 68))
       | (1ULL << (azslParser::Int64_t - 68))
       | (1ULL << (azslParser::Int1 - 68))
@@ -9299,9 +9329,9 @@ azslParser::ArrayRankSpecifierContext* azslParser::arrayRankSpecifier() {
       | (1ULL << (azslParser::Int1x1 - 68))
       | (1ULL << (azslParser::Int1x2 - 68))
       | (1ULL << (azslParser::Int1x3 - 68))
-      | (1ULL << (azslParser::Int1x4 - 68))
-      | (1ULL << (azslParser::Int2x1 - 68)))) != 0) || ((((_la - 132) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 132)) & ((1ULL << (azslParser::Int2x2 - 132))
+      | (1ULL << (azslParser::Int1x4 - 68)))) != 0) || ((((_la - 132) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 132)) & ((1ULL << (azslParser::Int2x1 - 132))
+      | (1ULL << (azslParser::Int2x2 - 132))
       | (1ULL << (azslParser::Int2x3 - 132))
       | (1ULL << (azslParser::Int2x4 - 132))
       | (1ULL << (azslParser::Int3x1 - 132))
@@ -9312,67 +9342,67 @@ azslParser::ArrayRankSpecifierContext* azslParser::arrayRankSpecifier() {
       | (1ULL << (azslParser::Int4x2 - 132))
       | (1ULL << (azslParser::Int4x3 - 132))
       | (1ULL << (azslParser::Int4x4 - 132))
-      | (1ULL << (azslParser::Matrix - 132)))) != 0) || ((((_la - 210) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 210)) & ((1ULL << (azslParser::Uint - 210))
-      | (1ULL << (azslParser::Uint32_t - 210))
-      | (1ULL << (azslParser::Uint64_t - 210))
-      | (1ULL << (azslParser::UnsignedInt - 210))
-      | (1ULL << (azslParser::Uint1 - 210))
-      | (1ULL << (azslParser::Uint2 - 210))
-      | (1ULL << (azslParser::Uint3 - 210))
-      | (1ULL << (azslParser::Uint4 - 210))
-      | (1ULL << (azslParser::Uint1x1 - 210))
-      | (1ULL << (azslParser::Uint1x2 - 210))
-      | (1ULL << (azslParser::Uint1x3 - 210))
-      | (1ULL << (azslParser::Uint1x4 - 210))
-      | (1ULL << (azslParser::Uint2x1 - 210))
-      | (1ULL << (azslParser::Uint2x2 - 210))
-      | (1ULL << (azslParser::Uint2x3 - 210))
-      | (1ULL << (azslParser::Uint2x4 - 210))
-      | (1ULL << (azslParser::Uint3x1 - 210))
-      | (1ULL << (azslParser::Uint3x2 - 210))
-      | (1ULL << (azslParser::Uint3x3 - 210))
-      | (1ULL << (azslParser::Uint3x4 - 210))
-      | (1ULL << (azslParser::Uint4x1 - 210))
-      | (1ULL << (azslParser::Uint4x2 - 210))
-      | (1ULL << (azslParser::Uint4x3 - 210))
-      | (1ULL << (azslParser::Uint4x4 - 210))
-      | (1ULL << (azslParser::Dword - 210))
-      | (1ULL << (azslParser::Dword1 - 210))
-      | (1ULL << (azslParser::Dword2 - 210))
-      | (1ULL << (azslParser::Dword3 - 210))
-      | (1ULL << (azslParser::Dword4 - 210))
-      | (1ULL << (azslParser::Dword1x1 - 210))
-      | (1ULL << (azslParser::Dword1x2 - 210))
-      | (1ULL << (azslParser::Dword1x3 - 210))
-      | (1ULL << (azslParser::Dword1x4 - 210))
-      | (1ULL << (azslParser::Dword2x1 - 210))
-      | (1ULL << (azslParser::Dword2x2 - 210))
-      | (1ULL << (azslParser::Dword2x3 - 210))
-      | (1ULL << (azslParser::Dword2x4 - 210))
-      | (1ULL << (azslParser::Dword3x1 - 210))
-      | (1ULL << (azslParser::Dword3x2 - 210))
-      | (1ULL << (azslParser::Dword3x3 - 210))
-      | (1ULL << (azslParser::Dword3x4 - 210))
-      | (1ULL << (azslParser::Dword4x1 - 210))
-      | (1ULL << (azslParser::Dword4x2 - 210))
-      | (1ULL << (azslParser::Dword4x3 - 210))
-      | (1ULL << (azslParser::Dword4x4 - 210))
-      | (1ULL << (azslParser::Vector - 210)))) != 0) || ((((_la - 304) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 304)) & ((1ULL << (azslParser::LeftParen - 304))
-      | (1ULL << (azslParser::Plus - 304))
-      | (1ULL << (azslParser::PlusPlus - 304))
-      | (1ULL << (azslParser::Minus - 304))
-      | (1ULL << (azslParser::MinusMinus - 304))
-      | (1ULL << (azslParser::Not - 304))
-      | (1ULL << (azslParser::Tilde - 304))
-      | (1ULL << (azslParser::ColonColon - 304))
-      | (1ULL << (azslParser::True - 304))
-      | (1ULL << (azslParser::False - 304)))) != 0) || ((((_la - 370) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 370)) & ((1ULL << (azslParser::Identifier - 370))
-      | (1ULL << (azslParser::IntegerLiteral - 370))
-      | (1ULL << (azslParser::FloatLiteral - 370))
-      | (1ULL << (azslParser::StringLiteral - 370)))) != 0)) {
+      | (1ULL << (azslParser::Matrix - 132)))) != 0) || ((((_la - 211) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 211)) & ((1ULL << (azslParser::Uint - 211))
+      | (1ULL << (azslParser::Uint1 - 211))
+      | (1ULL << (azslParser::Uint2 - 211))
+      | (1ULL << (azslParser::Uint3 - 211))
+      | (1ULL << (azslParser::Uint4 - 211))
+      | (1ULL << (azslParser::Uint1x1 - 211))
+      | (1ULL << (azslParser::Uint1x2 - 211))
+      | (1ULL << (azslParser::Uint1x3 - 211))
+      | (1ULL << (azslParser::Uint1x4 - 211))
+      | (1ULL << (azslParser::Uint2x1 - 211))
+      | (1ULL << (azslParser::Uint2x2 - 211))
+      | (1ULL << (azslParser::Uint2x3 - 211))
+      | (1ULL << (azslParser::Uint2x4 - 211))
+      | (1ULL << (azslParser::Uint3x1 - 211))
+      | (1ULL << (azslParser::Uint3x2 - 211))
+      | (1ULL << (azslParser::Uint3x3 - 211))
+      | (1ULL << (azslParser::Uint3x4 - 211))
+      | (1ULL << (azslParser::Uint4x1 - 211))
+      | (1ULL << (azslParser::Uint4x2 - 211))
+      | (1ULL << (azslParser::Uint4x3 - 211))
+      | (1ULL << (azslParser::Uint4x4 - 211))
+      | (1ULL << (azslParser::Uint16_t - 211))
+      | (1ULL << (azslParser::Uint32_t - 211))
+      | (1ULL << (azslParser::Uint64_t - 211))
+      | (1ULL << (azslParser::Dword - 211))
+      | (1ULL << (azslParser::Dword1 - 211))
+      | (1ULL << (azslParser::Dword2 - 211))
+      | (1ULL << (azslParser::Dword3 - 211))
+      | (1ULL << (azslParser::Dword4 - 211))
+      | (1ULL << (azslParser::Dword1x1 - 211))
+      | (1ULL << (azslParser::Dword1x2 - 211))
+      | (1ULL << (azslParser::Dword1x3 - 211))
+      | (1ULL << (azslParser::Dword1x4 - 211))
+      | (1ULL << (azslParser::Dword2x1 - 211))
+      | (1ULL << (azslParser::Dword2x2 - 211))
+      | (1ULL << (azslParser::Dword2x3 - 211))
+      | (1ULL << (azslParser::Dword2x4 - 211))
+      | (1ULL << (azslParser::Dword3x1 - 211))
+      | (1ULL << (azslParser::Dword3x2 - 211))
+      | (1ULL << (azslParser::Dword3x3 - 211))
+      | (1ULL << (azslParser::Dword3x4 - 211))
+      | (1ULL << (azslParser::Dword4x1 - 211))
+      | (1ULL << (azslParser::Dword4x2 - 211))
+      | (1ULL << (azslParser::Dword4x3 - 211))
+      | (1ULL << (azslParser::Dword4x4 - 211))
+      | (1ULL << (azslParser::Vector - 211)))) != 0) || ((((_la - 306) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 306)) & ((1ULL << (azslParser::LeftParen - 306))
+      | (1ULL << (azslParser::Plus - 306))
+      | (1ULL << (azslParser::PlusPlus - 306))
+      | (1ULL << (azslParser::Minus - 306))
+      | (1ULL << (azslParser::MinusMinus - 306))
+      | (1ULL << (azslParser::Not - 306))
+      | (1ULL << (azslParser::Tilde - 306))
+      | (1ULL << (azslParser::ColonColon - 306))
+      | (1ULL << (azslParser::True - 306))
+      | (1ULL << (azslParser::False - 306)))) != 0) || ((((_la - 372) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 372)) & ((1ULL << (azslParser::Identifier - 372))
+      | (1ULL << (azslParser::IntegerLiteral - 372))
+      | (1ULL << (azslParser::FloatLiteral - 372))
+      | (1ULL << (azslParser::StringLiteral - 372)))) != 0)) {
       setState(820);
       antlrcpp::downCast<ArrayRankSpecifierContext *>(_localctx)->Dimension = expression(0);
     }
@@ -9544,26 +9574,27 @@ azslParser::StorageFlagsContext* azslParser::storageFlags() {
       | (1ULL << (azslParser::In - 65))
       | (1ULL << (azslParser::Inline - 65))
       | (1ULL << (azslParser::Rootconstant - 65))
-      | (1ULL << (azslParser::Inout - 65)))) != 0) || ((((_la - 144) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 144)) & ((1ULL << (azslParser::Line_ - 144))
-      | (1ULL << (azslParser::LineAdj - 144))
-      | (1ULL << (azslParser::Linear - 144))
-      | (1ULL << (azslParser::Nointerpolation - 144))
-      | (1ULL << (azslParser::Noperspective - 144))
-      | (1ULL << (azslParser::Option - 144))
-      | (1ULL << (azslParser::Out - 144))
-      | (1ULL << (azslParser::Point - 144))
-      | (1ULL << (azslParser::Precise - 144))
-      | (1ULL << (azslParser::RowMajor - 144))
-      | (1ULL << (azslParser::Sample - 144))
-      | (1ULL << (azslParser::Shared - 144))
-      | (1ULL << (azslParser::SNorm - 144))
-      | (1ULL << (azslParser::Static - 144))
-      | (1ULL << (azslParser::Triangle - 144))
-      | (1ULL << (azslParser::TriangleAdj - 144)))) != 0) || ((((_la - 209) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 209)) & ((1ULL << (azslParser::Uniform - 209))
-      | (1ULL << (azslParser::UNorm - 209))
-      | (1ULL << (azslParser::Volatile - 209)))) != 0) || _la == azslParser::Indices
+      | (1ULL << (azslParser::Inout - 65)))) != 0) || ((((_la - 145) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 145)) & ((1ULL << (azslParser::Line_ - 145))
+      | (1ULL << (azslParser::LineAdj - 145))
+      | (1ULL << (azslParser::Linear - 145))
+      | (1ULL << (azslParser::Nointerpolation - 145))
+      | (1ULL << (azslParser::Noperspective - 145))
+      | (1ULL << (azslParser::Option - 145))
+      | (1ULL << (azslParser::Out - 145))
+      | (1ULL << (azslParser::Point - 145))
+      | (1ULL << (azslParser::Precise - 145))
+      | (1ULL << (azslParser::RowMajor - 145))
+      | (1ULL << (azslParser::Sample - 145))
+      | (1ULL << (azslParser::Shared - 145))
+      | (1ULL << (azslParser::SNorm - 145))
+      | (1ULL << (azslParser::Static - 145))
+      | (1ULL << (azslParser::Triangle - 145))
+      | (1ULL << (azslParser::TriangleAdj - 145)))) != 0) || ((((_la - 210) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 210)) & ((1ULL << (azslParser::Uniform - 210))
+      | (1ULL << (azslParser::UNorm - 210))
+      | (1ULL << (azslParser::Unsigned - 210))
+      | (1ULL << (azslParser::Volatile - 210)))) != 0) || _la == azslParser::Indices
 
     || _la == azslParser::Vertices) {
       setState(835);
@@ -9591,6 +9622,10 @@ azslParser::StorageFlagContext::StorageFlagContext(ParserRuleContext *parent, si
 
 tree::TerminalNode* azslParser::StorageFlagContext::Const() {
   return getToken(azslParser::Const, 0);
+}
+
+tree::TerminalNode* azslParser::StorageFlagContext::Unsigned() {
+  return getToken(azslParser::Unsigned, 0);
 }
 
 tree::TerminalNode* azslParser::StorageFlagContext::RowMajor() {
@@ -9761,26 +9796,27 @@ azslParser::StorageFlagContext* azslParser::storageFlag() {
       | (1ULL << (azslParser::In - 65))
       | (1ULL << (azslParser::Inline - 65))
       | (1ULL << (azslParser::Rootconstant - 65))
-      | (1ULL << (azslParser::Inout - 65)))) != 0) || ((((_la - 144) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 144)) & ((1ULL << (azslParser::Line_ - 144))
-      | (1ULL << (azslParser::LineAdj - 144))
-      | (1ULL << (azslParser::Linear - 144))
-      | (1ULL << (azslParser::Nointerpolation - 144))
-      | (1ULL << (azslParser::Noperspective - 144))
-      | (1ULL << (azslParser::Option - 144))
-      | (1ULL << (azslParser::Out - 144))
-      | (1ULL << (azslParser::Point - 144))
-      | (1ULL << (azslParser::Precise - 144))
-      | (1ULL << (azslParser::RowMajor - 144))
-      | (1ULL << (azslParser::Sample - 144))
-      | (1ULL << (azslParser::Shared - 144))
-      | (1ULL << (azslParser::SNorm - 144))
-      | (1ULL << (azslParser::Static - 144))
-      | (1ULL << (azslParser::Triangle - 144))
-      | (1ULL << (azslParser::TriangleAdj - 144)))) != 0) || ((((_la - 209) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 209)) & ((1ULL << (azslParser::Uniform - 209))
-      | (1ULL << (azslParser::UNorm - 209))
-      | (1ULL << (azslParser::Volatile - 209)))) != 0) || _la == azslParser::Indices
+      | (1ULL << (azslParser::Inout - 65)))) != 0) || ((((_la - 145) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 145)) & ((1ULL << (azslParser::Line_ - 145))
+      | (1ULL << (azslParser::LineAdj - 145))
+      | (1ULL << (azslParser::Linear - 145))
+      | (1ULL << (azslParser::Nointerpolation - 145))
+      | (1ULL << (azslParser::Noperspective - 145))
+      | (1ULL << (azslParser::Option - 145))
+      | (1ULL << (azslParser::Out - 145))
+      | (1ULL << (azslParser::Point - 145))
+      | (1ULL << (azslParser::Precise - 145))
+      | (1ULL << (azslParser::RowMajor - 145))
+      | (1ULL << (azslParser::Sample - 145))
+      | (1ULL << (azslParser::Shared - 145))
+      | (1ULL << (azslParser::SNorm - 145))
+      | (1ULL << (azslParser::Static - 145))
+      | (1ULL << (azslParser::Triangle - 145))
+      | (1ULL << (azslParser::TriangleAdj - 145)))) != 0) || ((((_la - 210) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 210)) & ((1ULL << (azslParser::Uniform - 210))
+      | (1ULL << (azslParser::UNorm - 210))
+      | (1ULL << (azslParser::Unsigned - 210))
+      | (1ULL << (azslParser::Volatile - 210)))) != 0) || _la == azslParser::Indices
 
     || _la == azslParser::Vertices)) {
     _errHandler->recoverInline(this);
@@ -9943,6 +9979,7 @@ azslParser::TypeContext* azslParser::type() {
       case azslParser::Half4x4:
       case azslParser::InputPatch:
       case azslParser::Int:
+      case azslParser::Int16_t:
       case azslParser::Int32_t:
       case azslParser::Int64_t:
       case azslParser::Int1:
@@ -9990,6 +10027,7 @@ azslParser::TypeContext* azslParser::type() {
       case azslParser::Sampler:
       case azslParser::SamplerCapitalS:
       case azslParser::SamplerComparisonState:
+      case azslParser::SamplerStateCamel:
       case azslParser::SamplerState:
       case azslParser::StructuredBuffer:
       case azslParser::SubpassInput:
@@ -10005,9 +10043,6 @@ azslParser::TypeContext* azslParser::type() {
       case azslParser::TextureCubeArray:
       case azslParser::TriangleStream:
       case azslParser::Uint:
-      case azslParser::Uint32_t:
-      case azslParser::Uint64_t:
-      case azslParser::UnsignedInt:
       case azslParser::Uint1:
       case azslParser::Uint2:
       case azslParser::Uint3:
@@ -10028,6 +10063,9 @@ azslParser::TypeContext* azslParser::type() {
       case azslParser::Uint4x2:
       case azslParser::Uint4x3:
       case azslParser::Uint4x4:
+      case azslParser::Uint16_t:
+      case azslParser::Uint32_t:
+      case azslParser::Uint64_t:
       case azslParser::Dword:
       case azslParser::Dword1:
       case azslParser::Dword2:
@@ -10423,16 +10461,16 @@ azslParser::SubobjectTypeContext* azslParser::subobjectType() {
     enterOuterAlt(_localctx, 1);
     setState(868);
     _la = _input->LA(1);
-    if (!(((((_la - 260) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 260)) & ((1ULL << (azslParser::StateObjectConfig - 260))
-      | (1ULL << (azslParser::LocalRootSignature - 260))
-      | (1ULL << (azslParser::GlobalRootSignature - 260))
-      | (1ULL << (azslParser::SubobjectToExportsAssociation - 260))
-      | (1ULL << (azslParser::RaytracingShaderConfig - 260))
-      | (1ULL << (azslParser::RaytracingPipelineConfig - 260))
-      | (1ULL << (azslParser::RaytracingPipelineConfig1 - 260))
-      | (1ULL << (azslParser::TriangleHitGroup - 260))
-      | (1ULL << (azslParser::ProceduralPrimitiveHitGroup - 260)))) != 0))) {
+    if (!(((((_la - 262) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 262)) & ((1ULL << (azslParser::StateObjectConfig - 262))
+      | (1ULL << (azslParser::LocalRootSignature - 262))
+      | (1ULL << (azslParser::GlobalRootSignature - 262))
+      | (1ULL << (azslParser::SubobjectToExportsAssociation - 262))
+      | (1ULL << (azslParser::RaytracingShaderConfig - 262))
+      | (1ULL << (azslParser::RaytracingPipelineConfig - 262))
+      | (1ULL << (azslParser::RaytracingPipelineConfig1 - 262))
+      | (1ULL << (azslParser::TriangleHitGroup - 262))
+      | (1ULL << (azslParser::ProceduralPrimitiveHitGroup - 262)))) != 0))) {
     _errHandler->recoverInline(this);
     }
     else {
@@ -10949,6 +10987,10 @@ tree::TerminalNode* azslParser::SamplerStatePredefinedTypeContext::SamplerState(
   return getToken(azslParser::SamplerState, 0);
 }
 
+tree::TerminalNode* azslParser::SamplerStatePredefinedTypeContext::SamplerStateCamel() {
+  return getToken(azslParser::SamplerStateCamel, 0);
+}
+
 tree::TerminalNode* azslParser::SamplerStatePredefinedTypeContext::SamplerComparisonState() {
   return getToken(azslParser::SamplerComparisonState, 0);
 }
@@ -10986,11 +11028,12 @@ azslParser::SamplerStatePredefinedTypeContext* azslParser::samplerStatePredefine
     enterOuterAlt(_localctx, 1);
     setState(892);
     _la = _input->LA(1);
-    if (!(((((_la - 183) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 183)) & ((1ULL << (azslParser::Sampler - 183))
-      | (1ULL << (azslParser::SamplerCapitalS - 183))
-      | (1ULL << (azslParser::SamplerComparisonState - 183))
-      | (1ULL << (azslParser::SamplerState - 183)))) != 0))) {
+    if (!(((((_la - 184) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 184)) & ((1ULL << (azslParser::Sampler - 184))
+      | (1ULL << (azslParser::SamplerCapitalS - 184))
+      | (1ULL << (azslParser::SamplerComparisonState - 184))
+      | (1ULL << (azslParser::SamplerStateCamel - 184))
+      | (1ULL << (azslParser::SamplerState - 184)))) != 0))) {
     _errHandler->recoverInline(this);
     }
     else {
@@ -11022,6 +11065,10 @@ tree::TerminalNode* azslParser::ScalarTypeContext::Int() {
   return getToken(azslParser::Int, 0);
 }
 
+tree::TerminalNode* azslParser::ScalarTypeContext::Int16_t() {
+  return getToken(azslParser::Int16_t, 0);
+}
+
 tree::TerminalNode* azslParser::ScalarTypeContext::Int32_t() {
   return getToken(azslParser::Int32_t, 0);
 }
@@ -11034,16 +11081,16 @@ tree::TerminalNode* azslParser::ScalarTypeContext::Uint() {
   return getToken(azslParser::Uint, 0);
 }
 
+tree::TerminalNode* azslParser::ScalarTypeContext::Uint16_t() {
+  return getToken(azslParser::Uint16_t, 0);
+}
+
 tree::TerminalNode* azslParser::ScalarTypeContext::Uint32_t() {
   return getToken(azslParser::Uint32_t, 0);
 }
 
 tree::TerminalNode* azslParser::ScalarTypeContext::Uint64_t() {
   return getToken(azslParser::Uint64_t, 0);
-}
-
-tree::TerminalNode* azslParser::ScalarTypeContext::UnsignedInt() {
-  return getToken(azslParser::UnsignedInt, 0);
 }
 
 tree::TerminalNode* azslParser::ScalarTypeContext::Dword() {
@@ -11101,13 +11148,14 @@ azslParser::ScalarTypeContext* azslParser::scalarType() {
       ((1ULL << (_la - 68)) & ((1ULL << (azslParser::Float - 68))
       | (1ULL << (azslParser::Half - 68))
       | (1ULL << (azslParser::Int - 68))
+      | (1ULL << (azslParser::Int16_t - 68))
       | (1ULL << (azslParser::Int32_t - 68))
-      | (1ULL << (azslParser::Int64_t - 68)))) != 0) || ((((_la - 210) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 210)) & ((1ULL << (azslParser::Uint - 210))
-      | (1ULL << (azslParser::Uint32_t - 210))
-      | (1ULL << (azslParser::Uint64_t - 210))
-      | (1ULL << (azslParser::UnsignedInt - 210))
-      | (1ULL << (azslParser::Dword - 210)))) != 0))) {
+      | (1ULL << (azslParser::Int64_t - 68)))) != 0) || ((((_la - 211) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 211)) & ((1ULL << (azslParser::Uint - 211))
+      | (1ULL << (azslParser::Uint16_t - 211))
+      | (1ULL << (azslParser::Uint32_t - 211))
+      | (1ULL << (azslParser::Uint64_t - 211))
+      | (1ULL << (azslParser::Dword - 211)))) != 0))) {
     _errHandler->recoverInline(this);
     }
     else {
@@ -11247,10 +11295,10 @@ azslParser::StreamOutputObjectTypeContext* azslParser::streamOutputObjectType() 
     enterOuterAlt(_localctx, 1);
     setState(901);
     _la = _input->LA(1);
-    if (!(((((_la - 147) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 147)) & ((1ULL << (azslParser::LineStream - 147))
-      | (1ULL << (azslParser::PointStream - 147))
-      | (1ULL << (azslParser::TriangleStream - 147)))) != 0))) {
+    if (!(((((_la - 148) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 148)) & ((1ULL << (azslParser::LineStream - 148))
+      | (1ULL << (azslParser::PointStream - 148))
+      | (1ULL << (azslParser::TriangleStream - 148)))) != 0))) {
     _errHandler->recoverInline(this);
     }
     else {
@@ -11400,10 +11448,10 @@ azslParser::StructuredBufferNameContext* azslParser::structuredBufferName() {
     _la = _input->LA(1);
     if (!(_la == azslParser::AppendStructuredBuffer
 
-    || _la == azslParser::ConsumeStructuredBuffer || ((((_la - 163) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 163)) & ((1ULL << (azslParser::RasterizerOrderedStructuredBuffer - 163))
-      | (1ULL << (azslParser::RWStructuredBuffer - 163))
-      | (1ULL << (azslParser::StructuredBuffer - 163)))) != 0))) {
+    || _la == azslParser::ConsumeStructuredBuffer || ((((_la - 164) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 164)) & ((1ULL << (azslParser::RasterizerOrderedStructuredBuffer - 164))
+      | (1ULL << (azslParser::RWStructuredBuffer - 164))
+      | (1ULL << (azslParser::StructuredBuffer - 164)))) != 0))) {
     _errHandler->recoverInline(this);
     }
     else {
@@ -11536,26 +11584,26 @@ azslParser::TextureTypeContext* azslParser::textureType() {
     enterOuterAlt(_localctx, 1);
     setState(910);
     _la = _input->LA(1);
-    if (!(((((_la - 164) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 164)) & ((1ULL << (azslParser::RasterizerOrderedTexture1D - 164))
-      | (1ULL << (azslParser::RasterizerOrderedTexture1DArray - 164))
-      | (1ULL << (azslParser::RasterizerOrderedTexture2D - 164))
-      | (1ULL << (azslParser::RasterizerOrderedTexture2DArray - 164))
-      | (1ULL << (azslParser::RasterizerOrderedTexture3D - 164))
-      | (1ULL << (azslParser::RWTexture1D - 164))
-      | (1ULL << (azslParser::RWTexture1DArray - 164))
-      | (1ULL << (azslParser::RWTexture2D - 164))
-      | (1ULL << (azslParser::RWTexture2DArray - 164))
-      | (1ULL << (azslParser::RWTexture3D - 164))
-      | (1ULL << (azslParser::SubpassInput - 164))
-      | (1ULL << (azslParser::SubpassInputMS - 164))
-      | (1ULL << (azslParser::Texture1D - 164))
-      | (1ULL << (azslParser::Texture1DArray - 164))
-      | (1ULL << (azslParser::Texture2D - 164))
-      | (1ULL << (azslParser::Texture2DArray - 164))
-      | (1ULL << (azslParser::Texture3D - 164))
-      | (1ULL << (azslParser::TextureCube - 164))
-      | (1ULL << (azslParser::TextureCubeArray - 164)))) != 0))) {
+    if (!(((((_la - 165) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 165)) & ((1ULL << (azslParser::RasterizerOrderedTexture1D - 165))
+      | (1ULL << (azslParser::RasterizerOrderedTexture1DArray - 165))
+      | (1ULL << (azslParser::RasterizerOrderedTexture2D - 165))
+      | (1ULL << (azslParser::RasterizerOrderedTexture2DArray - 165))
+      | (1ULL << (azslParser::RasterizerOrderedTexture3D - 165))
+      | (1ULL << (azslParser::RWTexture1D - 165))
+      | (1ULL << (azslParser::RWTexture1DArray - 165))
+      | (1ULL << (azslParser::RWTexture2D - 165))
+      | (1ULL << (azslParser::RWTexture2DArray - 165))
+      | (1ULL << (azslParser::RWTexture3D - 165))
+      | (1ULL << (azslParser::SubpassInput - 165))
+      | (1ULL << (azslParser::SubpassInputMS - 165))
+      | (1ULL << (azslParser::Texture1D - 165))
+      | (1ULL << (azslParser::Texture1DArray - 165))
+      | (1ULL << (azslParser::Texture2D - 165))
+      | (1ULL << (azslParser::Texture2DArray - 165))
+      | (1ULL << (azslParser::Texture3D - 165))
+      | (1ULL << (azslParser::TextureCube - 165))
+      | (1ULL << (azslParser::TextureCubeArray - 165)))) != 0))) {
     _errHandler->recoverInline(this);
     }
     else {
@@ -12029,16 +12077,16 @@ azslParser::VectorTypeContext* azslParser::vectorType() {
       | (1ULL << (azslParser::Int1 - 69))
       | (1ULL << (azslParser::Int2 - 69))
       | (1ULL << (azslParser::Int3 - 69))
-      | (1ULL << (azslParser::Int4 - 69)))) != 0) || ((((_la - 214) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 214)) & ((1ULL << (azslParser::Uint1 - 214))
-      | (1ULL << (azslParser::Uint2 - 214))
-      | (1ULL << (azslParser::Uint3 - 214))
-      | (1ULL << (azslParser::Uint4 - 214))
-      | (1ULL << (azslParser::Dword1 - 214))
-      | (1ULL << (azslParser::Dword2 - 214))
-      | (1ULL << (azslParser::Dword3 - 214))
-      | (1ULL << (azslParser::Dword4 - 214))
-      | (1ULL << (azslParser::Vector - 214)))) != 0))) {
+      | (1ULL << (azslParser::Int4 - 69)))) != 0) || ((((_la - 212) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 212)) & ((1ULL << (azslParser::Uint1 - 212))
+      | (1ULL << (azslParser::Uint2 - 212))
+      | (1ULL << (azslParser::Uint3 - 212))
+      | (1ULL << (azslParser::Uint4 - 212))
+      | (1ULL << (azslParser::Dword1 - 212))
+      | (1ULL << (azslParser::Dword2 - 212))
+      | (1ULL << (azslParser::Dword3 - 212))
+      | (1ULL << (azslParser::Dword4 - 212))
+      | (1ULL << (azslParser::Vector - 212)))) != 0))) {
     _errHandler->recoverInline(this);
     }
     else {
@@ -12190,12 +12238,13 @@ azslParser::ScalarOrVectorTypeContext* azslParser::scalarOrVectorType() {
       case azslParser::Float:
       case azslParser::Half:
       case azslParser::Int:
+      case azslParser::Int16_t:
       case azslParser::Int32_t:
       case azslParser::Int64_t:
       case azslParser::Uint:
+      case azslParser::Uint16_t:
       case azslParser::Uint32_t:
       case azslParser::Uint64_t:
-      case azslParser::UnsignedInt:
       case azslParser::Dword: {
         enterOuterAlt(_localctx, 1);
         setState(939);
@@ -12307,12 +12356,13 @@ azslParser::ScalarOrVectorOrMatrixTypeContext* azslParser::scalarOrVectorOrMatri
       case azslParser::Float:
       case azslParser::Half:
       case azslParser::Int:
+      case azslParser::Int16_t:
       case azslParser::Int32_t:
       case azslParser::Int64_t:
       case azslParser::Uint:
+      case azslParser::Uint16_t:
       case azslParser::Uint32_t:
       case azslParser::Uint64_t:
-      case azslParser::UnsignedInt:
       case azslParser::Dword: {
         enterOuterAlt(_localctx, 1);
         setState(943);
@@ -13052,47 +13102,47 @@ azslParser::MatrixTypeContext* azslParser::matrixType() {
       | (1ULL << (azslParser::Int2x2 - 73))
       | (1ULL << (azslParser::Int2x3 - 73))
       | (1ULL << (azslParser::Int2x4 - 73))
-      | (1ULL << (azslParser::Int3x1 - 73))
-      | (1ULL << (azslParser::Int3x2 - 73)))) != 0) || ((((_la - 137) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 137)) & ((1ULL << (azslParser::Int3x3 - 137))
+      | (1ULL << (azslParser::Int3x1 - 73)))) != 0) || ((((_la - 137) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 137)) & ((1ULL << (azslParser::Int3x2 - 137))
+      | (1ULL << (azslParser::Int3x3 - 137))
       | (1ULL << (azslParser::Int3x4 - 137))
       | (1ULL << (azslParser::Int4x1 - 137))
       | (1ULL << (azslParser::Int4x2 - 137))
       | (1ULL << (azslParser::Int4x3 - 137))
       | (1ULL << (azslParser::Int4x4 - 137))
-      | (1ULL << (azslParser::Matrix - 137)))) != 0) || ((((_la - 218) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 218)) & ((1ULL << (azslParser::Uint1x1 - 218))
-      | (1ULL << (azslParser::Uint1x2 - 218))
-      | (1ULL << (azslParser::Uint1x3 - 218))
-      | (1ULL << (azslParser::Uint1x4 - 218))
-      | (1ULL << (azslParser::Uint2x1 - 218))
-      | (1ULL << (azslParser::Uint2x2 - 218))
-      | (1ULL << (azslParser::Uint2x3 - 218))
-      | (1ULL << (azslParser::Uint2x4 - 218))
-      | (1ULL << (azslParser::Uint3x1 - 218))
-      | (1ULL << (azslParser::Uint3x2 - 218))
-      | (1ULL << (azslParser::Uint3x3 - 218))
-      | (1ULL << (azslParser::Uint3x4 - 218))
-      | (1ULL << (azslParser::Uint4x1 - 218))
-      | (1ULL << (azslParser::Uint4x2 - 218))
-      | (1ULL << (azslParser::Uint4x3 - 218))
-      | (1ULL << (azslParser::Uint4x4 - 218))
-      | (1ULL << (azslParser::Dword1x1 - 218))
-      | (1ULL << (azslParser::Dword1x2 - 218))
-      | (1ULL << (azslParser::Dword1x3 - 218))
-      | (1ULL << (azslParser::Dword1x4 - 218))
-      | (1ULL << (azslParser::Dword2x1 - 218))
-      | (1ULL << (azslParser::Dword2x2 - 218))
-      | (1ULL << (azslParser::Dword2x3 - 218))
-      | (1ULL << (azslParser::Dword2x4 - 218))
-      | (1ULL << (azslParser::Dword3x1 - 218))
-      | (1ULL << (azslParser::Dword3x2 - 218))
-      | (1ULL << (azslParser::Dword3x3 - 218))
-      | (1ULL << (azslParser::Dword3x4 - 218))
-      | (1ULL << (azslParser::Dword4x1 - 218))
-      | (1ULL << (azslParser::Dword4x2 - 218))
-      | (1ULL << (azslParser::Dword4x3 - 218))
-      | (1ULL << (azslParser::Dword4x4 - 218)))) != 0))) {
+      | (1ULL << (azslParser::Matrix - 137)))) != 0) || ((((_la - 216) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 216)) & ((1ULL << (azslParser::Uint1x1 - 216))
+      | (1ULL << (azslParser::Uint1x2 - 216))
+      | (1ULL << (azslParser::Uint1x3 - 216))
+      | (1ULL << (azslParser::Uint1x4 - 216))
+      | (1ULL << (azslParser::Uint2x1 - 216))
+      | (1ULL << (azslParser::Uint2x2 - 216))
+      | (1ULL << (azslParser::Uint2x3 - 216))
+      | (1ULL << (azslParser::Uint2x4 - 216))
+      | (1ULL << (azslParser::Uint3x1 - 216))
+      | (1ULL << (azslParser::Uint3x2 - 216))
+      | (1ULL << (azslParser::Uint3x3 - 216))
+      | (1ULL << (azslParser::Uint3x4 - 216))
+      | (1ULL << (azslParser::Uint4x1 - 216))
+      | (1ULL << (azslParser::Uint4x2 - 216))
+      | (1ULL << (azslParser::Uint4x3 - 216))
+      | (1ULL << (azslParser::Uint4x4 - 216))
+      | (1ULL << (azslParser::Dword1x1 - 216))
+      | (1ULL << (azslParser::Dword1x2 - 216))
+      | (1ULL << (azslParser::Dword1x3 - 216))
+      | (1ULL << (azslParser::Dword1x4 - 216))
+      | (1ULL << (azslParser::Dword2x1 - 216))
+      | (1ULL << (azslParser::Dword2x2 - 216))
+      | (1ULL << (azslParser::Dword2x3 - 216))
+      | (1ULL << (azslParser::Dword2x4 - 216))
+      | (1ULL << (azslParser::Dword3x1 - 216))
+      | (1ULL << (azslParser::Dword3x2 - 216))
+      | (1ULL << (azslParser::Dword3x3 - 216))
+      | (1ULL << (azslParser::Dword3x4 - 216))
+      | (1ULL << (azslParser::Dword4x1 - 216))
+      | (1ULL << (azslParser::Dword4x2 - 216))
+      | (1ULL << (azslParser::Dword4x3 - 216))
+      | (1ULL << (azslParser::Dword4x4 - 216)))) != 0))) {
     _errHandler->recoverInline(this);
     }
     else {
@@ -13704,15 +13754,16 @@ azslParser::LeadingTypeFunctionSignatureContext* azslParser::leadingTypeFunction
       | (1ULL << (azslParser::Inout - 65))
       | (1ULL << (azslParser::InputPatch - 65))
       | (1ULL << (azslParser::Int - 65))
+      | (1ULL << (azslParser::Int16_t - 65))
       | (1ULL << (azslParser::Int32_t - 65))
       | (1ULL << (azslParser::Int64_t - 65))
       | (1ULL << (azslParser::Int1 - 65))
       | (1ULL << (azslParser::Int2 - 65))
       | (1ULL << (azslParser::Int3 - 65))
       | (1ULL << (azslParser::Int4 - 65))
-      | (1ULL << (azslParser::Int1x1 - 65))
-      | (1ULL << (azslParser::Int1x2 - 65)))) != 0) || ((((_la - 129) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 129)) & ((1ULL << (azslParser::Int1x3 - 129))
+      | (1ULL << (azslParser::Int1x1 - 65)))) != 0) || ((((_la - 129) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 129)) & ((1ULL << (azslParser::Int1x2 - 129))
+      | (1ULL << (azslParser::Int1x3 - 129))
       | (1ULL << (azslParser::Int1x4 - 129))
       | (1ULL << (azslParser::Int2x1 - 129))
       | (1ULL << (azslParser::Int2x2 - 129))
@@ -13763,13 +13814,14 @@ azslParser::LeadingTypeFunctionSignatureContext* azslParser::leadingTypeFunction
       | (1ULL << (azslParser::Sampler - 129))
       | (1ULL << (azslParser::SamplerCapitalS - 129))
       | (1ULL << (azslParser::SamplerComparisonState - 129))
+      | (1ULL << (azslParser::SamplerStateCamel - 129))
       | (1ULL << (azslParser::SamplerState - 129))
       | (1ULL << (azslParser::Shared - 129))
       | (1ULL << (azslParser::SNorm - 129))
       | (1ULL << (azslParser::Static - 129))
-      | (1ULL << (azslParser::Struct - 129))
-      | (1ULL << (azslParser::StructuredBuffer - 129)))) != 0) || ((((_la - 193) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 193)) & ((1ULL << (azslParser::SubpassInput - 193))
+      | (1ULL << (azslParser::Struct - 129)))) != 0) || ((((_la - 193) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 193)) & ((1ULL << (azslParser::StructuredBuffer - 193))
+      | (1ULL << (azslParser::SubpassInput - 193))
       | (1ULL << (azslParser::SubpassInputMS - 193))
       | (1ULL << (azslParser::Texture1D - 193))
       | (1ULL << (azslParser::Texture1DArray - 193))
@@ -13785,9 +13837,6 @@ azslParser::LeadingTypeFunctionSignatureContext* azslParser::leadingTypeFunction
       | (1ULL << (azslParser::TriangleStream - 193))
       | (1ULL << (azslParser::Uniform - 193))
       | (1ULL << (azslParser::Uint - 193))
-      | (1ULL << (azslParser::Uint32_t - 193))
-      | (1ULL << (azslParser::Uint64_t - 193))
-      | (1ULL << (azslParser::UnsignedInt - 193))
       | (1ULL << (azslParser::Uint1 - 193))
       | (1ULL << (azslParser::Uint2 - 193))
       | (1ULL << (azslParser::Uint3 - 193))
@@ -13808,7 +13857,11 @@ azslParser::LeadingTypeFunctionSignatureContext* azslParser::leadingTypeFunction
       | (1ULL << (azslParser::Uint4x2 - 193))
       | (1ULL << (azslParser::Uint4x3 - 193))
       | (1ULL << (azslParser::Uint4x4 - 193))
+      | (1ULL << (azslParser::Uint16_t - 193))
+      | (1ULL << (azslParser::Uint32_t - 193))
+      | (1ULL << (azslParser::Uint64_t - 193))
       | (1ULL << (azslParser::UNorm - 193))
+      | (1ULL << (azslParser::Unsigned - 193))
       | (1ULL << (azslParser::Dword - 193))
       | (1ULL << (azslParser::Dword1 - 193))
       | (1ULL << (azslParser::Dword2 - 193))
@@ -13828,10 +13881,10 @@ azslParser::LeadingTypeFunctionSignatureContext* azslParser::leadingTypeFunction
       | (1ULL << (azslParser::Dword3x4 - 193))
       | (1ULL << (azslParser::Dword4x1 - 193))
       | (1ULL << (azslParser::Dword4x2 - 193))
-      | (1ULL << (azslParser::Dword4x3 - 193))
-      | (1ULL << (azslParser::Dword4x4 - 193))
-      | (1ULL << (azslParser::Vector - 193)))) != 0) || ((((_la - 257) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 257)) & ((1ULL << (azslParser::Volatile - 257))
+      | (1ULL << (azslParser::Dword4x3 - 193)))) != 0) || ((((_la - 257) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 257)) & ((1ULL << (azslParser::Dword4x4 - 257))
+      | (1ULL << (azslParser::Vector - 257))
+      | (1ULL << (azslParser::Volatile - 257))
       | (1ULL << (azslParser::Void - 257))
       | (1ULL << (azslParser::StateObjectConfig - 257))
       | (1ULL << (azslParser::LocalRootSignature - 257))
@@ -13843,12 +13896,12 @@ azslParser::LeadingTypeFunctionSignatureContext* azslParser::leadingTypeFunction
       | (1ULL << (azslParser::TriangleHitGroup - 257))
       | (1ULL << (azslParser::ProceduralPrimitiveHitGroup - 257))
       | (1ULL << (azslParser::LeftBracket - 257))
-      | (1ULL << (azslParser::LeftDoubleBracket - 257)))) != 0) || ((((_la - 333) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 333)) & ((1ULL << (azslParser::ColonColon - 333))
-      | (1ULL << (azslParser::KW_Typeof - 333))
-      | (1ULL << (azslParser::Indices - 333))
-      | (1ULL << (azslParser::Vertices - 333))
-      | (1ULL << (azslParser::Identifier - 333)))) != 0)) {
+      | (1ULL << (azslParser::LeftDoubleBracket - 257)))) != 0) || ((((_la - 335) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 335)) & ((1ULL << (azslParser::ColonColon - 335))
+      | (1ULL << (azslParser::KW_Typeof - 335))
+      | (1ULL << (azslParser::Indices - 335))
+      | (1ULL << (azslParser::Vertices - 335))
+      | (1ULL << (azslParser::Identifier - 335)))) != 0)) {
       setState(993);
       functionParams();
     }
@@ -14140,6 +14193,7 @@ azslParser::FunctionTypeContext* azslParser::functionType() {
       case azslParser::Half4x4:
       case azslParser::InputPatch:
       case azslParser::Int:
+      case azslParser::Int16_t:
       case azslParser::Int32_t:
       case azslParser::Int64_t:
       case azslParser::Int1:
@@ -14188,6 +14242,7 @@ azslParser::FunctionTypeContext* azslParser::functionType() {
       case azslParser::Sampler:
       case azslParser::SamplerCapitalS:
       case azslParser::SamplerComparisonState:
+      case azslParser::SamplerStateCamel:
       case azslParser::SamplerState:
       case azslParser::Struct:
       case azslParser::StructuredBuffer:
@@ -14204,9 +14259,6 @@ azslParser::FunctionTypeContext* azslParser::functionType() {
       case azslParser::TextureCubeArray:
       case azslParser::TriangleStream:
       case azslParser::Uint:
-      case azslParser::Uint32_t:
-      case azslParser::Uint64_t:
-      case azslParser::UnsignedInt:
       case azslParser::Uint1:
       case azslParser::Uint2:
       case azslParser::Uint3:
@@ -14227,6 +14279,9 @@ azslParser::FunctionTypeContext* azslParser::functionType() {
       case azslParser::Uint4x2:
       case azslParser::Uint4x3:
       case azslParser::Uint4x4:
+      case azslParser::Uint16_t:
+      case azslParser::Uint32_t:
+      case azslParser::Uint64_t:
       case azslParser::Dword:
       case azslParser::Dword1:
       case azslParser::Dword2:
@@ -15433,10 +15488,10 @@ azslParser::CompilerExtensionStatementContext* azslParser::compilerExtensionStat
         match(azslParser::Comma);
         setState(1102);
         _la = _input->LA(1);
-        if (!(((((_la - 359) & ~ 0x3fULL) == 0) &&
-          ((1ULL << (_la - 359)) & ((1ULL << (azslParser::KW_ext_prtsym_fully_qualified - 359))
-          | (1ULL << (azslParser::KW_ext_prtsym_least_qualified - 359))
-          | (1ULL << (azslParser::KW_ext_prtsym_constint_value - 359)))) != 0))) {
+        if (!(((((_la - 361) & ~ 0x3fULL) == 0) &&
+          ((1ULL << (_la - 361)) & ((1ULL << (azslParser::KW_ext_prtsym_fully_qualified - 361))
+          | (1ULL << (azslParser::KW_ext_prtsym_least_qualified - 361))
+          | (1ULL << (azslParser::KW_ext_prtsym_constint_value - 361)))) != 0))) {
         _errHandler->recoverInline(this);
         }
         else {
@@ -15671,15 +15726,16 @@ azslParser::SrgDefinitionContext* azslParser::srgDefinition() {
       | (1ULL << (azslParser::Inout - 65))
       | (1ULL << (azslParser::InputPatch - 65))
       | (1ULL << (azslParser::Int - 65))
+      | (1ULL << (azslParser::Int16_t - 65))
       | (1ULL << (azslParser::Int32_t - 65))
       | (1ULL << (azslParser::Int64_t - 65))
       | (1ULL << (azslParser::Int1 - 65))
       | (1ULL << (azslParser::Int2 - 65))
       | (1ULL << (azslParser::Int3 - 65))
       | (1ULL << (azslParser::Int4 - 65))
-      | (1ULL << (azslParser::Int1x1 - 65))
-      | (1ULL << (azslParser::Int1x2 - 65)))) != 0) || ((((_la - 129) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 129)) & ((1ULL << (azslParser::Int1x3 - 129))
+      | (1ULL << (azslParser::Int1x1 - 65)))) != 0) || ((((_la - 129) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 129)) & ((1ULL << (azslParser::Int1x2 - 129))
+      | (1ULL << (azslParser::Int1x3 - 129))
       | (1ULL << (azslParser::Int1x4 - 129))
       | (1ULL << (azslParser::Int2x1 - 129))
       | (1ULL << (azslParser::Int2x2 - 129))
@@ -15730,13 +15786,14 @@ azslParser::SrgDefinitionContext* azslParser::srgDefinition() {
       | (1ULL << (azslParser::Sampler - 129))
       | (1ULL << (azslParser::SamplerCapitalS - 129))
       | (1ULL << (azslParser::SamplerComparisonState - 129))
+      | (1ULL << (azslParser::SamplerStateCamel - 129))
       | (1ULL << (azslParser::SamplerState - 129))
       | (1ULL << (azslParser::Shared - 129))
       | (1ULL << (azslParser::SNorm - 129))
       | (1ULL << (azslParser::Static - 129))
-      | (1ULL << (azslParser::Struct - 129))
-      | (1ULL << (azslParser::StructuredBuffer - 129)))) != 0) || ((((_la - 193) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 193)) & ((1ULL << (azslParser::SubpassInput - 193))
+      | (1ULL << (azslParser::Struct - 129)))) != 0) || ((((_la - 193) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 193)) & ((1ULL << (azslParser::StructuredBuffer - 193))
+      | (1ULL << (azslParser::SubpassInput - 193))
       | (1ULL << (azslParser::SubpassInputMS - 193))
       | (1ULL << (azslParser::Texture1D - 193))
       | (1ULL << (azslParser::Texture1DArray - 193))
@@ -15752,9 +15809,6 @@ azslParser::SrgDefinitionContext* azslParser::srgDefinition() {
       | (1ULL << (azslParser::TriangleStream - 193))
       | (1ULL << (azslParser::Uniform - 193))
       | (1ULL << (azslParser::Uint - 193))
-      | (1ULL << (azslParser::Uint32_t - 193))
-      | (1ULL << (azslParser::Uint64_t - 193))
-      | (1ULL << (azslParser::UnsignedInt - 193))
       | (1ULL << (azslParser::Uint1 - 193))
       | (1ULL << (azslParser::Uint2 - 193))
       | (1ULL << (azslParser::Uint3 - 193))
@@ -15775,7 +15829,11 @@ azslParser::SrgDefinitionContext* azslParser::srgDefinition() {
       | (1ULL << (azslParser::Uint4x2 - 193))
       | (1ULL << (azslParser::Uint4x3 - 193))
       | (1ULL << (azslParser::Uint4x4 - 193))
+      | (1ULL << (azslParser::Uint16_t - 193))
+      | (1ULL << (azslParser::Uint32_t - 193))
+      | (1ULL << (azslParser::Uint64_t - 193))
       | (1ULL << (azslParser::UNorm - 193))
+      | (1ULL << (azslParser::Unsigned - 193))
       | (1ULL << (azslParser::Dword - 193))
       | (1ULL << (azslParser::Dword1 - 193))
       | (1ULL << (azslParser::Dword2 - 193))
@@ -15795,10 +15853,10 @@ azslParser::SrgDefinitionContext* azslParser::srgDefinition() {
       | (1ULL << (azslParser::Dword3x4 - 193))
       | (1ULL << (azslParser::Dword4x1 - 193))
       | (1ULL << (azslParser::Dword4x2 - 193))
-      | (1ULL << (azslParser::Dword4x3 - 193))
-      | (1ULL << (azslParser::Dword4x4 - 193))
-      | (1ULL << (azslParser::Vector - 193)))) != 0) || ((((_la - 257) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 257)) & ((1ULL << (azslParser::Volatile - 257))
+      | (1ULL << (azslParser::Dword4x3 - 193)))) != 0) || ((((_la - 257) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 257)) & ((1ULL << (azslParser::Dword4x4 - 257))
+      | (1ULL << (azslParser::Vector - 257))
+      | (1ULL << (azslParser::Volatile - 257))
       | (1ULL << (azslParser::Void - 257))
       | (1ULL << (azslParser::StateObjectConfig - 257))
       | (1ULL << (azslParser::LocalRootSignature - 257))
@@ -15810,14 +15868,14 @@ azslParser::SrgDefinitionContext* azslParser::srgDefinition() {
       | (1ULL << (azslParser::TriangleHitGroup - 257))
       | (1ULL << (azslParser::ProceduralPrimitiveHitGroup - 257))
       | (1ULL << (azslParser::LeftBracket - 257))
-      | (1ULL << (azslParser::LeftDoubleBracket - 257)))) != 0) || ((((_la - 333) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 333)) & ((1ULL << (azslParser::ColonColon - 333))
-      | (1ULL << (azslParser::KW_TypeAlias - 333))
-      | (1ULL << (azslParser::KW_Typedef - 333))
-      | (1ULL << (azslParser::KW_Typeof - 333))
-      | (1ULL << (azslParser::Indices - 333))
-      | (1ULL << (azslParser::Vertices - 333))
-      | (1ULL << (azslParser::Identifier - 333)))) != 0)) {
+      | (1ULL << (azslParser::LeftDoubleBracket - 257)))) != 0) || ((((_la - 335) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 335)) & ((1ULL << (azslParser::ColonColon - 335))
+      | (1ULL << (azslParser::KW_TypeAlias - 335))
+      | (1ULL << (azslParser::KW_Typedef - 335))
+      | (1ULL << (azslParser::KW_Typeof - 335))
+      | (1ULL << (azslParser::Indices - 335))
+      | (1ULL << (azslParser::Vertices - 335))
+      | (1ULL << (azslParser::Identifier - 335)))) != 0)) {
       setState(1118);
       srgMemberDeclaration();
       setState(1123);
@@ -16415,20 +16473,20 @@ azslParser::SamplerBodyDeclarationContext* azslParser::samplerBodyDeclaration() 
     setState(1180);
     _errHandler->sync(this);
     _la = _input->LA(1);
-    while (((((_la - 269) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 269)) & ((1ULL << (azslParser::ADDRESS_U - 269))
-      | (1ULL << (azslParser::ADDRESS_V - 269))
-      | (1ULL << (azslParser::ADDRESS_W - 269))
-      | (1ULL << (azslParser::BORDER_COLOR - 269))
-      | (1ULL << (azslParser::MIN_FILTER - 269))
-      | (1ULL << (azslParser::MAG_FILTER - 269))
-      | (1ULL << (azslParser::MIP_FILTER - 269))
-      | (1ULL << (azslParser::MAX_ANISOTROPY - 269))
-      | (1ULL << (azslParser::MAX_LOD - 269))
-      | (1ULL << (azslParser::MIN_LOD - 269))
-      | (1ULL << (azslParser::MIP_LOD_BIAS - 269))
-      | (1ULL << (azslParser::COMPARISON_FUNC - 269))
-      | (1ULL << (azslParser::REDUCTION_TYPE - 269)))) != 0)) {
+    while (((((_la - 271) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 271)) & ((1ULL << (azslParser::ADDRESS_U - 271))
+      | (1ULL << (azslParser::ADDRESS_V - 271))
+      | (1ULL << (azslParser::ADDRESS_W - 271))
+      | (1ULL << (azslParser::BORDER_COLOR - 271))
+      | (1ULL << (azslParser::MIN_FILTER - 271))
+      | (1ULL << (azslParser::MAG_FILTER - 271))
+      | (1ULL << (azslParser::MIP_FILTER - 271))
+      | (1ULL << (azslParser::MAX_ANISOTROPY - 271))
+      | (1ULL << (azslParser::MAX_LOD - 271))
+      | (1ULL << (azslParser::MIN_LOD - 271))
+      | (1ULL << (azslParser::MIP_LOD_BIAS - 271))
+      | (1ULL << (azslParser::COMPARISON_FUNC - 271))
+      | (1ULL << (azslParser::REDUCTION_TYPE - 271)))) != 0)) {
       setState(1177);
       samplerMemberDeclaration();
       setState(1182);
@@ -17688,11 +17746,11 @@ azslParser::ReductionTypeEnumContext* azslParser::reductionTypeEnum() {
     enterOuterAlt(_localctx, 1);
     setState(1267);
     _la = _input->LA(1);
-    if (!(((((_la - 284) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 284)) & ((1ULL << (azslParser::REDUCTION_TYPE_FILTER - 284))
-      | (1ULL << (azslParser::REDUCTION_TYPE_COMPARISON - 284))
-      | (1ULL << (azslParser::REDUCTION_TYPE_MINIMUM - 284))
-      | (1ULL << (azslParser::REDUCTION_TYPE_MAXIMUM - 284)))) != 0))) {
+    if (!(((((_la - 286) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 286)) & ((1ULL << (azslParser::REDUCTION_TYPE_FILTER - 286))
+      | (1ULL << (azslParser::REDUCTION_TYPE_COMPARISON - 286))
+      | (1ULL << (azslParser::REDUCTION_TYPE_MINIMUM - 286))
+      | (1ULL << (azslParser::REDUCTION_TYPE_MAXIMUM - 286)))) != 0))) {
     _errHandler->recoverInline(this);
     }
     else {
@@ -17769,12 +17827,12 @@ azslParser::AddressModeEnumContext* azslParser::addressModeEnum() {
     enterOuterAlt(_localctx, 1);
     setState(1269);
     _la = _input->LA(1);
-    if (!(((((_la - 288) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 288)) & ((1ULL << (azslParser::ADDRESS_MODE_WRAP - 288))
-      | (1ULL << (azslParser::ADDRESS_MODE_MIRROR - 288))
-      | (1ULL << (azslParser::ADDRESS_MODE_CLAMP - 288))
-      | (1ULL << (azslParser::ADDRESS_MODE_BORDER - 288))
-      | (1ULL << (azslParser::ADDRESS_MODE_MIRROR_ONCE - 288)))) != 0))) {
+    if (!(((((_la - 290) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 290)) & ((1ULL << (azslParser::ADDRESS_MODE_WRAP - 290))
+      | (1ULL << (azslParser::ADDRESS_MODE_MIRROR - 290))
+      | (1ULL << (azslParser::ADDRESS_MODE_CLAMP - 290))
+      | (1ULL << (azslParser::ADDRESS_MODE_BORDER - 290))
+      | (1ULL << (azslParser::ADDRESS_MODE_MIRROR_ONCE - 290)))) != 0))) {
     _errHandler->recoverInline(this);
     }
     else {
@@ -17863,15 +17921,15 @@ azslParser::ComparisonFunctionEnumContext* azslParser::comparisonFunctionEnum() 
     enterOuterAlt(_localctx, 1);
     setState(1271);
     _la = _input->LA(1);
-    if (!(((((_la - 293) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 293)) & ((1ULL << (azslParser::COMPARISON_FUNCTION_NEVER - 293))
-      | (1ULL << (azslParser::COMPARISON_FUNCTION_LESS - 293))
-      | (1ULL << (azslParser::COMPARISON_FUNCTION_EQUAL - 293))
-      | (1ULL << (azslParser::COMPARISON_FUNCTION_LESS_EQUAL - 293))
-      | (1ULL << (azslParser::COMPARISON_FUNCTION_GREATER - 293))
-      | (1ULL << (azslParser::COMPARISON_FUNCTION_NOT_EQUAL - 293))
-      | (1ULL << (azslParser::COMPARISON_FUNCTION_GREATER_EQUAL - 293))
-      | (1ULL << (azslParser::COMPARISON_FUNCTION_ALWAYS - 293)))) != 0))) {
+    if (!(((((_la - 295) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 295)) & ((1ULL << (azslParser::COMPARISON_FUNCTION_NEVER - 295))
+      | (1ULL << (azslParser::COMPARISON_FUNCTION_LESS - 295))
+      | (1ULL << (azslParser::COMPARISON_FUNCTION_EQUAL - 295))
+      | (1ULL << (azslParser::COMPARISON_FUNCTION_LESS_EQUAL - 295))
+      | (1ULL << (azslParser::COMPARISON_FUNCTION_GREATER - 295))
+      | (1ULL << (azslParser::COMPARISON_FUNCTION_NOT_EQUAL - 295))
+      | (1ULL << (azslParser::COMPARISON_FUNCTION_GREATER_EQUAL - 295))
+      | (1ULL << (azslParser::COMPARISON_FUNCTION_ALWAYS - 295)))) != 0))) {
     _errHandler->recoverInline(this);
     }
     else {
@@ -17940,10 +17998,10 @@ azslParser::BorderColorEnumContext* azslParser::borderColorEnum() {
     enterOuterAlt(_localctx, 1);
     setState(1273);
     _la = _input->LA(1);
-    if (!(((((_la - 301) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 301)) & ((1ULL << (azslParser::BORDER_COLOR_OPAQUE_BLACK - 301))
-      | (1ULL << (azslParser::BORDER_COLOR_TRANSPARENT_BLACK - 301))
-      | (1ULL << (azslParser::BORDER_COLOR_OPAQUE_WHITE - 301)))) != 0))) {
+    if (!(((((_la - 303) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 303)) & ((1ULL << (azslParser::BORDER_COLOR_OPAQUE_BLACK - 303))
+      | (1ULL << (azslParser::BORDER_COLOR_TRANSPARENT_BLACK - 303))
+      | (1ULL << (azslParser::BORDER_COLOR_OPAQUE_WHITE - 303)))) != 0))) {
     _errHandler->recoverInline(this);
     }
     else {
@@ -18068,15 +18126,15 @@ std::vector<std::string> azslParser::_literalNames = {
   "'half4'", "'half1x1'", "'half1x2'", "'half1x3'", "'half1x4'", "'half2x1'", 
   "'half2x2'", "'half2x3'", "'half2x4'", "'half3x1'", "'half3x2'", "'half3x3'", 
   "'half3x4'", "'half4x1'", "'half4x2'", "'half4x3'", "'half4x4'", "'if'", 
-  "'in'", "'inline'", "'rootconstant'", "", "'InputPatch'", "'int'", "'int32_t'", 
-  "'int64_t'", "'int1'", "'int2'", "'int3'", "'int4'", "'int1x1'", "'int1x2'", 
-  "'int1x3'", "'int1x4'", "'int2x1'", "'int2x2'", "'int2x3'", "'int2x4'", 
-  "'int3x1'", "'int3x2'", "'int3x3'", "'int3x4'", "'int4x1'", "'int4x2'", 
-  "'int4x3'", "'int4x4'", "'interface'", "'line'", "'lineadj'", "'linear'", 
-  "'LineStream'", "'long'", "'matrix'", "'nointerpolation'", "'noperspective'", 
-  "'option'", "'out'", "'OutputPatch'", "'override'", "'partial'", "'packoffset'", 
-  "'point'", "'PointStream'", "'precise'", "'RasterizerOrderedBuffer'", 
-  "'RasterizerOrderedByteAddressBuffer'", "'RasterizerOrderedStructuredBuffer'", 
+  "'in'", "'inline'", "'rootconstant'", "", "'InputPatch'", "'int'", "'int16_t'", 
+  "'int32_t'", "'int64_t'", "'int1'", "'int2'", "'int3'", "'int4'", "'int1x1'", 
+  "'int1x2'", "'int1x3'", "'int1x4'", "'int2x1'", "'int2x2'", "'int2x3'", 
+  "'int2x4'", "'int3x1'", "'int3x2'", "'int3x3'", "'int3x4'", "'int4x1'", 
+  "'int4x2'", "'int4x3'", "'int4x4'", "'interface'", "'line'", "'lineadj'", 
+  "'linear'", "'LineStream'", "'long'", "'matrix'", "'nointerpolation'", 
+  "'noperspective'", "'option'", "'out'", "'OutputPatch'", "'override'", 
+  "'partial'", "'packoffset'", "'point'", "'PointStream'", "'precise'", 
+  "'RasterizerOrderedBuffer'", "'RasterizerOrderedByteAddressBuffer'", "'RasterizerOrderedStructuredBuffer'", 
   "'RasterizerOrderedTexture1D'", "'RasterizerOrderedTexture1DArray'", "'RasterizerOrderedTexture2D'", 
   "'RasterizerOrderedTexture2DArray'", "'RasterizerOrderedTexture3D'", "'RayDesc'", 
   "'RaytracingAccelerationStructure'", "'register'", "'return'", "'row_major'", 
@@ -18088,15 +18146,15 @@ std::vector<std::string> azslParser::_literalNames = {
   "'Texture1DArray'", "'Texture2D'", "'Texture2DArray'", "'Texture2DMS'", 
   "'Texture2DMSArray'", "'Texture3D'", "'TextureCube'", "'TextureCubeArray'", 
   "'triangle'", "'triangleadj'", "'TriangleStream'", "'uniform'", "'uint'", 
-  "'uint32_t'", "'uint64_t'", "'unsigned int'", "'uint1'", "'uint2'", "'uint3'", 
-  "'uint4'", "'uint1x1'", "'uint1x2'", "'uint1x3'", "'uint1x4'", "'uint2x1'", 
-  "'uint2x2'", "'uint2x3'", "'uint2x4'", "'uint3x1'", "'uint3x2'", "'uint3x3'", 
-  "'uint3x4'", "'uint4x1'", "'uint4x2'", "'uint4x3'", "'uint4x4'", "'unorm'", 
-  "'dword'", "'dword1'", "'dword2'", "'dword3'", "'dword4'", "'dword1x1'", 
-  "'dword1x2'", "'dword1x3'", "'dword1x4'", "'dword2x1'", "'dword2x2'", 
-  "'dword2x3'", "'dword2x4'", "'dword3x1'", "'dword3x2'", "'dword3x3'", 
-  "'dword3x4'", "'dword4x1'", "'dword4x2'", "'dword4x3'", "'dword4x4'", 
-  "'vector'", "'volatile'", "'void'", "'while'", "'StateObjectConfig'", 
+  "'uint1'", "'uint2'", "'uint3'", "'uint4'", "'uint1x1'", "'uint1x2'", 
+  "'uint1x3'", "'uint1x4'", "'uint2x1'", "'uint2x2'", "'uint2x3'", "'uint2x4'", 
+  "'uint3x1'", "'uint3x2'", "'uint3x3'", "'uint3x4'", "'uint4x1'", "'uint4x2'", 
+  "'uint4x3'", "'uint4x4'", "'uint16_t'", "'uint32_t'", "'uint64_t'", "'unorm'", 
+  "'unsigned'", "'dword'", "'dword1'", "'dword2'", "'dword3'", "'dword4'", 
+  "'dword1x1'", "'dword1x2'", "'dword1x3'", "'dword1x4'", "'dword2x1'", 
+  "'dword2x2'", "'dword2x3'", "'dword2x4'", "'dword3x1'", "'dword3x2'", 
+  "'dword3x3'", "'dword3x4'", "'dword4x1'", "'dword4x2'", "'dword4x3'", 
+  "'dword4x4'", "'vector'", "'volatile'", "'void'", "'while'", "'StateObjectConfig'", 
   "'LocalRootSignature'", "'GlobalRootSignature'", "'SubobjectToExportsAssociation'", 
   "'RaytracingShaderConfig'", "'RaytracingPipelineConfig'", "'RaytracingPipelineConfig1'", 
   "'TriangleHitGroup'", "'ProceduralPrimitiveHitGroup'", "'AddressU'", "'AddressV'", 
@@ -18138,27 +18196,27 @@ std::vector<std::string> azslParser::_symbolicNames = {
   "Half1x1", "Half1x2", "Half1x3", "Half1x4", "Half2x1", "Half2x2", "Half2x3", 
   "Half2x4", "Half3x1", "Half3x2", "Half3x3", "Half3x4", "Half4x1", "Half4x2", 
   "Half4x3", "Half4x4", "If", "In", "Inline", "Rootconstant", "Inout", "InputPatch", 
-  "Int", "Int32_t", "Int64_t", "Int1", "Int2", "Int3", "Int4", "Int1x1", 
-  "Int1x2", "Int1x3", "Int1x4", "Int2x1", "Int2x2", "Int2x3", "Int2x4", 
-  "Int3x1", "Int3x2", "Int3x3", "Int3x4", "Int4x1", "Int4x2", "Int4x3", 
-  "Int4x4", "Interface", "Line_", "LineAdj", "Linear", "LineStream", "Long", 
-  "Matrix", "Nointerpolation", "Noperspective", "Option", "Out", "OutputPatch", 
-  "Override", "Partial", "Packoffset", "Point", "PointStream", "Precise", 
-  "RasterizerOrderedBuffer", "RasterizerOrderedByteAddressBuffer", "RasterizerOrderedStructuredBuffer", 
-  "RasterizerOrderedTexture1D", "RasterizerOrderedTexture1DArray", "RasterizerOrderedTexture2D", 
-  "RasterizerOrderedTexture2DArray", "RasterizerOrderedTexture3D", "RayDesc", 
-  "RaytracingAccelerationStructure", "Register", "Return", "RowMajor", "RWBuffer", 
-  "RWByteAddressBuffer", "RWStructuredBuffer", "RWTexture1D", "RWTexture1DArray", 
-  "RWTexture2D", "RWTexture2DArray", "RWTexture3D", "Sample", "Sampler", 
-  "SamplerCapitalS", "SamplerComparisonState", "SamplerStateCamel", "SamplerState", 
-  "Shared", "SNorm", "Static", "Struct", "StructuredBuffer", "SubpassInput", 
-  "SubpassInputMS", "Switch", "TBuffer", "Texture1D", "Texture1DArray", 
+  "Int", "Int16_t", "Int32_t", "Int64_t", "Int1", "Int2", "Int3", "Int4", 
+  "Int1x1", "Int1x2", "Int1x3", "Int1x4", "Int2x1", "Int2x2", "Int2x3", 
+  "Int2x4", "Int3x1", "Int3x2", "Int3x3", "Int3x4", "Int4x1", "Int4x2", 
+  "Int4x3", "Int4x4", "Interface", "Line_", "LineAdj", "Linear", "LineStream", 
+  "Long", "Matrix", "Nointerpolation", "Noperspective", "Option", "Out", 
+  "OutputPatch", "Override", "Partial", "Packoffset", "Point", "PointStream", 
+  "Precise", "RasterizerOrderedBuffer", "RasterizerOrderedByteAddressBuffer", 
+  "RasterizerOrderedStructuredBuffer", "RasterizerOrderedTexture1D", "RasterizerOrderedTexture1DArray", 
+  "RasterizerOrderedTexture2D", "RasterizerOrderedTexture2DArray", "RasterizerOrderedTexture3D", 
+  "RayDesc", "RaytracingAccelerationStructure", "Register", "Return", "RowMajor", 
+  "RWBuffer", "RWByteAddressBuffer", "RWStructuredBuffer", "RWTexture1D", 
+  "RWTexture1DArray", "RWTexture2D", "RWTexture2DArray", "RWTexture3D", 
+  "Sample", "Sampler", "SamplerCapitalS", "SamplerComparisonState", "SamplerStateCamel", 
+  "SamplerState", "Shared", "SNorm", "Static", "Struct", "StructuredBuffer", 
+  "SubpassInput", "SubpassInputMS", "Switch", "TBuffer", "Texture1D", "Texture1DArray", 
   "Texture2D", "Texture2DArray", "Texture2DMS", "Texture2DMSArray", "Texture3D", 
   "TextureCube", "TextureCubeArray", "Triangle", "TriangleAdj", "TriangleStream", 
-  "Uniform", "Uint", "Uint32_t", "Uint64_t", "UnsignedInt", "Uint1", "Uint2", 
-  "Uint3", "Uint4", "Uint1x1", "Uint1x2", "Uint1x3", "Uint1x4", "Uint2x1", 
-  "Uint2x2", "Uint2x3", "Uint2x4", "Uint3x1", "Uint3x2", "Uint3x3", "Uint3x4", 
-  "Uint4x1", "Uint4x2", "Uint4x3", "Uint4x4", "UNorm", "Dword", "Dword1", 
+  "Uniform", "Uint", "Uint1", "Uint2", "Uint3", "Uint4", "Uint1x1", "Uint1x2", 
+  "Uint1x3", "Uint1x4", "Uint2x1", "Uint2x2", "Uint2x3", "Uint2x4", "Uint3x1", 
+  "Uint3x2", "Uint3x3", "Uint3x4", "Uint4x1", "Uint4x2", "Uint4x3", "Uint4x4", 
+  "Uint16_t", "Uint32_t", "Uint64_t", "UNorm", "Unsigned", "Dword", "Dword1", 
   "Dword2", "Dword3", "Dword4", "Dword1x1", "Dword1x2", "Dword1x3", "Dword1x4", 
   "Dword2x1", "Dword2x2", "Dword2x3", "Dword2x4", "Dword3x1", "Dword3x2", 
   "Dword3x3", "Dword3x4", "Dword4x1", "Dword4x2", "Dword4x3", "Dword4x4", 
@@ -18211,7 +18269,7 @@ azslParser::Initializer::Initializer() {
 
   static const uint16_t serializedATNSegment0[] = {
     0x3, 0x608b, 0xa72a, 0x8133, 0xb9ed, 0x417c, 0x3be7, 0x7786, 0x5964, 
-       0x3, 0x17d, 0x4fe, 0x4, 0x2, 0x9, 0x2, 0x4, 0x3, 0x9, 0x3, 0x4, 0x4, 
+       0x3, 0x17f, 0x4fe, 0x4, 0x2, 0x9, 0x2, 0x4, 0x3, 0x9, 0x3, 0x4, 0x4, 
        0x9, 0x4, 0x4, 0x5, 0x9, 0x5, 0x4, 0x6, 0x9, 0x6, 0x4, 0x7, 0x9, 
        0x7, 0x4, 0x8, 0x9, 0x8, 0x4, 0x9, 0x9, 0x9, 0x4, 0xa, 0x9, 0xa, 
        0x4, 0xb, 0x9, 0xb, 0x4, 0xc, 0x9, 0xc, 0x4, 0xd, 0x9, 0xd, 0x4, 
@@ -18447,27 +18505,27 @@ azslParser::Initializer::Initializer() {
        0xda, 0xdc, 0xde, 0xe0, 0xe2, 0xe4, 0xe6, 0xe8, 0xea, 0xec, 0xee, 
        0xf0, 0xf2, 0xf4, 0xf6, 0xf8, 0xfa, 0xfc, 0xfe, 0x100, 0x102, 0x104, 
        0x106, 0x108, 0x10a, 0x10c, 0x10e, 0x110, 0x112, 0x114, 0x2, 0x1d, 
-       0x4, 0x2, 0x23, 0x23, 0xc1, 0xc1, 0x3, 0x2, 0x21, 0x22, 0x4, 0x2, 
-       0x170, 0x171, 0x174, 0x174, 0x4, 0x2, 0x140, 0x140, 0x142, 0x142, 
-       0x4, 0x2, 0x13f, 0x142, 0x14b, 0x14c, 0x6, 0x2, 0x139, 0x13f, 0x141, 
-       0x141, 0x143, 0x14a, 0x15d, 0x15e, 0x3, 0x2, 0x152, 0x15c, 0x13, 
+       0x4, 0x2, 0x23, 0x23, 0xc2, 0xc2, 0x3, 0x2, 0x21, 0x22, 0x4, 0x2, 
+       0x172, 0x173, 0x176, 0x176, 0x4, 0x2, 0x142, 0x142, 0x144, 0x144, 
+       0x4, 0x2, 0x141, 0x144, 0x14d, 0x14e, 0x6, 0x2, 0x13b, 0x141, 0x143, 
+       0x143, 0x145, 0x14c, 0x15f, 0x160, 0x3, 0x2, 0x154, 0x15e, 0x13, 
        0x2, 0x1f, 0x20, 0x24, 0x25, 0x43, 0x43, 0x5c, 0x5d, 0x75, 0x78, 
-       0x92, 0x94, 0x98, 0x9b, 0xa0, 0xa0, 0xa2, 0xa2, 0xaf, 0xaf, 0xb8, 
-       0xb8, 0xbe, 0xc0, 0xd0, 0xd1, 0xd3, 0xd3, 0xec, 0xec, 0x103, 0x103, 
-       0x172, 0x173, 0x3, 0x2, 0x106, 0x10e, 0x4, 0x2, 0x1a, 0x1a, 0xab, 
-       0xab, 0x5, 0x2, 0x19, 0x19, 0xa3, 0xa3, 0xb0, 0xb0, 0x5, 0x2, 0x1b, 
-       0x1b, 0xa4, 0xa4, 0xb1, 0xb1, 0x4, 0x2, 0x79, 0x79, 0x9c, 0x9c, 0x4, 
-       0x2, 0xb9, 0xbb, 0xbd, 0xbd, 0x9, 0x2, 0x4, 0x4, 0x2b, 0x2b, 0x46, 
-       0x46, 0x5f, 0x5f, 0x7a, 0x7c, 0xd4, 0xd7, 0xed, 0xed, 0x5, 0x2, 0x95, 
-       0x95, 0xa1, 0xa1, 0xd2, 0xd2, 0x7, 0x2, 0x3, 0x3, 0x26, 0x26, 0xa5, 
-       0xa5, 0xb2, 0xb2, 0xc2, 0xc2, 0x7, 0x2, 0xa6, 0xaa, 0xb3, 0xb7, 0xc3, 
-       0xc4, 0xc7, 0xca, 0xcd, 0xcf, 0x3, 0x2, 0xcb, 0xcc, 0xa, 0x2, 0x5, 
-       0x8, 0x2c, 0x2f, 0x47, 0x4a, 0x60, 0x63, 0x7d, 0x80, 0xd8, 0xdb, 
-       0xee, 0xf1, 0x102, 0x102, 0xa, 0x2, 0x9, 0x18, 0x30, 0x3f, 0x4b, 
-       0x5a, 0x64, 0x73, 0x81, 0x90, 0x97, 0x97, 0xdc, 0xeb, 0xf2, 0x101, 
-       0x3, 0x2, 0x169, 0x16b, 0x3, 0x2, 0x11c, 0x11d, 0x3, 0x2, 0x11e, 
-       0x121, 0x3, 0x2, 0x122, 0x126, 0x3, 0x2, 0x127, 0x12e, 0x3, 0x2, 
-       0x12f, 0x131, 0x2, 0x52a, 0x2, 0x119, 0x3, 0x2, 0x2, 0x2, 0x4, 0x128, 
+       0x93, 0x95, 0x99, 0x9c, 0xa1, 0xa1, 0xa3, 0xa3, 0xb0, 0xb0, 0xb9, 
+       0xb9, 0xbf, 0xc1, 0xd1, 0xd2, 0xd4, 0xd4, 0xed, 0xee, 0x105, 0x105, 
+       0x174, 0x175, 0x3, 0x2, 0x108, 0x110, 0x4, 0x2, 0x1a, 0x1a, 0xac, 
+       0xac, 0x5, 0x2, 0x19, 0x19, 0xa4, 0xa4, 0xb1, 0xb1, 0x5, 0x2, 0x1b, 
+       0x1b, 0xa5, 0xa5, 0xb2, 0xb2, 0x4, 0x2, 0x79, 0x79, 0x9d, 0x9d, 0x3, 
+       0x2, 0xba, 0xbe, 0xa, 0x2, 0x4, 0x4, 0x2b, 0x2b, 0x46, 0x46, 0x5f, 
+       0x5f, 0x7a, 0x7d, 0xd5, 0xd5, 0xea, 0xec, 0xef, 0xef, 0x5, 0x2, 0x96, 
+       0x96, 0xa2, 0xa2, 0xd3, 0xd3, 0x7, 0x2, 0x3, 0x3, 0x26, 0x26, 0xa6, 
+       0xa6, 0xb3, 0xb3, 0xc3, 0xc3, 0x7, 0x2, 0xa7, 0xab, 0xb4, 0xb8, 0xc4, 
+       0xc5, 0xc8, 0xcb, 0xce, 0xd0, 0x3, 0x2, 0xcc, 0xcd, 0xa, 0x2, 0x5, 
+       0x8, 0x2c, 0x2f, 0x47, 0x4a, 0x60, 0x63, 0x7e, 0x81, 0xd6, 0xd9, 
+       0xf0, 0xf3, 0x104, 0x104, 0xa, 0x2, 0x9, 0x18, 0x30, 0x3f, 0x4b, 
+       0x5a, 0x64, 0x73, 0x82, 0x91, 0x98, 0x98, 0xda, 0xe9, 0xf4, 0x103, 
+       0x3, 0x2, 0x16b, 0x16d, 0x3, 0x2, 0x11e, 0x11f, 0x3, 0x2, 0x120, 
+       0x123, 0x3, 0x2, 0x124, 0x128, 0x3, 0x2, 0x129, 0x130, 0x3, 0x2, 
+       0x131, 0x133, 0x2, 0x52a, 0x2, 0x119, 0x3, 0x2, 0x2, 0x2, 0x4, 0x128, 
        0x3, 0x2, 0x2, 0x2, 0x6, 0x12c, 0x3, 0x2, 0x2, 0x2, 0x8, 0x12e, 0x3, 
        0x2, 0x2, 0x2, 0xa, 0x130, 0x3, 0x2, 0x2, 0x2, 0xc, 0x134, 0x3, 0x2, 
        0x2, 0x2, 0xe, 0x13d, 0x3, 0x2, 0x2, 0x2, 0x10, 0x140, 0x3, 0x2, 
@@ -18545,7 +18603,7 @@ azslParser::Initializer::Initializer() {
        0xdc, 0x6f, 0x2, 0x121, 0x129, 0x5, 0xd8, 0x6d, 0x2, 0x122, 0x129, 
        0x5, 0x44, 0x23, 0x2, 0x123, 0x129, 0x5, 0xde, 0x70, 0x2, 0x124, 
        0x129, 0x5, 0xca, 0x66, 0x2, 0x125, 0x129, 0x5, 0xe2, 0x72, 0x2, 
-       0x126, 0x129, 0x5, 0xe8, 0x75, 0x2, 0x127, 0x129, 0x7, 0x150, 0x2, 
+       0x126, 0x129, 0x5, 0xe8, 0x75, 0x2, 0x127, 0x129, 0x7, 0x152, 0x2, 
        0x2, 0x128, 0x11e, 0x3, 0x2, 0x2, 0x2, 0x128, 0x11f, 0x3, 0x2, 0x2, 
        0x2, 0x128, 0x120, 0x3, 0x2, 0x2, 0x2, 0x128, 0x121, 0x3, 0x2, 0x2, 
        0x2, 0x128, 0x122, 0x3, 0x2, 0x2, 0x2, 0x128, 0x123, 0x3, 0x2, 0x2, 
@@ -18554,26 +18612,26 @@ azslParser::Initializer::Initializer() {
        0x2, 0x129, 0x5, 0x3, 0x2, 0x2, 0x2, 0x12a, 0x12d, 0x5, 0x8, 0x5, 
        0x2, 0x12b, 0x12d, 0x5, 0xa, 0x6, 0x2, 0x12c, 0x12a, 0x3, 0x2, 0x2, 
        0x2, 0x12c, 0x12b, 0x3, 0x2, 0x2, 0x2, 0x12d, 0x7, 0x3, 0x2, 0x2, 
-       0x2, 0x12e, 0x12f, 0x7, 0x174, 0x2, 0x2, 0x12f, 0x9, 0x3, 0x2, 0x2, 
+       0x2, 0x12e, 0x12f, 0x7, 0x176, 0x2, 0x2, 0x12f, 0x9, 0x3, 0x2, 0x2, 
        0x2, 0x130, 0x131, 0x5, 0xc, 0x7, 0x2, 0x131, 0x132, 0x5, 0x8, 0x5, 
-       0x2, 0x132, 0xb, 0x3, 0x2, 0x2, 0x2, 0x133, 0x135, 0x7, 0x14f, 0x2, 
+       0x2, 0x132, 0xb, 0x3, 0x2, 0x2, 0x2, 0x133, 0x135, 0x7, 0x151, 0x2, 
        0x2, 0x134, 0x133, 0x3, 0x2, 0x2, 0x2, 0x134, 0x135, 0x3, 0x2, 0x2, 
-       0x2, 0x135, 0x13a, 0x3, 0x2, 0x2, 0x2, 0x136, 0x137, 0x7, 0x174, 
-       0x2, 0x2, 0x137, 0x139, 0x7, 0x14f, 0x2, 0x2, 0x138, 0x136, 0x3, 
+       0x2, 0x135, 0x13a, 0x3, 0x2, 0x2, 0x2, 0x136, 0x137, 0x7, 0x176, 
+       0x2, 0x2, 0x137, 0x139, 0x7, 0x151, 0x2, 0x2, 0x138, 0x136, 0x3, 
        0x2, 0x2, 0x2, 0x139, 0x13c, 0x3, 0x2, 0x2, 0x2, 0x13a, 0x138, 0x3, 
        0x2, 0x2, 0x2, 0x13a, 0x13b, 0x3, 0x2, 0x2, 0x2, 0x13b, 0xd, 0x3, 
        0x2, 0x2, 0x2, 0x13c, 0x13a, 0x3, 0x2, 0x2, 0x2, 0x13d, 0x13e, 0x5, 
-       0x10, 0x9, 0x2, 0x13e, 0x13f, 0x7, 0x150, 0x2, 0x2, 0x13f, 0xf, 0x3, 
+       0x10, 0x9, 0x2, 0x13e, 0x13f, 0x7, 0x152, 0x2, 0x2, 0x13f, 0xf, 0x3, 
        0x2, 0x2, 0x2, 0x140, 0x141, 0x7, 0x23, 0x2, 0x2, 0x141, 0x143, 0x7, 
-       0x174, 0x2, 0x2, 0x142, 0x144, 0x5, 0x12, 0xa, 0x2, 0x143, 0x142, 
+       0x176, 0x2, 0x2, 0x142, 0x144, 0x5, 0x12, 0xa, 0x2, 0x143, 0x142, 
        0x3, 0x2, 0x2, 0x2, 0x143, 0x144, 0x3, 0x2, 0x2, 0x2, 0x144, 0x145, 
-       0x3, 0x2, 0x2, 0x2, 0x145, 0x149, 0x7, 0x136, 0x2, 0x2, 0x146, 0x148, 
+       0x3, 0x2, 0x2, 0x2, 0x145, 0x149, 0x7, 0x138, 0x2, 0x2, 0x146, 0x148, 
        0x5, 0x14, 0xb, 0x2, 0x147, 0x146, 0x3, 0x2, 0x2, 0x2, 0x148, 0x14b, 
        0x3, 0x2, 0x2, 0x2, 0x149, 0x147, 0x3, 0x2, 0x2, 0x2, 0x149, 0x14a, 
        0x3, 0x2, 0x2, 0x2, 0x14a, 0x14c, 0x3, 0x2, 0x2, 0x2, 0x14b, 0x149, 
-       0x3, 0x2, 0x2, 0x2, 0x14c, 0x14d, 0x7, 0x137, 0x2, 0x2, 0x14d, 0x11, 
-       0x3, 0x2, 0x2, 0x2, 0x14e, 0x14f, 0x7, 0x14e, 0x2, 0x2, 0x14f, 0x154, 
-       0x5, 0x6, 0x4, 0x2, 0x150, 0x151, 0x7, 0x151, 0x2, 0x2, 0x151, 0x153, 
+       0x3, 0x2, 0x2, 0x2, 0x14c, 0x14d, 0x7, 0x139, 0x2, 0x2, 0x14d, 0x11, 
+       0x3, 0x2, 0x2, 0x2, 0x14e, 0x14f, 0x7, 0x150, 0x2, 0x2, 0x14f, 0x154, 
+       0x5, 0x6, 0x4, 0x2, 0x150, 0x151, 0x7, 0x153, 0x2, 0x2, 0x151, 0x153, 
        0x5, 0x6, 0x4, 0x2, 0x152, 0x150, 0x3, 0x2, 0x2, 0x2, 0x153, 0x156, 
        0x3, 0x2, 0x2, 0x2, 0x154, 0x152, 0x3, 0x2, 0x2, 0x2, 0x154, 0x155, 
        0x3, 0x2, 0x2, 0x2, 0x155, 0x13, 0x3, 0x2, 0x2, 0x2, 0x156, 0x154, 
@@ -18584,13 +18642,13 @@ azslParser::Initializer::Initializer() {
        0x158, 0x3, 0x2, 0x2, 0x2, 0x15d, 0x159, 0x3, 0x2, 0x2, 0x2, 0x15d, 
        0x15a, 0x3, 0x2, 0x2, 0x2, 0x15d, 0x15b, 0x3, 0x2, 0x2, 0x2, 0x15d, 
        0x15c, 0x3, 0x2, 0x2, 0x2, 0x15e, 0x15, 0x3, 0x2, 0x2, 0x2, 0x15f, 
-       0x160, 0x5, 0x18, 0xd, 0x2, 0x160, 0x161, 0x7, 0x150, 0x2, 0x2, 0x161, 
-       0x17, 0x3, 0x2, 0x2, 0x2, 0x162, 0x163, 0x7, 0xc1, 0x2, 0x2, 0x163, 
-       0x164, 0x7, 0x174, 0x2, 0x2, 0x164, 0x168, 0x7, 0x136, 0x2, 0x2, 
+       0x160, 0x5, 0x18, 0xd, 0x2, 0x160, 0x161, 0x7, 0x152, 0x2, 0x2, 0x161, 
+       0x17, 0x3, 0x2, 0x2, 0x2, 0x162, 0x163, 0x7, 0xc2, 0x2, 0x2, 0x163, 
+       0x164, 0x7, 0x176, 0x2, 0x2, 0x164, 0x168, 0x7, 0x138, 0x2, 0x2, 
        0x165, 0x167, 0x5, 0x1a, 0xe, 0x2, 0x166, 0x165, 0x3, 0x2, 0x2, 0x2, 
        0x167, 0x16a, 0x3, 0x2, 0x2, 0x2, 0x168, 0x166, 0x3, 0x2, 0x2, 0x2, 
        0x168, 0x169, 0x3, 0x2, 0x2, 0x2, 0x169, 0x16b, 0x3, 0x2, 0x2, 0x2, 
-       0x16a, 0x168, 0x3, 0x2, 0x2, 0x2, 0x16b, 0x16c, 0x7, 0x137, 0x2, 
+       0x16a, 0x168, 0x3, 0x2, 0x2, 0x2, 0x16b, 0x16c, 0x7, 0x139, 0x2, 
        0x2, 0x16c, 0x19, 0x3, 0x2, 0x2, 0x2, 0x16d, 0x174, 0x5, 0x32, 0x1a, 
        0x2, 0x16e, 0x174, 0x5, 0xdc, 0x6f, 0x2, 0x16f, 0x174, 0x5, 0xd8, 
        0x6d, 0x2, 0x170, 0x174, 0x5, 0x1c, 0xf, 0x2, 0x171, 0x174, 0x5, 
@@ -18602,48 +18660,48 @@ azslParser::Initializer::Initializer() {
        0x3, 0x2, 0x2, 0x2, 0x177, 0x17a, 0x3, 0x2, 0x2, 0x2, 0x178, 0x176, 
        0x3, 0x2, 0x2, 0x2, 0x178, 0x179, 0x3, 0x2, 0x2, 0x2, 0x179, 0x17b, 
        0x3, 0x2, 0x2, 0x2, 0x17a, 0x178, 0x3, 0x2, 0x2, 0x2, 0x17b, 0x17c, 
-       0x5, 0x28, 0x15, 0x2, 0x17c, 0x17d, 0x7, 0x150, 0x2, 0x2, 0x17d, 
+       0x5, 0x28, 0x15, 0x2, 0x17c, 0x17d, 0x7, 0x152, 0x2, 0x2, 0x17d, 
        0x1d, 0x3, 0x2, 0x2, 0x2, 0x17e, 0x17f, 0x5, 0x20, 0x11, 0x2, 0x17f, 
-       0x180, 0x7, 0x150, 0x2, 0x2, 0x180, 0x1f, 0x3, 0x2, 0x2, 0x2, 0x181, 
-       0x182, 0x5, 0x22, 0x12, 0x2, 0x182, 0x183, 0x7, 0x174, 0x2, 0x2, 
-       0x183, 0x185, 0x7, 0x136, 0x2, 0x2, 0x184, 0x186, 0x5, 0x24, 0x13, 
+       0x180, 0x7, 0x152, 0x2, 0x2, 0x180, 0x1f, 0x3, 0x2, 0x2, 0x2, 0x181, 
+       0x182, 0x5, 0x22, 0x12, 0x2, 0x182, 0x183, 0x7, 0x176, 0x2, 0x2, 
+       0x183, 0x185, 0x7, 0x138, 0x2, 0x2, 0x184, 0x186, 0x5, 0x24, 0x13, 
        0x2, 0x185, 0x184, 0x3, 0x2, 0x2, 0x2, 0x185, 0x186, 0x3, 0x2, 0x2, 
-       0x2, 0x186, 0x187, 0x3, 0x2, 0x2, 0x2, 0x187, 0x188, 0x7, 0x137, 
+       0x2, 0x186, 0x187, 0x3, 0x2, 0x2, 0x2, 0x187, 0x188, 0x7, 0x139, 
        0x2, 0x2, 0x188, 0x21, 0x3, 0x2, 0x2, 0x2, 0x189, 0x18d, 0x7, 0x41, 
        0x2, 0x2, 0x18a, 0x18b, 0x7, 0x41, 0x2, 0x2, 0x18b, 0x18d, 0x9, 0x2, 
        0x2, 0x2, 0x18c, 0x189, 0x3, 0x2, 0x2, 0x2, 0x18c, 0x18a, 0x3, 0x2, 
        0x2, 0x2, 0x18d, 0x23, 0x3, 0x2, 0x2, 0x2, 0x18e, 0x193, 0x5, 0x26, 
-       0x14, 0x2, 0x18f, 0x190, 0x7, 0x151, 0x2, 0x2, 0x190, 0x192, 0x5, 
+       0x14, 0x2, 0x18f, 0x190, 0x7, 0x153, 0x2, 0x2, 0x190, 0x192, 0x5, 
        0x26, 0x14, 0x2, 0x191, 0x18f, 0x3, 0x2, 0x2, 0x2, 0x192, 0x195, 
        0x3, 0x2, 0x2, 0x2, 0x193, 0x191, 0x3, 0x2, 0x2, 0x2, 0x193, 0x194, 
        0x3, 0x2, 0x2, 0x2, 0x194, 0x197, 0x3, 0x2, 0x2, 0x2, 0x195, 0x193, 
-       0x3, 0x2, 0x2, 0x2, 0x196, 0x198, 0x7, 0x151, 0x2, 0x2, 0x197, 0x196, 
+       0x3, 0x2, 0x2, 0x2, 0x196, 0x198, 0x7, 0x153, 0x2, 0x2, 0x197, 0x196, 
        0x3, 0x2, 0x2, 0x2, 0x197, 0x198, 0x3, 0x2, 0x2, 0x2, 0x198, 0x25, 
-       0x3, 0x2, 0x2, 0x2, 0x199, 0x19c, 0x7, 0x174, 0x2, 0x2, 0x19a, 0x19b, 
-       0x7, 0x152, 0x2, 0x2, 0x19b, 0x19d, 0x5, 0x58, 0x2d, 0x2, 0x19c, 
+       0x3, 0x2, 0x2, 0x2, 0x199, 0x19c, 0x7, 0x176, 0x2, 0x2, 0x19a, 0x19b, 
+       0x7, 0x154, 0x2, 0x2, 0x19b, 0x19d, 0x5, 0x58, 0x2d, 0x2, 0x19c, 
        0x19a, 0x3, 0x2, 0x2, 0x2, 0x19c, 0x19d, 0x3, 0x2, 0x2, 0x2, 0x19d, 
        0x27, 0x3, 0x2, 0x2, 0x2, 0x19e, 0x1a3, 0x5, 0x10, 0x9, 0x2, 0x19f, 
        0x1a3, 0x5, 0x2c, 0x17, 0x2, 0x1a0, 0x1a3, 0x5, 0x18, 0xd, 0x2, 0x1a1, 
        0x1a3, 0x5, 0x20, 0x11, 0x2, 0x1a2, 0x19e, 0x3, 0x2, 0x2, 0x2, 0x1a2, 
        0x19f, 0x3, 0x2, 0x2, 0x2, 0x1a2, 0x1a0, 0x3, 0x2, 0x2, 0x2, 0x1a2, 
        0x1a1, 0x3, 0x2, 0x2, 0x2, 0x1a3, 0x29, 0x3, 0x2, 0x2, 0x2, 0x1a4, 
-       0x1a5, 0x5, 0x2c, 0x17, 0x2, 0x1a5, 0x1a6, 0x7, 0x150, 0x2, 0x2, 
-       0x1a6, 0x2b, 0x3, 0x2, 0x2, 0x2, 0x1a7, 0x1a8, 0x7, 0x91, 0x2, 0x2, 
-       0x1a8, 0x1a9, 0x7, 0x174, 0x2, 0x2, 0x1a9, 0x1ad, 0x7, 0x136, 0x2, 
+       0x1a5, 0x5, 0x2c, 0x17, 0x2, 0x1a5, 0x1a6, 0x7, 0x152, 0x2, 0x2, 
+       0x1a6, 0x2b, 0x3, 0x2, 0x2, 0x2, 0x1a7, 0x1a8, 0x7, 0x92, 0x2, 0x2, 
+       0x1a8, 0x1a9, 0x7, 0x176, 0x2, 0x2, 0x1a9, 0x1ad, 0x7, 0x138, 0x2, 
        0x2, 0x1aa, 0x1ac, 0x5, 0x2e, 0x18, 0x2, 0x1ab, 0x1aa, 0x3, 0x2, 
        0x2, 0x2, 0x1ac, 0x1af, 0x3, 0x2, 0x2, 0x2, 0x1ad, 0x1ab, 0x3, 0x2, 
        0x2, 0x2, 0x1ad, 0x1ae, 0x3, 0x2, 0x2, 0x2, 0x1ae, 0x1b0, 0x3, 0x2, 
-       0x2, 0x2, 0x1af, 0x1ad, 0x3, 0x2, 0x2, 0x2, 0x1b0, 0x1b1, 0x7, 0x137, 
+       0x2, 0x2, 0x1af, 0x1ad, 0x3, 0x2, 0x2, 0x2, 0x1b0, 0x1b1, 0x7, 0x139, 
        0x2, 0x2, 0x1b1, 0x2d, 0x3, 0x2, 0x2, 0x2, 0x1b2, 0x1b6, 0x5, 0xd8, 
        0x6d, 0x2, 0x1b3, 0x1b6, 0x5, 0xc4, 0x63, 0x2, 0x1b4, 0x1b6, 0x5, 
        0x1c, 0xf, 0x2, 0x1b5, 0x1b2, 0x3, 0x2, 0x2, 0x2, 0x1b5, 0x1b3, 0x3, 
        0x2, 0x2, 0x2, 0x1b5, 0x1b4, 0x3, 0x2, 0x2, 0x2, 0x1b6, 0x2f, 0x3, 
        0x2, 0x2, 0x2, 0x1b7, 0x1b8, 0x9, 0x3, 0x2, 0x2, 0x1b8, 0x1b9, 0x7, 
-       0x139, 0x2, 0x2, 0x1b9, 0x1ba, 0x5, 0x7e, 0x40, 0x2, 0x1ba, 0x1bb, 
-       0x7, 0x13b, 0x2, 0x2, 0x1bb, 0x31, 0x3, 0x2, 0x2, 0x2, 0x1bc, 0x1bd, 
-       0x5, 0x68, 0x35, 0x2, 0x1bd, 0x1be, 0x7, 0x150, 0x2, 0x2, 0x1be, 
-       0x33, 0x3, 0x2, 0x2, 0x2, 0x1bf, 0x1c9, 0x7, 0x104, 0x2, 0x2, 0x1c0, 
-       0x1c5, 0x5, 0x36, 0x1c, 0x2, 0x1c1, 0x1c2, 0x7, 0x151, 0x2, 0x2, 
+       0x13b, 0x2, 0x2, 0x1b9, 0x1ba, 0x5, 0x7e, 0x40, 0x2, 0x1ba, 0x1bb, 
+       0x7, 0x13d, 0x2, 0x2, 0x1bb, 0x31, 0x3, 0x2, 0x2, 0x2, 0x1bc, 0x1bd, 
+       0x5, 0x68, 0x35, 0x2, 0x1bd, 0x1be, 0x7, 0x152, 0x2, 0x2, 0x1be, 
+       0x33, 0x3, 0x2, 0x2, 0x2, 0x1bf, 0x1c9, 0x7, 0x106, 0x2, 0x2, 0x1c0, 
+       0x1c5, 0x5, 0x36, 0x1c, 0x2, 0x1c1, 0x1c2, 0x7, 0x153, 0x2, 0x2, 
        0x1c2, 0x1c4, 0x5, 0x36, 0x1c, 0x2, 0x1c3, 0x1c1, 0x3, 0x2, 0x2, 
        0x2, 0x1c4, 0x1c7, 0x3, 0x2, 0x2, 0x2, 0x1c5, 0x1c3, 0x3, 0x2, 0x2, 
        0x2, 0x1c5, 0x1c6, 0x3, 0x2, 0x2, 0x2, 0x1c6, 0x1c9, 0x3, 0x2, 0x2, 
@@ -18654,47 +18712,47 @@ azslParser::Initializer::Initializer() {
        0x2, 0x2, 0x1cd, 0x1ce, 0x3, 0x2, 0x2, 0x2, 0x1ce, 0x1d0, 0x3, 0x2, 
        0x2, 0x2, 0x1cf, 0x1cd, 0x3, 0x2, 0x2, 0x2, 0x1d0, 0x1d1, 0x5, 0x7a, 
        0x3e, 0x2, 0x1d1, 0x1d3, 0x5, 0x7e, 0x40, 0x2, 0x1d2, 0x1d4, 0x7, 
-       0x174, 0x2, 0x2, 0x1d3, 0x1d2, 0x3, 0x2, 0x2, 0x2, 0x1d3, 0x1d4, 
+       0x176, 0x2, 0x2, 0x1d3, 0x1d2, 0x3, 0x2, 0x2, 0x2, 0x1d3, 0x1d4, 
        0x3, 0x2, 0x2, 0x2, 0x1d4, 0x1d5, 0x3, 0x2, 0x2, 0x2, 0x1d5, 0x1d6, 
        0x5, 0x6c, 0x37, 0x2, 0x1d6, 0x37, 0x3, 0x2, 0x2, 0x2, 0x1d7, 0x1d8, 
-       0x7, 0x14e, 0x2, 0x2, 0x1d8, 0x1d9, 0x5, 0x3a, 0x1e, 0x2, 0x1d9, 
+       0x7, 0x150, 0x2, 0x2, 0x1d8, 0x1d9, 0x5, 0x3a, 0x1e, 0x2, 0x1d9, 
        0x39, 0x3, 0x2, 0x2, 0x2, 0x1da, 0x1db, 0x9, 0x4, 0x2, 0x2, 0x1db, 
        0x3b, 0x3, 0x2, 0x2, 0x2, 0x1dc, 0x1e1, 0x5, 0xb8, 0x5d, 0x2, 0x1dd, 
-       0x1de, 0x7, 0x151, 0x2, 0x2, 0x1de, 0x1e0, 0x5, 0xb8, 0x5d, 0x2, 
+       0x1de, 0x7, 0x153, 0x2, 0x2, 0x1de, 0x1e0, 0x5, 0xb8, 0x5d, 0x2, 
        0x1df, 0x1dd, 0x3, 0x2, 0x2, 0x2, 0x1e0, 0x1e3, 0x3, 0x2, 0x2, 0x2, 
        0x1e1, 0x1df, 0x3, 0x2, 0x2, 0x2, 0x1e1, 0x1e2, 0x3, 0x2, 0x2, 0x2, 
        0x1e2, 0x3d, 0x3, 0x2, 0x2, 0x2, 0x1e3, 0x1e1, 0x3, 0x2, 0x2, 0x2, 
-       0x1e4, 0x1e5, 0x7, 0x132, 0x2, 0x2, 0x1e5, 0x1e6, 0x5, 0x3c, 0x1f, 
-       0x2, 0x1e6, 0x1e7, 0x7, 0x133, 0x2, 0x2, 0x1e7, 0x3f, 0x3, 0x2, 0x2, 
-       0x2, 0x1e8, 0x1e9, 0x7, 0x5e, 0x2, 0x2, 0x1e9, 0x1ec, 0x7, 0x14f, 
-       0x2, 0x2, 0x1ea, 0x1eb, 0x7, 0x174, 0x2, 0x2, 0x1eb, 0x1ed, 0x7, 
-       0x14f, 0x2, 0x2, 0x1ec, 0x1ea, 0x3, 0x2, 0x2, 0x2, 0x1ec, 0x1ed, 
+       0x1e4, 0x1e5, 0x7, 0x134, 0x2, 0x2, 0x1e5, 0x1e6, 0x5, 0x3c, 0x1f, 
+       0x2, 0x1e6, 0x1e7, 0x7, 0x135, 0x2, 0x2, 0x1e7, 0x3f, 0x3, 0x2, 0x2, 
+       0x2, 0x1e8, 0x1e9, 0x7, 0x5e, 0x2, 0x2, 0x1e9, 0x1ec, 0x7, 0x151, 
+       0x2, 0x2, 0x1ea, 0x1eb, 0x7, 0x176, 0x2, 0x2, 0x1eb, 0x1ed, 0x7, 
+       0x151, 0x2, 0x2, 0x1ec, 0x1ea, 0x3, 0x2, 0x2, 0x2, 0x1ec, 0x1ed, 
        0x3, 0x2, 0x2, 0x2, 0x1ed, 0x1ee, 0x3, 0x2, 0x2, 0x2, 0x1ee, 0x1f0, 
-       0x7, 0x174, 0x2, 0x2, 0x1ef, 0x1f1, 0x5, 0x3e, 0x20, 0x2, 0x1f0, 
+       0x7, 0x176, 0x2, 0x2, 0x1ef, 0x1f1, 0x5, 0x3e, 0x20, 0x2, 0x1f0, 
        0x1ef, 0x3, 0x2, 0x2, 0x2, 0x1f0, 0x1f1, 0x3, 0x2, 0x2, 0x2, 0x1f1, 
-       0x1fb, 0x3, 0x2, 0x2, 0x2, 0x1f2, 0x1f3, 0x7, 0x174, 0x2, 0x2, 0x1f3, 
-       0x1f5, 0x7, 0x14f, 0x2, 0x2, 0x1f4, 0x1f2, 0x3, 0x2, 0x2, 0x2, 0x1f4, 
+       0x1fb, 0x3, 0x2, 0x2, 0x2, 0x1f2, 0x1f3, 0x7, 0x176, 0x2, 0x2, 0x1f3, 
+       0x1f5, 0x7, 0x151, 0x2, 0x2, 0x1f4, 0x1f2, 0x3, 0x2, 0x2, 0x2, 0x1f4, 
        0x1f5, 0x3, 0x2, 0x2, 0x2, 0x1f5, 0x1f6, 0x3, 0x2, 0x2, 0x2, 0x1f6, 
-       0x1f8, 0x7, 0x174, 0x2, 0x2, 0x1f7, 0x1f9, 0x5, 0x3e, 0x20, 0x2, 
+       0x1f8, 0x7, 0x176, 0x2, 0x2, 0x1f7, 0x1f9, 0x5, 0x3e, 0x20, 0x2, 
        0x1f8, 0x1f7, 0x3, 0x2, 0x2, 0x2, 0x1f8, 0x1f9, 0x3, 0x2, 0x2, 0x2, 
        0x1f9, 0x1fb, 0x3, 0x2, 0x2, 0x2, 0x1fa, 0x1e8, 0x3, 0x2, 0x2, 0x2, 
        0x1fa, 0x1f4, 0x3, 0x2, 0x2, 0x2, 0x1fb, 0x41, 0x3, 0x2, 0x2, 0x2, 
-       0x1fc, 0x1fd, 0x7, 0x134, 0x2, 0x2, 0x1fd, 0x1fe, 0x5, 0x40, 0x21, 
-       0x2, 0x1fe, 0x1ff, 0x7, 0x135, 0x2, 0x2, 0x1ff, 0x43, 0x3, 0x2, 0x2, 
-       0x2, 0x200, 0x201, 0x7, 0x138, 0x2, 0x2, 0x201, 0x206, 0x5, 0x40, 
-       0x21, 0x2, 0x202, 0x203, 0x7, 0x151, 0x2, 0x2, 0x203, 0x205, 0x5, 
+       0x1fc, 0x1fd, 0x7, 0x136, 0x2, 0x2, 0x1fd, 0x1fe, 0x5, 0x40, 0x21, 
+       0x2, 0x1fe, 0x1ff, 0x7, 0x137, 0x2, 0x2, 0x1ff, 0x43, 0x3, 0x2, 0x2, 
+       0x2, 0x200, 0x201, 0x7, 0x13a, 0x2, 0x2, 0x201, 0x206, 0x5, 0x40, 
+       0x21, 0x2, 0x202, 0x203, 0x7, 0x153, 0x2, 0x2, 0x203, 0x205, 0x5, 
        0x40, 0x21, 0x2, 0x204, 0x202, 0x3, 0x2, 0x2, 0x2, 0x205, 0x208, 
        0x3, 0x2, 0x2, 0x2, 0x206, 0x204, 0x3, 0x2, 0x2, 0x2, 0x206, 0x207, 
        0x3, 0x2, 0x2, 0x2, 0x207, 0x209, 0x3, 0x2, 0x2, 0x2, 0x208, 0x206, 
-       0x3, 0x2, 0x2, 0x2, 0x209, 0x20a, 0x7, 0x135, 0x2, 0x2, 0x20a, 0x20b, 
-       0x7, 0x135, 0x2, 0x2, 0x20b, 0x45, 0x3, 0x2, 0x2, 0x2, 0x20c, 0x20f, 
+       0x3, 0x2, 0x2, 0x2, 0x209, 0x20a, 0x7, 0x137, 0x2, 0x2, 0x20a, 0x20b, 
+       0x7, 0x137, 0x2, 0x2, 0x20b, 0x45, 0x3, 0x2, 0x2, 0x2, 0x20c, 0x20f, 
        0x5, 0x42, 0x22, 0x2, 0x20d, 0x20f, 0x5, 0x44, 0x23, 0x2, 0x20e, 
        0x20c, 0x3, 0x2, 0x2, 0x2, 0x20e, 0x20d, 0x3, 0x2, 0x2, 0x2, 0x20f, 
-       0x47, 0x3, 0x2, 0x2, 0x2, 0x210, 0x214, 0x7, 0x136, 0x2, 0x2, 0x211, 
+       0x47, 0x3, 0x2, 0x2, 0x2, 0x210, 0x214, 0x7, 0x138, 0x2, 0x2, 0x211, 
        0x213, 0x5, 0x4a, 0x26, 0x2, 0x212, 0x211, 0x3, 0x2, 0x2, 0x2, 0x213, 
        0x216, 0x3, 0x2, 0x2, 0x2, 0x214, 0x212, 0x3, 0x2, 0x2, 0x2, 0x214, 
        0x215, 0x3, 0x2, 0x2, 0x2, 0x215, 0x217, 0x3, 0x2, 0x2, 0x2, 0x216, 
-       0x214, 0x3, 0x2, 0x2, 0x2, 0x217, 0x218, 0x7, 0x137, 0x2, 0x2, 0x218, 
+       0x214, 0x3, 0x2, 0x2, 0x2, 0x217, 0x218, 0x7, 0x139, 0x2, 0x2, 0x218, 
        0x49, 0x3, 0x2, 0x2, 0x2, 0x219, 0x21d, 0x5, 0x32, 0x1a, 0x2, 0x21a, 
        0x21d, 0x5, 0x54, 0x2b, 0x2, 0x21b, 0x21d, 0x5, 0x1c, 0xf, 0x2, 0x21c, 
        0x219, 0x3, 0x2, 0x2, 0x2, 0x21c, 0x21a, 0x3, 0x2, 0x2, 0x2, 0x21c, 
@@ -18702,9 +18760,9 @@ azslParser::Initializer::Initializer() {
        0x221, 0x5, 0x68, 0x35, 0x2, 0x21f, 0x221, 0x5, 0x5a, 0x2e, 0x2, 
        0x220, 0x21e, 0x3, 0x2, 0x2, 0x2, 0x220, 0x21f, 0x3, 0x2, 0x2, 0x2, 
        0x221, 0x4d, 0x3, 0x2, 0x2, 0x2, 0x222, 0x223, 0x7, 0x1d, 0x2, 0x2, 
-       0x223, 0x224, 0x5, 0x58, 0x2d, 0x2, 0x224, 0x225, 0x7, 0x14e, 0x2, 
+       0x223, 0x224, 0x5, 0x58, 0x2d, 0x2, 0x224, 0x225, 0x7, 0x150, 0x2, 
        0x2, 0x225, 0x229, 0x3, 0x2, 0x2, 0x2, 0x226, 0x227, 0x7, 0x28, 0x2, 
-       0x2, 0x227, 0x229, 0x7, 0x14e, 0x2, 0x2, 0x228, 0x222, 0x3, 0x2, 
+       0x2, 0x227, 0x229, 0x7, 0x150, 0x2, 0x2, 0x228, 0x222, 0x3, 0x2, 
        0x2, 0x2, 0x228, 0x226, 0x3, 0x2, 0x2, 0x2, 0x229, 0x4f, 0x3, 0x2, 
        0x2, 0x2, 0x22a, 0x22c, 0x5, 0x4e, 0x28, 0x2, 0x22b, 0x22a, 0x3, 
        0x2, 0x2, 0x2, 0x22c, 0x22d, 0x3, 0x2, 0x2, 0x2, 0x22d, 0x22b, 0x3, 
@@ -18712,63 +18770,63 @@ azslParser::Initializer::Initializer() {
        0x2, 0x2, 0x2, 0x22f, 0x231, 0x5, 0x4a, 0x26, 0x2, 0x230, 0x22f, 
        0x3, 0x2, 0x2, 0x2, 0x231, 0x232, 0x3, 0x2, 0x2, 0x2, 0x232, 0x230, 
        0x3, 0x2, 0x2, 0x2, 0x232, 0x233, 0x3, 0x2, 0x2, 0x2, 0x233, 0x51, 
-       0x3, 0x2, 0x2, 0x2, 0x234, 0x238, 0x7, 0x136, 0x2, 0x2, 0x235, 0x237, 
+       0x3, 0x2, 0x2, 0x2, 0x234, 0x238, 0x7, 0x138, 0x2, 0x2, 0x235, 0x237, 
        0x5, 0x50, 0x29, 0x2, 0x236, 0x235, 0x3, 0x2, 0x2, 0x2, 0x237, 0x23a, 
        0x3, 0x2, 0x2, 0x2, 0x238, 0x236, 0x3, 0x2, 0x2, 0x2, 0x238, 0x239, 
        0x3, 0x2, 0x2, 0x2, 0x239, 0x23b, 0x3, 0x2, 0x2, 0x2, 0x23a, 0x238, 
-       0x3, 0x2, 0x2, 0x2, 0x23b, 0x23c, 0x7, 0x137, 0x2, 0x2, 0x23c, 0x53, 
-       0x3, 0x2, 0x2, 0x2, 0x23d, 0x299, 0x7, 0x150, 0x2, 0x2, 0x23e, 0x299, 
+       0x3, 0x2, 0x2, 0x2, 0x23b, 0x23c, 0x7, 0x139, 0x2, 0x2, 0x23c, 0x53, 
+       0x3, 0x2, 0x2, 0x2, 0x23d, 0x299, 0x7, 0x152, 0x2, 0x2, 0x23e, 0x299, 
        0x5, 0x48, 0x25, 0x2, 0x23f, 0x240, 0x5, 0x5a, 0x2e, 0x2, 0x240, 
-       0x241, 0x7, 0x150, 0x2, 0x2, 0x241, 0x299, 0x3, 0x2, 0x2, 0x2, 0x242, 
+       0x241, 0x7, 0x152, 0x2, 0x2, 0x241, 0x299, 0x3, 0x2, 0x2, 0x2, 0x242, 
        0x244, 0x5, 0x42, 0x22, 0x2, 0x243, 0x242, 0x3, 0x2, 0x2, 0x2, 0x244, 
        0x247, 0x3, 0x2, 0x2, 0x2, 0x245, 0x243, 0x3, 0x2, 0x2, 0x2, 0x245, 
        0x246, 0x3, 0x2, 0x2, 0x2, 0x246, 0x248, 0x3, 0x2, 0x2, 0x2, 0x247, 
        0x245, 0x3, 0x2, 0x2, 0x2, 0x248, 0x249, 0x7, 0x74, 0x2, 0x2, 0x249, 
-       0x24a, 0x7, 0x132, 0x2, 0x2, 0x24a, 0x24b, 0x5, 0x5a, 0x2e, 0x2, 
-       0x24b, 0x24c, 0x7, 0x133, 0x2, 0x2, 0x24c, 0x24e, 0x5, 0x54, 0x2b, 
+       0x24a, 0x7, 0x134, 0x2, 0x2, 0x24a, 0x24b, 0x5, 0x5a, 0x2e, 0x2, 
+       0x24b, 0x24c, 0x7, 0x135, 0x2, 0x2, 0x24c, 0x24e, 0x5, 0x54, 0x2b, 
        0x2, 0x24d, 0x24f, 0x5, 0x56, 0x2c, 0x2, 0x24e, 0x24d, 0x3, 0x2, 
        0x2, 0x2, 0x24e, 0x24f, 0x3, 0x2, 0x2, 0x2, 0x24f, 0x299, 0x3, 0x2, 
        0x2, 0x2, 0x250, 0x252, 0x5, 0x42, 0x22, 0x2, 0x251, 0x250, 0x3, 
        0x2, 0x2, 0x2, 0x252, 0x255, 0x3, 0x2, 0x2, 0x2, 0x253, 0x251, 0x3, 
        0x2, 0x2, 0x2, 0x253, 0x254, 0x3, 0x2, 0x2, 0x2, 0x254, 0x256, 0x3, 
        0x2, 0x2, 0x2, 0x255, 0x253, 0x3, 0x2, 0x2, 0x2, 0x256, 0x257, 0x7, 
-       0xc5, 0x2, 0x2, 0x257, 0x258, 0x7, 0x132, 0x2, 0x2, 0x258, 0x259, 
-       0x5, 0x5a, 0x2e, 0x2, 0x259, 0x25a, 0x7, 0x133, 0x2, 0x2, 0x25a, 
+       0xc6, 0x2, 0x2, 0x257, 0x258, 0x7, 0x134, 0x2, 0x2, 0x258, 0x259, 
+       0x5, 0x5a, 0x2e, 0x2, 0x259, 0x25a, 0x7, 0x135, 0x2, 0x2, 0x25a, 
        0x25b, 0x5, 0x52, 0x2a, 0x2, 0x25b, 0x299, 0x3, 0x2, 0x2, 0x2, 0x25c, 
        0x25e, 0x5, 0x42, 0x22, 0x2, 0x25d, 0x25c, 0x3, 0x2, 0x2, 0x2, 0x25e, 
        0x261, 0x3, 0x2, 0x2, 0x2, 0x25f, 0x25d, 0x3, 0x2, 0x2, 0x2, 0x25f, 
        0x260, 0x3, 0x2, 0x2, 0x2, 0x260, 0x262, 0x3, 0x2, 0x2, 0x2, 0x261, 
-       0x25f, 0x3, 0x2, 0x2, 0x2, 0x262, 0x263, 0x7, 0x105, 0x2, 0x2, 0x263, 
-       0x264, 0x7, 0x132, 0x2, 0x2, 0x264, 0x265, 0x5, 0x5a, 0x2e, 0x2, 
-       0x265, 0x266, 0x7, 0x133, 0x2, 0x2, 0x266, 0x267, 0x5, 0x54, 0x2b, 
+       0x25f, 0x3, 0x2, 0x2, 0x2, 0x262, 0x263, 0x7, 0x107, 0x2, 0x2, 0x263, 
+       0x264, 0x7, 0x134, 0x2, 0x2, 0x264, 0x265, 0x5, 0x5a, 0x2e, 0x2, 
+       0x265, 0x266, 0x7, 0x135, 0x2, 0x2, 0x266, 0x267, 0x5, 0x54, 0x2b, 
        0x2, 0x267, 0x299, 0x3, 0x2, 0x2, 0x2, 0x268, 0x26a, 0x5, 0x42, 0x22, 
        0x2, 0x269, 0x268, 0x3, 0x2, 0x2, 0x2, 0x26a, 0x26d, 0x3, 0x2, 0x2, 
        0x2, 0x26b, 0x269, 0x3, 0x2, 0x2, 0x2, 0x26b, 0x26c, 0x3, 0x2, 0x2, 
        0x2, 0x26c, 0x26e, 0x3, 0x2, 0x2, 0x2, 0x26d, 0x26b, 0x3, 0x2, 0x2, 
        0x2, 0x26e, 0x26f, 0x7, 0x2a, 0x2, 0x2, 0x26f, 0x270, 0x5, 0x54, 
-       0x2b, 0x2, 0x270, 0x271, 0x7, 0x105, 0x2, 0x2, 0x271, 0x272, 0x7, 
-       0x132, 0x2, 0x2, 0x272, 0x273, 0x5, 0x5a, 0x2e, 0x2, 0x273, 0x274, 
-       0x7, 0x133, 0x2, 0x2, 0x274, 0x275, 0x7, 0x150, 0x2, 0x2, 0x275, 
+       0x2b, 0x2, 0x270, 0x271, 0x7, 0x107, 0x2, 0x2, 0x271, 0x272, 0x7, 
+       0x134, 0x2, 0x2, 0x272, 0x273, 0x5, 0x5a, 0x2e, 0x2, 0x273, 0x274, 
+       0x7, 0x135, 0x2, 0x2, 0x274, 0x275, 0x7, 0x152, 0x2, 0x2, 0x275, 
        0x299, 0x3, 0x2, 0x2, 0x2, 0x276, 0x278, 0x5, 0x42, 0x22, 0x2, 0x277, 
        0x276, 0x3, 0x2, 0x2, 0x2, 0x278, 0x27b, 0x3, 0x2, 0x2, 0x2, 0x279, 
        0x277, 0x3, 0x2, 0x2, 0x2, 0x279, 0x27a, 0x3, 0x2, 0x2, 0x2, 0x27a, 
        0x27c, 0x3, 0x2, 0x2, 0x2, 0x27b, 0x279, 0x3, 0x2, 0x2, 0x2, 0x27c, 
-       0x27d, 0x7, 0x5b, 0x2, 0x2, 0x27d, 0x27f, 0x7, 0x132, 0x2, 0x2, 0x27e, 
+       0x27d, 0x7, 0x5b, 0x2, 0x2, 0x27d, 0x27f, 0x7, 0x134, 0x2, 0x2, 0x27e, 
        0x280, 0x5, 0x4c, 0x27, 0x2, 0x27f, 0x27e, 0x3, 0x2, 0x2, 0x2, 0x27f, 
        0x280, 0x3, 0x2, 0x2, 0x2, 0x280, 0x281, 0x3, 0x2, 0x2, 0x2, 0x281, 
-       0x283, 0x7, 0x150, 0x2, 0x2, 0x282, 0x284, 0x5, 0x5a, 0x2e, 0x2, 
+       0x283, 0x7, 0x152, 0x2, 0x2, 0x282, 0x284, 0x5, 0x5a, 0x2e, 0x2, 
        0x283, 0x282, 0x3, 0x2, 0x2, 0x2, 0x283, 0x284, 0x3, 0x2, 0x2, 0x2, 
-       0x284, 0x285, 0x3, 0x2, 0x2, 0x2, 0x285, 0x287, 0x7, 0x150, 0x2, 
+       0x284, 0x285, 0x3, 0x2, 0x2, 0x2, 0x285, 0x287, 0x7, 0x152, 0x2, 
        0x2, 0x286, 0x288, 0x5, 0x5a, 0x2e, 0x2, 0x287, 0x286, 0x3, 0x2, 
        0x2, 0x2, 0x287, 0x288, 0x3, 0x2, 0x2, 0x2, 0x288, 0x289, 0x3, 0x2, 
-       0x2, 0x2, 0x289, 0x28a, 0x7, 0x133, 0x2, 0x2, 0x28a, 0x299, 0x5, 
+       0x2, 0x2, 0x289, 0x28a, 0x7, 0x135, 0x2, 0x2, 0x28a, 0x299, 0x5, 
        0x54, 0x2b, 0x2, 0x28b, 0x28c, 0x7, 0x1c, 0x2, 0x2, 0x28c, 0x299, 
-       0x7, 0x150, 0x2, 0x2, 0x28d, 0x28e, 0x7, 0x27, 0x2, 0x2, 0x28e, 0x299, 
-       0x7, 0x150, 0x2, 0x2, 0x28f, 0x290, 0x7, 0x29, 0x2, 0x2, 0x290, 0x299, 
-       0x7, 0x150, 0x2, 0x2, 0x291, 0x293, 0x7, 0xae, 0x2, 0x2, 0x292, 0x294, 
+       0x7, 0x152, 0x2, 0x2, 0x28d, 0x28e, 0x7, 0x27, 0x2, 0x2, 0x28e, 0x299, 
+       0x7, 0x152, 0x2, 0x2, 0x28f, 0x290, 0x7, 0x29, 0x2, 0x2, 0x290, 0x299, 
+       0x7, 0x152, 0x2, 0x2, 0x291, 0x293, 0x7, 0xaf, 0x2, 0x2, 0x292, 0x294, 
        0x5, 0x5a, 0x2e, 0x2, 0x293, 0x292, 0x3, 0x2, 0x2, 0x2, 0x293, 0x294, 
        0x3, 0x2, 0x2, 0x2, 0x294, 0x295, 0x3, 0x2, 0x2, 0x2, 0x295, 0x299, 
-       0x7, 0x150, 0x2, 0x2, 0x296, 0x299, 0x5, 0xde, 0x70, 0x2, 0x297, 
+       0x7, 0x152, 0x2, 0x2, 0x296, 0x299, 0x5, 0xde, 0x70, 0x2, 0x297, 
        0x299, 0x5, 0xca, 0x66, 0x2, 0x298, 0x23d, 0x3, 0x2, 0x2, 0x2, 0x298, 
        0x23e, 0x3, 0x2, 0x2, 0x2, 0x298, 0x23f, 0x3, 0x2, 0x2, 0x2, 0x298, 
        0x245, 0x3, 0x2, 0x2, 0x2, 0x298, 0x253, 0x3, 0x2, 0x2, 0x2, 0x298, 
@@ -18780,15 +18838,15 @@ azslParser::Initializer::Initializer() {
        0x29b, 0x7, 0x40, 0x2, 0x2, 0x29b, 0x29c, 0x5, 0x54, 0x2b, 0x2, 0x29c, 
        0x57, 0x3, 0x2, 0x2, 0x2, 0x29d, 0x29e, 0x8, 0x2d, 0x1, 0x2, 0x29e, 
        0x2b6, 0x5, 0xb8, 0x5d, 0x2, 0x29f, 0x2b6, 0x5, 0x6, 0x4, 0x2, 0x2a0, 
-       0x2a1, 0x7, 0x132, 0x2, 0x2, 0x2a1, 0x2a2, 0x5, 0x5a, 0x2e, 0x2, 
-       0x2a2, 0x2a3, 0x7, 0x133, 0x2, 0x2, 0x2a3, 0x2b6, 0x3, 0x2, 0x2, 
+       0x2a1, 0x7, 0x134, 0x2, 0x2, 0x2a1, 0x2a2, 0x5, 0x5a, 0x2e, 0x2, 
+       0x2a2, 0x2a3, 0x7, 0x135, 0x2, 0x2, 0x2a3, 0x2b6, 0x3, 0x2, 0x2, 
        0x2, 0x2a4, 0x2a5, 0x5, 0xae, 0x58, 0x2, 0x2a5, 0x2a6, 0x5, 0x64, 
-       0x33, 0x2, 0x2a6, 0x2b6, 0x3, 0x2, 0x2, 0x2, 0x2a7, 0x2a8, 0x7, 0x132, 
+       0x33, 0x2, 0x2a6, 0x2b6, 0x3, 0x2, 0x2, 0x2, 0x2a7, 0x2a8, 0x7, 0x134, 
        0x2, 0x2, 0x2a8, 0x2ac, 0x5, 0x7e, 0x40, 0x2, 0x2a9, 0x2ab, 0x5, 
        0x76, 0x3c, 0x2, 0x2aa, 0x2a9, 0x3, 0x2, 0x2, 0x2, 0x2ab, 0x2ae, 
        0x3, 0x2, 0x2, 0x2, 0x2ac, 0x2aa, 0x3, 0x2, 0x2, 0x2, 0x2ac, 0x2ad, 
        0x3, 0x2, 0x2, 0x2, 0x2ad, 0x2af, 0x3, 0x2, 0x2, 0x2, 0x2ae, 0x2ac, 
-       0x3, 0x2, 0x2, 0x2, 0x2af, 0x2b0, 0x7, 0x133, 0x2, 0x2, 0x2b0, 0x2b1, 
+       0x3, 0x2, 0x2, 0x2, 0x2af, 0x2b0, 0x7, 0x135, 0x2, 0x2, 0x2b0, 0x2b1, 
        0x5, 0x58, 0x2d, 0x8, 0x2b1, 0x2b6, 0x3, 0x2, 0x2, 0x2, 0x2b2, 0x2b3, 
        0x5, 0x5e, 0x30, 0x2, 0x2b3, 0x2b4, 0x5, 0x58, 0x2d, 0x6, 0x2b4, 
        0x2b6, 0x3, 0x2, 0x2, 0x2, 0x2b5, 0x29d, 0x3, 0x2, 0x2, 0x2, 0x2b5, 
@@ -18797,15 +18855,15 @@ azslParser::Initializer::Initializer() {
        0x2b2, 0x3, 0x2, 0x2, 0x2, 0x2b6, 0x2d3, 0x3, 0x2, 0x2, 0x2, 0x2b7, 
        0x2b8, 0xc, 0x5, 0x2, 0x2, 0x2b8, 0x2b9, 0x5, 0x60, 0x31, 0x2, 0x2b9, 
        0x2ba, 0x5, 0x58, 0x2d, 0x6, 0x2ba, 0x2d2, 0x3, 0x2, 0x2, 0x2, 0x2bb, 
-       0x2bc, 0xc, 0xc, 0x2, 0x2, 0x2bc, 0x2bd, 0x7, 0x15f, 0x2, 0x2, 0x2bd, 
+       0x2bc, 0xc, 0xc, 0x2, 0x2, 0x2bc, 0x2bd, 0x7, 0x161, 0x2, 0x2, 0x2bd, 
        0x2d2, 0x5, 0x6, 0x4, 0x2, 0x2be, 0x2bf, 0xc, 0xb, 0x2, 0x2, 0x2bf, 
-       0x2c0, 0x7, 0x134, 0x2, 0x2, 0x2c0, 0x2c1, 0x5, 0x58, 0x2d, 0x2, 
-       0x2c1, 0x2c2, 0x7, 0x135, 0x2, 0x2, 0x2c2, 0x2d2, 0x3, 0x2, 0x2, 
+       0x2c0, 0x7, 0x136, 0x2, 0x2, 0x2c0, 0x2c1, 0x5, 0x58, 0x2d, 0x2, 
+       0x2c1, 0x2c2, 0x7, 0x137, 0x2, 0x2, 0x2c2, 0x2d2, 0x3, 0x2, 0x2, 
        0x2, 0x2c3, 0x2c4, 0xc, 0xa, 0x2, 0x2, 0x2c4, 0x2d2, 0x5, 0x64, 0x33, 
        0x2, 0x2c5, 0x2c6, 0xc, 0x7, 0x2, 0x2, 0x2c6, 0x2d2, 0x5, 0x5c, 0x2f, 
-       0x2, 0x2c7, 0x2c8, 0xc, 0x4, 0x2, 0x2, 0x2c8, 0x2c9, 0x7, 0x14d, 
+       0x2, 0x2c7, 0x2c8, 0xc, 0x4, 0x2, 0x2, 0x2c8, 0x2c9, 0x7, 0x14f, 
        0x2, 0x2, 0x2c9, 0x2ca, 0x5, 0x5a, 0x2e, 0x2, 0x2ca, 0x2cb, 0x7, 
-       0x14e, 0x2, 0x2, 0x2cb, 0x2cc, 0x5, 0x5a, 0x2e, 0x2, 0x2cc, 0x2d2, 
+       0x150, 0x2, 0x2, 0x2cb, 0x2cc, 0x5, 0x5a, 0x2e, 0x2, 0x2cc, 0x2d2, 
        0x3, 0x2, 0x2, 0x2, 0x2cd, 0x2ce, 0xc, 0x3, 0x2, 0x2, 0x2ce, 0x2cf, 
        0x5, 0x62, 0x32, 0x2, 0x2cf, 0x2d0, 0x5, 0x5a, 0x2e, 0x2, 0x2d0, 
        0x2d2, 0x3, 0x2, 0x2, 0x2, 0x2d1, 0x2b7, 0x3, 0x2, 0x2, 0x2, 0x2d1, 
@@ -18816,7 +18874,7 @@ azslParser::Initializer::Initializer() {
        0x2d4, 0x3, 0x2, 0x2, 0x2, 0x2d4, 0x59, 0x3, 0x2, 0x2, 0x2, 0x2d5, 
        0x2d3, 0x3, 0x2, 0x2, 0x2, 0x2d6, 0x2d7, 0x8, 0x2e, 0x1, 0x2, 0x2d7, 
        0x2d8, 0x5, 0x58, 0x2d, 0x2, 0x2d8, 0x2de, 0x3, 0x2, 0x2, 0x2, 0x2d9, 
-       0x2da, 0xc, 0x3, 0x2, 0x2, 0x2da, 0x2db, 0x7, 0x151, 0x2, 0x2, 0x2db, 
+       0x2da, 0xc, 0x3, 0x2, 0x2, 0x2da, 0x2db, 0x7, 0x153, 0x2, 0x2, 0x2db, 
        0x2dd, 0x5, 0x58, 0x2d, 0x2, 0x2dc, 0x2d9, 0x3, 0x2, 0x2, 0x2, 0x2dd, 
        0x2e0, 0x3, 0x2, 0x2, 0x2, 0x2de, 0x2dc, 0x3, 0x2, 0x2, 0x2, 0x2de, 
        0x2df, 0x3, 0x2, 0x2, 0x2, 0x2df, 0x5b, 0x3, 0x2, 0x2, 0x2, 0x2e0, 
@@ -18824,11 +18882,11 @@ azslParser::Initializer::Initializer() {
        0x5d, 0x3, 0x2, 0x2, 0x2, 0x2e3, 0x2e4, 0x9, 0x6, 0x2, 0x2, 0x2e4, 
        0x5f, 0x3, 0x2, 0x2, 0x2, 0x2e5, 0x2e6, 0x9, 0x7, 0x2, 0x2, 0x2e6, 
        0x61, 0x3, 0x2, 0x2, 0x2, 0x2e7, 0x2e8, 0x9, 0x8, 0x2, 0x2, 0x2e8, 
-       0x63, 0x3, 0x2, 0x2, 0x2, 0x2e9, 0x2eb, 0x7, 0x132, 0x2, 0x2, 0x2ea, 
+       0x63, 0x3, 0x2, 0x2, 0x2, 0x2e9, 0x2eb, 0x7, 0x134, 0x2, 0x2, 0x2ea, 
        0x2ec, 0x5, 0x66, 0x34, 0x2, 0x2eb, 0x2ea, 0x3, 0x2, 0x2, 0x2, 0x2eb, 
        0x2ec, 0x3, 0x2, 0x2, 0x2, 0x2ec, 0x2ed, 0x3, 0x2, 0x2, 0x2, 0x2ed, 
-       0x2ee, 0x7, 0x133, 0x2, 0x2, 0x2ee, 0x65, 0x3, 0x2, 0x2, 0x2, 0x2ef, 
-       0x2f4, 0x5, 0x58, 0x2d, 0x2, 0x2f0, 0x2f1, 0x7, 0x151, 0x2, 0x2, 
+       0x2ee, 0x7, 0x135, 0x2, 0x2, 0x2ee, 0x65, 0x3, 0x2, 0x2, 0x2, 0x2ef, 
+       0x2f4, 0x5, 0x58, 0x2d, 0x2, 0x2f0, 0x2f1, 0x7, 0x153, 0x2, 0x2, 
        0x2f1, 0x2f3, 0x5, 0x58, 0x2d, 0x2, 0x2f2, 0x2f0, 0x3, 0x2, 0x2, 
        0x2, 0x2f3, 0x2f6, 0x3, 0x2, 0x2, 0x2, 0x2f4, 0x2f2, 0x3, 0x2, 0x2, 
        0x2, 0x2f4, 0x2f5, 0x3, 0x2, 0x2, 0x2, 0x2f5, 0x67, 0x3, 0x2, 0x2, 
@@ -18839,7 +18897,7 @@ azslParser::Initializer::Initializer() {
        0x2, 0x2fd, 0x2fe, 0x5, 0x7a, 0x3e, 0x2, 0x2fe, 0x2ff, 0x5, 0x7e, 
        0x40, 0x2, 0x2ff, 0x300, 0x5, 0x6a, 0x36, 0x2, 0x300, 0x69, 0x3, 
        0x2, 0x2, 0x2, 0x301, 0x306, 0x5, 0x6e, 0x38, 0x2, 0x302, 0x303, 
-       0x7, 0x151, 0x2, 0x2, 0x303, 0x305, 0x5, 0x6e, 0x38, 0x2, 0x304, 
+       0x7, 0x153, 0x2, 0x2, 0x303, 0x305, 0x5, 0x6e, 0x38, 0x2, 0x304, 
        0x302, 0x3, 0x2, 0x2, 0x2, 0x305, 0x308, 0x3, 0x2, 0x2, 0x2, 0x306, 
        0x304, 0x3, 0x2, 0x2, 0x2, 0x306, 0x307, 0x3, 0x2, 0x2, 0x2, 0x307, 
        0x6b, 0x3, 0x2, 0x2, 0x2, 0x308, 0x306, 0x3, 0x2, 0x2, 0x2, 0x309, 
@@ -18854,31 +18912,31 @@ azslParser::Initializer::Initializer() {
        0x315, 0x3, 0x2, 0x2, 0x2, 0x316, 0x317, 0x3, 0x2, 0x2, 0x2, 0x317, 
        0x319, 0x3, 0x2, 0x2, 0x2, 0x318, 0x31a, 0x5, 0x70, 0x39, 0x2, 0x319, 
        0x318, 0x3, 0x2, 0x2, 0x2, 0x319, 0x31a, 0x3, 0x2, 0x2, 0x2, 0x31a, 
-       0x6d, 0x3, 0x2, 0x2, 0x2, 0x31b, 0x31c, 0x7, 0x174, 0x2, 0x2, 0x31c, 
+       0x6d, 0x3, 0x2, 0x2, 0x2, 0x31b, 0x31c, 0x7, 0x176, 0x2, 0x2, 0x31c, 
        0x31d, 0x5, 0x6c, 0x37, 0x2, 0x31d, 0x6f, 0x3, 0x2, 0x2, 0x2, 0x31e, 
-       0x31f, 0x7, 0x152, 0x2, 0x2, 0x31f, 0x322, 0x5, 0x72, 0x3a, 0x2, 
+       0x31f, 0x7, 0x154, 0x2, 0x2, 0x31f, 0x322, 0x5, 0x72, 0x3a, 0x2, 
        0x320, 0x322, 0x5, 0xee, 0x78, 0x2, 0x321, 0x31e, 0x3, 0x2, 0x2, 
        0x2, 0x321, 0x320, 0x3, 0x2, 0x2, 0x2, 0x322, 0x71, 0x3, 0x2, 0x2, 
-       0x2, 0x323, 0x324, 0x7, 0x136, 0x2, 0x2, 0x324, 0x325, 0x5, 0x74, 
-       0x3b, 0x2, 0x325, 0x326, 0x7, 0x137, 0x2, 0x2, 0x326, 0x329, 0x3, 
+       0x2, 0x323, 0x324, 0x7, 0x138, 0x2, 0x2, 0x324, 0x325, 0x5, 0x74, 
+       0x3b, 0x2, 0x325, 0x326, 0x7, 0x139, 0x2, 0x2, 0x326, 0x329, 0x3, 
        0x2, 0x2, 0x2, 0x327, 0x329, 0x5, 0x58, 0x2d, 0x2, 0x328, 0x323, 
        0x3, 0x2, 0x2, 0x2, 0x328, 0x327, 0x3, 0x2, 0x2, 0x2, 0x329, 0x73, 
        0x3, 0x2, 0x2, 0x2, 0x32a, 0x32f, 0x5, 0x72, 0x3a, 0x2, 0x32b, 0x32c, 
-       0x7, 0x151, 0x2, 0x2, 0x32c, 0x32e, 0x5, 0x72, 0x3a, 0x2, 0x32d, 
+       0x7, 0x153, 0x2, 0x2, 0x32c, 0x32e, 0x5, 0x72, 0x3a, 0x2, 0x32d, 
        0x32b, 0x3, 0x2, 0x2, 0x2, 0x32e, 0x331, 0x3, 0x2, 0x2, 0x2, 0x32f, 
        0x32d, 0x3, 0x2, 0x2, 0x2, 0x32f, 0x330, 0x3, 0x2, 0x2, 0x2, 0x330, 
        0x333, 0x3, 0x2, 0x2, 0x2, 0x331, 0x32f, 0x3, 0x2, 0x2, 0x2, 0x332, 
-       0x334, 0x7, 0x151, 0x2, 0x2, 0x333, 0x332, 0x3, 0x2, 0x2, 0x2, 0x333, 
+       0x334, 0x7, 0x153, 0x2, 0x2, 0x333, 0x332, 0x3, 0x2, 0x2, 0x2, 0x333, 
        0x334, 0x3, 0x2, 0x2, 0x2, 0x334, 0x75, 0x3, 0x2, 0x2, 0x2, 0x335, 
-       0x337, 0x7, 0x134, 0x2, 0x2, 0x336, 0x338, 0x5, 0x58, 0x2d, 0x2, 
+       0x337, 0x7, 0x136, 0x2, 0x2, 0x336, 0x338, 0x5, 0x58, 0x2d, 0x2, 
        0x337, 0x336, 0x3, 0x2, 0x2, 0x2, 0x337, 0x338, 0x3, 0x2, 0x2, 0x2, 
-       0x338, 0x339, 0x3, 0x2, 0x2, 0x2, 0x339, 0x33a, 0x7, 0x135, 0x2, 
-       0x2, 0x33a, 0x77, 0x3, 0x2, 0x2, 0x2, 0x33b, 0x33c, 0x7, 0x14e, 0x2, 
-       0x2, 0x33c, 0x33d, 0x7, 0x9f, 0x2, 0x2, 0x33d, 0x33e, 0x7, 0x132, 
-       0x2, 0x2, 0x33e, 0x341, 0x7, 0x174, 0x2, 0x2, 0x33f, 0x340, 0x7, 
-       0x15f, 0x2, 0x2, 0x340, 0x342, 0x7, 0x174, 0x2, 0x2, 0x341, 0x33f, 
+       0x338, 0x339, 0x3, 0x2, 0x2, 0x2, 0x339, 0x33a, 0x7, 0x137, 0x2, 
+       0x2, 0x33a, 0x77, 0x3, 0x2, 0x2, 0x2, 0x33b, 0x33c, 0x7, 0x150, 0x2, 
+       0x2, 0x33c, 0x33d, 0x7, 0xa0, 0x2, 0x2, 0x33d, 0x33e, 0x7, 0x134, 
+       0x2, 0x2, 0x33e, 0x341, 0x7, 0x176, 0x2, 0x2, 0x33f, 0x340, 0x7, 
+       0x161, 0x2, 0x2, 0x340, 0x342, 0x7, 0x176, 0x2, 0x2, 0x341, 0x33f, 
        0x3, 0x2, 0x2, 0x2, 0x341, 0x342, 0x3, 0x2, 0x2, 0x2, 0x342, 0x343, 
-       0x3, 0x2, 0x2, 0x2, 0x343, 0x344, 0x7, 0x133, 0x2, 0x2, 0x344, 0x79, 
+       0x3, 0x2, 0x2, 0x2, 0x343, 0x344, 0x7, 0x135, 0x2, 0x2, 0x344, 0x79, 
        0x3, 0x2, 0x2, 0x2, 0x345, 0x347, 0x5, 0x7c, 0x3f, 0x2, 0x346, 0x345, 
        0x3, 0x2, 0x2, 0x2, 0x347, 0x34a, 0x3, 0x2, 0x2, 0x2, 0x348, 0x346, 
        0x3, 0x2, 0x2, 0x2, 0x348, 0x349, 0x3, 0x2, 0x2, 0x2, 0x349, 0x7b, 
@@ -18907,43 +18965,43 @@ azslParser::Initializer::Initializer() {
        0x2, 0x2, 0x364, 0x360, 0x3, 0x2, 0x2, 0x2, 0x364, 0x361, 0x3, 0x2, 
        0x2, 0x2, 0x364, 0x362, 0x3, 0x2, 0x2, 0x2, 0x364, 0x363, 0x3, 0x2, 
        0x2, 0x2, 0x365, 0x81, 0x3, 0x2, 0x2, 0x2, 0x366, 0x367, 0x9, 0xa, 
-       0x2, 0x2, 0x367, 0x83, 0x3, 0x2, 0x2, 0x2, 0x368, 0x369, 0x7, 0xac, 
+       0x2, 0x2, 0x367, 0x83, 0x3, 0x2, 0x2, 0x2, 0x368, 0x369, 0x7, 0xad, 
        0x2, 0x2, 0x369, 0x85, 0x3, 0x2, 0x2, 0x2, 0x36a, 0x36b, 0x9, 0xb, 
        0x2, 0x2, 0x36b, 0x87, 0x3, 0x2, 0x2, 0x2, 0x36c, 0x36d, 0x5, 0x8a, 
-       0x46, 0x2, 0x36d, 0x36e, 0x7, 0x139, 0x2, 0x2, 0x36e, 0x36f, 0x5, 
-       0xae, 0x58, 0x2, 0x36f, 0x370, 0x7, 0x13b, 0x2, 0x2, 0x370, 0x89, 
+       0x46, 0x2, 0x36d, 0x36e, 0x7, 0x13b, 0x2, 0x2, 0x36e, 0x36f, 0x5, 
+       0xae, 0x58, 0x2, 0x36f, 0x370, 0x7, 0x13d, 0x2, 0x2, 0x370, 0x89, 
        0x3, 0x2, 0x2, 0x2, 0x371, 0x372, 0x9, 0xc, 0x2, 0x2, 0x372, 0x8b, 
        0x3, 0x2, 0x2, 0x2, 0x373, 0x374, 0x9, 0xd, 0x2, 0x2, 0x374, 0x8d, 
        0x3, 0x2, 0x2, 0x2, 0x375, 0x376, 0x5, 0x90, 0x49, 0x2, 0x376, 0x377, 
-       0x7, 0x139, 0x2, 0x2, 0x377, 0x378, 0x5, 0xc2, 0x62, 0x2, 0x378, 
-       0x379, 0x7, 0x151, 0x2, 0x2, 0x379, 0x37a, 0x7, 0x175, 0x2, 0x2, 
-       0x37a, 0x37b, 0x7, 0x13b, 0x2, 0x2, 0x37b, 0x8f, 0x3, 0x2, 0x2, 0x2, 
+       0x7, 0x13b, 0x2, 0x2, 0x377, 0x378, 0x5, 0xc2, 0x62, 0x2, 0x378, 
+       0x379, 0x7, 0x153, 0x2, 0x2, 0x379, 0x37a, 0x7, 0x177, 0x2, 0x2, 
+       0x37a, 0x37b, 0x7, 0x13d, 0x2, 0x2, 0x37b, 0x8f, 0x3, 0x2, 0x2, 0x2, 
        0x37c, 0x37d, 0x9, 0xe, 0x2, 0x2, 0x37d, 0x91, 0x3, 0x2, 0x2, 0x2, 
        0x37e, 0x37f, 0x9, 0xf, 0x2, 0x2, 0x37f, 0x93, 0x3, 0x2, 0x2, 0x2, 
        0x380, 0x381, 0x9, 0x10, 0x2, 0x2, 0x381, 0x95, 0x3, 0x2, 0x2, 0x2, 
-       0x382, 0x383, 0x5, 0x98, 0x4d, 0x2, 0x383, 0x384, 0x7, 0x139, 0x2, 
-       0x2, 0x384, 0x385, 0x5, 0x7e, 0x40, 0x2, 0x385, 0x386, 0x7, 0x13b, 
+       0x382, 0x383, 0x5, 0x98, 0x4d, 0x2, 0x383, 0x384, 0x7, 0x13b, 0x2, 
+       0x2, 0x384, 0x385, 0x5, 0x7e, 0x40, 0x2, 0x385, 0x386, 0x7, 0x13d, 
        0x2, 0x2, 0x386, 0x97, 0x3, 0x2, 0x2, 0x2, 0x387, 0x388, 0x9, 0x11, 
        0x2, 0x2, 0x388, 0x99, 0x3, 0x2, 0x2, 0x2, 0x389, 0x38a, 0x5, 0x9c, 
-       0x4f, 0x2, 0x38a, 0x38b, 0x7, 0x139, 0x2, 0x2, 0x38b, 0x38c, 0x5, 
-       0x7e, 0x40, 0x2, 0x38c, 0x38d, 0x7, 0x13b, 0x2, 0x2, 0x38d, 0x9b, 
+       0x4f, 0x2, 0x38a, 0x38b, 0x7, 0x13b, 0x2, 0x2, 0x38b, 0x38c, 0x5, 
+       0x7e, 0x40, 0x2, 0x38c, 0x38d, 0x7, 0x13d, 0x2, 0x2, 0x38d, 0x9b, 
        0x3, 0x2, 0x2, 0x2, 0x38e, 0x38f, 0x9, 0x12, 0x2, 0x2, 0x38f, 0x9d, 
        0x3, 0x2, 0x2, 0x2, 0x390, 0x391, 0x9, 0x13, 0x2, 0x2, 0x391, 0x9f, 
        0x3, 0x2, 0x2, 0x2, 0x392, 0x393, 0x5, 0x9e, 0x50, 0x2, 0x393, 0xa1, 
        0x3, 0x2, 0x2, 0x2, 0x394, 0x395, 0x5, 0x9e, 0x50, 0x2, 0x395, 0x396, 
-       0x7, 0x139, 0x2, 0x2, 0x396, 0x397, 0x5, 0xac, 0x57, 0x2, 0x397, 
-       0x398, 0x7, 0x13b, 0x2, 0x2, 0x398, 0xa3, 0x3, 0x2, 0x2, 0x2, 0x399, 
+       0x7, 0x13b, 0x2, 0x2, 0x396, 0x397, 0x5, 0xac, 0x57, 0x2, 0x397, 
+       0x398, 0x7, 0x13d, 0x2, 0x2, 0x398, 0xa3, 0x3, 0x2, 0x2, 0x2, 0x399, 
        0x39a, 0x9, 0x14, 0x2, 0x2, 0x39a, 0xa5, 0x3, 0x2, 0x2, 0x2, 0x39b, 
-       0x39c, 0x5, 0xa4, 0x53, 0x2, 0x39c, 0x39d, 0x7, 0x139, 0x2, 0x2, 
-       0x39d, 0x3a0, 0x5, 0xac, 0x57, 0x2, 0x39e, 0x39f, 0x7, 0x151, 0x2, 
-       0x2, 0x39f, 0x3a1, 0x7, 0x175, 0x2, 0x2, 0x3a0, 0x39e, 0x3, 0x2, 
+       0x39c, 0x5, 0xa4, 0x53, 0x2, 0x39c, 0x39d, 0x7, 0x13b, 0x2, 0x2, 
+       0x39d, 0x3a0, 0x5, 0xac, 0x57, 0x2, 0x39e, 0x39f, 0x7, 0x153, 0x2, 
+       0x2, 0x39f, 0x3a1, 0x7, 0x177, 0x2, 0x2, 0x3a0, 0x39e, 0x3, 0x2, 
        0x2, 0x2, 0x3a0, 0x3a1, 0x3, 0x2, 0x2, 0x2, 0x3a1, 0x3a2, 0x3, 0x2, 
-       0x2, 0x2, 0x3a2, 0x3a3, 0x7, 0x13b, 0x2, 0x2, 0x3a3, 0xa7, 0x3, 0x2, 
+       0x2, 0x2, 0x3a2, 0x3a3, 0x7, 0x13d, 0x2, 0x2, 0x3a3, 0xa7, 0x3, 0x2, 
        0x2, 0x2, 0x3a4, 0x3a5, 0x9, 0x15, 0x2, 0x2, 0x3a5, 0xa9, 0x3, 0x2, 
-       0x2, 0x2, 0x3a6, 0x3a7, 0x7, 0x102, 0x2, 0x2, 0x3a7, 0x3a8, 0x7, 
-       0x139, 0x2, 0x2, 0x3a8, 0x3a9, 0x5, 0x94, 0x4b, 0x2, 0x3a9, 0x3aa, 
-       0x7, 0x151, 0x2, 0x2, 0x3aa, 0x3ab, 0x7, 0x175, 0x2, 0x2, 0x3ab, 
-       0x3ac, 0x7, 0x13b, 0x2, 0x2, 0x3ac, 0xab, 0x3, 0x2, 0x2, 0x2, 0x3ad, 
+       0x2, 0x2, 0x3a6, 0x3a7, 0x7, 0x104, 0x2, 0x2, 0x3a7, 0x3a8, 0x7, 
+       0x13b, 0x2, 0x2, 0x3a8, 0x3a9, 0x5, 0x94, 0x4b, 0x2, 0x3a9, 0x3aa, 
+       0x7, 0x153, 0x2, 0x2, 0x3aa, 0x3ab, 0x7, 0x177, 0x2, 0x2, 0x3ab, 
+       0x3ac, 0x7, 0x13d, 0x2, 0x2, 0x3ac, 0xab, 0x3, 0x2, 0x2, 0x2, 0x3ad, 
        0x3b0, 0x5, 0x94, 0x4b, 0x2, 0x3ae, 0x3b0, 0x5, 0xa8, 0x55, 0x2, 
        0x3af, 0x3ad, 0x3, 0x2, 0x2, 0x2, 0x3af, 0x3ae, 0x3, 0x2, 0x2, 0x2, 
        0x3b0, 0xad, 0x3, 0x2, 0x2, 0x2, 0x3b1, 0x3b5, 0x5, 0x94, 0x4b, 0x2, 
@@ -18951,77 +19009,77 @@ azslParser::Initializer::Initializer() {
        0x2, 0x3b4, 0x3b1, 0x3, 0x2, 0x2, 0x2, 0x3b4, 0x3b2, 0x3, 0x2, 0x2, 
        0x2, 0x3b4, 0x3b3, 0x3, 0x2, 0x2, 0x2, 0x3b5, 0xaf, 0x3, 0x2, 0x2, 
        0x2, 0x3b6, 0x3b7, 0x9, 0x16, 0x2, 0x2, 0x3b7, 0xb1, 0x3, 0x2, 0x2, 
-       0x2, 0x3b8, 0x3b9, 0x7, 0x97, 0x2, 0x2, 0x3b9, 0x3ba, 0x7, 0x139, 
+       0x2, 0x3b8, 0x3b9, 0x7, 0x98, 0x2, 0x2, 0x3b9, 0x3ba, 0x7, 0x13b, 
        0x2, 0x2, 0x3ba, 0x3bb, 0x5, 0x94, 0x4b, 0x2, 0x3bb, 0x3bc, 0x7, 
-       0x151, 0x2, 0x2, 0x3bc, 0x3bd, 0x7, 0x175, 0x2, 0x2, 0x3bd, 0x3be, 
-       0x7, 0x151, 0x2, 0x2, 0x3be, 0x3bf, 0x7, 0x175, 0x2, 0x2, 0x3bf, 
-       0x3c0, 0x7, 0x13b, 0x2, 0x2, 0x3c0, 0xb3, 0x3, 0x2, 0x2, 0x2, 0x3c1, 
-       0x3c2, 0x7, 0x14e, 0x2, 0x2, 0x3c2, 0x3c3, 0x7, 0xad, 0x2, 0x2, 0x3c3, 
-       0x3c4, 0x7, 0x132, 0x2, 0x2, 0x3c4, 0x3c5, 0x7, 0x174, 0x2, 0x2, 
-       0x3c5, 0x3c6, 0x7, 0x133, 0x2, 0x2, 0x3c6, 0xb5, 0x3, 0x2, 0x2, 0x2, 
-       0x3c7, 0x3c8, 0x7, 0x174, 0x2, 0x2, 0x3c8, 0x3c9, 0x7, 0x152, 0x2, 
-       0x2, 0x3c9, 0x3ca, 0x5, 0x58, 0x2d, 0x2, 0x3ca, 0x3cb, 0x7, 0x150, 
-       0x2, 0x2, 0x3cb, 0xb7, 0x3, 0x2, 0x2, 0x2, 0x3cc, 0x3d6, 0x7, 0x160, 
-       0x2, 0x2, 0x3cd, 0x3d6, 0x7, 0x161, 0x2, 0x2, 0x3ce, 0x3d6, 0x7, 
-       0x176, 0x2, 0x2, 0x3cf, 0x3d6, 0x7, 0x175, 0x2, 0x2, 0x3d0, 0x3d2, 
-       0x7, 0x177, 0x2, 0x2, 0x3d1, 0x3d0, 0x3, 0x2, 0x2, 0x2, 0x3d2, 0x3d3, 
+       0x153, 0x2, 0x2, 0x3bc, 0x3bd, 0x7, 0x177, 0x2, 0x2, 0x3bd, 0x3be, 
+       0x7, 0x153, 0x2, 0x2, 0x3be, 0x3bf, 0x7, 0x177, 0x2, 0x2, 0x3bf, 
+       0x3c0, 0x7, 0x13d, 0x2, 0x2, 0x3c0, 0xb3, 0x3, 0x2, 0x2, 0x2, 0x3c1, 
+       0x3c2, 0x7, 0x150, 0x2, 0x2, 0x3c2, 0x3c3, 0x7, 0xae, 0x2, 0x2, 0x3c3, 
+       0x3c4, 0x7, 0x134, 0x2, 0x2, 0x3c4, 0x3c5, 0x7, 0x176, 0x2, 0x2, 
+       0x3c5, 0x3c6, 0x7, 0x135, 0x2, 0x2, 0x3c6, 0xb5, 0x3, 0x2, 0x2, 0x2, 
+       0x3c7, 0x3c8, 0x7, 0x176, 0x2, 0x2, 0x3c8, 0x3c9, 0x7, 0x154, 0x2, 
+       0x2, 0x3c9, 0x3ca, 0x5, 0x58, 0x2d, 0x2, 0x3ca, 0x3cb, 0x7, 0x152, 
+       0x2, 0x2, 0x3cb, 0xb7, 0x3, 0x2, 0x2, 0x2, 0x3cc, 0x3d6, 0x7, 0x162, 
+       0x2, 0x2, 0x3cd, 0x3d6, 0x7, 0x163, 0x2, 0x2, 0x3ce, 0x3d6, 0x7, 
+       0x178, 0x2, 0x2, 0x3cf, 0x3d6, 0x7, 0x177, 0x2, 0x2, 0x3d0, 0x3d2, 
+       0x7, 0x179, 0x2, 0x2, 0x3d1, 0x3d0, 0x3, 0x2, 0x2, 0x2, 0x3d2, 0x3d3, 
        0x3, 0x2, 0x2, 0x2, 0x3d3, 0x3d1, 0x3, 0x2, 0x2, 0x2, 0x3d3, 0x3d4, 
        0x3, 0x2, 0x2, 0x2, 0x3d4, 0x3d6, 0x3, 0x2, 0x2, 0x2, 0x3d5, 0x3cc, 
        0x3, 0x2, 0x2, 0x2, 0x3d5, 0x3cd, 0x3, 0x2, 0x2, 0x2, 0x3d5, 0x3ce, 
        0x3, 0x2, 0x2, 0x2, 0x3d5, 0x3cf, 0x3, 0x2, 0x2, 0x2, 0x3d5, 0x3d1, 
        0x3, 0x2, 0x2, 0x2, 0x3d6, 0xb9, 0x3, 0x2, 0x2, 0x2, 0x3d7, 0x3d8, 
        0x5, 0x7a, 0x3e, 0x2, 0x3d8, 0x3dc, 0x5, 0xc0, 0x61, 0x2, 0x3d9, 
-       0x3da, 0x5, 0xc2, 0x62, 0x2, 0x3da, 0x3db, 0x7, 0x14f, 0x2, 0x2, 
+       0x3da, 0x5, 0xc2, 0x62, 0x2, 0x3da, 0x3db, 0x7, 0x151, 0x2, 0x2, 
        0x3db, 0x3dd, 0x3, 0x2, 0x2, 0x2, 0x3dc, 0x3d9, 0x3, 0x2, 0x2, 0x2, 
        0x3dc, 0x3dd, 0x3, 0x2, 0x2, 0x2, 0x3dd, 0x3de, 0x3, 0x2, 0x2, 0x2, 
-       0x3de, 0x3e0, 0x7, 0x174, 0x2, 0x2, 0x3df, 0x3e1, 0x5, 0xce, 0x68, 
+       0x3de, 0x3e0, 0x7, 0x176, 0x2, 0x2, 0x3df, 0x3e1, 0x5, 0xce, 0x68, 
        0x2, 0x3e0, 0x3df, 0x3, 0x2, 0x2, 0x2, 0x3e0, 0x3e1, 0x3, 0x2, 0x2, 
-       0x2, 0x3e1, 0x3e2, 0x3, 0x2, 0x2, 0x2, 0x3e2, 0x3e4, 0x7, 0x132, 
+       0x2, 0x3e1, 0x3e2, 0x3, 0x2, 0x2, 0x2, 0x3e2, 0x3e4, 0x7, 0x134, 
        0x2, 0x2, 0x3e3, 0x3e5, 0x5, 0x34, 0x1b, 0x2, 0x3e4, 0x3e3, 0x3, 
        0x2, 0x2, 0x2, 0x3e4, 0x3e5, 0x3, 0x2, 0x2, 0x2, 0x3e5, 0x3e6, 0x3, 
-       0x2, 0x2, 0x2, 0x3e6, 0x3e8, 0x7, 0x133, 0x2, 0x2, 0x3e7, 0x3e9, 
-       0x7, 0x9d, 0x2, 0x2, 0x3e8, 0x3e7, 0x3, 0x2, 0x2, 0x2, 0x3e8, 0x3e9, 
+       0x2, 0x2, 0x2, 0x3e6, 0x3e8, 0x7, 0x135, 0x2, 0x2, 0x3e7, 0x3e9, 
+       0x7, 0x9e, 0x2, 0x2, 0x3e8, 0x3e7, 0x3, 0x2, 0x2, 0x2, 0x3e8, 0x3e9, 
        0x3, 0x2, 0x2, 0x2, 0x3e9, 0x3eb, 0x3, 0x2, 0x2, 0x2, 0x3ea, 0x3ec, 
        0x5, 0x38, 0x1d, 0x2, 0x3eb, 0x3ea, 0x3, 0x2, 0x2, 0x2, 0x3eb, 0x3ec, 
        0x3, 0x2, 0x2, 0x2, 0x3ec, 0xbb, 0x3, 0x2, 0x2, 0x2, 0x3ed, 0x3ee, 
        0x5, 0xba, 0x5e, 0x2, 0x3ee, 0x3ef, 0x5, 0x48, 0x25, 0x2, 0x3ef, 
        0xbd, 0x3, 0x2, 0x2, 0x2, 0x3f0, 0x3f1, 0x5, 0xba, 0x5e, 0x2, 0x3f1, 
-       0x3f2, 0x7, 0x150, 0x2, 0x2, 0x3f2, 0xbf, 0x3, 0x2, 0x2, 0x2, 0x3f3, 
-       0x3f6, 0x5, 0x7e, 0x40, 0x2, 0x3f4, 0x3f6, 0x7, 0x104, 0x2, 0x2, 
+       0x3f2, 0x7, 0x152, 0x2, 0x2, 0x3f2, 0xbf, 0x3, 0x2, 0x2, 0x2, 0x3f3, 
+       0x3f6, 0x5, 0x7e, 0x40, 0x2, 0x3f4, 0x3f6, 0x7, 0x106, 0x2, 0x2, 
        0x3f5, 0x3f3, 0x3, 0x2, 0x2, 0x2, 0x3f5, 0x3f4, 0x3, 0x2, 0x2, 0x2, 
        0x3f6, 0xc1, 0x3, 0x2, 0x2, 0x2, 0x3f7, 0x3fa, 0x5, 0x6, 0x4, 0x2, 
        0x3f8, 0x3fa, 0x5, 0x28, 0x15, 0x2, 0x3f9, 0x3f7, 0x3, 0x2, 0x2, 
        0x2, 0x3f9, 0x3f8, 0x3, 0x2, 0x2, 0x2, 0x3fa, 0xc3, 0x3, 0x2, 0x2, 
-       0x2, 0x3fb, 0x3fc, 0x7, 0x162, 0x2, 0x2, 0x3fc, 0x3fe, 0x7, 0x174, 
+       0x2, 0x3fb, 0x3fc, 0x7, 0x164, 0x2, 0x2, 0x3fc, 0x3fe, 0x7, 0x176, 
        0x2, 0x2, 0x3fd, 0x3ff, 0x5, 0xd2, 0x6a, 0x2, 0x3fe, 0x3fd, 0x3, 
        0x2, 0x2, 0x2, 0x3fe, 0x3ff, 0x3, 0x2, 0x2, 0x2, 0x3ff, 0x400, 0x3, 
-       0x2, 0x2, 0x2, 0x400, 0x401, 0x7, 0x150, 0x2, 0x2, 0x401, 0xc5, 0x3, 
-       0x2, 0x2, 0x2, 0x402, 0x403, 0x7, 0x164, 0x2, 0x2, 0x403, 0x404, 
-       0x5, 0xc0, 0x61, 0x2, 0x404, 0x405, 0x7, 0x174, 0x2, 0x2, 0x405, 
-       0x406, 0x7, 0x150, 0x2, 0x2, 0x406, 0xc7, 0x3, 0x2, 0x2, 0x2, 0x407, 
-       0x408, 0x7, 0x163, 0x2, 0x2, 0x408, 0x409, 0x7, 0x174, 0x2, 0x2, 
-       0x409, 0x40a, 0x7, 0x152, 0x2, 0x2, 0x40a, 0x40b, 0x5, 0xc0, 0x61, 
-       0x2, 0x40b, 0x40c, 0x7, 0x150, 0x2, 0x2, 0x40c, 0xc9, 0x3, 0x2, 0x2, 
+       0x2, 0x2, 0x2, 0x400, 0x401, 0x7, 0x152, 0x2, 0x2, 0x401, 0xc5, 0x3, 
+       0x2, 0x2, 0x2, 0x402, 0x403, 0x7, 0x166, 0x2, 0x2, 0x403, 0x404, 
+       0x5, 0xc0, 0x61, 0x2, 0x404, 0x405, 0x7, 0x176, 0x2, 0x2, 0x405, 
+       0x406, 0x7, 0x152, 0x2, 0x2, 0x406, 0xc7, 0x3, 0x2, 0x2, 0x2, 0x407, 
+       0x408, 0x7, 0x165, 0x2, 0x2, 0x408, 0x409, 0x7, 0x176, 0x2, 0x2, 
+       0x409, 0x40a, 0x7, 0x154, 0x2, 0x2, 0x40a, 0x40b, 0x5, 0xc0, 0x61, 
+       0x2, 0x40b, 0x40c, 0x7, 0x152, 0x2, 0x2, 0x40c, 0xc9, 0x3, 0x2, 0x2, 
        0x2, 0x40d, 0x410, 0x5, 0xc8, 0x65, 0x2, 0x40e, 0x410, 0x5, 0xc6, 
        0x64, 0x2, 0x40f, 0x40d, 0x3, 0x2, 0x2, 0x2, 0x40f, 0x40e, 0x3, 0x2, 
-       0x2, 0x2, 0x410, 0xcb, 0x3, 0x2, 0x2, 0x2, 0x411, 0x412, 0x7, 0x166, 
-       0x2, 0x2, 0x412, 0x415, 0x7, 0x132, 0x2, 0x2, 0x413, 0x416, 0x5, 
+       0x2, 0x2, 0x410, 0xcb, 0x3, 0x2, 0x2, 0x2, 0x411, 0x412, 0x7, 0x168, 
+       0x2, 0x2, 0x412, 0x415, 0x7, 0x134, 0x2, 0x2, 0x413, 0x416, 0x5, 
        0x5a, 0x2e, 0x2, 0x414, 0x416, 0x5, 0xc0, 0x61, 0x2, 0x415, 0x413, 
        0x3, 0x2, 0x2, 0x2, 0x415, 0x414, 0x3, 0x2, 0x2, 0x2, 0x416, 0x417, 
-       0x3, 0x2, 0x2, 0x2, 0x417, 0x41a, 0x7, 0x133, 0x2, 0x2, 0x418, 0x419, 
-       0x7, 0x14f, 0x2, 0x2, 0x419, 0x41b, 0x5, 0x6, 0x4, 0x2, 0x41a, 0x418, 
+       0x3, 0x2, 0x2, 0x2, 0x417, 0x41a, 0x7, 0x135, 0x2, 0x2, 0x418, 0x419, 
+       0x7, 0x151, 0x2, 0x2, 0x419, 0x41b, 0x5, 0x6, 0x4, 0x2, 0x41a, 0x418, 
        0x3, 0x2, 0x2, 0x2, 0x41a, 0x41b, 0x3, 0x2, 0x2, 0x2, 0x41b, 0xcd, 
-       0x3, 0x2, 0x2, 0x2, 0x41c, 0x41d, 0x7, 0x139, 0x2, 0x2, 0x41d, 0x422, 
-       0x5, 0xd0, 0x69, 0x2, 0x41e, 0x41f, 0x7, 0x151, 0x2, 0x2, 0x41f, 
+       0x3, 0x2, 0x2, 0x2, 0x41c, 0x41d, 0x7, 0x13b, 0x2, 0x2, 0x41d, 0x422, 
+       0x5, 0xd0, 0x69, 0x2, 0x41e, 0x41f, 0x7, 0x153, 0x2, 0x2, 0x41f, 
        0x421, 0x5, 0xd0, 0x69, 0x2, 0x420, 0x41e, 0x3, 0x2, 0x2, 0x2, 0x421, 
        0x424, 0x3, 0x2, 0x2, 0x2, 0x422, 0x420, 0x3, 0x2, 0x2, 0x2, 0x422, 
        0x423, 0x3, 0x2, 0x2, 0x2, 0x423, 0x425, 0x3, 0x2, 0x2, 0x2, 0x424, 
-       0x422, 0x3, 0x2, 0x2, 0x2, 0x425, 0x426, 0x7, 0x13b, 0x2, 0x2, 0x426, 
-       0xcf, 0x3, 0x2, 0x2, 0x2, 0x427, 0x429, 0x7, 0x174, 0x2, 0x2, 0x428, 
+       0x422, 0x3, 0x2, 0x2, 0x2, 0x425, 0x426, 0x7, 0x13d, 0x2, 0x2, 0x426, 
+       0xcf, 0x3, 0x2, 0x2, 0x2, 0x427, 0x429, 0x7, 0x176, 0x2, 0x2, 0x428, 
        0x42a, 0x5, 0xd2, 0x6a, 0x2, 0x429, 0x428, 0x3, 0x2, 0x2, 0x2, 0x429, 
        0x42a, 0x3, 0x2, 0x2, 0x2, 0x42a, 0xd1, 0x3, 0x2, 0x2, 0x2, 0x42b, 
-       0x42c, 0x7, 0x14e, 0x2, 0x2, 0x42c, 0x42d, 0x5, 0xc2, 0x62, 0x2, 
-       0x42d, 0xd3, 0x3, 0x2, 0x2, 0x2, 0x42e, 0x42f, 0x7, 0x165, 0x2, 0x2, 
+       0x42c, 0x7, 0x150, 0x2, 0x2, 0x42c, 0x42d, 0x5, 0xc2, 0x62, 0x2, 
+       0x42d, 0xd3, 0x3, 0x2, 0x2, 0x2, 0x42e, 0x42f, 0x7, 0x167, 0x2, 0x2, 
        0x42f, 0xd5, 0x3, 0x2, 0x2, 0x2, 0x430, 0x431, 0x5, 0xbe, 0x60, 0x2, 
        0x431, 0xd7, 0x3, 0x2, 0x2, 0x2, 0x432, 0x434, 0x5, 0x46, 0x24, 0x2, 
        0x433, 0x432, 0x3, 0x2, 0x2, 0x2, 0x434, 0x437, 0x3, 0x2, 0x2, 0x2, 
@@ -19033,28 +19091,28 @@ azslParser::Initializer::Initializer() {
        0x2, 0x43e, 0x441, 0x3, 0x2, 0x2, 0x2, 0x43f, 0x43d, 0x3, 0x2, 0x2, 
        0x2, 0x43f, 0x440, 0x3, 0x2, 0x2, 0x2, 0x440, 0x442, 0x3, 0x2, 0x2, 
        0x2, 0x441, 0x43f, 0x3, 0x2, 0x2, 0x2, 0x442, 0x443, 0x5, 0xda, 0x6e, 
-       0x2, 0x443, 0xdd, 0x3, 0x2, 0x2, 0x2, 0x444, 0x445, 0x7, 0x167, 0x2, 
-       0x2, 0x445, 0x446, 0x7, 0x132, 0x2, 0x2, 0x446, 0x447, 0x7, 0x177, 
-       0x2, 0x2, 0x447, 0x448, 0x7, 0x133, 0x2, 0x2, 0x448, 0x455, 0x7, 
-       0x150, 0x2, 0x2, 0x449, 0x44a, 0x7, 0x168, 0x2, 0x2, 0x44a, 0x44d, 
-       0x7, 0x132, 0x2, 0x2, 0x44b, 0x44e, 0x5, 0x6, 0x4, 0x2, 0x44c, 0x44e, 
+       0x2, 0x443, 0xdd, 0x3, 0x2, 0x2, 0x2, 0x444, 0x445, 0x7, 0x169, 0x2, 
+       0x2, 0x445, 0x446, 0x7, 0x134, 0x2, 0x2, 0x446, 0x447, 0x7, 0x179, 
+       0x2, 0x2, 0x447, 0x448, 0x7, 0x135, 0x2, 0x2, 0x448, 0x455, 0x7, 
+       0x152, 0x2, 0x2, 0x449, 0x44a, 0x7, 0x16a, 0x2, 0x2, 0x44a, 0x44d, 
+       0x7, 0x134, 0x2, 0x2, 0x44b, 0x44e, 0x5, 0x6, 0x4, 0x2, 0x44c, 0x44e, 
        0x5, 0xcc, 0x67, 0x2, 0x44d, 0x44b, 0x3, 0x2, 0x2, 0x2, 0x44d, 0x44c, 
        0x3, 0x2, 0x2, 0x2, 0x44e, 0x44f, 0x3, 0x2, 0x2, 0x2, 0x44f, 0x450, 
-       0x7, 0x151, 0x2, 0x2, 0x450, 0x451, 0x9, 0x17, 0x2, 0x2, 0x451, 0x452, 
-       0x7, 0x133, 0x2, 0x2, 0x452, 0x453, 0x7, 0x150, 0x2, 0x2, 0x453, 
+       0x7, 0x153, 0x2, 0x2, 0x450, 0x451, 0x9, 0x17, 0x2, 0x2, 0x451, 0x452, 
+       0x7, 0x135, 0x2, 0x2, 0x452, 0x453, 0x7, 0x152, 0x2, 0x2, 0x453, 
        0x455, 0x3, 0x2, 0x2, 0x2, 0x454, 0x444, 0x3, 0x2, 0x2, 0x2, 0x454, 
        0x449, 0x3, 0x2, 0x2, 0x2, 0x455, 0xdf, 0x3, 0x2, 0x2, 0x2, 0x456, 
-       0x458, 0x7, 0x9e, 0x2, 0x2, 0x457, 0x456, 0x3, 0x2, 0x2, 0x2, 0x457, 
+       0x458, 0x7, 0x9f, 0x2, 0x2, 0x457, 0x456, 0x3, 0x2, 0x2, 0x2, 0x457, 
        0x458, 0x3, 0x2, 0x2, 0x2, 0x458, 0x459, 0x3, 0x2, 0x2, 0x2, 0x459, 
-       0x45a, 0x7, 0x16f, 0x2, 0x2, 0x45a, 0x45d, 0x7, 0x174, 0x2, 0x2, 
-       0x45b, 0x45c, 0x7, 0x14e, 0x2, 0x2, 0x45c, 0x45e, 0x7, 0x174, 0x2, 
+       0x45a, 0x7, 0x171, 0x2, 0x2, 0x45a, 0x45d, 0x7, 0x176, 0x2, 0x2, 
+       0x45b, 0x45c, 0x7, 0x150, 0x2, 0x2, 0x45c, 0x45e, 0x7, 0x176, 0x2, 
        0x2, 0x45d, 0x45b, 0x3, 0x2, 0x2, 0x2, 0x45d, 0x45e, 0x3, 0x2, 0x2, 
-       0x2, 0x45e, 0x45f, 0x3, 0x2, 0x2, 0x2, 0x45f, 0x463, 0x7, 0x136, 
+       0x2, 0x45e, 0x45f, 0x3, 0x2, 0x2, 0x2, 0x45f, 0x463, 0x7, 0x138, 
        0x2, 0x2, 0x460, 0x462, 0x5, 0xe4, 0x73, 0x2, 0x461, 0x460, 0x3, 
        0x2, 0x2, 0x2, 0x462, 0x465, 0x3, 0x2, 0x2, 0x2, 0x463, 0x461, 0x3, 
        0x2, 0x2, 0x2, 0x463, 0x464, 0x3, 0x2, 0x2, 0x2, 0x464, 0x466, 0x3, 
        0x2, 0x2, 0x2, 0x465, 0x463, 0x3, 0x2, 0x2, 0x2, 0x466, 0x467, 0x7, 
-       0x137, 0x2, 0x2, 0x467, 0xe1, 0x3, 0x2, 0x2, 0x2, 0x468, 0x46a, 0x5, 
+       0x139, 0x2, 0x2, 0x467, 0xe1, 0x3, 0x2, 0x2, 0x2, 0x468, 0x46a, 0x5, 
        0x46, 0x24, 0x2, 0x469, 0x468, 0x3, 0x2, 0x2, 0x2, 0x46a, 0x46d, 
        0x3, 0x2, 0x2, 0x2, 0x46b, 0x469, 0x3, 0x2, 0x2, 0x2, 0x46b, 0x46c, 
        0x3, 0x2, 0x2, 0x2, 0x46c, 0x46e, 0x3, 0x2, 0x2, 0x2, 0x46d, 0x46b, 
@@ -19067,30 +19125,30 @@ azslParser::Initializer::Initializer() {
        0x2, 0x477, 0x472, 0x3, 0x2, 0x2, 0x2, 0x477, 0x473, 0x3, 0x2, 0x2, 
        0x2, 0x477, 0x474, 0x3, 0x2, 0x2, 0x2, 0x477, 0x475, 0x3, 0x2, 0x2, 
        0x2, 0x477, 0x476, 0x3, 0x2, 0x2, 0x2, 0x478, 0xe5, 0x3, 0x2, 0x2, 
-       0x2, 0x479, 0x47a, 0x7, 0x16e, 0x2, 0x2, 0x47a, 0x47b, 0x7, 0x174, 
+       0x2, 0x479, 0x47a, 0x7, 0x170, 0x2, 0x2, 0x47a, 0x47b, 0x7, 0x176, 
        0x2, 0x2, 0x47b, 0x47c, 0x5, 0xea, 0x76, 0x2, 0x47c, 0xe7, 0x3, 0x2, 
        0x2, 0x2, 0x47d, 0x47f, 0x5, 0x46, 0x24, 0x2, 0x47e, 0x47d, 0x3, 
        0x2, 0x2, 0x2, 0x47f, 0x482, 0x3, 0x2, 0x2, 0x2, 0x480, 0x47e, 0x3, 
        0x2, 0x2, 0x2, 0x480, 0x481, 0x3, 0x2, 0x2, 0x2, 0x481, 0x483, 0x3, 
        0x2, 0x2, 0x2, 0x482, 0x480, 0x3, 0x2, 0x2, 0x2, 0x483, 0x484, 0x5, 
        0xe6, 0x74, 0x2, 0x484, 0xe9, 0x3, 0x2, 0x2, 0x2, 0x485, 0x489, 0x7, 
-       0x136, 0x2, 0x2, 0x486, 0x488, 0x5, 0xec, 0x77, 0x2, 0x487, 0x486, 
+       0x138, 0x2, 0x2, 0x486, 0x488, 0x5, 0xec, 0x77, 0x2, 0x487, 0x486, 
        0x3, 0x2, 0x2, 0x2, 0x488, 0x48b, 0x3, 0x2, 0x2, 0x2, 0x489, 0x487, 
        0x3, 0x2, 0x2, 0x2, 0x489, 0x48a, 0x3, 0x2, 0x2, 0x2, 0x48a, 0x48c, 
        0x3, 0x2, 0x2, 0x2, 0x48b, 0x489, 0x3, 0x2, 0x2, 0x2, 0x48c, 0x48d, 
-       0x7, 0x137, 0x2, 0x2, 0x48d, 0xeb, 0x3, 0x2, 0x2, 0x2, 0x48e, 0x48f, 
-       0x7, 0x16c, 0x2, 0x2, 0x48f, 0x490, 0x7, 0x152, 0x2, 0x2, 0x490, 
-       0x491, 0x5, 0xb8, 0x5d, 0x2, 0x491, 0x492, 0x7, 0x150, 0x2, 0x2, 
-       0x492, 0x499, 0x3, 0x2, 0x2, 0x2, 0x493, 0x494, 0x7, 0x16d, 0x2, 
-       0x2, 0x494, 0x495, 0x7, 0x152, 0x2, 0x2, 0x495, 0x496, 0x5, 0xb8, 
-       0x5d, 0x2, 0x496, 0x497, 0x7, 0x150, 0x2, 0x2, 0x497, 0x499, 0x3, 
+       0x7, 0x139, 0x2, 0x2, 0x48d, 0xeb, 0x3, 0x2, 0x2, 0x2, 0x48e, 0x48f, 
+       0x7, 0x16e, 0x2, 0x2, 0x48f, 0x490, 0x7, 0x154, 0x2, 0x2, 0x490, 
+       0x491, 0x5, 0xb8, 0x5d, 0x2, 0x491, 0x492, 0x7, 0x152, 0x2, 0x2, 
+       0x492, 0x499, 0x3, 0x2, 0x2, 0x2, 0x493, 0x494, 0x7, 0x16f, 0x2, 
+       0x2, 0x494, 0x495, 0x7, 0x154, 0x2, 0x2, 0x495, 0x496, 0x5, 0xb8, 
+       0x5d, 0x2, 0x496, 0x497, 0x7, 0x152, 0x2, 0x2, 0x497, 0x499, 0x3, 
        0x2, 0x2, 0x2, 0x498, 0x48e, 0x3, 0x2, 0x2, 0x2, 0x498, 0x493, 0x3, 
        0x2, 0x2, 0x2, 0x499, 0xed, 0x3, 0x2, 0x2, 0x2, 0x49a, 0x49e, 0x7, 
-       0x136, 0x2, 0x2, 0x49b, 0x49d, 0x5, 0xf0, 0x79, 0x2, 0x49c, 0x49b, 
+       0x138, 0x2, 0x2, 0x49b, 0x49d, 0x5, 0xf0, 0x79, 0x2, 0x49c, 0x49b, 
        0x3, 0x2, 0x2, 0x2, 0x49d, 0x4a0, 0x3, 0x2, 0x2, 0x2, 0x49e, 0x49c, 
        0x3, 0x2, 0x2, 0x2, 0x49e, 0x49f, 0x3, 0x2, 0x2, 0x2, 0x49f, 0x4a1, 
        0x3, 0x2, 0x2, 0x2, 0x4a0, 0x49e, 0x3, 0x2, 0x2, 0x2, 0x4a1, 0x4a2, 
-       0x7, 0x137, 0x2, 0x2, 0x4a2, 0xef, 0x3, 0x2, 0x2, 0x2, 0x4a3, 0x4b1, 
+       0x7, 0x139, 0x2, 0x2, 0x4a2, 0xef, 0x3, 0x2, 0x2, 0x2, 0x4a3, 0x4b1, 
        0x5, 0xf2, 0x7a, 0x2, 0x4a4, 0x4b1, 0x5, 0xf4, 0x7b, 0x2, 0x4a5, 
        0x4b1, 0x5, 0xf6, 0x7c, 0x2, 0x4a6, 0x4b1, 0x5, 0xf8, 0x7d, 0x2, 
        0x4a7, 0x4b1, 0x5, 0xfa, 0x7e, 0x2, 0x4a8, 0x4b1, 0x5, 0xfc, 0x7f, 
@@ -19105,40 +19163,40 @@ azslParser::Initializer::Initializer() {
        0x4ab, 0x3, 0x2, 0x2, 0x2, 0x4b0, 0x4ac, 0x3, 0x2, 0x2, 0x2, 0x4b0, 
        0x4ad, 0x3, 0x2, 0x2, 0x2, 0x4b0, 0x4ae, 0x3, 0x2, 0x2, 0x2, 0x4b0, 
        0x4af, 0x3, 0x2, 0x2, 0x2, 0x4b1, 0xf1, 0x3, 0x2, 0x2, 0x2, 0x4b2, 
-       0x4b3, 0x7, 0x116, 0x2, 0x2, 0x4b3, 0x4b4, 0x7, 0x152, 0x2, 0x2, 
-       0x4b4, 0x4b5, 0x7, 0x175, 0x2, 0x2, 0x4b5, 0x4b6, 0x7, 0x150, 0x2, 
-       0x2, 0x4b6, 0xf3, 0x3, 0x2, 0x2, 0x2, 0x4b7, 0x4b8, 0x7, 0x113, 0x2, 
-       0x2, 0x4b8, 0x4b9, 0x7, 0x152, 0x2, 0x2, 0x4b9, 0x4ba, 0x5, 0x10c, 
-       0x87, 0x2, 0x4ba, 0x4bb, 0x7, 0x150, 0x2, 0x2, 0x4bb, 0xf5, 0x3, 
-       0x2, 0x2, 0x2, 0x4bc, 0x4bd, 0x7, 0x114, 0x2, 0x2, 0x4bd, 0x4be, 
-       0x7, 0x152, 0x2, 0x2, 0x4be, 0x4bf, 0x5, 0x10c, 0x87, 0x2, 0x4bf, 
-       0x4c0, 0x7, 0x150, 0x2, 0x2, 0x4c0, 0xf7, 0x3, 0x2, 0x2, 0x2, 0x4c1, 
-       0x4c2, 0x7, 0x115, 0x2, 0x2, 0x4c2, 0x4c3, 0x7, 0x152, 0x2, 0x2, 
-       0x4c3, 0x4c4, 0x5, 0x10c, 0x87, 0x2, 0x4c4, 0x4c5, 0x7, 0x150, 0x2, 
-       0x2, 0x4c5, 0xf9, 0x3, 0x2, 0x2, 0x2, 0x4c6, 0x4c7, 0x7, 0x11b, 0x2, 
-       0x2, 0x4c7, 0x4c8, 0x7, 0x152, 0x2, 0x2, 0x4c8, 0x4c9, 0x5, 0x10e, 
-       0x88, 0x2, 0x4c9, 0x4ca, 0x7, 0x150, 0x2, 0x2, 0x4ca, 0xfb, 0x3, 
-       0x2, 0x2, 0x2, 0x4cb, 0x4cc, 0x7, 0x11a, 0x2, 0x2, 0x4cc, 0x4cd, 
-       0x7, 0x152, 0x2, 0x2, 0x4cd, 0x4ce, 0x5, 0x112, 0x8a, 0x2, 0x4ce, 
-       0x4cf, 0x7, 0x150, 0x2, 0x2, 0x4cf, 0xfd, 0x3, 0x2, 0x2, 0x2, 0x4d0, 
-       0x4d1, 0x7, 0x10f, 0x2, 0x2, 0x4d1, 0x4d2, 0x7, 0x152, 0x2, 0x2, 
-       0x4d2, 0x4d3, 0x5, 0x110, 0x89, 0x2, 0x4d3, 0x4d4, 0x7, 0x150, 0x2, 
-       0x2, 0x4d4, 0xff, 0x3, 0x2, 0x2, 0x2, 0x4d5, 0x4d6, 0x7, 0x110, 0x2, 
-       0x2, 0x4d6, 0x4d7, 0x7, 0x152, 0x2, 0x2, 0x4d7, 0x4d8, 0x5, 0x110, 
-       0x89, 0x2, 0x4d8, 0x4d9, 0x7, 0x150, 0x2, 0x2, 0x4d9, 0x101, 0x3, 
-       0x2, 0x2, 0x2, 0x4da, 0x4db, 0x7, 0x111, 0x2, 0x2, 0x4db, 0x4dc, 
-       0x7, 0x152, 0x2, 0x2, 0x4dc, 0x4dd, 0x5, 0x110, 0x89, 0x2, 0x4dd, 
-       0x4de, 0x7, 0x150, 0x2, 0x2, 0x4de, 0x103, 0x3, 0x2, 0x2, 0x2, 0x4df, 
-       0x4e0, 0x7, 0x118, 0x2, 0x2, 0x4e0, 0x4e1, 0x7, 0x152, 0x2, 0x2, 
-       0x4e1, 0x4e2, 0x7, 0x176, 0x2, 0x2, 0x4e2, 0x4e3, 0x7, 0x150, 0x2, 
-       0x2, 0x4e3, 0x105, 0x3, 0x2, 0x2, 0x2, 0x4e4, 0x4e5, 0x7, 0x117, 
-       0x2, 0x2, 0x4e5, 0x4e6, 0x7, 0x152, 0x2, 0x2, 0x4e6, 0x4e7, 0x7, 
-       0x176, 0x2, 0x2, 0x4e7, 0x4e8, 0x7, 0x150, 0x2, 0x2, 0x4e8, 0x107, 
-       0x3, 0x2, 0x2, 0x2, 0x4e9, 0x4ea, 0x7, 0x119, 0x2, 0x2, 0x4ea, 0x4eb, 
-       0x7, 0x152, 0x2, 0x2, 0x4eb, 0x4ec, 0x7, 0x176, 0x2, 0x2, 0x4ec, 
-       0x4ed, 0x7, 0x150, 0x2, 0x2, 0x4ed, 0x109, 0x3, 0x2, 0x2, 0x2, 0x4ee, 
-       0x4ef, 0x7, 0x112, 0x2, 0x2, 0x4ef, 0x4f0, 0x7, 0x152, 0x2, 0x2, 
-       0x4f0, 0x4f1, 0x5, 0x114, 0x8b, 0x2, 0x4f1, 0x4f2, 0x7, 0x150, 0x2, 
+       0x4b3, 0x7, 0x118, 0x2, 0x2, 0x4b3, 0x4b4, 0x7, 0x154, 0x2, 0x2, 
+       0x4b4, 0x4b5, 0x7, 0x177, 0x2, 0x2, 0x4b5, 0x4b6, 0x7, 0x152, 0x2, 
+       0x2, 0x4b6, 0xf3, 0x3, 0x2, 0x2, 0x2, 0x4b7, 0x4b8, 0x7, 0x115, 0x2, 
+       0x2, 0x4b8, 0x4b9, 0x7, 0x154, 0x2, 0x2, 0x4b9, 0x4ba, 0x5, 0x10c, 
+       0x87, 0x2, 0x4ba, 0x4bb, 0x7, 0x152, 0x2, 0x2, 0x4bb, 0xf5, 0x3, 
+       0x2, 0x2, 0x2, 0x4bc, 0x4bd, 0x7, 0x116, 0x2, 0x2, 0x4bd, 0x4be, 
+       0x7, 0x154, 0x2, 0x2, 0x4be, 0x4bf, 0x5, 0x10c, 0x87, 0x2, 0x4bf, 
+       0x4c0, 0x7, 0x152, 0x2, 0x2, 0x4c0, 0xf7, 0x3, 0x2, 0x2, 0x2, 0x4c1, 
+       0x4c2, 0x7, 0x117, 0x2, 0x2, 0x4c2, 0x4c3, 0x7, 0x154, 0x2, 0x2, 
+       0x4c3, 0x4c4, 0x5, 0x10c, 0x87, 0x2, 0x4c4, 0x4c5, 0x7, 0x152, 0x2, 
+       0x2, 0x4c5, 0xf9, 0x3, 0x2, 0x2, 0x2, 0x4c6, 0x4c7, 0x7, 0x11d, 0x2, 
+       0x2, 0x4c7, 0x4c8, 0x7, 0x154, 0x2, 0x2, 0x4c8, 0x4c9, 0x5, 0x10e, 
+       0x88, 0x2, 0x4c9, 0x4ca, 0x7, 0x152, 0x2, 0x2, 0x4ca, 0xfb, 0x3, 
+       0x2, 0x2, 0x2, 0x4cb, 0x4cc, 0x7, 0x11c, 0x2, 0x2, 0x4cc, 0x4cd, 
+       0x7, 0x154, 0x2, 0x2, 0x4cd, 0x4ce, 0x5, 0x112, 0x8a, 0x2, 0x4ce, 
+       0x4cf, 0x7, 0x152, 0x2, 0x2, 0x4cf, 0xfd, 0x3, 0x2, 0x2, 0x2, 0x4d0, 
+       0x4d1, 0x7, 0x111, 0x2, 0x2, 0x4d1, 0x4d2, 0x7, 0x154, 0x2, 0x2, 
+       0x4d2, 0x4d3, 0x5, 0x110, 0x89, 0x2, 0x4d3, 0x4d4, 0x7, 0x152, 0x2, 
+       0x2, 0x4d4, 0xff, 0x3, 0x2, 0x2, 0x2, 0x4d5, 0x4d6, 0x7, 0x112, 0x2, 
+       0x2, 0x4d6, 0x4d7, 0x7, 0x154, 0x2, 0x2, 0x4d7, 0x4d8, 0x5, 0x110, 
+       0x89, 0x2, 0x4d8, 0x4d9, 0x7, 0x152, 0x2, 0x2, 0x4d9, 0x101, 0x3, 
+       0x2, 0x2, 0x2, 0x4da, 0x4db, 0x7, 0x113, 0x2, 0x2, 0x4db, 0x4dc, 
+       0x7, 0x154, 0x2, 0x2, 0x4dc, 0x4dd, 0x5, 0x110, 0x89, 0x2, 0x4dd, 
+       0x4de, 0x7, 0x152, 0x2, 0x2, 0x4de, 0x103, 0x3, 0x2, 0x2, 0x2, 0x4df, 
+       0x4e0, 0x7, 0x11a, 0x2, 0x2, 0x4e0, 0x4e1, 0x7, 0x154, 0x2, 0x2, 
+       0x4e1, 0x4e2, 0x7, 0x178, 0x2, 0x2, 0x4e2, 0x4e3, 0x7, 0x152, 0x2, 
+       0x2, 0x4e3, 0x105, 0x3, 0x2, 0x2, 0x2, 0x4e4, 0x4e5, 0x7, 0x119, 
+       0x2, 0x2, 0x4e5, 0x4e6, 0x7, 0x154, 0x2, 0x2, 0x4e6, 0x4e7, 0x7, 
+       0x178, 0x2, 0x2, 0x4e7, 0x4e8, 0x7, 0x152, 0x2, 0x2, 0x4e8, 0x107, 
+       0x3, 0x2, 0x2, 0x2, 0x4e9, 0x4ea, 0x7, 0x11b, 0x2, 0x2, 0x4ea, 0x4eb, 
+       0x7, 0x154, 0x2, 0x2, 0x4eb, 0x4ec, 0x7, 0x178, 0x2, 0x2, 0x4ec, 
+       0x4ed, 0x7, 0x152, 0x2, 0x2, 0x4ed, 0x109, 0x3, 0x2, 0x2, 0x2, 0x4ee, 
+       0x4ef, 0x7, 0x114, 0x2, 0x2, 0x4ef, 0x4f0, 0x7, 0x154, 0x2, 0x2, 
+       0x4f0, 0x4f1, 0x5, 0x114, 0x8b, 0x2, 0x4f1, 0x4f2, 0x7, 0x152, 0x2, 
        0x2, 0x4f2, 0x10b, 0x3, 0x2, 0x2, 0x2, 0x4f3, 0x4f4, 0x9, 0x18, 0x2, 
        0x2, 0x4f4, 0x10d, 0x3, 0x2, 0x2, 0x2, 0x4f5, 0x4f6, 0x9, 0x19, 0x2, 
        0x2, 0x4f6, 0x10f, 0x3, 0x2, 0x2, 0x2, 0x4f7, 0x4f8, 0x9, 0x1a, 0x2, 

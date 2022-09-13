@@ -394,6 +394,7 @@ storageFlags:
 storageFlag:
     // Type modifiers
         Const
+    |   Unsigned
     |   RowMajor
     |   ColumnMajor
     // Storage classes
@@ -519,12 +520,13 @@ samplerStatePredefinedType:
 scalarType:
         Bool
     |   Int
+    |   Int16_t
     |   Int32_t
     |   Int64_t
     |   Uint
+    |   Uint16_t
     |   Uint32_t
     |   Uint64_t
-    |   UnsignedInt
     |   Dword
     |   Half
     |   Float
