@@ -408,13 +408,13 @@ namespace AZ::ShaderCompiler
             ThrowRedeclarationAsDifferentKind(symbolName, newKind, kindInfo, lineNumber);
         }
 
-        void CheckQualifersAreOnlyInlineOrStatic(TypeQualifier qualifier, size_t line) const
+        void CheckFunctionReturnTypeModifierNotOptionNorRootconstant(TypeQualifier qualifier, size_t line) const
         {
-            auto okFlags = TypeQualifier{ StorageFlag::Inline } | StorageFlag::Static;
-            if (qualifier & ~okFlags)
+            auto ngFlags = TypeQualifier{ StorageFlag::Option } | StorageFlag::Rootconstant;
+            if (qualifier & ngFlags)
             {
                 ThrowAzslcOrchestratorException(ORCHESTRATOR_DISALLOWED_FUNCTION_MODIFIER, line,
-                    none, " Functions can only have either static or inline modifiers.");
+                    none, " Functions can't have option or rootconstant qualified return types.");
             }
         }
 

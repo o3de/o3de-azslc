@@ -31,3 +31,17 @@ void closest(inout P payload : SV_RayPayload,
 [shader("anyhit")]
 void closest(inout P payload : SV_RayPayload,
 			 in BuiltInTriangleIntersectionAttributes myAttr);
+
+struct Payload {};
+
+[RootSignature( "CBV(b0), CBV(b1), CBV(b2), SRV(t0), SRV(t1), SRV(t2), SRV(t3), SRV(t4)" )]
+[NumThreads(128, 1, 1)]
+[OutputTopology("triangle")]
+void main(
+    uint dtid : SV_DispatchThreadID,
+    uint gtid : SV_GroupThreadID,
+    uint gid : SV_GroupID,
+    in /*payload*/ Payload payload,
+    out vertices VertexOut verts[64],
+    out indices uint3 tris[126]
+);

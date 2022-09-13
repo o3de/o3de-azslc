@@ -275,7 +275,7 @@ namespace AZ::ShaderCompiler
 
         // Add storage flags
         funcInfo->m_typeQualifier |= ExtractTypeQualifiers(ctx->storageFlags());
-        CheckQualifersAreOnlyInlineOrStatic(funcInfo->m_typeQualifier, line); // throws a diagnostic if needed
+        CheckFunctionReturnTypeModifierNotOptionNorRootconstant(funcInfo->m_typeQualifier, line); // throws a diagnostic if needed
 
         // keep track of original AST node
         if (statementGenre == AsFunc::Definition)
@@ -442,8 +442,8 @@ namespace AZ::ShaderCompiler
         if (!aliasInfo.m_canonicalType.IsClassFound())
         {
             ThrowAzslcOrchestratorException(ORCHESTRATOR_INVALID_TYPEALIAS_TARGET,
-                                             existingTypeCtx->start,
-                                             ConcatString("target type ", existingTypeCtx->getText() + " not understood in typealias expression"));
+                                            existingTypeCtx->start,
+                                            ConcatString("target type ", existingTypeCtx->getText() + " not understood in typealias expression"));
         }
         assert(aliasInfo.m_canonicalType.m_coreType.m_typeClass != TypeClass::Alias);
         // further registration in containing scopes
