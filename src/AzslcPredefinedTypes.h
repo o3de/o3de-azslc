@@ -168,8 +168,8 @@ static constexpr std::array<const char*, 1> OtherViewBufferType = {
 static constexpr std::array<const char*, 4> Sampler = {
 "Sampler",
 "SamplerComparisonState",
-"SamplerState",
-"sampler"};
+"sampler",
+"sampler_state"};
 
 static constexpr std::array<const char*, 12> Scalar = {
 "bool",

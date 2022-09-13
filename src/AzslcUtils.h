@@ -273,7 +273,7 @@ namespace AZ::ShaderCompiler
     }
 
     MAKE_REFLECTABLE_ENUM_POWER (StorageFlag,
-        Static, Const, Extern, Shared, Groupshared, Precise, Uniform, Volatile, RowMajor, ColumnMajor, In, Out, InOut, Inline, Option, Enumerator, Rootconstant, Unknown
+        Static, Const, Extern, Shared, Groupshared, Globallycoherent, Precise, Uniform, Volatile, RowMajor, ColumnMajor, In, Out, InOut, Inline, Option, Enumerator, Rootconstant, Other
     );
     using TypeQualifier = Flag<StorageFlag>;
 
@@ -1109,9 +1109,34 @@ namespace AZ::ShaderCompiler
         return nullptr;
     }
 
+    inline StorageFlag AsFlag(azslParser::StorageFlagContext* ctx)
+    {
+        return ctx->Const()            ? StorageFlag::Const
+             : ctx->Extern()           ? StorageFlag::Extern
+             : ctx->Groupshared()      ? StorageFlag::Groupshared
+             : ctx->Precise()          ? StorageFlag::Precise
+             : ctx->Shared()           ? StorageFlag::Shared
+             : ctx->Static()           ? StorageFlag::Static
+             : ctx->Uniform()          ? StorageFlag::Uniform
+             : ctx->Volatile()         ? StorageFlag::Volatile
+             : ctx->Globallycoherent() ? StorageFlag::Globallycoherent
+             : ctx->RowMajor()         ? StorageFlag::RowMajor
+             : ctx->ColumnMajor()      ? StorageFlag::ColumnMajor
+             : ctx->In()               ? StorageFlag::In
+             : ctx->Out()              ? StorageFlag::Out
+             : ctx->Inout()            ? StorageFlag::InOut
+             : ctx->Inline()           ? StorageFlag::Inline
+             : ctx->Option()           ? StorageFlag::Option
+             : ctx->Rootconstant()     ? StorageFlag::Rootconstant
+            // Everything else can still be stored, but won't be checked in any special way:
+            // linear, centroid, noninterpolation, noperspective, sample, point, line, triangle, lineadk, triangleadj, indices, vertices, etc...
+             : StorageFlag::Other;
+    }
+
     inline bool IsFlag(azslParser::StorageFlagContext* ctx, StorageFlag flag)
     {
-        switch (flag)
+        return AsFlag(ctx) == flag;
+        /*switch (flag)
         {
         case StorageFlag::Const: return ctx->Const();
         case StorageFlag::Extern: return ctx->Extern();
@@ -1121,6 +1146,7 @@ namespace AZ::ShaderCompiler
         case StorageFlag::Static: return ctx->Static();
         case StorageFlag::Uniform: return ctx->Uniform();
         case StorageFlag::Volatile: return ctx->Volatile();
+        case StorageFlag::Globallycoherent: return ctx->Globallycoherent();
         case StorageFlag::RowMajor: return ctx->RowMajor();
         case StorageFlag::ColumnMajor: return ctx->ColumnMajor();
         case StorageFlag::In: return ctx->In();
@@ -1129,44 +1155,11 @@ namespace AZ::ShaderCompiler
         case StorageFlag::Inline: return ctx->Inline();
         case StorageFlag::Rootconstant: return ctx->Rootconstant();
         case StorageFlag::Option: return ctx->Option();
-        case StorageFlag::Enumerator: return false; // Not a data-driven flag
-        case StorageFlag::Unknown: return false; // Not a data-driven flag
+        case StorageFlag::Enumerator: return false; // Not a source-driven flag
+        case StorageFlag::Other: return AsFlag(ctx) == StorageFlag::Other;
         default: break;
         }
-        return false;
-    }
-
-    inline StorageFlag AsFlag(azslParser::StorageFlagContext* ctx)
-    {
-        return ctx->Const()        ? StorageFlag::Const
-             : ctx->Extern()       ? StorageFlag::Extern
-             : ctx->Groupshared()  ? StorageFlag::Groupshared
-             : ctx->Precise()      ? StorageFlag::Precise
-             : ctx->Shared()       ? StorageFlag::Shared
-             : ctx->Static()       ? StorageFlag::Static
-             : ctx->Uniform()      ? StorageFlag::Uniform
-             : ctx->Volatile()     ? StorageFlag::Volatile
-             : ctx->RowMajor()     ? StorageFlag::RowMajor
-             : ctx->ColumnMajor()  ? StorageFlag::ColumnMajor
-             : ctx->In()           ? StorageFlag::In
-             : ctx->Out()          ? StorageFlag::Out
-             : ctx->Inout()        ? StorageFlag::InOut
-             : ctx->Inline()       ? StorageFlag::Inline
-             : ctx->Option()       ? StorageFlag::Option
-             : ctx->Rootconstant() ? StorageFlag::Rootconstant
-
-            // Everything unknown can still be stored, but won't be checked in any special way
-             : ctx->Linear()          ? StorageFlag::Unknown
-             : ctx->Centroid()        ? StorageFlag::Unknown
-             : ctx->Nointerpolation() ? StorageFlag::Unknown
-             : ctx->Noperspective()   ? StorageFlag::Unknown
-             : ctx->Sample()          ? StorageFlag::Unknown
-             : ctx->Point()           ? StorageFlag::Unknown
-             : ctx->Line_()           ? StorageFlag::Unknown
-             : ctx->Triangle()        ? StorageFlag::Unknown
-             : ctx->LineAdj()         ? StorageFlag::Unknown
-             : ctx->TriangleAdj()     ? StorageFlag::Unknown
-             :                          StorageFlag::Unknown;
+        return false;*/
     }
 
     // Either just a string, or string + its original source node.

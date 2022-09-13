@@ -852,9 +852,9 @@ namespace AZ::ShaderCompiler
         {
             // inline should not be added as modifier for variables in HLSL. But in HLSL6 can be useful for functions
         }
-        if (var.CheckHasStorageFlag(StorageFlag::Unknown))
+        if (var.CheckHasStorageFlag(StorageFlag::Other))
         {
-            for (const auto& flag : var.m_unknownQualifiers)
+            for (const auto& flag : var.m_otherQualifiers)
             {
                 modifiers += " " + flag;
             }

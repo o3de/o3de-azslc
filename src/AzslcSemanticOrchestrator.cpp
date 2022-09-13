@@ -26,16 +26,16 @@ namespace AZ::ShaderCompiler
             return major;
         }
 
-        TypeQualifier ExtractTypeQualifiers(azslParser::StorageFlagsContext* flags, vector<string>* unknownQualifiers = nullptr)
+        TypeQualifier ExtractTypeQualifiers(azslParser::StorageFlagsContext* flags, vector<string>* otherQualifiers = nullptr)
         {
             TypeQualifier qualifiers;
             for (auto* flagCtx : flags->storageFlag())
             {
                 const auto& newFlag = AsFlag(flagCtx);
                 qualifiers |= newFlag;
-                if (newFlag == StorageFlag::Unknown && unknownQualifiers)
+                if (newFlag == StorageFlag::Other && otherQualifiers)
                 {
-                    unknownQualifiers->push_back(flagCtx->getText());
+                    otherQualifiers->push_back(flagCtx->getText());
                 }
             }
             return qualifiers;
@@ -496,7 +496,7 @@ namespace AZ::ShaderCompiler
         auto& [uid, kindInfo]           = symbolRef;
         VarInfo& varInfo                = kindInfo.GetSubRefAs<VarInfo>();
         // Discover the storage flags:
-        varInfo.m_typeQualifier         = ExtractTypeQualifiers(ctx, &varInfo.m_unknownQualifiers);
+        varInfo.m_typeQualifier         = ExtractTypeQualifiers(ctx, &varInfo.m_otherQualifiers);
         // Discover array dimensions:
         ArrayDimensions arrayDims;
         TryFoldArrayDimensions(ctx, arrayDims);

@@ -26,7 +26,7 @@ topLevelDeclaration:
     |   attributedSrgDefinition         // AZSLc specific
     |   attributedSrgSemantic           // AZSLc specific
     |   Semi
-;       
+;
 
 // Amazon: AZSL has scopes, and identifiers can be qualified
 idExpression:
@@ -399,16 +399,20 @@ storageFlag:
     // Storage classes
     |   Extern
     |   Inline
-    |   Rootconstant
-    |   Option
+    |   Rootconstant   // AZSL specific
+    |   Option         // AZSL
     |   Precise
     |   Shared
     |   Groupshared
     |   Static
     |   Uniform
     |   Volatile
+    |   Globallycoherent
+    |   SNorm
+    |   UNorm
     // Interpolation modifiers
     |   Linear
+    |   Center
     |   Centroid
     |   Nointerpolation
     |   Noperspective
@@ -417,6 +421,9 @@ storageFlag:
     |   In
     |   Out
     |   Inout
+    |   Indices   // mesh shader qualifiers
+    |   Vertices
+    //| Payload   // ray shader optional qualifier (note: not supported to lift pressure on reserved keywords space)
     // Geometry shader primitive type
     |   Point
     |   Line_
@@ -505,6 +512,7 @@ samplerStatePredefinedType:
         Sampler
     |   SamplerCapitalS
     |   SamplerState
+    |   SamplerStateCamel
     |   SamplerComparisonState
 ;
 

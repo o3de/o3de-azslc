@@ -374,7 +374,7 @@ namespace AZ::ShaderCompiler
         AstUnnamedVarDecl*         m_declNode = nullptr;
         UnqualifiedName            m_identifier;
         TypeQualifier              m_typeQualifier;
-        vector<string>             m_unknownQualifiers;        // For qualifiers we didn't add to the enum
+        vector<string>             m_otherQualifiers;      // For qualifiers we didn't add to the enum
         bool                       m_srgMember = false;
         bool                       m_isPublic = true;
         ConstNumericVal            m_constVal;   // (attempted folded) initializer value for simple scalars
