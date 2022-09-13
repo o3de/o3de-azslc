@@ -21,9 +21,11 @@ namespace StdFs = std::filesystem;
 // Correspond to the supported version of the AZSL language.
 #define AZSLC_MAJOR "1"
 // For large features or milestones. Minor version allows for breaking changes. Existing tests can change.
-#define AZSLC_MINOR "8"   // introduction of class inheritance
+#define AZSLC_MINOR "8"   // last change: introduction of class inheritance
 // For small features or bug fixes. They cannot introduce breaking changes. Existing tests shouldn't change.
-#define AZSLC_REVISION "4"
+#define AZSLC_REVISION "5"  // last change: enhanced grammar compliance with HLSL
+
+
 namespace AZ::ShaderCompiler
 {
     DiagnosticStream verboseCout;
@@ -488,6 +490,12 @@ int main(int argc, const char* argv[])
         parser.addErrorListener(&azslParserEventListener);
         tree::ParseTree *tree = parser.compilationUnit();
 
+        if (ast)
+        {
+            PrintAst(tree, parser);
+            syntax = true; // ast print is a syntax only build.
+        }
+
         if (parser.getNumberOfSyntaxErrors() > 0)
         {
             throw std::runtime_error("grammatic errors present");
@@ -624,11 +632,6 @@ int main(int argc, const char* argv[])
             if (dumpsym)
             {
                 DumpSymbols(ir);
-                doEmission = false;
-            }
-            else if (ast)
-            {
-                PrintAst(tree, parser);
                 doEmission = false;
             }
             else if (!visitName.empty())
