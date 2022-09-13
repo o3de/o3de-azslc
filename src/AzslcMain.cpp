@@ -191,7 +191,7 @@ namespace AZ::ShaderCompiler
         if (irOut->m_lineMap.find(1) == irOut->m_lineMap.end())
         {
             // if we have no line directives, add one that can be found by lower_bound
-            LineDirectiveInfo catchAllDirective{1, 1, AzslcException::s_currentSourceFileName};
+            LineDirectiveInfo catchAllDirective{1, 2, AzslcException::s_currentSourceFileName};
             irOut->m_lineMap[1] = catchAllDirective;
         }
     }
