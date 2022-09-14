@@ -619,6 +619,9 @@ namespace AZ::Tests
             assert(FindInterval(intervals, 6) == intervals.cend());
             assert(FindInterval(intervals, 8) != intervals.cend());
             assert(FindInterval(intervals, 1) == intervals.cend());
+
+            auto high = Infimum(intervals, 20);
+            assert(high->first == 8);
         }
 
         assert(Replace("Srg/A", "/", "::") == "Srg::A");

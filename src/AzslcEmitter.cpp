@@ -460,23 +460,32 @@ namespace AZ::ShaderCompiler
 
     void CodeEmitter::EmitPreprocessorLineDirective(size_t azslLineNumber)
     {
-        const LineDirectiveInfo* lineDirectiveInfo = m_ir->GetNearestPreprocessorLineDirective(azslLineNumber);
-        if (!lineDirectiveInfo)
+        size_t supposedVirtualLine = m_lineFinder->GetVirtualLineNumber(azslLineNumber);
+        size_t curHlslLine = m_out.GetLineCount();
+        auto lastEmitted = Infimum(m_alreadyEmittedPreprocessorLineDirectives, curHlslLine);
+        if (lastEmitted != m_alreadyEmittedPreprocessorLineDirectives.cend())
         {
-            return;
+            // verify if we can skip the line emission if current stream line feed is still in synch with expectations
+            //  image:
+            //            in sync                  out of sync
+            //  1 | #line 1                1 | #line 1
+            //  2 | code                   2 | code
+            //  3 | newSymbol              3 | code
+            //                             4 | #line 2
+            //                             5 | newSymbol
+
+            size_t curHlslPhysicalDistance = curHlslLine - lastEmitted->first;
+            size_t lastVirtualSet = lastEmitted->second;
+            size_t nonAdjustedCurrentLandingLine = lastVirtualSet + curHlslPhysicalDistance;
+            if (nonAdjustedCurrentLandingLine == supposedVirtualLine)
+                return; // no need to emit. we can skip
         }
-
-        const auto physicalTokenLine = lineDirectiveInfo->m_physicalTokenLine;
-        if (m_alreadyEmittedPreprocessorLineDirectives.find(physicalTokenLine) != m_alreadyEmittedPreprocessorLineDirectives.end())
-        {
-            return;
-        }
-
-        const string& originalFileName = StdFs::absolute(lineDirectiveInfo->m_containingFilename).lexically_normal().generic_string();
-        const auto lineNumber = lineDirectiveInfo->m_forcedLineNumber;
-        m_out << "#line " << lineNumber << " \"" << originalFileName << "\"\n";
-
-        m_alreadyEmittedPreprocessorLineDirectives.insert(physicalTokenLine);
+        // get the original file as absolute path:
+        const string& originalFileName = StdFs::absolute( m_lineFinder->GetVirtualFileName(azslLineNumber) ).lexically_normal().generic_string();
+        // emit the line:
+        m_out << "#line " << supposedVirtualLine << " \"" << originalFileName << "\"\n";
+        // remember it:
+        m_alreadyEmittedPreprocessorLineDirectives[curHlslLine] = supposedVirtualLine;
     }
 
     void CodeEmitter::EmitPreprocessorLineDirective(QualifiedNameView symbolName)
@@ -502,7 +511,7 @@ namespace AZ::ShaderCompiler
 
     void CodeEmitter::EmitStruct(const ClassInfo& classInfo, string_view structuredSymName, const Options& options)
     {
-        EmitEmptyLinesToLineNumber(classInfo.GetOriginalLineNumber());
+        //EmitEmptyLinesToLineNumber(classInfo.GetOriginalLineNumber());
 
         auto HlslStructuredDelcTagFromKind = [](Kind k)
         {
@@ -696,7 +705,7 @@ namespace AZ::ShaderCompiler
 
     void CodeEmitter::EmitEnum(const IdentifierUID& uid, const ClassInfo& classInfo, const Options& options)
     {
-        EmitEmptyLinesToLineNumber(classInfo.GetOriginalLineNumber());
+        //EmitEmptyLinesToLineNumber(classInfo.GetOriginalLineNumber());
 
         const auto& enumInfo = get<EnumerationInfo>(classInfo.m_subInfo);
 
@@ -746,7 +755,7 @@ namespace AZ::ShaderCompiler
 
         AstFuncSig* node = funcSub.m_defNode ? funcSub.m_defNode : funcSub.m_declNode;
 
-        EmitEmptyLinesToLineNumber(funcSub.GetOriginalLineNumber(emitAsDefinition));
+        //EmitEmptyLinesToLineNumber(funcSub.GetOriginalLineNumber(emitAsDefinition));
 
         EmitAllAttachedAttributes(uid);
 
@@ -882,7 +891,7 @@ namespace AZ::ShaderCompiler
 
     void CodeEmitter::EmitVariableDeclaration(const VarInfo& varInfo, const IdentifierUID& uid, const Options& options, VarDeclHasFlag declOptions) const
     {
-        EmitEmptyLinesToLineNumber(varInfo.GetOriginalLineNumber());
+        //EmitEmptyLinesToLineNumber(varInfo.GetOriginalLineNumber());
 
         // from MSDN: https://docs.microsoft.com/en-us/windows/desktop/direct3dhlsl/dx-graphics-hlsl-variable-syntax
         // [Storage_Class] [Type_Modifier] Type Name[Index] [: Semantic] [: Packoffset] [: Register]; [Annotations] [= Initial_Value]
@@ -1063,7 +1072,7 @@ namespace AZ::ShaderCompiler
         const auto* varInfo = m_ir->GetSymbolSubAs<VarInfo>(cId.m_name);
         auto cbName = ReplaceSeparators(cId.m_name, Underscore);
 
-        EmitEmptyLinesToLineNumber(varInfo->GetOriginalLineNumber());
+        //EmitEmptyLinesToLineNumber(varInfo->GetOriginalLineNumber());
 
         assert(varInfo->IsConstantBuffer());
         // note: instead of redoing this work ad-hoc, EmitText could be used directly on the ext type.
@@ -1090,7 +1099,7 @@ namespace AZ::ShaderCompiler
         const auto& bindInfo = rootSig.Get(sId);
         const auto* varInfo = m_ir->GetSymbolSubAs<VarInfo>(sId.m_name);
 
-        EmitEmptyLinesToLineNumber(varInfo->GetOriginalLineNumber());
+        //EmitEmptyLinesToLineNumber(varInfo->GetOriginalLineNumber());
 
         const string spaceX = ", space" + std::to_string(bindInfo.m_registerBinding.m_pair[bindSet].m_logicalSpace);
         m_out << (varInfo->m_samplerState->m_isComparison ? "SamplerComparisonState " : "SamplerState ")
@@ -1139,7 +1148,7 @@ namespace AZ::ShaderCompiler
         auto   registerTypeLetter = ToLower(BindingType::ToStr(RootParamTypeToBindingType(bindInfo.m_type)));
         optional<string> stringifiedLogicalSpace = std::to_string(bindInfo.m_registerBinding.m_pair[bindSet].m_logicalSpace);
 
-        EmitEmptyLinesToLineNumber(varInfo->GetOriginalLineNumber());
+        //EmitEmptyLinesToLineNumber(varInfo->GetOriginalLineNumber());
 
         // depending on platforms we may have supplementary attributes or/and type modifier.
         auto [prefix, suffix] = GetPlatformEmitter().GetDataViewHeaderFooter(*this, tId, bindInfo.m_registerBinding.m_pair[bindSet].m_registerIndex, registerTypeLetter, stringifiedLogicalSpace);
@@ -1223,7 +1232,7 @@ namespace AZ::ShaderCompiler
         RootSigDesc::SrgDesc srgDesc;
         srgDesc.m_uid = srgId;
 
-        EmitEmptyLinesToLineNumber(srgInfo.GetOriginalLineNumber());
+        //EmitEmptyLinesToLineNumber(srgInfo.GetOriginalLineNumber());
 
         m_out << "/* Generated code from ";
         // We don't emit the SRG attributes (only as a comment), but they can be accessed by the srgId if needed
@@ -1290,7 +1299,7 @@ namespace AZ::ShaderCompiler
             
             if (emitNewLines)
             {
-                EmitEmptyLinesToLineNumber(token->getLine());
+                //EmitEmptyLinesToLineNumber(token->getLine());
             }
 
             const auto tokenIndex = token->getTokenIndex();
@@ -1378,11 +1387,11 @@ namespace AZ::ShaderCompiler
         GetTextInStream(interval, Backend::m_out);
     }
 
-    void CodeEmitter::EmitEmptyLinesToLineNumber(size_t originalLineNumber) const
-    {
-        while (m_out.GetLineCount() < originalLineNumber)
-        {
-            m_out << "\n";
-        }
-    }
+    //void CodeEmitter::EmitEmptyLinesToLineNumber(size_t originalLineNumber) const
+    //{
+    //    while (m_out.GetLineCount() < originalLineNumber)
+    //    {
+    //        m_out << "\n";
+    //    }
+    //}
 }

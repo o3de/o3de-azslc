@@ -23,8 +23,7 @@ namespace AZ::ShaderCompiler
     //! Deals with jobs that requires access to both Scope and SymbolTable
     struct SemanticOrchestrator
     {
-        SemanticOrchestrator(SymbolAggregator* sema, ScopeTracker* scope, azslLexer* lexer,
-            PreprocessorLineDirectiveFinder* preprocessorLineDirectiveFinder = nullptr);
+        SemanticOrchestrator(SymbolAggregator* sema, ScopeTracker* scope, azslLexer* lexer);
 
         //! Helper shortcut: uses the current scope as a starting location to lookup a symbol.
         //! Returns whatever SymbolAggretator's eponymous returns.
@@ -381,48 +380,10 @@ namespace AZ::ShaderCompiler
         //! queries whether a function has default parameters
         bool HasAnyDefaultParameterValue(const IdentifierUID& functionUid) const;
 
-        void ThrowAzslcOrchestratorException(uint32_t errorCode, optional<size_t> line, optional<size_t> column, const string& message) const
-        {
-            if (line && m_preprocessorLineDirectiveFinder)
-            {
-                m_preprocessorLineDirectiveFinder->OverrideAzslcExceptionFileAndLine(line.value());
-            }
-            throw AzslcOrchestratorException(errorCode, line, column, message);
-        }
-
-        void ThrowAzslcOrchestratorException(uint32_t errorCode, Token* token, const string& message) const
-        {
-            if (token && m_preprocessorLineDirectiveFinder)
-            {
-                m_preprocessorLineDirectiveFinder->OverrideAzslcExceptionFileAndLine(token->getLine());
-            }
-            throw AzslcOrchestratorException(errorCode, token, message);
-        }
-
-        void ThrowRedeclarationAsDifferentKindInternal(string_view symbolName, Kind newKind, const KindInfo& kindInfo, size_t lineNumber) const
-        {
-            if (lineNumber && m_preprocessorLineDirectiveFinder)
-            {
-                m_preprocessorLineDirectiveFinder->OverrideAzslcExceptionFileAndLine(lineNumber);
-            }
-            ThrowRedeclarationAsDifferentKind(symbolName, newKind, kindInfo, lineNumber);
-        }
-
-        void CheckFunctionReturnTypeModifierNotOptionNorRootconstant(TypeQualifier qualifier, size_t line) const
-        {
-            auto ngFlags = TypeQualifier{ StorageFlag::Option } | StorageFlag::Rootconstant;
-            if (qualifier & ngFlags)
-            {
-                ThrowAzslcOrchestratorException(ORCHESTRATOR_DISALLOWED_FUNCTION_MODIFIER, line,
-                    none, " Functions can't have option or rootconstant qualified return types.");
-            }
-        }
-
     public:
         SymbolAggregator* m_symbols;
         ScopeTracker*     m_scope;
         azslLexer*        m_lexer;
-        PreprocessorLineDirectiveFinder* m_preprocessorLineDirectiveFinder;
         UnboundedArraysValidator m_unboundedArraysValidator;
 
         //! cached property informing of the presence of at least one input attachment use.

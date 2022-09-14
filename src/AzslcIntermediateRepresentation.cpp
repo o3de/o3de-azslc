@@ -110,7 +110,8 @@ namespace AZ::ShaderCompiler
     }
 
     //! execute any logic that relates to intermediate treatment that would need to be done between front end and back end
-    void IntermediateRepresentation::MiddleEnd(const MiddleEndConfiguration& middleEndconfigration)
+    void IntermediateRepresentation::MiddleEnd(const MiddleEndConfiguration& middleEndconfigration,
+                                               PreprocessorLineDirectiveFinder* lineFinder)
     {
         // At this point we have an order apparition vector that stores symbols in the immediate naive
         // order in which they are first seen in the source code.
@@ -129,7 +130,7 @@ namespace AZ::ShaderCompiler
 
         if (!middleEndconfigration.m_skipAlignmentValidation)
         {
-            ValidateAlignmentIssueWhenScalarOrFloat2PrecededByMatrix(middleEndconfigration);
+            ValidateAlignmentIssueWhenScalarOrFloat2PrecededByMatrix(middleEndconfigration, lineFinder);
         }
     }
 
@@ -642,7 +643,8 @@ namespace AZ::ShaderCompiler
         m_rootConstantStructUID = rootConstantStructUid;
     }
 
-    void IntermediateRepresentation::ValidateAlignmentIssueWhenScalarOrFloat2PrecededByMatrix(const MiddleEndConfiguration& middleEndconfigration)
+    void IntermediateRepresentation::ValidateAlignmentIssueWhenScalarOrFloat2PrecededByMatrix(const MiddleEndConfiguration& middleEndconfigration,
+                                                                                              PreprocessorLineDirectiveFinder* lineFinder)
     {
         //! Helper lambda to check if a symbol is a matrix, it also returns
         //! the number of columns in @numColumns
@@ -876,10 +878,10 @@ namespace AZ::ShaderCompiler
             }
 
             // Let's get the line number where @insertBeforeThisUid was found in the flat AZSL file.
-            const auto * tmpThis = this; // To disambiguate which version of GetSymbolSubAs<> to call.
-            const auto * varInfo = tmpThis->GetSymbolSubAs<VarInfo>(insertBeforeThisUid.GetName());
+            const auto* constThis = this; // To disambiguate which version of GetSymbolSubAs<> to call.
+            const auto* varInfo = constThis->GetSymbolSubAs<VarInfo>(insertBeforeThisUid.GetName());
             size_t lineOfDeclaration = varInfo->GetOriginalLineNumber();
-            const LineDirectiveInfo* lineInfo = GetNearestPreprocessorLineDirective(lineOfDeclaration);
+            const LineDirectiveInfo* lineInfo = lineFinder->GetNearestPreprocessorLineDirective(lineOfDeclaration);
             if (!lineInfo)
             {
                 // When the LineDirectiveInfo* is null, it means We have detected a variable that was added
@@ -887,14 +889,11 @@ namespace AZ::ShaderCompiler
                 // In such case, this is not an issue We want to interfere with.
                 return {};
             }
-            const auto originallineNumber = GetLineNumberInOriginalSourceFile(*lineInfo, lineOfDeclaration);
-
+            const auto virtualLine = lineFinder->GetVirtualLineNumber(*lineInfo, lineOfDeclaration);
             string solution = FormatString("- A 'float%d' variable should be added before the variable '%s' in '%s %s' at Line number %zu of '%s'\n",
-                prepadType == PrepadType::Float2 ? 2 : 3, insertBeforeThisUid.GetNameLeaf().c_str(), typeName.c_str(), parentName.data(),
-                originallineNumber, lineInfo->m_containingFilename.c_str());
-
+                                           prepadType == PrepadType::Float2 ? 2 : 3, insertBeforeThisUid.GetNameLeaf().c_str(), typeName.c_str(), parentName.data(),
+                                           virtualLine, lineInfo->m_containingFilename.c_str());
             return solution;
-
         };
 
         string solutionsReport;
@@ -952,36 +951,5 @@ namespace AZ::ShaderCompiler
         }
         return memberList[memberList.size() - 1];
     }
-
-
-    //////////////////////////////////////////////////////////////////////////
-    // PreprocessorLineDirective overrides...
-    const LineDirectiveInfo* IntermediateRepresentation::GetNearestPreprocessorLineDirective(size_t azslLineNumber) const
-    {
-        if (!azslLineNumber)
-        {
-            return nullptr;
-        }
-
-        auto lineBefore = m_lineMap.lower_bound(azslLineNumber);
-        if (lineBefore != m_lineMap.begin() && (lineBefore != m_lineMap.end() || m_lineMap.size() > 0))
-        {
-            lineBefore--;
-            return &lineBefore->second;
-        }
-        return nullptr;
-    }
-
-    void IntermediateRepresentation::OverrideAzslcExceptionFileAndLine(size_t azslLineNumber) const
-    {
-        const LineDirectiveInfo* lineInfo = GetNearestPreprocessorLineDirective(azslLineNumber);
-        if (!lineInfo)
-        {
-            return;
-        }
-        AzslcException::s_currentSourceFileName = lineInfo->m_containingFilename;
-        AzslcException::s_sourceFileLineNumber = GetLineNumberInOriginalSourceFile(*lineInfo, azslLineNumber);
-    }
-    ///////////////////////////////////////////////////////////////////////////
 
 }  // end of namespace AZ::ShaderCompiler

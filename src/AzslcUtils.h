@@ -87,7 +87,7 @@ namespace AZ::ShaderCompiler
     inline string DiagLine(size_t line)
     {
         using namespace std::string_literals;
-        return AzslcException::s_currentSourceFileName + "("s + std::to_string(line) + "):";
+        return AzslcException::s_lineFinder->GetVirtualFileName(line) + "("s + std::to_string(line) + "):";
     }
 
     inline string DiagLine(optional<int> line)
@@ -115,7 +115,8 @@ namespace AZ::ShaderCompiler
     inline void PrintWarning(DiagnosticStream& stream, Warn::EnumType level, optional<size_t> lineNumber, optional<size_t> column, Types&&... messageBits)
     {
         stream << PushLevel{} << level
-               << AzslcException::MakeErrorMessage(lineNumber ? ToString(*lineNumber) : "", column ? ToString(*column) : "",
+               << AzslcException::MakeErrorMessage(lineNumber ? AzslcException::s_lineFinder->GetVirtualFileName(*lineNumber) : "",
+                                                   lineNumber ? ToString(AzslcException::s_lineFinder->GetVirtualLineNumber(*lineNumber)) : "", column ? ToString(*column) : "",
                                                    "", false, "", ConcatString(messageBits..., "\n"))
                << PopLevel{};
     }

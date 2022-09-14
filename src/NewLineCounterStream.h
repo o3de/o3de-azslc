@@ -16,13 +16,14 @@ namespace AZ
     //! Wraps and forwards data to a std::ostream,
     //! Overrides operator<< for char, const char * and string data and counts
     //! the number of '\n' (new line) characters that go through it.
-    class NewLineCounterStream
+    class NewLineCounterStream : public std::ostringstream
     {
         typedef NewLineCounterStream Self;
 
     public:
 
-        explicit NewLineCounterStream(std::ostream& streamToWrap) : m_wrappedStream(streamToWrap)
+        explicit NewLineCounterStream(std::ostream& streamToWrap)
+            : m_wrappedStream(streamToWrap)
         {}
 
         Self& operator<<(char c)

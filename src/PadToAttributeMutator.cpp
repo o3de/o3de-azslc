@@ -18,27 +18,27 @@ namespace AZ::ShaderCompiler
         if (attrInfo.m_argList.size() != 1)
         {
             auto errorMsg = FormatString("The [[pad_to(N)]] attribute only accepts one argument of integral type. %zu arguments were given.", attrInfo.m_argList.size());
-            m_ir.ThrowAzslcIrException(IR_INVALID_PAD_TO_ARGUMENTS, attrInfo.m_lineNumber, errorMsg);
+            throw AzslcIrException{IR_INVALID_PAD_TO_ARGUMENTS, errorMsg, attrInfo.m_lineNumber};
         }
         //Is the argument integral?
         if (!holds_alternative<ConstNumericVal>(attrInfo.m_argList[0]))
         {
             string errorMsg("The [[pad_to(N)]] attribute only accepts one argument of integral type. A non integral argument was given.");
-            m_ir.ThrowAzslcIrException(IR_INVALID_PAD_TO_ARGUMENTS, attrInfo.m_lineNumber, errorMsg);
+            throw AzslcIrException{IR_INVALID_PAD_TO_ARGUMENTS, errorMsg, attrInfo.m_lineNumber};
         }
         // Read the integral.
         auto pad_to_value = ExtractValueAs<uint32_t>(get<ConstNumericVal>(attrInfo.m_argList[0]), uint32_t(0));
         if (!pad_to_value)
         {
             string errorMsg("Failed to read input integral to [[pad_to(N)]].");
-            m_ir.ThrowAzslcIrException(IR_INVALID_PAD_TO_ARGUMENTS, attrInfo.m_lineNumber, errorMsg);
+            throw AzslcIrException{IR_INVALID_PAD_TO_ARGUMENTS, errorMsg, attrInfo.m_lineNumber};
         }
         // Must be a multiple of 4.
         static const uint32_t MultipleOf = 4;
         if (pad_to_value & (MultipleOf-1))
         {
             auto errorMsg = FormatString("Invalid integral in [[pad_to(N)]]. %u is not a multiple of %u", pad_to_value, MultipleOf);
-            m_ir.ThrowAzslcIrException(IR_INVALID_PAD_TO_ARGUMENTS, attrInfo.m_lineNumber, errorMsg);
+            throw AzslcIrException{IR_INVALID_PAD_TO_ARGUMENTS, errorMsg, attrInfo.m_lineNumber};
         }
 
         auto& [curScopeId, curScopeKindInfo] = m_ir.GetCurrentScopeIdAndKind();
@@ -51,7 +51,7 @@ namespace AZ::ShaderCompiler
                 auto errorMsg = FormatString("The [[pad_to(N)]] attribute must be added after a member variable."
                                              " The current scope '%.*s' doesn't have a declared variable yet.",
                                              static_cast<int>(curScopeId.GetName().size()), curScopeId.GetName().data());
-                m_ir.ThrowAzslcIrException(IR_INVALID_PAD_TO_LOCATION, attrInfo.m_lineNumber, errorMsg);
+                throw AzslcIrException{IR_INVALID_PAD_TO_LOCATION, errorMsg, attrInfo.m_lineNumber};
             }
             auto structItor = m_scopesToPad.find(curScopeId);
             if (structItor == m_scopesToPad.end())
@@ -64,7 +64,7 @@ namespace AZ::ShaderCompiler
             {
                 // It appears that there are two consecutive [[pad_to(N)]] attributes. This is an error.
                 auto errorMsg = string("Two consecutive [[pad_to(N)]] attributes are not allowed inside 'struct'.");
-                m_ir.ThrowAzslcIrException(IR_INVALID_PAD_TO_LOCATION, attrInfo.m_lineNumber, errorMsg);
+                throw AzslcIrException{IR_INVALID_PAD_TO_LOCATION, errorMsg, attrInfo.m_lineNumber};
             }
             varInfoUidToPadMap[varUid] = pad_to_value;
         }
@@ -73,7 +73,7 @@ namespace AZ::ShaderCompiler
             auto errorMsg = FormatString("The [[pad_to(N)]] attribute is only supported inside  inside 'struct', 'class' or 'ShaderResourceGroup'."
                                          " The current scope '%.*s' is not one of those scope types.",
                 static_cast<int>(curScopeId.GetName().size()), curScopeId.GetName().data());
-            m_ir.ThrowAzslcIrException(IR_INVALID_PAD_TO_LOCATION, attrInfo.m_lineNumber, errorMsg);
+            throw AzslcIrException{IR_INVALID_PAD_TO_LOCATION, errorMsg, attrInfo.m_lineNumber};
         }
     }
 
@@ -226,7 +226,7 @@ namespace AZ::ShaderCompiler
                                                           static_cast<int>(scopeUid.m_name.size()), scopeUid.m_name.data(),
                                                           padToBoundary);
                     const auto * varInfoPtr= m_ir.GetSymbolSubAs<VarInfo>(varUid.m_name);
-                    m_ir.ThrowAzslcIrException(IR_PAD_TO_CASE_REQUIRES_POWER_OF_TWO, varInfoPtr->GetOriginalLineNumber(), errorMsg);
+                    throw AzslcIrException{IR_PAD_TO_CASE_REQUIRES_POWER_OF_TWO, errorMsg, varInfoPtr->GetOriginalLineNumber()};
                 }
                 const uint32_t alignedOffset = Packing::AlignUp(nextMemberOffset, padToBoundary);
                 bytesToAdd = alignedOffset - nextMemberOffset;

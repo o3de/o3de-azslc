@@ -640,7 +640,7 @@ namespace AZ::ShaderCompiler
         output["space-merged"] = bindInfo.m_registerBinding.m_pair[BindingPair::Set::Merged].m_logicalSpace;
     }
 
-    void CodeReflection::DumpSRGLayout(const Options& options) const
+    void CodeReflection::DumpSRGLayout(const Options& options, PreprocessorLineDirectiveFinder* lineFinder) const
     {
         uint32_t numOf32bitConst = GetNumberOf32BitConstants(options, m_ir->m_rootConstantStructUID);
         RootSigDesc rootSig = BuildSignatureDescription(options, numOf32bitConst);
@@ -658,16 +658,10 @@ namespace AZ::ShaderCompiler
             srgLayout["id"] = srgInfo->m_declNode->Name->getText();
 
             // Try to locate the original filename where this SRG is declared
-            auto lineBefore = m_ir->m_lineMap.lower_bound(srgInfo->m_declNode->getStart()->getLine());
-            if (lineBefore != m_ir->m_lineMap.begin() && (lineBefore != m_ir->m_lineMap.end() || m_ir->m_lineMap.size() > 0))
-            {
-                lineBefore--;
-                const string& containing = lineBefore->second.m_containingFilename;
-                srgLayout["originalFileName"]    = StdFs::absolute(containing).lexically_normal().generic_string();
-                srgLayout["originalLineNumber"]  = static_cast<Json::Value::UInt64>(lineBefore->second.m_forcedLineNumber); // TODO: fix according to following concept:
-                /*auto nearestLineDirective = lineBefore->second.m_forcedLineNumber;
-                srgLayout["originalLineNumber"]  =  CurrentLine - nearestLineDirective;*/
-            }
+            size_t physical = srgInfo->m_declNode->getStart()->getLine();
+            srgLayout["originalFileName"]   = StdFs::absolute(lineFinder->GetVirtualFileName(physical)).lexically_normal().generic_string();
+            srgLayout["originalLineNumber"] = lineFinder->GetVirtualLineNumber(physical);
+
             auto semantic = m_ir->GetSymbolSubAs<ClassInfo>(srgInfo->m_semantic->GetName())->Get<SRGSemanticInfo>();
 
             srgLayout["bindingSlot"] = *semantic->m_frequencyId; // Semantic check has asserted that we have it, so we can dereference here.

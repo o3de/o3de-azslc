@@ -170,9 +170,10 @@ namespace AZ::ShaderCompiler
 
         string GetExtendedTypeInfo(const ExtendedTypeInfo& extTypeInfo, std::function<string(const TypeRefInfo&)> translator) const;
 
-        std::ostream&               m_out;
-        IntermediateRepresentation* m_ir;
-        TokenStream*                m_tokens;
+        std::ostream&                    m_out;
+        IntermediateRepresentation*      m_ir;
+        TokenStream*                     m_tokens;
+        PreprocessorLineDirectiveFinder* m_lineFinder;
     };
 
     // independent utility functions

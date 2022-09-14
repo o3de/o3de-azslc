@@ -31,7 +31,7 @@ namespace AZ::ShaderCompiler
 
         //! Reflect resource groups layout
         //! @param options  user configuration parsed from command line
-        void DumpSRGLayout(const Options& options) const;
+        void DumpSRGLayout(const Options& options, PreprocessorLineDirectiveFinder* lineFinder) const;
 
         //! Reflect shader options
         //! @param options  user configuration parsed from command line

@@ -566,7 +566,7 @@ Whitespace
 Newline
     :   (   '\r' '\n'?
         |   '\n'
-        )  -> skip
+        )  -> channel(HIDDEN)
     ;
 
 // Amazon: The original mode switches from Tim Jones were not working.

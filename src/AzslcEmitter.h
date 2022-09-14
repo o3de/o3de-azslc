@@ -27,12 +27,11 @@ namespace AZ::ShaderCompiler
 
     struct CodeEmitter : Backend
     {
-        using Backend::Backend;
-
-        CodeEmitter(IntermediateRepresentation* ir, TokenStream* tokens, std::ostream& out)
+        CodeEmitter(IntermediateRepresentation* ir, TokenStream* tokens, std::ostream& out, PreprocessorLineDirectiveFinder* lineFinder)
             :
-            Backend(ir, tokens, out),
-            m_out(out)
+            Backend(ir, tokens, m_out),
+            m_out(out),
+            m_lineFinder(lineFinder)
         {}
 
         //! Create a companion database of mutations on the IR, through which the emitter backend can query symbols scope and names.
@@ -211,7 +210,7 @@ namespace AZ::ShaderCompiler
         SymbolTranslation m_translations;
         unordered_set<IdentifierUID> m_alreadyEmittedFunctionDeclarations;
         unordered_set<IdentifierUID> m_alreadyEmittedFunctionDefinitions;
-        unordered_set<size_t> m_alreadyEmittedPreprocessorLineDirectives;
+        map<size_t, size_t> m_alreadyEmittedPreprocessorLineDirectives;
 
         IdentifierUID m_shaderVariantFallbackUid;
         
@@ -220,12 +219,13 @@ namespace AZ::ShaderCompiler
         ICodeEmissionMutator* m_codeMutator = nullptr;
 
         //! We keep track here of the number of lines that have been emitted.
-        //! The idea is to try to keep the number of lines between the input and the output files
-        //! as close to each other as possible.
-        //! Each symbol has an original line number where it appeared and if the number of output lines
-        //! is less We fill with '\n' (new line) characters until they match.
+        //! Each symbol has an original line number (virtual and physical) where it appeared,
+        //! and emission will also have line directives to remap errors from further tools to the original azsl.
+        //! To avoid spamming the output with line directives, we can keep track of whether a deviation
+        //! has been introduced since the last emitted line directive and the desired virtual line of the currently emitted code construct.
         mutable NewLineCounterStream m_out;
-        void EmitEmptyLinesToLineNumber(size_t originalLineNumber) const;
+
+        PreprocessorLineDirectiveFinder* m_lineFinder;
 
         //! This template takes over the previous implementation of
         //! void GetTextInStream(misc::Interval interval, std::ostream& output) const override;

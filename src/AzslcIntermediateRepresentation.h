@@ -10,7 +10,6 @@
 #include "AzslcSemanticOrchestrator.h"
 #include "AzslcTokenToAst.h"
 #include "AzslcKindInfo.h"
-#include "PreprocessorLineDirectiveFinder.h"
 #include "PadToAttributeMutator.h"
 
 namespace AZ::ShaderCompiler
@@ -33,7 +32,7 @@ namespace AZ::ShaderCompiler
 
     // Holder responsible for owning post-parsed source data (in the form of an object graph).
     // Note that this is not IL. e.g. not a serialized form of IR with op-codes (like DXIL).
-    struct IntermediateRepresentation : public PreprocessorLineDirectiveFinder
+    struct IntermediateRepresentation
     {
         IntermediateRepresentation(azslLexer* lexer)
             : m_scope{[&](QualifiedNameView sym)  // Initialize the scope object with a decoupled identifier getter. (SOLID's D.I.P)
@@ -42,7 +41,7 @@ namespace AZ::ShaderCompiler
                       }
                      }
             , m_lexer{ lexer }
-            , m_sema{&m_symbols, &m_scope, lexer, this}
+            , m_sema{&m_symbols, &m_scope, lexer}
             , m_padToAttributeMutator(*this)
         {
             // Default output format for all targets
@@ -187,7 +186,8 @@ namespace AZ::ShaderCompiler
             const AZ::ShaderCompiler::Packing::Layout layoutPacking) const;
 
         //! execute any logic that relates to intermediate treatment that would need to be done between front end and back end
-        void MiddleEnd(const MiddleEndConfiguration& middleEndconfig);
+        void MiddleEnd(const MiddleEndConfiguration& middleEndconfig,
+                       PreprocessorLineDirectiveFinder* lineFinder);
 
         bool Validate();
 
@@ -298,19 +298,8 @@ namespace AZ::ShaderCompiler
         //!     float2 m_value;
         //! }
         //!  
-        void ValidateAlignmentIssueWhenScalarOrFloat2PrecededByMatrix(const MiddleEndConfiguration& middleEndconfigration);
-
-        //////////////////////////////////////////////////////////////////////////
-        // PreprocessorLineDirective overrides...
-        const LineDirectiveInfo* GetNearestPreprocessorLineDirective(size_t azslLineNumber) const override;
-        void OverrideAzslcExceptionFileAndLine(size_t azslLineNumber) const override;
-        //////////////////////////////////////////////////////////////////////////
-
-        void ThrowAzslcIrException(uint32_t errorCode, size_t lineNumber, const string& message)
-        {
-            OverrideAzslcExceptionFileAndLine(lineNumber);
-            throw AzslcIrException(errorCode, message);
-        }
+        void ValidateAlignmentIssueWhenScalarOrFloat2PrecededByMatrix(const MiddleEndConfiguration& middleEndconfigration,
+                                                                      PreprocessorLineDirectiveFinder* lineFinder);
 
         // Returns info for the last variable inside the struct or class named @structUid.
         // If @structUid is not struct or class, then it returns nullptr.
@@ -329,9 +318,7 @@ namespace AZ::ShaderCompiler
         // the structure that holds root constants (it's a generated thing, and there is only one)
         IdentifierUID         m_rootConstantStructUID;
 
-        map<size_t, LineDirectiveInfo> m_lineMap;
-
-        IRMetaData m_metaData;
+        IRMetaData            m_metaData;
 
         // Helper to deal with the [[pad_to(N)]] attribute.
         PadToAttributeMutator m_padToAttributeMutator;
