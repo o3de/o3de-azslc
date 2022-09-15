@@ -572,7 +572,7 @@ namespace AZ::ShaderCompiler
         auto regType = RootParamTypeToBindingType(paramType);
 
         BindingPair binding = bindInfo.GetCurrent(regType);
-        if (isUnboundedArray)
+        if (isUnboundedArray && GetPlatformEmitter().RequiresUniqueSpaceForUnboundedArrays())
         {
             // Use a unique register space for every unbounded array because in DirectX 12 unbounded arrays consume
             // all remaining registers for that resource type. By making a unique space for each unbounded array
