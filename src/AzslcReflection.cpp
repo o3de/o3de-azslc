@@ -21,7 +21,8 @@ namespace AZ::ShaderCompiler
     Json::Value ToJson(const OStreamable& streamableObj)
     {
         std::ostringstream baseStr;
-        baseStr << streamableObj;
+        Streamable&& s{MakeOStreamStreamable{baseStr}};
+        s << streamableObj;
         return baseStr.str();
     }
 

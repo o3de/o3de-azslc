@@ -10,7 +10,7 @@
 #include "StdUtils.h"
 #include "MetaUtils.h"
 
-#include <sstream>
+#include "StreamableInterface.h"
 
 #define AZ_STRINGIFY(x) #x
 #define AZ_TOSTRING(x) AZ_STRINGIFY(x)
@@ -216,9 +216,10 @@ namespace AZ
             return "";
 
         std::stringstream ss;
-        ss << *begin;
+        Streamable&& wrap{MakeOStreamStreamable{ss}};
+        wrap << *begin;
 
-        auto aggregate = [&ss, &separator](auto s) { ss << separator.data() << s; };
+        auto aggregate = [&wrap, &separator](auto s) { wrap << separator.data() << s; };
         std::for_each(std::next(begin), end, aggregate);
 
         return ss.str();

@@ -8,6 +8,7 @@
 #pragma once
 
 #include "AzslcListener.h"
+#include "NewLineCounterStream.h"
 
 #include "jsoncpp/dist/json/json.h"
 
@@ -132,8 +133,8 @@ namespace AZ::ShaderCompiler
     class Backend
     {
     public:
-        Backend(IntermediateRepresentation* ir, TokenStream* tokens, std::ostream& out)
-        : m_ir(ir), m_tokens(tokens), m_out(out)
+        Backend(IntermediateRepresentation* ir, TokenStream* tokens)
+        : m_ir(ir), m_tokens(tokens)
         {}
 
         //! Gets the IntermediateRepresentation object
@@ -146,11 +147,9 @@ namespace AZ::ShaderCompiler
         //! Gets the next and increments tokenIndex. TokenIndex must be in the [misc::Interval.a, misc::Interval.b] range. Token cannot be nullptr.
         auto GetNextToken(ssize_t& tokenIndex, size_t channel = Token::DEFAULT_CHANNEL) const -> antlr4::Token*;
 
-        //! Extract an interval of text out of the source token stream, and append it to @output
-        virtual void GetTextInStream(misc::Interval interval, std::ostream& output) const;
+        virtual void EmitTranspiledTokens(misc::Interval interval, Streamable& output) const;
 
-        //! Extract an interval of text out of the source token stream
-        string GetTextAsString(misc::Interval interval) const;
+        string GetTranspiledTokens(misc::Interval interval) const;
 
         string GetInitializerClause(const AZ::ShaderCompiler::VarInfo* varInfo) const;
 
@@ -170,10 +169,8 @@ namespace AZ::ShaderCompiler
 
         string GetExtendedTypeInfo(const ExtendedTypeInfo& extTypeInfo, std::function<string(const TypeRefInfo&)> translator) const;
 
-        std::ostream&                    m_out;
         IntermediateRepresentation*      m_ir;
         TokenStream*                     m_tokens;
-        PreprocessorLineDirectiveFinder* m_lineFinder;
     };
 
     // independent utility functions
@@ -197,9 +194,9 @@ namespace AZ::ShaderCompiler
     // don't use for HLSL emission (this doesn't go through translation)
     string UnmangleTrimedName(const ExtendedTypeInfo& extTypeInfo);
 
-    std::ostream &operator << (std::ostream &out, const SamplerStateDesc::AddressMode& addressMode);
-    std::ostream &operator << (std::ostream &out, const SamplerStateDesc::ComparisonFunc& compFunc);
-    std::ostream &operator << (std::ostream &out, const SamplerStateDesc::BorderColor& borderColor);
-    std::ostream &operator << (std::ostream &out, const SamplerStateDesc& samplerDesc);
-    std::ostream &operator << (std::ostream &out, const SamplerStateDesc::ReductionType& redcType);
+    Streamable& operator << (Streamable& out, const SamplerStateDesc::AddressMode& addressMode);
+    Streamable& operator << (Streamable& out, const SamplerStateDesc::ComparisonFunc& compFunc);
+    Streamable& operator << (Streamable& out, const SamplerStateDesc::BorderColor& borderColor);
+    Streamable& operator << (Streamable& out, const SamplerStateDesc& samplerDesc);
+    Streamable& operator << (Streamable& out, const SamplerStateDesc::ReductionType& redcType);
 }

@@ -707,7 +707,7 @@ int main(int argc, const char* argv[])
                     {
                         emitter.SetCodeMutator(&texture2DMSto2DCodeMutator);
                     }
-                    out << "// HLSL emission by " << versionString << "\n";
+                    emitter << "// HLSL emission by " << versionString << "\n";
                     emitter.Run(emitOptions);
 
                     prepareOutputAndCall("ia", [&](CodeReflection& r) { r.DumpShaderEntries(); });
@@ -743,7 +743,7 @@ int main(int argc, const char* argv[])
                     {
                         emitter.SetCodeMutator(&texture2DMSto2DCodeMutator);
                     }
-                    out << "// HLSL emission by " << versionString << "\n";
+                    emitter << "// HLSL emission by " << versionString << "\n";
                     emitter.Run(emitOptions);
                 }
             }

@@ -10,7 +10,6 @@
 #include "AzslcBackend.h"
 #include "AzslcSymbolTranslation.h"
 #include "AzslcCodeEmissionMutator.h"
-#include "NewLineCounterStream.h"
 
 namespace Json
 {
@@ -29,7 +28,7 @@ namespace AZ::ShaderCompiler
     {
         CodeEmitter(IntermediateRepresentation* ir, TokenStream* tokens, std::ostream& out, PreprocessorLineDirectiveFinder* lineFinder)
             :
-            Backend(ir, tokens, m_out),
+            Backend(ir, tokens),
             m_out(out),
             m_lineFinder(lineFinder)
         {}
@@ -53,9 +52,18 @@ namespace AZ::ShaderCompiler
         string GetTranslatedName(const ExtendedTypeInfo& extType, UsageContext qualification, ssize_t tokenId = NotOverToken) const;
 
         //! Write the HLSL formatted shape of an attribute into a stream
-        static void EmitAttribute(const AttributeInfo& attrInfo, std::ostream& outstream);
+        static void EmitAttribute(const AttributeInfo& attrInfo, Streamable& outstream);
 
         void SetCodeMutator(ICodeEmissionMutator* codeMutator) { m_codeMutator = codeMutator; }
+
+        //! It would be nice that the clients don't push text through the passed "out" stream since it's not observed by the line counter;
+        //! use this API in case of custom client text pushing.
+        template< typename Streamable >
+        CodeEmitter& operator << (Streamable&& s)
+        {
+            m_out << s;
+            return *this;
+        }
 
     protected:
 
@@ -137,7 +145,7 @@ namespace AZ::ShaderCompiler
                     {
                         for (auto* rankCtx : param.m_arrayRankSpecifiers)
                         {
-                            EmitText(rankCtx->getSourceInterval());
+                            EmitTranspiledTokens(rankCtx->getSourceInterval());
                         }
                     }
 
@@ -148,7 +156,7 @@ namespace AZ::ShaderCompiler
 
                     if (param.m_defaultValueExpression)
                     {
-                        EmitText(param.m_defaultValueExpression->getSourceInterval());
+                        EmitTranspiledTokens(param.m_defaultValueExpression->getSourceInterval());
                     }
                 }
 
@@ -179,10 +187,10 @@ namespace AZ::ShaderCompiler
         void EmitSRG(const SRGInfo& srgInfo, const IdentifierUID& srgId, const Options& options, const RootSigDesc& rootSig);
 
         //! Advanced logic (targeted transpilation transforms included) interval-as-text extractor from source token stream
-        void GetTextInStream(misc::Interval interval, std::ostream& output) const override;
-
         //! Will copy function body original tokens, skipping comments, reformatting if possible, and translating variable declarations when needed, as well as mutating reference names of migrated SRG contents.
-        void EmitText(misc::Interval interval) const;
+        void EmitTranspiledTokens(misc::Interval interval, Streamable& output) const override;
+
+        void EmitTranspiledTokens(misc::Interval interval) const { EmitTranspiledTokens(interval, m_out); }
 
         //! Move a symbol to a different scope. Currently used to strip SRGs of their symbols, so that SRGs are effectively erased.
         void MigrateASTSubTree(const IdentifierUID& azslSymbol, QualifiedNameView landingScope);
@@ -226,13 +234,6 @@ namespace AZ::ShaderCompiler
         mutable NewLineCounterStream m_out;
 
         PreprocessorLineDirectiveFinder* m_lineFinder;
-
-        //! This template takes over the previous implementation of
-        //! void GetTextInStream(misc::Interval interval, std::ostream& output) const override;
-        //! The idea is that by using the template We only have to write the same code once
-        //! whether We are using a regular std::ostream or an instance of NewLineCounterStream.
-        template <class StreamLike>
-        void GetTextInStreamInternal(misc::Interval interval, StreamLike& output, bool emitNewLines) const;
 
         //! This is a readability function for class emission code. Serves for HLSL declarator of classes
         string EmitInheritanceList(const ClassInfo& clInfo);

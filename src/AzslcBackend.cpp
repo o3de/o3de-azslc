@@ -69,7 +69,7 @@ namespace AZ::ShaderCompiler
     // Define emission for sampler states
     // Reference: https://github.com/Microsoft/DirectXShaderCompiler/blob/master/tools/clang/unittests/HLSL/FunctionTest.cpp
 
-    std::ostream &operator << (std::ostream &out, const SamplerStateDesc::AddressMode& addressMode)
+    Streamable& operator << (Streamable& out, const SamplerStateDesc::AddressMode& addressMode)
     {
         return out << ((addressMode == SamplerStateDesc::AddressMode::Wrap)   ? "TEXTURE_ADDRESS_WRAP"
                      : (addressMode == SamplerStateDesc::AddressMode::Clamp)  ? "TEXTURE_ADDRESS_CLAMP"
@@ -78,7 +78,7 @@ namespace AZ::ShaderCompiler
                      :                                                          "TEXTURE_ADDRESS_MIRROR_ONCE");
     }
 
-    std::ostream &operator << (std::ostream &out, const SamplerStateDesc::ComparisonFunc& compFunc)
+    Streamable& operator << (Streamable& out, const SamplerStateDesc::ComparisonFunc& compFunc)
     {
         return out << ((compFunc == SamplerStateDesc::ComparisonFunc::Never)        ? "COMPARISON_NEVER"
                      : (compFunc == SamplerStateDesc::ComparisonFunc::Less)         ? "COMPARISON_LESS"
@@ -90,14 +90,14 @@ namespace AZ::ShaderCompiler
                      :                                                                "COMPARISON_ALWAYS");
     }
 
-    std::ostream &operator << (std::ostream &out, const SamplerStateDesc::BorderColor& borderColor)
+    Streamable& operator << (Streamable& out, const SamplerStateDesc::BorderColor& borderColor)
     {
         return out << ((borderColor == SamplerStateDesc::BorderColor::OpaqueBlack) ? "STATIC_BORDER_COLOR_OPAQUE_BLACK"
                      : (borderColor == SamplerStateDesc::BorderColor::OpaqueWhite) ? "STATIC_BORDER_COLOR_OPAQUE_WHITE"
                      :                                                               "STATIC_BORDER_COLOR_TRANSPARENT_BLACK");
     }
 
-    std::ostream &operator << (std::ostream &out, const SamplerStateDesc& samplerDesc)
+    Streamable& operator << (Streamable& out, const SamplerStateDesc& samplerDesc)
     {
         // Resolving the filter is the hardest part of the emission
         out << ", filter = FILTER_";
@@ -241,7 +241,7 @@ namespace AZ::ShaderCompiler
         return pair;
     }
 
-    std::ostream &operator << (std::ostream &out, const SamplerStateDesc::ReductionType& redcType)
+    Streamable& operator << (Streamable& out, const SamplerStateDesc::ReductionType& redcType)
     {
         return out << ((redcType == SamplerStateDesc::ReductionType::Comparison)  ? "Comparison"
                      : (redcType == SamplerStateDesc::ReductionType::Filter)      ? "Filter"
@@ -280,7 +280,7 @@ namespace AZ::ShaderCompiler
         return token;
     }
 
-    void Backend::GetTextInStream(misc::Interval interval, std::ostream& output) const
+    void Backend::EmitTranspiledTokens(misc::Interval interval, Streamable& output) const
     {
         ssize_t ii = interval.a;
         while (ii <= interval.b)
@@ -291,12 +291,13 @@ namespace AZ::ShaderCompiler
         }
     }
 
-    string Backend::GetTextAsString(misc::Interval interval) const
+    string Backend::GetTranspiledTokens(misc::Interval interval) const
     {
         static std::stringstream ss;
         ss.str({});
         ss.clear();
-        GetTextInStream(interval, ss);
+        MakeOStreamStreamable soss(ss);
+        EmitTranspiledTokens(interval, soss);
         return ss.str();
     }
 
@@ -310,7 +311,7 @@ namespace AZ::ShaderCompiler
         }
 
         auto* initClause = varInfo->m_declNode->variableInitializer()->standardVariableInitializer();
-        return RemoveWhitespaces(GetTextAsString(initClause->getSourceInterval()));
+        return RemoveWhitespaces(GetTranspiledTokens(initClause->getSourceInterval()));
     }
 
     void Backend::AppendOptionRange(Json::Value& varOption, const IdentifierUID& varUid, const VarInfo* varInfo, const Options& options) const

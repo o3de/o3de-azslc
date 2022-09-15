@@ -7,26 +7,23 @@
  */
 #pragma once
 
-#include "ReflectableEnums.h"
-
-#include <ostream>
+#include "StreamableInterface.h"
 
 namespace AZ
 {
     //! Wraps and forwards data to a std::ostream,
     //! Overrides operator<< for char, const char * and string data and counts
     //! the number of '\n' (new line) characters that go through it.
-    class NewLineCounterStream : public std::ostringstream
+    class NewLineCounterStream : public Streamable
     {
         typedef NewLineCounterStream Self;
 
     public:
-
-        explicit NewLineCounterStream(std::ostream& streamToWrap)
+        NewLineCounterStream(std::ostream& streamToWrap)
             : m_wrappedStream(streamToWrap)
         {}
 
-        Self& operator<<(char c)
+        Self& operator<<(char c) override
         {
             if (c == '\n')
             {
@@ -36,7 +33,7 @@ namespace AZ
             return *this;
         }
 
-        Self& operator<<(const char * nts)
+        Self& operator<<(const char * nts) override
         {
             const char * tmp = nts;
             while(char c = *tmp++)
@@ -50,7 +47,7 @@ namespace AZ
             return *this;
         }
 
-        Self& operator<<(const std::string& str)
+        Self& operator<<(const string& str) override
         {
             for (char c : str)
             {
@@ -63,6 +60,12 @@ namespace AZ
             return *this;
         }
 
+        Streamable& operator<<(StringFormTypeEraser&& anything) override
+        {
+            this->operator<<(anything.textified);
+            return *this;
+        }
+
         template <class Any>
         Self& operator<<(Any&& thing)
         {
@@ -72,10 +75,8 @@ namespace AZ
 
         int GetLineCount() const { return m_lineCount; }
 
-        bool IsTheSameStream(std::ostream& stream) const { return &stream == &m_wrappedStream; } 
-
     private:
-        std::ostream& m_wrappedStream;
         int m_lineCount = 0;
+        std::ostream& m_wrappedStream;
     };
 }
