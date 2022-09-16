@@ -388,25 +388,26 @@ Dot : '.';
 True : 'true';
 False : 'false';
 
-// AMAZON
+// AZSL extensions
 KW_AssociatedType : 'associatedtype' ;
 KW_TypeAlias : 'typealias' ;
 KW_Typedef : 'typedef' ;
 KW_Fundamental : 'fundamental' ; // [GFX TODO]
 KW_Typeof : 'typeof' ;  // simple decltype-like operator
 
-// AZSLc extensions
+// AZSL SRG
+FrequencyId : 'FrequencyId';
+ShaderVariantFallback : 'ShaderVariantFallback';
+ShaderResourceGroupSemantic : 'ShaderResourceGroupSemantic';
+ShaderResourceGroup : 'ShaderResourceGroup';
+
+// AZSLc-specific internal access keywords
 KW_ext_print_message : '__azslc_print_message' ;
 KW_ext_print_symbol : '__azslc_print_symbol' ;
 KW_ext_prtsym_fully_qualified : '__azslc_prtsym_fully_qualified' ;
 KW_ext_prtsym_least_qualified : '__azslc_prtsym_least_qualified' ;
 KW_ext_prtsym_constint_value : '__azslc_prtsym_constint_value' ;
 
-// AZSL SRG
-FrequencyId : 'FrequencyId';
-ShaderVariantFallback : 'ShaderVariantFallback';
-ShaderResourceGroupSemantic : 'ShaderResourceGroupSemantic';
-ShaderResourceGroup : 'ShaderResourceGroup';
 
 HLSLSemanticStream:
     'BINORMAL'      Digit*
@@ -434,10 +435,10 @@ HLSLSemanticSystem:
   | 'sv_'       (Nondigit | Digit)*
 ;
 
-// unfortunately reserved keywords preventing their use as Identifier:
+// unfortunately common words need to become reserved keywords, precluding their use as Identifier:
 Indices : 'indices';   // mesh-shader parameter qualifier
 Vertices : 'vertices'; // mesh-shader parameter qualifier
-//Payload : 'payload';   // hit-shader optional qualifier -> not allowed in AZSL since optional, and many samples uses "payload" as a parameter variable name.
+Payload : 'payload';   // mesh-shader parameter qualifier & hit-shader optional qualifier
 
 Identifier
     :   Nondigit (Nondigit | Digit)*

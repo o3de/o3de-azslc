@@ -23,7 +23,7 @@ namespace StdFs = std::filesystem;
 // For large features or milestones. Minor version allows for breaking changes. Existing tests can change.
 #define AZSLC_MINOR "8"   // last change: introduction of class inheritance
 // For small features or bug fixes. They cannot introduce breaking changes. Existing tests shouldn't change.
-#define AZSLC_REVISION "6"  // last change: enhanced grammar compliance with HLSL & robust line directive support
+#define AZSLC_REVISION "7"  // last change: enhanced grammar compliance with HLSL & robust line directive support
 
 
 namespace AZ::ShaderCompiler
@@ -34,15 +34,14 @@ namespace AZ::ShaderCompiler
 
     using MapOfStringViewToSetOfString = map<string_view, set<string>>;
 
-    // out argument: classifiedTokens
-    // filter: is a predicate for condition to check to pass registration
-    template <typename FilterFunction>
-    void ClassifyAllTokens(const azslLexer* lexer, MapOfStringViewToSetOfString& classifiedTokens, FilterFunction&& filter = nullptr)
+    template <typename TypeClassFilterPredicate = std::nullptr_t>
+    void VisitTokens(const antlr4::Recognizer* recognizer,
+                     MapOfStringViewToSetOfString& acceptedToken, set<string>& notTypes1,  // out
+                     TypeClassFilterPredicate tcFilter = nullptr)
     {
         // loop over all keywords
-        const auto& vocabulary = lexer->getVocabulary();
+        const auto& vocabulary = recognizer->getVocabulary();
         size_t maxToken = vocabulary.getMaxTokenType();
-        set<string> notTypes1;
         for (size_t ii = 0; ii < maxToken; ++ii)
         {
             string token = vocabulary.getLiteralName(ii);
@@ -51,9 +50,9 @@ namespace AZ::ShaderCompiler
             {
                 TypeClass tc = AnalyzeTypeClass(TentativeName{token});
                 bool accept = true;
-                if constexpr (!is_same_v<std::nullptr_t, std::remove_reference_t<decltype(filter)>>)
+                if constexpr (!is_same_v<std::nullptr_t, std::remove_reference_t<decltype(tcFilter)>>)
                 {
-                    accept = filter(tc);
+                    accept = tcFilter(tc);
                 }
 
                 if (tc == TypeClass::IsNotType)
@@ -63,11 +62,19 @@ namespace AZ::ShaderCompiler
 
                 if (accept)
                 {
-                    classifiedTokens[TypeClass::ToStr(tc)].emplace(std::move(token));
+                    acceptedToken[TypeClass::ToStr(tc)].emplace(std::move(token));
                 }
             }
         }
+    }
 
+    // out argument: classifiedTokens
+    // filter: is a predicate for condition to check to pass registration
+    template <typename FilterFunction>
+    void ClassifyAllTokens(const azslLexer* lexer, MapOfStringViewToSetOfString& classifiedTokens, FilterFunction filter)
+    {
+        set<string> notTypes1;
+        VisitTokens(lexer, classifiedTokens, notTypes1, filter);
         // now. because of names such as StructuredBuffer or matrix, need to have a generic appendix to mean something,
         // they will be classified as IsNotType. So we need to re-attempt analysis by appending something parseable.
 
@@ -130,6 +137,17 @@ namespace AZ::ShaderCompiler
                 classifiedTokens[TypeClass::ToStr(tc)].insert(token);
             }
         } // end for
+    }
+
+    bool IsKeyword(const antlr4::Recognizer* r, antlr4::Token* token)
+    {
+        MapOfStringViewToSetOfString byTypeClass;
+        set<string> notTypes;
+        VisitTokens(r, byTypeClass, notTypes);
+        bool notType = notTypes.find(token->getText()) != notTypes.end();
+        bool notIdentifier = r->getVocabulary().getSymbolicName(token->getType()) != "Identifier";
+        bool firstIsalpha(token->getText()[0]);
+        return notType && notIdentifier && firstIsalpha;
     }
 
     void DumpClassifiedTokensToYaml(const MapOfStringViewToSetOfString& classifiedTokens)
@@ -489,6 +507,7 @@ int main(int argc, const char* argv[])
         AzslParserEventListener azslParserEventListener;
         azslParser parser(&tokens);
         parser.removeErrorListeners();
+        azslParserEventListener.m_isKeywordPredicate = IsKeyword;
         parser.addErrorListener(&azslParserEventListener);
         tree::ParseTree *tree = parser.compilationUnit();
 

@@ -29,7 +29,6 @@ namespace AZ::ShaderCompiler
         void enterEnumeratorDeclarator(azslParser::EnumeratorDeclaratorContext* ctx) override;
         void enterSamplerBodyDeclaration(azslParser::SamplerBodyDeclarationContext* ctx) override;
         void exitSamplerBodyDeclaration(azslParser::SamplerBodyDeclarationContext* ctx) override;
-        void enterConstantBufferTemplated(azslParser::ConstantBufferTemplatedContext* ctx) override;
         void enterSrgDefinition(azslParser::SrgDefinitionContext* ctx) override;
         void exitSrgDefinition(azslParser::SrgDefinitionContext* ctx) override;
         void enterSrgSemanticMemberDeclaration(azslParser::SrgSemanticMemberDeclarationContext* ctx) override;

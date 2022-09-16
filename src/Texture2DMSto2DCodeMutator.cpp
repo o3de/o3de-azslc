@@ -321,7 +321,7 @@ namespace AZ::ShaderCompiler
             }
 
             //Semantics can be part of a struct, or function parameters.
-            if (ParamContextOverVariableDeclarator(varInfo->m_declNode))
+            if (ParamContextOverUnnamedVariableDeclarator(varInfo->m_declNode))
             {
                 // This is a function parameter.
                 IdentifierUID functionUid = IdentifierUID{ GetParentName(uid.GetName()) };
@@ -341,7 +341,7 @@ namespace AZ::ShaderCompiler
     static string GetLocalVariableStringFromFunctionArgument(const UnqualifiedName& uqName, AstUnnamedVarDecl* ctx, const char * initializationValue)
     {
         azslParser::FunctionParamContext* paramCtx = nullptr;
-        auto typeCtx = ExtractTypeFromVariableDeclarator(ctx, &paramCtx);
+        auto typeCtx = ExtractTypeFromUnnamedVariableDeclarator(ctx, &paramCtx);
         auto variableTypeStr = typeCtx->getText();
         if (initializationValue)
         {

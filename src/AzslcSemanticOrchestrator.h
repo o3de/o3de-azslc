@@ -149,7 +149,7 @@ namespace AZ::ShaderCompiler
             return symbol;
         }
 
-        auto RegisterTypeAlias(string_view newIdentifier, AstFuncType* existingTypeCtx, azslParser::TypeAliasingDefinitionStatementContext* ctx) -> IdAndKind&;
+        auto RegisterTypeAlias(string_view newIdentifier, AstType* existingTypeCtx, azslParser::TypeAliasingDefinitionStatementContext* ctx) -> IdAndKind&;
 
         auto RegisterSRGSemantic(AstSRGSemanticDeclNode* ctx) -> IdAndKind&;
 
@@ -207,7 +207,6 @@ namespace AZ::ShaderCompiler
         auto TypeofExpr(azslParser::ExpressionExtContext* ctx) const -> QualifiedName;
         auto TypeofExpr(azslParser::OtherExpressionContext* ctx) const -> QualifiedName;
         auto TypeofExpr(AstType* ctx) const -> QualifiedName;
-        auto TypeofExpr(AstFuncType* ctx) const -> QualifiedName;
         auto TypeofExpr(AstIdExpr* ctx) const -> QualifiedName;
         auto TypeofExpr(azslParser::IdentifierExpressionContext* ctx) const -> QualifiedName;
         auto TypeofExpr(azslParser::MemberAccessExpressionContext* ctx) const -> QualifiedName;
@@ -324,7 +323,7 @@ namespace AZ::ShaderCompiler
         }
 
         // lookup the symbol database for a type of a given name (or discover the name through an Ast context) and compose a TypeRefInfo
-        // ArgumentType maybe UnqualifiedNameView or a TypeCtx (AstType or AstFuncType)
+        // ArgumentType maybe UnqualifiedNameView or a AstType
         template< typename ContextOrNameT >
         auto CreateTypeRefInfo(ContextOrNameT typeNameOrCtx, OnNotFoundOrWrongKind policy = OnNotFoundOrWrongKind::CopeByCopy) const -> TypeRefInfo
         {
@@ -343,7 +342,7 @@ namespace AZ::ShaderCompiler
         // Just a helper function to compose the bigger version, that contains more data that can't be stored in the core type (TypeRefInfo).
         // Array dimensions and mtxMajor are usually stored in VarInfo for example. If you have a custom way to discover them, use this helper to make your own ExtendedTypeInfo
         auto CreateExtendedTypeInfo(AstType* ctx, ArrayDimensions dims, Packing::MatrixMajor mtxMajor) const -> ExtendedTypeInfo;
-        auto CreateExtendedTypeInfo(AstFuncType* ctx, ArrayDimensions dims, Packing::MatrixMajor mtxMajor) const -> ExtendedTypeInfo;
+
         // Helper func which folds any possible generic dimensions into the extracted composed type
         bool TryFoldGenericArrayDimensions(ExtractedComposedType& extType, vector<tree::TerminalNode*>& genericDims) const;
 

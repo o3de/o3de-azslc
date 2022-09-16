@@ -103,8 +103,6 @@ namespace AZ::ShaderCompiler
         EMITTER_UNDEFINED_SRG_MEMBER = 267u,
 
         // others
-        ADVANCED_SYNTAX_CONSTANT_BUFFER_RESTRICTION = 512u,
-        ADVANCED_SYNTAX_CONSTANT_BUFFER_ONLY_IN_SRG = 513u,
         ADVANCED_SYNTAX_DOUBLE_SCOPE_RESOLUTION = 514u,
         ADVANCED_RESERVED_NAME_USED = 515u,
         ADVANCED_SYNTAX_FUNCTION_IN_STRUCT = 516u,
@@ -279,8 +277,9 @@ namespace AZ::ShaderCompiler
     {
     public:
         void syntaxError(antlr4::Recognizer* recognizer, antlr4::Token* offendingSymbol, size_t line,
-            size_t charPositionInLine, const string &msg, std::exception_ptr e) override
+            size_t charPositionInLine, const string& msg, std::exception_ptr e) override
         {
+            bool isKeyword = m_isKeywordPredicate(recognizer, offendingSymbol);
             using Ex = AzslcException;
             string errorMessage = Ex::MakeErrorMessage(Ex::s_lineFinder->GetVirtualFileName(line),
                                                        ToString(Ex::s_lineFinder->GetVirtualLineNumber(line)),
@@ -288,7 +287,7 @@ namespace AZ::ShaderCompiler
                                                        "syntax",
                                                        true,
                                                        ToString(PARSER_SYNTAX_ERROR),
-                                                       ConcatString(msg, " (", offendingSymbol->getText(), " was unexpected)"));
+                                                       ConcatString(msg, " (", offendingSymbol->getText(), isKeyword ? " is a keyword)" : " was unexpected)"));
 
             antlr4::ParseCancellationException parseException(errorMessage);
             if (e)
@@ -300,6 +299,8 @@ namespace AZ::ShaderCompiler
                 throw parseException;
             }
         }
+
+        std::function<bool(antlr4::Recognizer*, antlr4::Token* )> m_isKeywordPredicate;
 
         void reportAmbiguity(antlr4::Parser *recognizer, const antlr4::dfa::DFA &dfa, size_t startIndex, size_t stopIndex, bool exact,
             const antlrcpp::BitSet &ambigAlts, antlr4::atn::ATNConfigSet *configs) override

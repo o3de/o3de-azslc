@@ -39,7 +39,6 @@ namespace AZ::ShaderCompiler
     extern Endl             azEndl;
 
     using AstType                       = azslParser::TypeContext;                  // all usertypes and predefined, but cannot be Void
-    using AstFuncType                   = azslParser::FunctionTypeContext;          // all (can be Void)
     using AstTypeofNode                 = azslParser::TypeofExpressionContext;
     using AstPredefinedTypeNode         = azslParser::PredefinedTypeContext;
     using AstClassDeclNode              = azslParser::ClassDefinitionContext;
@@ -137,22 +136,12 @@ namespace AZ::ShaderCompiler
 
     inline bool WasParsedAsPredefinedType(AstType* ctx)
     {
-        return ctx->predefinedType();
-    }
-
-    inline bool WasParsedAsPredefinedType(AstFuncType* ctx)
-    {
-        return ctx->Void() || WasParsedAsPredefinedType(ctx->type());
+        return ctx->predefinedType() || ctx->Void();
     }
 
     inline AstTypeofNode* ExtractTypeofAstNode(AstType* ctx)
     {
         return ctx->typeofExpression();
-    }
-
-    inline AstTypeofNode* ExtractTypeofAstNode(AstFuncType* ctx)
-    {
-        return ctx->type() ? ExtractTypeofAstNode(ctx->type()) : nullptr;
     }
 
     template<typename AnyOther>
@@ -274,7 +263,7 @@ namespace AZ::ShaderCompiler
     }
 
     MAKE_REFLECTABLE_ENUM_POWER (StorageFlag,
-        Static, Const, Extern, Shared, Groupshared, Globallycoherent, Precise, Uniform, Volatile, RowMajor, ColumnMajor, In, Out, InOut, Inline, Option, Enumerator, Rootconstant, Other
+        Const, Unsigned, RowMajor, ColumnMajor, Extern, Inline, Rootconstant, Option, Precise, Shared, Groupshared, Static, Uniform, Volatile, Globallycoherent, In, Out, InOut, Enumerator, Other
     );
     using TypeQualifier = Flag<StorageFlag>;
 
@@ -1046,7 +1035,7 @@ namespace AZ::ShaderCompiler
         return ExtractSpecificParent<AstVarInitializer>(ctx);
     }
 
-    inline azslParser::FunctionParamContext* ParamContextOverVariableDeclarator(AstUnnamedVarDecl* ctx)
+    inline azslParser::FunctionParamContext* ParamContextOverUnnamedVariableDeclarator(AstUnnamedVarDecl* ctx)
     {
         return As<azslParser::FunctionParamContext*>(ctx->parent);
     }
@@ -1056,9 +1045,9 @@ namespace AZ::ShaderCompiler
         return As<azslParser::VariableDeclarationContext*>(ctx->parent->parent);
     }
 
-    inline azslParser::TypeContext* ExtractTypeFromVariableDeclarator(AstUnnamedVarDecl* ctx, azslParser::FunctionParamContext** funcParamContextOut = nullptr)
+    inline azslParser::TypeContext* ExtractTypeFromUnnamedVariableDeclarator(AstUnnamedVarDecl* ctx, azslParser::FunctionParamContext** funcParamContextOut = nullptr)
     {
-        auto* paramCtx = ParamContextOverVariableDeclarator(ctx);
+        auto* paramCtx = ParamContextOverUnnamedVariableDeclarator(ctx);
         if (paramCtx != nullptr)
         {
             if (funcParamContextOut)
@@ -1099,26 +1088,15 @@ namespace AZ::ShaderCompiler
 
     inline bool TypeIsSamplerComparisonState(AstUnnamedVarDecl* ctx)
     {
-        auto* typeCtx = ExtractTypeFromVariableDeclarator(ctx);
+        auto* typeCtx = ExtractTypeFromUnnamedVariableDeclarator(ctx);
         return typeCtx->predefinedType() &&
                typeCtx->predefinedType()->samplerStatePredefinedType() &&
                typeCtx->predefinedType()->samplerStatePredefinedType()->SamplerComparisonState();
     }
 
-
-    inline azslParser::StorageFlagsContext* ExtractStorageFlagsFromVariableDeclarator(AstUnnamedVarDecl* ctx)
+    inline azslParser::StorageFlagsContext* ExtractStorageFlagsFromUnnamedVariableDeclarator(AstUnnamedVarDecl* ctx)
     {
-        auto* paramCtx = ParamContextOverVariableDeclarator(ctx);
-        if (paramCtx != nullptr)
-        {
-            return paramCtx->storageFlags();
-        }
-        auto* varDeclCtx = VarDeclContextOverVariableDeclarator(As<AstNamedVarDecl*>(ctx->parent));
-        if (varDeclCtx != nullptr)
-        {
-            return varDeclCtx->storageFlags();
-        }
-        return nullptr;
+        return ExtractTypeFromUnnamedVariableDeclarator(ctx)->storageFlags();
     }
 
     inline StorageFlag AsFlag(azslParser::StorageFlagContext* ctx)
@@ -1140,6 +1118,7 @@ namespace AZ::ShaderCompiler
              : ctx->Inline()           ? StorageFlag::Inline
              : ctx->Option()           ? StorageFlag::Option
              : ctx->Rootconstant()     ? StorageFlag::Rootconstant
+             : ctx->Unsigned()         ? StorageFlag::Unsigned
             // Everything else can still be stored, but won't be checked in any special way:
             // linear, centroid, noninterpolation, noperspective, sample, point, line, triangle, lineadk, triangleadj, indices, vertices, etc...
              : StorageFlag::Other;
@@ -1148,30 +1127,6 @@ namespace AZ::ShaderCompiler
     inline bool IsFlag(azslParser::StorageFlagContext* ctx, StorageFlag flag)
     {
         return AsFlag(ctx) == flag;
-        /*switch (flag)
-        {
-        case StorageFlag::Const: return ctx->Const();
-        case StorageFlag::Extern: return ctx->Extern();
-        case StorageFlag::Groupshared: return ctx->Groupshared();
-        case StorageFlag::Precise: return ctx->Precise();
-        case StorageFlag::Shared: return ctx->Shared();
-        case StorageFlag::Static: return ctx->Static();
-        case StorageFlag::Uniform: return ctx->Uniform();
-        case StorageFlag::Volatile: return ctx->Volatile();
-        case StorageFlag::Globallycoherent: return ctx->Globallycoherent();
-        case StorageFlag::RowMajor: return ctx->RowMajor();
-        case StorageFlag::ColumnMajor: return ctx->ColumnMajor();
-        case StorageFlag::In: return ctx->In();
-        case StorageFlag::Out: return ctx->Out();
-        case StorageFlag::InOut: return ctx->Inout();
-        case StorageFlag::Inline: return ctx->Inline();
-        case StorageFlag::Rootconstant: return ctx->Rootconstant();
-        case StorageFlag::Option: return ctx->Option();
-        case StorageFlag::Enumerator: return false; // Not a source-driven flag
-        case StorageFlag::Other: return AsFlag(ctx) == StorageFlag::Other;
-        default: break;
-        }
-        return false;*/
     }
 
     // Either just a string, or string + its original source node.
@@ -1310,23 +1265,13 @@ namespace AZ::ShaderCompiler
         {
             return ExtractComposedTypeNamesFromAstContext(ctx->predefinedType(), genericDims);
         }
-        // this could be a typeof, let's return the node for further resolve !
-        return {ExtractedTypeExt{UnqualifiedName{ctx->getText()}, ctx}};
-    }
-
-    //! from function type context (highest type level)
-    inline ExtractedComposedType ExtractComposedTypeNamesFromAstContext(AstFuncType* ctx)
-    {
-        if (ctx->type())
-        {
-            return ExtractComposedTypeNamesFromAstContext(ctx->type());
-        }
         else if (ctx->Void())
         {
             assert(string_view{AZ::ShaderCompiler::Predefined::Void[0]} == ctx->getText());
-            return {UnqualifiedName{ctx->getText()}}; // "void"
+            return {UnqualifiedName{ctx->getText()}, ctx}; // "void"
         }
-        throw std::logic_error((DiagLine(ctx->start) + " internal error: can't extract name on unsupported expression"));
+        // this could be a typeof, let's return the node for further resolve!
+        return {ExtractedTypeExt{UnqualifiedName{ctx->getText()}, ctx}};
     }
 
     //! Parse an HLSL semantic from a context into (semantic name, semantic index, is system value)
