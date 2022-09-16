@@ -134,11 +134,6 @@ namespace AZ::ShaderCompiler
         PrintWarning(warningCout, level, token->getLine(), token->getCharPositionInLine() + 1, messageBits...);
     }
 
-    inline bool WasParsedAsPredefinedType(AstType* ctx)
-    {
-        return ctx->predefinedType() || ctx->Void();
-    }
-
     inline AstTypeofNode* ExtractTypeofAstNode(AstType* ctx)
     {
         return ctx->typeofExpression();
@@ -1261,14 +1256,14 @@ namespace AZ::ShaderCompiler
         {
             return ExtractComposedTypeNamesFromAstContext(ctx->userDefinedType(), genericDims);
         }
-        else if (WasParsedAsPredefinedType(ctx))
+        else if (ctx->predefinedType())
         {
             return ExtractComposedTypeNamesFromAstContext(ctx->predefinedType(), genericDims);
         }
         else if (ctx->Void())
         {
-            assert(string_view{AZ::ShaderCompiler::Predefined::Void[0]} == ctx->getText());
-            return {UnqualifiedName{ctx->getText()}, ctx}; // "void"
+            assert(string_view{AZ::ShaderCompiler::Predefined::Void[0]} == ctx->Void()->getText());
+            return {UnqualifiedName{ctx->Void()->getText()}}; // "void"
         }
         // this could be a typeof, let's return the node for further resolve!
         return {ExtractedTypeExt{UnqualifiedName{ctx->getText()}, ctx}};
