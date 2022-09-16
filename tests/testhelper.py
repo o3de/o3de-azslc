@@ -43,7 +43,7 @@ def found(needle, haystack):
         return True
     return False
 
-# pars the argument mentioned in the shader source file Ex : Cmdargs: --namespace=vk   or Cmdargs: ['--unique-idx', '--root-sig', '--root-const', '0']
+# parse the argument mentioned in the shader source file Ex : Cmdargs: --namespace=vk   or Cmdargs: ['--unique-idx', '--root-sig', '--root-const', '0']
 def parse_strlist(sl):
     clean = re.sub("[\[\],\s]","",sl)
     splitted = re.split("[\'\"]",clean)
@@ -59,7 +59,7 @@ def verifyEmissionPattern(azslFile, patternsFileName, compilerPath, silent, argL
         print ("Pattern file not found: " + patternsFileName)
         return False
     arg = []
-    with io.open(patternsFileName, "r", encoding="latin-1") as f:
+    with io.open(patternsFileName, "r", encoding="utf-8") as f:
         for line in f:
             if line.find("Cmdargs") >= 0:
                 line = line[line.rfind(':')+1:]
@@ -72,12 +72,12 @@ def verifyEmissionPattern(azslFile, patternsFileName, compilerPath, silent, argL
         if not silent: print (style.BRIGHT + fg.CYAN + "Now to check emission patterns for " + patternsFileName + style.RESET_ALL)
         # normalizes the shader code by inserting spaces around identifiers stuck to other things.
         # eg : 'func()' will become 'func ( )'
-        allidents = re.split("([a-zA-Z_]+[a-zA-Z_0-9]*)|(;)|(\()|(\))|(<)|(>)|( )", shaderCode.decode('utf-8'))
+        allidents = re.split("([a-zA-Z_]+[a-zA-Z_0-9]*)|(\.)|(,)|(::)|(;)|(\()|(\))|(<)|(>)|( )", shaderCode.decode('utf-8'))
         allidents = filter(lambda s: s is not None and s!="" and s!=" ", allidents)  # remove empties from ['', 'code', '', 'piece']...
         shaderCode = " ".join(allidents)
         predicates = []
         # load the pattern file:
-        with io.open(patternsFileName, encoding="latin-1") as f:
+        with io.open(patternsFileName, encoding="utf-8") as f:
             i = 0
             for line in f:
                 if line.startswith("\""):
@@ -138,7 +138,7 @@ def compileAndExpectError(thefile, compilerPath, silent, argList):
         failList.append(thefile)
         return 0 # Failure
     # Read the expected error code from the source file.
-    f = io.open(thefile, 'r', encoding="latin-1")
+    f = io.open(thefile, 'r', encoding="utf-8")
     azslCode = f.read()
     f.close()
     expectedErrorCode = testfuncs.findTokenToInt(azslCode, r"#EC\s\d*")

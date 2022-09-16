@@ -180,31 +180,27 @@ bool IsInRange(in float val, in float min, in float max)
     return (val >= min && val <= max);
 }
 
-
-// TODO Support the static keyword
-// Can functions *not* be inlined?
-// static 
-uint3 Load3x16BitIndices(uint offsetBytes, ByteAddressBuffer Indices)
+static uint3 Load3x16BitIndices(uint offsetBytes, ByteAddressBuffer Indices)
 {
-    uint3 indices;
+    uint3 indices_;
     const uint dwordAlignedOffset = offsetBytes & ~3;
     const uint2 four16BitIndices = Indices.Load2(dwordAlignedOffset);
 
 
     if (dwordAlignedOffset == offsetBytes)
     {
-        indices.x = four16BitIndices.x & 0xffff;
-        indices.y = (four16BitIndices.x >> 16) & 0xffff;
-        indices.z = four16BitIndices.y & 0xffff;
+        indices_.x = four16BitIndices.x & 0xffff;
+        indices_.y = (four16BitIndices.x >> 16) & 0xffff;
+        indices_.z = four16BitIndices.y & 0xffff;
     }
     else
     {
-        indices.x = (four16BitIndices.x >> 16) & 0xffff;
-        indices.y = four16BitIndices.y & 0xffff;
-        indices.z = (four16BitIndices.y >> 16) & 0xffff;
+        indices_.x = (four16BitIndices.x >> 16) & 0xffff;
+        indices_.y = four16BitIndices.y & 0xffff;
+        indices_.z = (four16BitIndices.y >> 16) & 0xffff;
     }
 
-    return indices;
+    return indices_;
 }
 
 

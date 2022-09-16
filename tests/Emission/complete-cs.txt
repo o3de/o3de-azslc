@@ -1,5 +1,5 @@
 "groupshared uint gs_GpShared [ 1024 ] "
-" [ numthreads ( 1, 1, 1 ) ] "
+" [ numthreads ( 1 , 1 , 1 ) ] "
 " InterlockedAdd ( gs_GpShared [ thread_id . x ] , 1 ) "
 " InterlockedAdd ( gs_GpShared [ thread_id . x ] , 1 , origVal ) "
 " InterlockedOr ( gs_GpShared [ thread_id . x ] , 1 ) "
