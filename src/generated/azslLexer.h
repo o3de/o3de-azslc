@@ -94,14 +94,14 @@ public:
     MinusAssign = 343, LeftShiftAssign = 344, RightShiftAssign = 345, AndAssign = 346, 
     XorAssign = 347, OrAssign = 348, Equal = 349, NotEqual = 350, Dot = 351, 
     True = 352, False = 353, KW_AssociatedType = 354, KW_TypeAlias = 355, 
-    KW_Typedef = 356, KW_Fundamental = 357, KW_Typeof = 358, KW_ext_print_message = 359, 
-    KW_ext_print_symbol = 360, KW_ext_prtsym_fully_qualified = 361, KW_ext_prtsym_least_qualified = 362, 
-    KW_ext_prtsym_constint_value = 363, FrequencyId = 364, ShaderVariantFallback = 365, 
-    ShaderResourceGroupSemantic = 366, ShaderResourceGroup = 367, HLSLSemanticStream = 368, 
-    HLSLSemanticSystem = 369, Indices = 370, Vertices = 371, Identifier = 372, 
-    IntegerLiteral = 373, FloatLiteral = 374, StringLiteral = 375, PragmaDirective = 376, 
-    LineDirective = 377, Whitespace = 378, Newline = 379, BlockComment = 380, 
-    LineComment = 381
+    KW_Typedef = 356, KW_Fundamental = 357, KW_Typeof = 358, FrequencyId = 359, 
+    ShaderVariantFallback = 360, ShaderResourceGroupSemantic = 361, ShaderResourceGroup = 362, 
+    KW_ext_print_message = 363, KW_ext_print_symbol = 364, KW_ext_prtsym_fully_qualified = 365, 
+    KW_ext_prtsym_least_qualified = 366, KW_ext_prtsym_constint_value = 367, 
+    HLSLSemanticStream = 368, HLSLSemanticSystem = 369, Indices = 370, Vertices = 371, 
+    Payload = 372, Identifier = 373, IntegerLiteral = 374, FloatLiteral = 375, 
+    StringLiteral = 376, PragmaDirective = 377, LineDirective = 378, Whitespace = 379, 
+    Newline = 380, BlockComment = 381, LineComment = 382
   };
 
   enum {

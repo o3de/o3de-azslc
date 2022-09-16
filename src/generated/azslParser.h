@@ -94,14 +94,14 @@ public:
     MinusAssign = 343, LeftShiftAssign = 344, RightShiftAssign = 345, AndAssign = 346, 
     XorAssign = 347, OrAssign = 348, Equal = 349, NotEqual = 350, Dot = 351, 
     True = 352, False = 353, KW_AssociatedType = 354, KW_TypeAlias = 355, 
-    KW_Typedef = 356, KW_Fundamental = 357, KW_Typeof = 358, KW_ext_print_message = 359, 
-    KW_ext_print_symbol = 360, KW_ext_prtsym_fully_qualified = 361, KW_ext_prtsym_least_qualified = 362, 
-    KW_ext_prtsym_constint_value = 363, FrequencyId = 364, ShaderVariantFallback = 365, 
-    ShaderResourceGroupSemantic = 366, ShaderResourceGroup = 367, HLSLSemanticStream = 368, 
-    HLSLSemanticSystem = 369, Indices = 370, Vertices = 371, Identifier = 372, 
-    IntegerLiteral = 373, FloatLiteral = 374, StringLiteral = 375, PragmaDirective = 376, 
-    LineDirective = 377, Whitespace = 378, Newline = 379, BlockComment = 380, 
-    LineComment = 381
+    KW_Typedef = 356, KW_Fundamental = 357, KW_Typeof = 358, FrequencyId = 359, 
+    ShaderVariantFallback = 360, ShaderResourceGroupSemantic = 361, ShaderResourceGroup = 362, 
+    KW_ext_print_message = 363, KW_ext_print_symbol = 364, KW_ext_prtsym_fully_qualified = 365, 
+    KW_ext_prtsym_least_qualified = 366, KW_ext_prtsym_constint_value = 367, 
+    HLSLSemanticStream = 368, HLSLSemanticSystem = 369, Indices = 370, Vertices = 371, 
+    Payload = 372, Identifier = 373, IntegerLiteral = 374, FloatLiteral = 375, 
+    StringLiteral = 376, PragmaDirective = 377, LineDirective = 378, Whitespace = 379, 
+    Newline = 380, BlockComment = 381, LineComment = 382
   };
 
   enum {
@@ -137,23 +137,23 @@ public:
     RuleGenericVectorType = 84, RuleScalarOrVectorType = 85, RuleScalarOrVectorOrMatrixType = 86, 
     RuleMatrixType = 87, RuleGenericMatrixPredefinedType = 88, RuleRegisterAllocation = 89, 
     RuleSamplerStateProperty = 90, RuleLiteral = 91, RuleLeadingTypeFunctionSignature = 92, 
-    RuleHlslFunctionDefinition = 93, RuleHlslFunctionDeclaration = 94, RuleFunctionType = 95, 
-    RuleUserDefinedType = 96, RuleAssociatedTypeDeclaration = 97, RuleTypedefStatement = 98, 
-    RuleTypealiasStatement = 99, RuleTypeAliasingDefinitionStatement = 100, 
-    RuleTypeofExpression = 101, RuleGenericParameterList = 102, RuleGenericTypeDefinition = 103, 
-    RuleGenericConstraint = 104, RuleLanguageDefinedConstraint = 105, RuleFunctionDeclaration = 106, 
-    RuleAttributedFunctionDeclaration = 107, RuleFunctionDefinition = 108, 
-    RuleAttributedFunctionDefinition = 109, RuleCompilerExtensionStatement = 110, 
-    RuleSrgDefinition = 111, RuleAttributedSrgDefinition = 112, RuleSrgMemberDeclaration = 113, 
-    RuleSrgSemantic = 114, RuleAttributedSrgSemantic = 115, RuleSrgSemanticBodyDeclaration = 116, 
-    RuleSrgSemanticMemberDeclaration = 117, RuleSamplerBodyDeclaration = 118, 
-    RuleSamplerMemberDeclaration = 119, RuleMaxAnisotropyOption = 120, RuleMinFilterOption = 121, 
-    RuleMagFilterOption = 122, RuleMipFilterOption = 123, RuleReductionTypeOption = 124, 
-    RuleComparisonFunctionOption = 125, RuleAddressUOption = 126, RuleAddressVOption = 127, 
-    RuleAddressWOption = 128, RuleMinLodOption = 129, RuleMaxLodOption = 130, 
-    RuleMipLodBiasOption = 131, RuleBorderColorOption = 132, RuleFilterModeEnum = 133, 
-    RuleReductionTypeEnum = 134, RuleAddressModeEnum = 135, RuleComparisonFunctionEnum = 136, 
-    RuleBorderColorEnum = 137
+    RuleHlslFunctionDefinition = 93, RuleHlslFunctionDeclaration = 94, RuleUserDefinedType = 95, 
+    RuleAssociatedTypeDeclaration = 96, RuleTypedefStatement = 97, RuleTypealiasStatement = 98, 
+    RuleTypeAliasingDefinitionStatement = 99, RuleTypeofExpression = 100, 
+    RuleGenericParameterList = 101, RuleGenericTypeDefinition = 102, RuleGenericConstraint = 103, 
+    RuleLanguageDefinedConstraint = 104, RuleFunctionDeclaration = 105, 
+    RuleAttributedFunctionDeclaration = 106, RuleFunctionDefinition = 107, 
+    RuleAttributedFunctionDefinition = 108, RuleCompilerExtensionStatement = 109, 
+    RuleSrgDefinition = 110, RuleAttributedSrgDefinition = 111, RuleSrgMemberDeclaration = 112, 
+    RuleSrgSemantic = 113, RuleAttributedSrgSemantic = 114, RuleSrgSemanticBodyDeclaration = 115, 
+    RuleSrgSemanticMemberDeclaration = 116, RuleSamplerBodyDeclaration = 117, 
+    RuleSamplerMemberDeclaration = 118, RuleMaxAnisotropyOption = 119, RuleMinFilterOption = 120, 
+    RuleMagFilterOption = 121, RuleMipFilterOption = 122, RuleReductionTypeOption = 123, 
+    RuleComparisonFunctionOption = 124, RuleAddressUOption = 125, RuleAddressVOption = 126, 
+    RuleAddressWOption = 127, RuleMinLodOption = 128, RuleMaxLodOption = 129, 
+    RuleMipLodBiasOption = 130, RuleBorderColorOption = 131, RuleFilterModeEnum = 132, 
+    RuleReductionTypeEnum = 133, RuleAddressModeEnum = 134, RuleComparisonFunctionEnum = 135, 
+    RuleBorderColorEnum = 136
   };
 
   explicit azslParser(antlr4::TokenStream *input);
@@ -261,7 +261,6 @@ public:
   class LeadingTypeFunctionSignatureContext;
   class HlslFunctionDefinitionContext;
   class HlslFunctionDeclarationContext;
-  class FunctionTypeContext;
   class UserDefinedTypeContext;
   class AssociatedTypeDeclarationContext;
   class TypedefStatementContext;
@@ -761,7 +760,6 @@ public:
     antlr4::Token *Name = nullptr;
     FunctionParamContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
-    StorageFlagsContext *storageFlags();
     TypeContext *type();
     UnnamedVariableDeclaratorContext *unnamedVariableDeclarator();
     std::vector<AttributeSpecifierAnyContext *> attributeSpecifierAny();
@@ -1593,7 +1591,6 @@ public:
   public:
     VariableDeclarationContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
-    StorageFlagsContext *storageFlags();
     TypeContext *type();
     VariableDeclaratorsContext *variableDeclarators();
     std::vector<AttributeSpecifierAnyContext *> attributeSpecifierAny();
@@ -1793,6 +1790,7 @@ public:
     antlr4::tree::TerminalNode *Inout();
     antlr4::tree::TerminalNode *Indices();
     antlr4::tree::TerminalNode *Vertices();
+    antlr4::tree::TerminalNode *Payload();
     antlr4::tree::TerminalNode *Point();
     antlr4::tree::TerminalNode *Line_();
     antlr4::tree::TerminalNode *Triangle();
@@ -1810,9 +1808,11 @@ public:
   public:
     TypeContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
+    StorageFlagsContext *storageFlags();
     PredefinedTypeContext *predefinedType();
     UserDefinedTypeContext *userDefinedType();
     TypeofExpressionContext *typeofExpression();
+    antlr4::tree::TerminalNode *Void();
 
     virtual void enterRule(antlr4::tree::ParseTreeListener *listener) override;
     virtual void exitRule(antlr4::tree::ParseTreeListener *listener) override;
@@ -2475,8 +2475,7 @@ public:
     antlr4::Token *Name = nullptr;
     LeadingTypeFunctionSignatureContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
-    StorageFlagsContext *storageFlags();
-    FunctionTypeContext *functionType();
+    TypeContext *type();
     antlr4::tree::TerminalNode *LeftParen();
     antlr4::tree::TerminalNode *RightParen();
     antlr4::tree::TerminalNode *Identifier();
@@ -2522,20 +2521,6 @@ public:
 
   HlslFunctionDeclarationContext* hlslFunctionDeclaration();
 
-  class  FunctionTypeContext : public antlr4::ParserRuleContext {
-  public:
-    FunctionTypeContext(antlr4::ParserRuleContext *parent, size_t invokingState);
-    virtual size_t getRuleIndex() const override;
-    TypeContext *type();
-    antlr4::tree::TerminalNode *Void();
-
-    virtual void enterRule(antlr4::tree::ParseTreeListener *listener) override;
-    virtual void exitRule(antlr4::tree::ParseTreeListener *listener) override;
-   
-  };
-
-  FunctionTypeContext* functionType();
-
   class  UserDefinedTypeContext : public antlr4::ParserRuleContext {
   public:
     UserDefinedTypeContext(antlr4::ParserRuleContext *parent, size_t invokingState);
@@ -2569,13 +2554,13 @@ public:
 
   class  TypedefStatementContext : public antlr4::ParserRuleContext {
   public:
-    azslParser::FunctionTypeContext *ExistingType = nullptr;
+    azslParser::TypeContext *ExistingType = nullptr;
     antlr4::Token *NewTypeName = nullptr;
     TypedefStatementContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
     antlr4::tree::TerminalNode *KW_Typedef();
     antlr4::tree::TerminalNode *Semi();
-    FunctionTypeContext *functionType();
+    TypeContext *type();
     antlr4::tree::TerminalNode *Identifier();
 
     virtual void enterRule(antlr4::tree::ParseTreeListener *listener) override;
@@ -2588,14 +2573,14 @@ public:
   class  TypealiasStatementContext : public antlr4::ParserRuleContext {
   public:
     antlr4::Token *NewTypeName = nullptr;
-    azslParser::FunctionTypeContext *ExistingType = nullptr;
+    azslParser::TypeContext *ExistingType = nullptr;
     TypealiasStatementContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
     antlr4::tree::TerminalNode *KW_TypeAlias();
     antlr4::tree::TerminalNode *Assign();
     antlr4::tree::TerminalNode *Semi();
     antlr4::tree::TerminalNode *Identifier();
-    FunctionTypeContext *functionType();
+    TypeContext *type();
 
     virtual void enterRule(antlr4::tree::ParseTreeListener *listener) override;
     virtual void exitRule(antlr4::tree::ParseTreeListener *listener) override;
@@ -2627,7 +2612,7 @@ public:
     antlr4::tree::TerminalNode *KW_Typeof();
     antlr4::tree::TerminalNode *LeftParen();
     antlr4::tree::TerminalNode *RightParen();
-    FunctionTypeContext *functionType();
+    TypeContext *type();
     ExpressionExtContext *expressionExt();
     antlr4::tree::TerminalNode *ColonColon();
     IdExpressionContext *idExpression();
