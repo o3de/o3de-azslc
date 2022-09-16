@@ -662,7 +662,6 @@ namespace AZ::ShaderCompiler
                 if (holds_alternative<string>(attrInfo.m_argList[0]))
                 {
                     string poFormat{ Trim(get<string>(attrInfo.m_argList[0]), "\"") };
-                    OutputFormat hint = OutputFormat::FromStr(poFormat);
                     outstream << "#pragma OutputFormatHint(default " << poFormat << ")\n";
                 }
                 else if (attrInfo.m_argList.size() > 1 &&
@@ -673,7 +672,6 @@ namespace AZ::ShaderCompiler
                     if (rtIndex >= 0 && rtIndex <= 7)
                     {
                         string poFormat{ Trim(get<string>(attrInfo.m_argList[1]), "\"") };
-                        OutputFormat hint = OutputFormat::FromStr(poFormat);
                         outstream << "#pragma OutputFormatHint(target " << rtIndex << " " << poFormat << ")\n";
                     }
                 }

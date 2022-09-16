@@ -14,14 +14,13 @@ namespace AZ
     //! Wraps and forwards data to a std::ostream,
     //! Overrides operator<< for char, const char * and string data and counts
     //! the number of '\n' (new line) characters that go through it.
-    class NewLineCounterStream : public Streamable
+    class NewLineCounterStream : public MakeOStreamStreamable
     {
         typedef NewLineCounterStream Self;
 
     public:
-        NewLineCounterStream(std::ostream& streamToWrap)
-            : m_wrappedStream(streamToWrap)
-        {}
+
+        using MakeOStreamStreamable::MakeOStreamStreamable;
 
         Self& operator<<(char c) override
         {
@@ -60,12 +59,6 @@ namespace AZ
             return *this;
         }
 
-        Streamable& operator<<(StringFormTypeEraser&& anything) override
-        {
-            this->operator<<(anything.textified);
-            return *this;
-        }
-
         template <class Any>
         Self& operator<<(Any&& thing)
         {
@@ -77,6 +70,5 @@ namespace AZ
 
     private:
         int m_lineCount = 0;
-        std::ostream& m_wrappedStream;
     };
 }

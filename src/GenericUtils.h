@@ -11,6 +11,7 @@
 #include "MetaUtils.h"
 
 #include "StreamableInterface.h"
+#include <sstream>
 
 #define AZ_STRINGIFY(x) #x
 #define AZ_TOSTRING(x) AZ_STRINGIFY(x)
