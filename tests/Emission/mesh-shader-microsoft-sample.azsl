@@ -170,12 +170,12 @@ void main(
     uint dtid : SV_DispatchThreadID,
     uint gtid : SV_GroupThreadID,
     uint gid : SV_GroupID,
-    in /*payload*/ Payload payload,
+    in payload Payload a_payload,
     out vertices VertexOut verts[64],
     out indices uint3 tris[126]
 )
 {
-    uint meshletIndex = payload.MeshletIndices[gid];
+    uint meshletIndex = a_payload.MeshletIndices[gid];
 
     if (meshletIndex >= u_::GMeshInfo.MeshletCount)
         return;

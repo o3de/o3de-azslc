@@ -878,13 +878,13 @@ namespace AZ::ShaderCompiler
             }
 
             // Let's get the line number where @insertBeforeThisUid was found in the flat AZSL file.
-            const auto* constThis = this; // To disambiguate which version of GetSymbolSubAs<> to call.
+            const auto* constThis = this; // To disambiguate which cv-version of GetSymbolSubAs<> to call.
             const auto* varInfo = constThis->GetSymbolSubAs<VarInfo>(insertBeforeThisUid.GetName());
             size_t lineOfDeclaration = varInfo->GetOriginalLineNumber();
             const LineDirectiveInfo* lineInfo = lineFinder->GetNearestPreprocessorLineDirective(lineOfDeclaration);
-            if (!lineInfo)
+            if (!lineInfo || lineOfDeclaration == 0)
             {
-                // When the LineDirectiveInfo* is null, it means We have detected a variable that was added
+                // When the LineDirectiveInfo* is null (or at 0), it means We have detected a variable that was added
                 // by AZSLc itself. e.g. Root Constant padding, etc.
                 // In such case, this is not an issue We want to interfere with.
                 return {};

@@ -78,7 +78,7 @@ ShaderResourceGroup RaySRG : RaySemantic
 // Load three 16 bit indices from a byte addressed buffer.
 uint3 Load3x16BitIndices(uint offsetBytes)
 {
-    uint3 indices;
+    uint3 indices_;
 
     // ByteAdressBuffer loads must be aligned at a 4 byte boundary.
     // Since we need to read three 16 bit indices: { 0, 1, 2 } 
@@ -93,18 +93,18 @@ uint3 Load3x16BitIndices(uint offsetBytes)
     // Aligned: { 0 1 | 2 - } => retrieve first three 16bit indices
     if (dwordAlignedOffset == offsetBytes)
     {
-        indices.x = four16BitIndices.x & 0xffff;
-        indices.y = (four16BitIndices.x >> 16) & 0xffff;
-        indices.z = four16BitIndices.y & 0xffff;
+        indices_.x = four16BitIndices.x & 0xffff;
+        indices_.y = (four16BitIndices.x >> 16) & 0xffff;
+        indices_.z = four16BitIndices.y & 0xffff;
     }
     else // Not aligned: { - 0 | 1 2 } => retrieve last three 16bit indices
     {
-        indices.x = (four16BitIndices.x >> 16) & 0xffff;
-        indices.y = four16BitIndices.y & 0xffff;
-        indices.z = (four16BitIndices.y >> 16) & 0xffff;
+        indices_.x = (four16BitIndices.x >> 16) & 0xffff;
+        indices_.y = four16BitIndices.y & 0xffff;
+        indices_.z = (four16BitIndices.y >> 16) & 0xffff;
     }
 
-    return indices;
+    return indices_;
 }
 
 // [Atom-942] TODO support typedef
@@ -176,15 +176,15 @@ void MyRaygenShader()
     // TMin should be kept small to prevent missing geometry at close contact areas.
     ray.TMin = 0.001;
     ray.TMax = 10000.0;
-    RayPayload payload = { float4(0, 0, 0, 0) };
-    TraceRay(RaySRG::Scene, RAY_FLAG_CULL_BACK_FACING_TRIANGLES, ~0, 0, 1, 0, ray, payload);
+    RayPayload payload_ = { float4(0, 0, 0, 0) };
+    TraceRay(RaySRG::Scene, RAY_FLAG_CULL_BACK_FACING_TRIANGLES, ~0, 0, 1, 0, ray, payload_);
 
     // Write the raytraced color to the output texture.
-    RaySRG::RenderTarget[DispatchRaysIndex().xy] = payload.color;
+    RaySRG::RenderTarget[DispatchRaysIndex().xy] = payload_.color;
 }
 
 [shader("closesthit")]
-void MyClosestHitShader(inout RayPayload payload, in BuiltInTriangleIntersectionAttributes attr)
+void MyClosestHitShader(inout RayPayload a_payload, in BuiltInTriangleIntersectionAttributes attr)
 {
     float3 hitPosition = HitWorldPosition();
 
@@ -195,13 +195,13 @@ void MyClosestHitShader(inout RayPayload payload, in BuiltInTriangleIntersection
     uint baseIndex = PrimitiveIndex() * triangleIndexStride;
 
     // Load up 3 16 bit indices for the triangle.
-    const uint3 indices = Load3x16BitIndices(baseIndex);
+    const uint3 indices_ = Load3x16BitIndices(baseIndex);
 
     // Retrieve corresponding vertex normals for the triangle vertices.
     float3 vertexNormals[3] = { 
-        RaySRG::Vertices[indices[0]].normal, 
-        RaySRG::Vertices[indices[1]].normal, 
-        RaySRG::Vertices[indices[2]].normal 
+        RaySRG::Vertices[indices_[0]].normal, 
+        RaySRG::Vertices[indices_[1]].normal, 
+        RaySRG::Vertices[indices_[2]].normal 
     };
 
     // Compute the triangle's normal.
@@ -212,12 +212,12 @@ void MyClosestHitShader(inout RayPayload payload, in BuiltInTriangleIntersection
     float4 diffuseColor = CalculateDiffuseLighting(hitPosition, triangleNormal);
     float4 color = RaySRG::g_sceneCB.lightAmbientColor + diffuseColor;
 
-    payload.color = color;
+    a_payload.color = color;
 }
 
 [shader("miss")]
-void MyMissShader(inout RayPayload payload)
+void MyMissShader(inout RayPayload a_payload)
 {
     float4 background = float4(0.0f, 0.2f, 0.4f, 1.0f);
-    payload.color = background;
+    a_payload.color = background;
 }
