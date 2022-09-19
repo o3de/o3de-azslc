@@ -694,7 +694,8 @@ namespace AZ::ShaderCompiler
         return rootSig;
     }
 
-    const char* Backend::GetInputModifier(TypeQualifier typeQualifier)
+    //static
+    const char* Backend::GetInputModifier(const TypeQualifiers& typeQualifier)
     {
         const bool in = TypeHasStorageFlag(typeQualifier, StorageFlag::In);
         const bool out = TypeHasStorageFlag(typeQualifier, StorageFlag::Out);

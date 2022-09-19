@@ -632,8 +632,8 @@ namespace AZ::ShaderCompiler
                 string typeName = FormatString("uint%d", padSize / 4);
 
                 ExtractedTypeExt padType = { UnqualifiedNameView(typeName), nullptr };
-                varInfo.m_typeInfoExt = ExtendedTypeInfo{ m_sema.CreateTypeRefInfo(padType),
-                                 {}, {}, {}, Packing::MatrixMajor::Default };
+                varInfo.m_typeInfoExt = ExtendedTypeInfo{m_sema.CreateTypeRefInfo(padType), {},
+                                                         {}, {}, {}, Packing::MatrixMajor::Default };
 
                 newVarKind.GetSubRefAs<VarInfo>() = varInfo;
                 rootConstantStructKindInfo.GetSubRefAs<ClassInfo>().PushMember(newVarUid, Kind::Variable);

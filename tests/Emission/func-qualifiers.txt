@@ -1,0 +1,2 @@
+"const unsigned inline static volatile center centroid payload unorm int t ( ) ;"
+"const unsigned volatile center centroid payload unorm int t ( )"

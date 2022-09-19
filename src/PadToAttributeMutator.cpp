@@ -434,13 +434,13 @@ namespace AZ::ShaderCompiler
             ExtractedTypeExt padType = { UnqualifiedNameView(typeName), nullptr };
             if (itemsCount < 1)
             {
-                newVarInfo.m_typeInfoExt = ExtendedTypeInfo{ m_ir.m_sema.CreateTypeRefInfo(padType),
-                             {}, {}, {}, Packing::MatrixMajor::Default };
+                newVarInfo.m_typeInfoExt = ExtendedTypeInfo{m_ir.m_sema.CreateTypeRefInfo(padType), {},
+                                                            {}, {}, {}, Packing::MatrixMajor::Default };
             }
             else
             {
-                newVarInfo.m_typeInfoExt = ExtendedTypeInfo{ m_ir.m_sema.CreateTypeRefInfo(padType),
-                    {}, {{itemsCount}}, {}, Packing::MatrixMajor::Default };
+                newVarInfo.m_typeInfoExt = ExtendedTypeInfo{m_ir.m_sema.CreateTypeRefInfo(padType), {},
+                                                            {}, {{itemsCount}}, {}, Packing::MatrixMajor::Default };
             }
             newVarKind.GetSubRefAs<VarInfo>() = newVarInfo;
             return newVarUid;

@@ -1,1 +1,0 @@
-ConstantBuffer<struct S{}> func();  // #EC 512 impossible to use ConstantBuffer in that context

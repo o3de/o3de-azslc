@@ -101,38 +101,6 @@ namespace AZ
     using std::unordered_set;
     using std::vector;
 
-    // exception type of VisitFirstNonNull
-    struct AllNull : std::runtime_error
-    {
-        using runtime_error::runtime_error;
-    };
-
-    // Type-heterogeneity-preserving multi pointer object single visitor.
-    // Returns whatever the passed functor would.
-    // Throws if all passed objects are null.
-    template <typename Lambda, typename T>
-    invoke_result_t<Lambda, T*> VisitFirstNonNull(Lambda functor, T* object) noexcept(false)
-    {
-        if (object)
-        {
-            return functor(object);
-        }
-        throw AllNull{ "no non-null object passed" };
-    }
-
-    template <typename Lambda, typename T, typename... TOther>
-    invoke_result_t<Lambda, T*> VisitFirstNonNull(Lambda functor, T*object, TOther*... rest) noexcept(false)
-    {
-        if (object)
-        {
-            return functor(object);
-        }
-        else
-        {
-            return VisitFirstNonNull(functor, rest...);
-        }
-    }
-
     template <typename SetType>
     void SetMerge(SetType& dest, SetType& src)
     {

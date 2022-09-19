@@ -100,10 +100,7 @@ namespace AZ::ShaderCompiler
         void EmitGetFunctionsForRootConstants(const ClassInfo& classInfo, string_view bufferName) const;
 
         // for all sorts of const/static/groupshared/matrixmajor....
-        static string GetTypeModifier(const VarInfo&, const Options& options);
-
-        // for all sorts of inline/static/....
-        static string GetTypeModifier(const FunctionInfo&, const Options& options);
+        static string GetTypeModifier(const ExtendedTypeInfo&, const Options& options, Modifiers bannedFlags = {});
 
         //! That is a list of code elements we possibly want to emit (e.g when we emit a variable declaration)
         MAKE_REFLECTABLE_ENUM_POWER( VarDeclHas,
@@ -137,7 +134,7 @@ namespace AZ::ShaderCompiler
                 }
                 else
                 {
-                    m_out << GetInputModifier(param.m_typeQualifier) << " ";
+                    m_out << GetInputModifier(param.m_typeInfo.m_qualifiers) << " ";
 
                     m_out << GetTranslatedName(param.m_typeInfo, UsageContext::ReferenceSite);
 

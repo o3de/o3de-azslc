@@ -758,13 +758,12 @@ namespace AZ::ShaderCompiler
 
         EmitAllAttachedAttributes(uid);
 
-        // emit modifiers in case of first declaration/definition
+        // emit some modifiers only in case of first declaration/definition
         // because:    class C{ static vd A(); };
         //             static vd C::A(){}    // ill-formed HLSL. we can't repeat static here.
-        if (!AlreadyEmittedFunctionDeclaration(uid))
-        {
-            m_out << GetTypeModifier(funcSub, options) << " ";
-        }
+        Modifiers forbidden = Modifiers{StorageFlag::Static} | StorageFlag::Inline | StorageFlag::Extern;
+        bool firstDecl = !AlreadyEmittedFunctionDeclaration(uid);
+        m_out << GetTypeModifier(funcSub.m_returnType, options, firstDecl ? Modifiers{} : forbidden) << " ";
 
         // emit return type:
         m_out << GetTranslatedName(funcSub.m_returnType, UsageContext::ReferenceSite) << " ";
@@ -813,16 +812,16 @@ namespace AZ::ShaderCompiler
     }
 
     // static
-    string CodeEmitter::GetTypeModifier(const VarInfo& var, const Options& options)
+    string CodeEmitter::GetTypeModifier(const ExtendedTypeInfo& typeInfo, const Options& options, Modifiers bannedFlags /*= {}*/)
     {
         using namespace std::string_literals;
         string modifiers;
-        bool isMatrix = IsArithmetic(var.GetTypeClass()) && var.m_typeInfoExt.m_coreType.m_arithmeticInfo.IsMatrix();
-        if (var.CheckHasStorageFlag(StorageFlag::ColumnMajor))
+        bool isMatrix = typeInfo.m_coreType.m_arithmeticInfo.IsMatrix();
+        if (typeInfo.CheckHasStorageFlag(StorageFlag::ColumnMajor) && !(bannedFlags & StorageFlag::ColumnMajor))
         {
             modifiers = "column_major";
         }
-        else if (var.CheckHasStorageFlag(StorageFlag::RowMajor))
+        else if (typeInfo.CheckHasStorageFlag(StorageFlag::RowMajor) && !(bannedFlags & StorageFlag::RowMajor))
         {
             modifiers = "row_major";
         }
@@ -832,59 +831,26 @@ namespace AZ::ShaderCompiler
         }
 
         auto maybeSpace = [&modifiers](){ return modifiers.empty() ? "" : " "; };
-        if (var.CheckHasStorageFlag(StorageFlag::Volatile))
+        using SF = StorageFlag;
+        static const StorageFlag toReEmit[] = {SF::Const,
+            SF::Unsigned, SF::Extern, SF::Inline, SF::Precise, SF::Groupshared, SF::Static,
+            SF::Uniform, SF::Volatile, SF::Globallycoherent};
+        for (int i = 0; i < std::size(toReEmit); ++i)
         {
-            modifiers += maybeSpace() + "volatile"s;
+            if (typeInfo.CheckHasStorageFlag(toReEmit[i]) && !(bannedFlags & toReEmit[i]))
+            {
+                modifiers += maybeSpace() + ToLower(StorageFlag::ToStr(toReEmit[i]));
+            }
         }
-        if (var.CheckHasStorageFlag(StorageFlag::Precise))
+
+        if (typeInfo.CheckHasStorageFlag(StorageFlag::Other) && !(bannedFlags & StorageFlag::Other))
         {
-            modifiers += maybeSpace() + "precise"s;
-        }
-        if (var.CheckHasStorageFlag(StorageFlag::Groupshared))
-        {
-            modifiers += maybeSpace() + "groupshared"s;
-        }
-        if (var.CheckHasStorageFlag(StorageFlag::Extern))
-        {
-            assert(false); // should never get there. extern is banned from azsl
-        }
-        if (var.CheckHasStorageFlag(StorageFlag::Static))
-        {
-            modifiers += maybeSpace() + "static"s;
-        }
-        if (var.CheckHasStorageFlag(StorageFlag::Const))
-        {
-            modifiers += maybeSpace() + "const"s;
-        }
-        if (var.CheckHasStorageFlag(StorageFlag::Inline))
-        {
-            // inline should not be added as modifier for variables in HLSL. But in HLSL6 can be useful for functions
-        }
-        if (var.CheckHasStorageFlag(StorageFlag::Other))
-        {
-            for (const auto& flag : var.m_otherQualifiers)
+            for (const auto& flag : typeInfo.m_qualifiers.m_others)
             {
                 modifiers += " " + flag;
             }
         }
-        return modifiers;
-    }
 
-    // static
-    string CodeEmitter::GetTypeModifier(const FunctionInfo& func, const Options& options)
-    {
-        using namespace std::string_literals;
-        string modifiers;
-
-        auto maybeSpace = [&modifiers](){ return modifiers.empty() ? "" : " "; };
-        if (func.CheckHasStorageFlag(StorageFlag::Static))
-        {
-            modifiers += maybeSpace() + "static"s;
-        }
-        if (func.CheckHasStorageFlag(StorageFlag::Inline))
-        {
-            modifiers += maybeSpace() + "inline"s;
-        }
         return modifiers;
     }
 
@@ -919,12 +885,12 @@ namespace AZ::ShaderCompiler
             // parameter in/out modifiers
             if (declOptions & VarDeclHas::InOutModifiers)
             {
-                m_out << GetInputModifier(varInfo.m_typeQualifier) << " ";
+                m_out << GetInputModifier(varInfo.m_typeInfoExt.m_qualifiers) << " ";
             }
             // type qualifiers (storage class, modifiers...)
             if (!(declOptions & VarDeclHas::NoModifiers))
             {
-                m_out << GetTypeModifier(varInfo, options) << " ";
+                m_out << GetTypeModifier(varInfo.m_typeInfoExt, options) << " ";
             }
             // type
             if (!(declOptions & VarDeclHas::NoType) || (declOptions & VarDeclHas::OptionDefine))

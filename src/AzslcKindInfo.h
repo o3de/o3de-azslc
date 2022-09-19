@@ -77,6 +77,12 @@ namespace AZ::ShaderCompiler
         vector<Argument>  m_argList;
     };
 
+    static bool TypeHasStorageFlag(const TypeQualifiers& typeQualifier, StorageFlag flag)
+    {
+        // The mask operation returns an rvalue and it isn't converted to bool
+        return static_cast<bool>(typeQualifier.m_flag & flag);
+    }
+
     //! store base list, member list...
     struct ClassInfo
     {
@@ -225,7 +231,7 @@ namespace AZ::ShaderCompiler
     //! an extended type information gathers:
     //!  + core type info (immutable and limited amount, all stored in the fixed symbol table)
     //!  + array dimensions
-    //!  + matrix majorness storage flag
+    //!  + matrix majorness storage flag / all other qualifiers (unsigned, const, volatile, precise, inline, groupshared...)
     struct ExtendedTypeInfo
     {
         const auto& GetDimensions() const
@@ -261,9 +267,18 @@ namespace AZ::ShaderCompiler
         void SetMatrixMajor(Packing::MatrixMajor mtxMajor)
         {
             m_mtxMajor = mtxMajor;
+            m_qualifiers.m_flag &= StorageFlag::ColumnMajor;
+            m_qualifiers.m_flag &= StorageFlag::RowMajor;
+            if (mtxMajor == Packing::MatrixMajor::ColumnMajor)
+            {
+                m_qualifiers.m_flag |= StorageFlag::ColumnMajor;
+            }
+            else if (mtxMajor == Packing::MatrixMajor::RowMajor)
+            {
+                m_qualifiers.m_flag |= StorageFlag::RowMajor;
+            }
         }
 
-        //! True if the storage type is in row major. False if the storage type is column major (default).
         const Packing::MatrixMajor GetMatrixMajor() const
         {
             return m_mtxMajor;
@@ -289,11 +304,21 @@ namespace AZ::ShaderCompiler
                 && (m_genericParameter.IsEmpty() || m_genericParameter.m_typeClass != TypeClass::IsNotType);
         }
 
+        bool CheckHasStorageFlag(StorageFlag flag) const
+        {
+            return TypeHasStorageFlag(m_qualifiers, flag);
+        }
+
         friend bool operator == (const ExtendedTypeInfo& lhs, const ExtendedTypeInfo& rhs)
         {
+            static const Modifiers inconsequentialModifiers = Modifiers{StorageFlag::Extern}
+                | StorageFlag::Inline | StorageFlag::Static | StorageFlag::Volatile | StorageFlag::Uniform;
+            Modifiers lhsTM = lhs.m_qualifiers.m_flag & ~inconsequentialModifiers;
+            Modifiers rhsTM = rhs.m_qualifiers.m_flag & ~inconsequentialModifiers;
             return lhs.m_coreType == rhs.m_coreType
                 && lhs.m_genericParameter == rhs.m_genericParameter
-                && lhs.m_arrayDims == rhs.m_arrayDims;
+                && lhs.m_arrayDims == rhs.m_arrayDims
+                && lhsTM == rhsTM;
         }
         friend bool operator != (const ExtendedTypeInfo& lhs, const ExtendedTypeInfo& rhs)
         {
@@ -304,7 +329,8 @@ namespace AZ::ShaderCompiler
         //! this is not rigorous and does not constitute a mangling. the full feature is better served at emission side by GetExtendedTypeInfo function.
         string GetDisplayName() const
         {
-             return m_coreType.m_typeId.m_name + (m_genericParameter.IsEmpty() ? "" : Decorate("<", m_genericParameter.m_typeId.m_name, ">"));
+             return m_qualifiers.GetDisplayName() + " " + m_coreType.m_typeId.m_name +
+                 (m_genericParameter.IsEmpty() ? "" : Decorate("<", m_genericParameter.m_typeId.m_name, ">"));
         }
 
         //! only use leaf form of names to compose a displayable reconstituted name
@@ -320,9 +346,9 @@ namespace AZ::ShaderCompiler
         //  This is because of a limitation called array collapsing. (which is kind of important for typeof and the seenat feature)
         //  If we store the array dimensions directly in TypeRefInfo, it will not be possible
         //  to support multiple different arrays of `int`s throughout the whole compilation unit.
-        // Finally m_mtxMajor is not part of the type; we only provide it here as a cache for convenience
         TypeRefInfo          m_coreType;
         TypeRefInfo          m_genericParameter;  // in case of Buffer<float> coreType is Buffer, genericParameter is float. note that genericParams can't be arrays since brackets are not part of the "type:" rule
+        TypeQualifiers       m_qualifiers;
         ArrayDimensions      m_arrayDims;
         ArrayDimensions      m_genericDims;
         Packing::MatrixMajor m_mtxMajor = Packing::MatrixMajor::Default; // Can be changed by #pragmapack_matrix directive, or with the row_major or the column_major qualifiers.
@@ -334,12 +360,6 @@ namespace AZ::ShaderCompiler
         azslParser::TypeAliasingDefinitionStatementContext* m_declNode = nullptr;
         ExtendedTypeInfo m_canonicalType;  // ultimate (existing) target of the alias
     };
-
-    static bool TypeHasStorageFlag(TypeQualifier typeQualifier, StorageFlag flag)
-    {
-        // The mask operation returns an rvalue and it isn't converted to bool
-        return static_cast<bool>(typeQualifier & flag);
-    }
 
     struct VarInfo
     {
@@ -373,8 +393,6 @@ namespace AZ::ShaderCompiler
 
         AstUnnamedVarDecl*         m_declNode = nullptr;
         UnqualifiedName            m_identifier;
-        TypeQualifier              m_typeQualifier;
-        vector<string>             m_otherQualifiers;      // For qualifiers we didn't add to the enum
         bool                       m_srgMember = false;
         bool                       m_isPublic = true;
         ConstNumericVal            m_constVal;   // (attempted folded) initializer value for simple scalars
@@ -382,10 +400,10 @@ namespace AZ::ShaderCompiler
         ExtendedTypeInfo           m_typeInfoExt;
     };
 
-    // deported method definitions
+    // VarInfo methods definitions
     bool VarInfo::CheckHasStorageFlag(StorageFlag flag) const
     {
-       return TypeHasStorageFlag(m_typeQualifier, flag);
+       return m_typeInfoExt.CheckHasStorageFlag(flag);
     }
 
     bool VarInfo::CheckHasAllStorageFlags(std::initializer_list<StorageFlag> vararg) const
@@ -660,16 +678,6 @@ namespace AZ::ShaderCompiler
             return m_isMethod && HasPreDeclarationAndLaterDefinition();
         }
 
-        bool CheckHasStorageFlag(StorageFlag flag) const
-        {
-            return (m_typeQualifier & flag).AsBool();
-        }
-
-        bool HasStorageFlags() const
-        {
-            return !m_typeQualifier.IsEmpty();
-        }
-
         //! queries whether this function has a default value, registered for at least one of its parameters.
         //! e.g such as in "f(int i = 2)"
         bool HasAnyDefaultParameterValue() const
@@ -680,12 +688,11 @@ namespace AZ::ShaderCompiler
         }
 
         //! add a parameter
-        void PushParameter(IdentifierUID varName, const ExtendedTypeInfo& typeInfo, TypeQualifier typeQualifier, AstUnnamedVarDecl* unnamedCtx)
+        void PushParameter(IdentifierUID varName, const ExtendedTypeInfo& typeInfo, AstUnnamedVarDecl* unnamedCtx)
         {
             Parameter param;
             param.m_varId = varName;
             param.m_typeInfo = typeInfo;
-            param.m_typeQualifier = typeQualifier;
             param.m_semanticCtx = unnamedCtx->SemanticOpt;
             param.m_arrayRankSpecifiers = unnamedCtx->ArrayRankSpecifiers;
             param.m_defaultValueExpression = unnamedCtx->variableInitializer();
@@ -774,12 +781,10 @@ namespace AZ::ShaderCompiler
         bool                      m_isVirtual    = false;     //!< is a method from an interface
         vector< IdentifierUID >   m_overrides;                //!< list of implementing functions in child classes
         optional< IdentifierUID > m_base;   //!< points to the overridden function in the base interface, if applies. only supports one base
-        TypeQualifier             m_typeQualifier;
         struct Parameter
         {
             IdentifierUID m_varId;
             ExtendedTypeInfo m_typeInfo;
-            TypeQualifier m_typeQualifier;
             azslParser::HlslSemanticContext* m_semanticCtx = nullptr;
             std::vector<azslParser::ArrayRankSpecifierContext*> m_arrayRankSpecifiers;
             AstVarInitializer* m_defaultValueExpression = nullptr;

@@ -110,6 +110,10 @@ struct EnumTypeName\
     struct Iterator\
     {\
         EnumType m_i;\
+        using iterator_category = std::forward_iterator_tag;\
+        using difference_type   = int;\
+        using value_type        = EnumType;\
+        using reference         = EnumType&;\
         constexpr EnumType operator*() { return m_i; }\
         constexpr Iterator operator++() { m_i = static_cast<EnumType>(EnumeratorNextOp); return {m_i}; }\
         constexpr bool operator!=(const Iterator& rhs) const { return m_i != rhs.m_i; }\

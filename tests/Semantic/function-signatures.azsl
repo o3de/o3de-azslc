@@ -25,11 +25,11 @@ float4 main( TriVertex in_ ) : SV_POSITION {return 0;}
 struct P { float3 c; };
 struct Attributes { float2 bary; };
 [shader( "closesthit" )]
-void closest(inout P payload : SV_RayPayload,
+void closest(inout P a_payload : SV_RayPayload,
 			 Attributes attrib);
 
 [shader("anyhit")]
-void closest(inout P payload : SV_RayPayload,
+void closest(inout P a_payload : SV_RayPayload,
 			 in BuiltInTriangleIntersectionAttributes myAttr);
 
 struct Payload {};
@@ -42,7 +42,7 @@ void main2(
     uint dtid : SV_DispatchThreadID,
     uint gtid : SV_GroupThreadID,
     uint gid : SV_GroupID,
-    in /*payload*/ Payload payload,
+    in payload Payload a_payload,
     out vertices VertexOut verts[64],
     out indices uint3 tris[126]
 )

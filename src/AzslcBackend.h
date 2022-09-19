@@ -165,7 +165,7 @@ namespace AZ::ShaderCompiler
 
         Json::Value GetVariantList(const Options& options, bool includeEmpty = false) const;
 
-        static const char* GetInputModifier(TypeQualifier typeQualifier);
+        static const char* GetInputModifier(const TypeQualifiers& typeQualifier);
 
         string GetExtendedTypeInfo(const ExtendedTypeInfo& extTypeInfo, std::function<string(const TypeRefInfo&)> translator) const;
 

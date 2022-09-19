@@ -27,7 +27,7 @@ def testVariables(thefile, compilerPath, silent):
         # now check global var `b`
         predicates.append(lambda: symbols["Symbol '/b'"]['kind'] == 'Variable')
         predicates.append(lambda: symbols["Symbol '/b'"]['type']['core']['name'] == '?int')
-        predicates.append(lambda: symbols["Symbol '/b'"]['storage'] == 'Static Const')
+        predicates.append(lambda: set(symbols["Symbol '/b'"]['storage'].split()) == set(['Static', 'Const']))
         # it appears in 2 places:
         predicates.append(lambda: len(symbols["Symbol '/b'"]['references']) == 2)
         predicates.append(lambda: symbols["Symbol '/b'"]['references'][0]['line'] == 10)  # c = b;

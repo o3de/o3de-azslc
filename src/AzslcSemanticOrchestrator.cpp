@@ -12,7 +12,7 @@ namespace AZ::ShaderCompiler
 {
     namespace  // utility helpers to raise the abstraction level of SemanticOrchestrator's methods.
     {
-        Packing::MatrixMajor ExtractMatrixMajorness(TypeQualifier variableQualificationFlags)
+        Packing::MatrixMajor ExtractMatrixMajorness(TypeQualifiers variableQualificationFlags)
         {
             Packing::MatrixMajor major = Packing::MatrixMajor::Default;
             if (TypeHasStorageFlag(variableQualificationFlags, StorageFlag::RowMajor))
@@ -26,31 +26,36 @@ namespace AZ::ShaderCompiler
             return major;
         }
 
-        TypeQualifier ExtractTypeQualifiers(azslParser::StorageFlagsContext* flags, vector<string>* otherQualifiers = nullptr)
+        TypeQualifiers ExtractTypeQualifiers(azslParser::StorageFlagsContext* flags)
         {
-            TypeQualifier qualifiers;
+            TypeQualifiers qualifiers;
             for (auto* flagCtx : flags->storageFlag())
             {
-                const auto& newFlag = AsFlag(flagCtx);
-                qualifiers |= newFlag;
-                if (newFlag == StorageFlag::Other && otherQualifiers)
+                StorageFlag newFlag = AsFlag(flagCtx);
+                qualifiers.m_flag |= newFlag;
+                if (newFlag == StorageFlag::Other)
                 {
-                    otherQualifiers->push_back(flagCtx->getText());
+                    qualifiers.m_others.push_back(flagCtx->getText());
                 }
             }
             return qualifiers;
         }
 
-        TypeQualifier ExtractTypeQualifiers(AstUnnamedVarDecl* ctx, vector<string>* unknownQualifiers = nullptr)
+        TypeQualifiers ExtractTypeQualifiers(AstType* ctx)
         {
-            azslParser::StorageFlagsContext* flags = ExtractStorageFlagsFromUnnamedVariableDeclarator(ctx);
-            return flags ? ExtractTypeQualifiers(flags, unknownQualifiers) : TypeQualifier{};
+            return ctx->storageFlags() ? ExtractTypeQualifiers(ctx->storageFlags()) : TypeQualifiers{};
         }
 
-        void CheckFunctionReturnTypeModifierNotOptionNorRootconstant(TypeQualifier qualifier, size_t line)
+        TypeQualifiers ExtractTypeQualifiers(AstUnnamedVarDecl* ctx)
         {
-            auto ngFlags = TypeQualifier{StorageFlag::Option} | StorageFlag::Rootconstant;
-            if (qualifier & ngFlags)
+            azslParser::StorageFlagsContext* flags = ExtractStorageFlagsFromUnnamedVariableDeclarator(ctx);
+            return flags ? ExtractTypeQualifiers(flags) : TypeQualifiers{};
+        }
+
+        void CheckFunctionReturnTypeModifierNotOptionNorRootconstant(const TypeQualifiers& qualifier, size_t line)
+        {
+            auto ngFlags = Modifiers{StorageFlag::Option} | StorageFlag::Rootconstant;
+            if (qualifier.m_flag & ngFlags)
             {
                 throw AzslcOrchestratorException{ORCHESTRATOR_DISALLOWED_FUNCTION_MODIFIER, line,
                     none, " Functions can't have option or rootconstant qualified return types."};
@@ -281,10 +286,6 @@ namespace AZ::ShaderCompiler
         // decompose the Id and Kind of this function
         auto& [newUID, newKind] = *symbol;
 
-        // Add storage flags
-        funcInfo->m_typeQualifier |= ExtractTypeQualifiers(ctx->type()->storageFlags());
-        CheckFunctionReturnTypeModifierNotOptionNorRootconstant(funcInfo->m_typeQualifier, line); // throws a diagnostic if needed
-
         // keep track of original AST node
         if (statementGenre == AsFunc::Definition)
         {
@@ -297,7 +298,8 @@ namespace AZ::ShaderCompiler
         // OR fusion between decl and def sites
         funcInfo->m_mustOverride = funcInfo->m_mustOverride || ctx->Override() != nullptr;
         // return types must match (between redeclaration of this concrete function)
-        ExtendedTypeInfo returnType = CreateExtendedTypeInfo(ctx->type(), {}, Packing::MatrixMajor::Default);
+        // at the exception of inconsequential type modifiers (extern, inline, static, volatile, uniform) that we must merge to preserve in case of difference
+        ExtendedTypeInfo returnType = CreateExtendedTypeInfo(ctx->type(), {});
         if (alreadyDeclared && funcInfo->m_returnType != returnType)
         {
             throw AzslcOrchestratorException{ORCHESTRATOR_FUNCTION_INCONSISTENT_RETURN_TYPE, ctx->type()->start,
@@ -305,6 +307,8 @@ namespace AZ::ShaderCompiler
                                                           GetFirstSeenLineMessage(symbol->second), ", had a different return type: ",
                                                           funcInfo->m_returnType.GetDisplayName(), ", versus now seen: ", returnType.GetDisplayName())};
         }
+        CheckFunctionReturnTypeModifierNotOptionNorRootconstant(returnType.m_qualifiers, line); // throws a diagnostic if needed
+        returnType.m_qualifiers.OrMerge(funcInfo->m_returnType.m_qualifiers);
         funcInfo->m_returnType = returnType;
         assert(!funcInfo->m_returnType.IsEmpty());
         if (!funcInfo->m_returnType.IsClassFound())
@@ -391,12 +395,11 @@ namespace AZ::ShaderCompiler
             varInfo.m_constVal = FoldEvalStaticConstExprNumericValue(ctx->Value);
         }
         varInfo.m_declNode    = nullptr;
-        varInfo.m_typeQualifier |= StorageFlag::Static;
-        varInfo.m_typeQualifier |= StorageFlag::Const;
-        varInfo.m_typeQualifier |= StorageFlag::Enumerator;
+        Modifiers modifiers = Modifiers{StorageFlag::Static} |
+            StorageFlag::Const | StorageFlag::Enumerator;
 
-        varInfo.m_typeInfoExt = ExtendedTypeInfo{CreateTypeRefInfo(UnqualifiedNameView{enumQn}, OnNotFoundOrWrongKind::Diagnose),
-                                                 {}, {}, {}, Packing::MatrixMajor::Default };
+        varInfo.m_typeInfoExt = ExtendedTypeInfo{CreateTypeRefInfo(UnqualifiedNameView{enumQn}, OnNotFoundOrWrongKind::Diagnose), {},
+                                                 {modifiers}, {}, {}};
         enumInfo.PushMember(uid, Kind::Variable);
     }
 
@@ -416,7 +419,7 @@ namespace AZ::ShaderCompiler
                 auto& varInfo         = var.GetSubAfterInitAs<Kind::Variable>();
                 varInfo.m_constVal    = FoldEvalStaticConstExprNumericValue(intLit);
                 varInfo.m_declNode    = nullptr;
-                varInfo.m_typeInfoExt = ExtendedTypeInfo{CreateTypeRefInfo(UnqualifiedNameView{"int"}, OnNotFoundOrWrongKind::Diagnose),
+                varInfo.m_typeInfoExt = ExtendedTypeInfo{CreateTypeRefInfo(UnqualifiedNameView{"int"}, OnNotFoundOrWrongKind::Diagnose), {},
                                                          {}, {}, {}, Packing::MatrixMajor::Default };
                 srgSemanticInfo.PushMember(uid, Kind::Variable);
             }
@@ -432,7 +435,7 @@ namespace AZ::ShaderCompiler
                 auto& varInfo         = var.GetSubAfterInitAs<Kind::Variable>();
                 varInfo.m_constVal    = FoldEvalStaticConstExprNumericValue(intLit);
                 varInfo.m_declNode    = nullptr;
-                varInfo.m_typeInfoExt = ExtendedTypeInfo{CreateTypeRefInfo(UnqualifiedNameView{"int"}, OnNotFoundOrWrongKind::Diagnose),
+                varInfo.m_typeInfoExt = ExtendedTypeInfo{CreateTypeRefInfo(UnqualifiedNameView{"int"}, OnNotFoundOrWrongKind::Diagnose), {},
                                                          {}, {}, {}, Packing::MatrixMajor::Default };
                 srgSemanticInfo.PushMember(uid, Kind::Variable);
             }
@@ -446,7 +449,7 @@ namespace AZ::ShaderCompiler
         auto& [uid, kinfo]  = idKind;
         TypeAliasInfo& aliasInfo  = kinfo.GetSubAfterInitAs<Kind::TypeAlias>();
         aliasInfo.m_declNode      = ctx;
-        aliasInfo.m_canonicalType = CreateExtendedTypeInfo(existingTypeCtx, {}, Packing::MatrixMajor::Default);
+        aliasInfo.m_canonicalType = CreateExtendedTypeInfo(existingTypeCtx, {});
         if (!aliasInfo.m_canonicalType.IsClassFound())
         {
             throw AzslcOrchestratorException{ORCHESTRATOR_INVALID_TYPEALIAS_TARGET,
@@ -503,15 +506,11 @@ namespace AZ::ShaderCompiler
         IdAndKind& symbolRef            = AddIdentifier(uqNameView, Kind::Variable, line);
         auto& [uid, kindInfo]           = symbolRef;
         VarInfo& varInfo                = kindInfo.GetSubRefAs<VarInfo>();
-        // Discover the storage flags:
-        varInfo.m_typeQualifier         = ExtractTypeQualifiers(ctx, &varInfo.m_otherQualifiers);
         // Discover array dimensions:
         ArrayDimensions arrayDims;
         TryFoldArrayDimensions(ctx, arrayDims);
-        // Discover matrix majorness:
-        Packing::MatrixMajor major      = ExtractMatrixMajorness(varInfo.m_typeQualifier);
         // Finally make the structure to hold all type information from the type context:
-        // (this will perform a lookup/resolve type/typeof and compose the data)
+        //  this will perform a lookup/resolve type/typeof, extract the qualifiers and compose the data.
         //
         //  note: this syntax: "A A;" is allowed in C++/HLSL but not in AZSL.
         // Because originally in C you can disambiguate lookup using a repetition of the type tag: "struct A A;"
@@ -520,7 +519,7 @@ namespace AZ::ShaderCompiler
         //  - an inversion between CreateExtendedTypeInfo call AddIdentifier call
         //  - an evolution in the mangling to be able to store 2 symbols of the same name in the same scope
         //        E.g "/!A" for type ::A (bang mark would mirror built-ins "?float")
-        varInfo.m_typeInfoExt           = CreateExtendedTypeInfo(typeCtx, arrayDims, major);
+        varInfo.m_typeInfoExt           = CreateExtendedTypeInfo(typeCtx, arrayDims);
         assert(!varInfo.m_typeInfoExt.IsEmpty());
         // now fillup what we can, and already know, about that variable in the IR:
         varInfo.m_declNode              = ctx;
@@ -579,7 +578,7 @@ namespace AZ::ShaderCompiler
             if (varInfo.CheckHasStorageFlag(StorageFlag::Const))
             {
                 PrintWarning(Warn::W2, ctx->start, "const ignored in conjunction with rootconstant or option (because already immutable).");
-                varInfo.m_typeQualifier &= StorageFlag::EnumType(~StorageFlag::Const);
+                varInfo.m_typeInfoExt.m_qualifiers.m_flag &= StorageFlag::EnumType(~StorageFlag::Const);
             }
         }
 
@@ -592,8 +591,8 @@ namespace AZ::ShaderCompiler
                 throw AzslcOrchestratorException{ORCHESTRATOR_UNKNOWN_OPTION_TYPE, ctx->start, message};
             }
             // we'll set that here, an option is better flagged as static const for simplicity during emission
-            varInfo.m_typeQualifier |= StorageFlag::Static;
-            varInfo.m_typeQualifier |= StorageFlag::Const;
+            varInfo.m_typeInfoExt.m_qualifiers.m_flag |= StorageFlag::Static;
+            varInfo.m_typeInfoExt.m_qualifiers.m_flag |= StorageFlag::Const;
             // we don't do the same for rootconstant because they exist through a ConstantBuffer<STRUCT>
         }
 
@@ -624,7 +623,7 @@ namespace AZ::ShaderCompiler
         {
             // We need to register each newly registered parameter variable ID, in the list of the function subinfo too:
             auto& funcSub = GetCurrentScopeSubInfoAs<FunctionInfo>();
-            funcSub.PushParameter(uid, varInfo.m_typeInfoExt, varInfo.m_typeQualifier, varInfo.m_declNode);
+            funcSub.PushParameter(uid, varInfo.m_typeInfoExt, varInfo.m_declNode);
         }
 
         bool isExtern = !varInfo.StorageFlagIsLocalLinkage(global || enclosedBySRG);
@@ -676,11 +675,10 @@ namespace AZ::ShaderCompiler
 
     void SemanticOrchestrator::RegisterNamelessFunctionParameter(azslParser::FunctionParamContext* ctx)
     {
-        TypeQualifier typeQualifier = ExtractTypeQualifiers(ctx->type()->storageFlags());
         ArrayDimensions arrayDims;
         TryFoldArrayDimensions(ctx->unnamedVariableDeclarator(), arrayDims);
-        auto paramType = CreateExtendedTypeInfo(ctx->type(), arrayDims, Packing::MatrixMajor::Default);
-        GetCurrentScopeSubInfoAs<FunctionInfo>().PushParameter({}, paramType, typeQualifier, ctx->unnamedVariableDeclarator());
+        auto paramType = CreateExtendedTypeInfo(ctx->type(), arrayDims);
+        GetCurrentScopeSubInfoAs<FunctionInfo>().PushParameter({}, paramType, ctx->unnamedVariableDeclarator());
     }
 
     // Helper to avoid code redundancy for a message that is used in three different places.
@@ -1566,7 +1564,7 @@ namespace AZ::ShaderCompiler
 
                 ArrayDimensions arrayDims;
                 arrayDims.PushBack(keyLength / kShaderVariantKeyRegisterSize);
-                varInfo.m_typeInfoExt = ExtendedTypeInfo{ CreateTypeRefInfo(UnqualifiedNameView{"uint4"}, OnNotFoundOrWrongKind::Diagnose),
+                varInfo.m_typeInfoExt = ExtendedTypeInfo{CreateTypeRefInfo(UnqualifiedNameView{"uint4"}, OnNotFoundOrWrongKind::Diagnose), {},
                                                          {}, arrayDims, {}, Packing::MatrixMajor::Default };
 
                 srgInfo.m_implicitStruct.PushMember(uid, Kind::Variable);
@@ -1900,19 +1898,21 @@ namespace AZ::ShaderCompiler
         return true;
     }
 
-    ExtendedTypeInfo SemanticOrchestrator::CreateExtendedTypeInfo(AstType* ctx, ArrayDimensions dims, Packing::MatrixMajor mtxMajor) const
+    ExtendedTypeInfo SemanticOrchestrator::CreateExtendedTypeInfo(AstType* ctx, ArrayDimensions dims) const
     {
         vector<tree::TerminalNode*> genericDims;
         auto extType = ExtractComposedTypeNamesFromAstContext(ctx, &genericDims);
         if (!TryFoldGenericArrayDimensions(extType, genericDims))
         {
-            throw AzslcOrchestratorException{ORCHESTRATOR_DEPORTED_METHOD_DEFINITION, ctx->start,
+            throw AzslcOrchestratorException{ORCHESTRATOR_ILLEGAL_FOLDABLE_ARRAY_DIMENSIONS, ctx->start,
 					ConcatString("SemanticOrchestrator::CreateExtendedTypeInfo failed for type (", ctx->getText(), ")")};
         }
-        return CreateExtendedTypeInfo(extType, dims, mtxMajor);
+        return CreateExtendedTypeInfo(extType, ExtractTypeQualifiers(ctx->storageFlags()), dims);
     }
 
-    ExtendedTypeInfo SemanticOrchestrator::CreateExtendedTypeInfo(const ExtractedComposedType& extractedComposed, ArrayDimensions dims, Packing::MatrixMajor mtxMajor) const
+    ExtendedTypeInfo SemanticOrchestrator::CreateExtendedTypeInfo(const ExtractedComposedType& extractedComposed,
+                                                                  const TypeQualifiers& qualifiers,
+                                                                  ArrayDimensions dims) const
     {
         TypeRefInfo core = CreateTypeRefInfo(extractedComposed.m_core);
         TypeRefInfo generic = CreateTypeRefInfo(extractedComposed.m_genericParam);
@@ -1924,7 +1924,8 @@ namespace AZ::ShaderCompiler
             const TypeAliasInfo* targetAlias = m_symbols->GetAsSub<TypeAliasInfo>(core.m_typeId);
             return targetAlias->m_canonicalType;
         }
-        return ExtendedTypeInfo{core, generic, dims, extractedComposed.m_genericDimensions, mtxMajor};
+        Packing::MatrixMajor mtxMajor = ExtractMatrixMajorness(qualifiers);
+        return ExtendedTypeInfo{core, generic, qualifiers, dims, extractedComposed.m_genericDimensions, mtxMajor};
     }
 
     IdAndKind* SemanticOrchestrator::GetSymbolHiddenInBase(IdentifierUID hidingCandidate)

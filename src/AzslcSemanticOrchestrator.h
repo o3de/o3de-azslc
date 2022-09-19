@@ -340,14 +340,14 @@ namespace AZ::ShaderCompiler
         }
 
         // Just a helper function to compose the bigger version, that contains more data that can't be stored in the core type (TypeRefInfo).
-        // Array dimensions and mtxMajor are usually stored in VarInfo for example. If you have a custom way to discover them, use this helper to make your own ExtendedTypeInfo
-        auto CreateExtendedTypeInfo(AstType* ctx, ArrayDimensions dims, Packing::MatrixMajor mtxMajor) const -> ExtendedTypeInfo;
+        // Array dimensions are usually stored in VarInfo for example. If you have a custom way to discover them, use this helper to make your own ExtendedTypeInfo
+        auto CreateExtendedTypeInfo(AstType* ctx, ArrayDimensions dims) const -> ExtendedTypeInfo;
 
         // Helper func which folds any possible generic dimensions into the extracted composed type
         bool TryFoldGenericArrayDimensions(ExtractedComposedType& extType, vector<tree::TerminalNode*>& genericDims) const;
 
         // another helper to streamline what to do directly with the result from ExtractTypeNameFromAstContext function families.
-        auto CreateExtendedTypeInfo(const ExtractedComposedType& extractedComposed, ArrayDimensions dims, Packing::MatrixMajor mtxMajor) const -> ExtendedTypeInfo;
+        auto CreateExtendedTypeInfo(const ExtractedComposedType&, const TypeQualifiers&, ArrayDimensions) const -> ExtendedTypeInfo;
 
         //! check if current scope is a structured user defined type ("struct", "class" or "interface")
         bool IsScopeStructClassInterface() const;

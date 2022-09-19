@@ -258,9 +258,36 @@ namespace AZ::ShaderCompiler
     }
 
     MAKE_REFLECTABLE_ENUM_POWER (StorageFlag,
-        Const, Unsigned, RowMajor, ColumnMajor, Extern, Inline, Rootconstant, Option, Precise, Shared, Groupshared, Static, Uniform, Volatile, Globallycoherent, In, Out, InOut, Enumerator, Other
+        Const, Unsigned, RowMajor, ColumnMajor, Extern, Inline, Rootconstant, Option, Precise, Groupshared, Static, Uniform, Volatile, Globallycoherent, In, Out, InOut, Enumerator, Other
     );
-    using TypeQualifier = Flag<StorageFlag>;
+
+    inline Streamable& operator << (Streamable& out, StorageFlag::EnumType sf)
+    {
+        return out << ToLower(StorageFlag::ToStr(sf));
+    }
+
+    using Modifiers = Flag<StorageFlag>;
+    struct TypeQualifiers
+    {
+        Modifiers      m_flag;
+        vector<string> m_others;    // For qualifiers we didn't add to the enum
+
+        string GetDisplayName() const
+        {
+            vector<StorageFlag> bag;
+            auto end = std::copy_if(StorageFlag::Enumerate{}.begin(), StorageFlag::Enumerate{}.end(), std::back_inserter(bag),
+                                    [&](auto sf) -> bool { return (m_flag & sf) && (sf & ~StorageFlag::Other); });
+            return string{Trim(Join(bag.begin(), bag.end(), " ") + " " + Join(m_others.begin(), m_others.end(), " "))};
+        }
+
+        void OrMerge(const TypeQualifiers& src)
+        {
+            m_flag |= src.m_flag;
+            set<string> fresh{m_others.begin(), m_others.end()};
+            fresh.insert(src.m_others.begin(), src.m_others.end());
+            m_others = vector<string>{fresh.begin(), fresh.end()};
+        }
+    };
 
     struct ArrayDimensions
     {
@@ -1100,7 +1127,6 @@ namespace AZ::ShaderCompiler
              : ctx->Extern()           ? StorageFlag::Extern
              : ctx->Groupshared()      ? StorageFlag::Groupshared
              : ctx->Precise()          ? StorageFlag::Precise
-             : ctx->Shared()           ? StorageFlag::Shared
              : ctx->Static()           ? StorageFlag::Static
              : ctx->Uniform()          ? StorageFlag::Uniform
              : ctx->Volatile()         ? StorageFlag::Volatile
