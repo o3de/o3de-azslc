@@ -258,7 +258,7 @@ namespace AZ::ShaderCompiler
     }
 
     MAKE_REFLECTABLE_ENUM_POWER (StorageFlag,
-        Const, Unsigned, RowMajor, ColumnMajor, Extern, Inline, Rootconstant, Option, Precise, Groupshared, Static, Uniform, Volatile, Globallycoherent, In, Out, InOut, Enumerator, Other
+        Static, Const, Unsigned, RowMajor, ColumnMajor, Extern, Inline, Rootconstant, Option, Precise, Groupshared, Uniform, Volatile, Globallycoherent, In, Out, InOut, Enumerator, Other
     );
 
     inline Streamable& operator << (Streamable& out, StorageFlag::EnumType sf)

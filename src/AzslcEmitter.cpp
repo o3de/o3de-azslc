@@ -832,9 +832,9 @@ namespace AZ::ShaderCompiler
 
         auto maybeSpace = [&modifiers](){ return modifiers.empty() ? "" : " "; };
         using SF = StorageFlag;
-        static const StorageFlag toReEmit[] = {SF::Const,
-            SF::Unsigned, SF::Extern, SF::Inline, SF::Precise, SF::Groupshared, SF::Static,
-            SF::Uniform, SF::Volatile, SF::Globallycoherent};
+        static const StorageFlag toReEmit[] = {SF::Static, SF::Extern, SF::Inline,
+            SF::Const, SF::Volatile, SF::Precise, SF::Groupshared,
+            SF::Uniform, SF::Globallycoherent, SF::Unsigned};
         for (int i = 0; i < std::size(toReEmit); ++i)
         {
             if (typeInfo.CheckHasStorageFlag(toReEmit[i]) && !(bannedFlags & toReEmit[i]))
