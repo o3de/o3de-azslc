@@ -188,6 +188,11 @@ namespace AZ
         return haystack;
     }
 
+    inline bool IsAllWhitespaces(string_view s)
+    {
+        return std::all_of(s.begin(), s.end(), [&](char c) { return std::isspace(c); });
+    }
+
     /// tells whether a position in a string is surrounded by round braces
     /// e.g. true  for arguments {"a(b)", 2}
     /// e.g. true  for arguments {"a()", 1}  by convention

@@ -533,7 +533,7 @@ int main(int argc, const char* argv[])
                 ir.m_metaData.m_insource = StdFs::absolute(inSource).lexically_normal().generic_string();
             }
             tree::ParseTreeWalker walker;
-            Texture2DMSto2DCodeMutator texture2DMSto2DCodeMutator(&ir);
+            Texture2DMSto2DCodeMutator texture2DMSto2DCodeMutator(&ir, &tokens);
             SemaCheckListener semanticListener{&ir};
             warningCout.m_onErrorCallback = [](string_view message) {
                 throw AzslcException{WX_WARNINGS_AS_ERRORS, "as-error", string{message}};

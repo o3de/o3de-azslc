@@ -56,6 +56,9 @@ namespace AZ::ShaderCompiler
 
         void SetCodeMutator(ICodeEmissionMutator* codeMutator) { m_codeMutator = codeMutator; }
 
+        //! Make a string that lists all type qualifiers/modifiers in HLSL format
+        static string GetTypeModifier(const ExtendedTypeInfo&, const Options& options, Modifiers bannedFlags = {});
+
         //! It would be nice that the clients don't push text through the passed "out" stream since it's not observed by the line counter;
         //! use this API in case of custom client text pushing.
         template< typename Streamable >
@@ -98,9 +101,6 @@ namespace AZ::ShaderCompiler
 
         //! Emits get function definitions for root constants
         void EmitGetFunctionsForRootConstants(const ClassInfo& classInfo, string_view bufferName) const;
-
-        // for all sorts of const/static/groupshared/matrixmajor....
-        static string GetTypeModifier(const ExtendedTypeInfo&, const Options& options, Modifiers bannedFlags = {});
 
         //! That is a list of code elements we possibly want to emit (e.g when we emit a variable declaration)
         MAKE_REFLECTABLE_ENUM_POWER( VarDeclHas,
