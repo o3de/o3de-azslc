@@ -232,6 +232,8 @@ namespace AZ::ShaderCompiler
 
         PreprocessorLineDirectiveFinder* m_lineFinder;
 
+
+
         //! This is a readability function for class emission code. Serves for HLSL declarator of classes
         string EmitInheritanceList(const ClassInfo& clInfo);
     };

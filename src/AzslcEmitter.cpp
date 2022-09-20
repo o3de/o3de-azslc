@@ -517,6 +517,17 @@ namespace AZ::ShaderCompiler
 
     void CodeEmitter::EmitStruct(const ClassInfo& classInfo, string_view structuredSymName, const Options& options)
     {
+        string hlsl = clInfo.HasAnyBases() ? " : " : "";
+        vector<string> mutatedBaseNames;
+        TransformCopy(clInfo.GetBases(), mutatedBaseNames,
+                      [&](const IdentifierUID& uid)
+                      {
+                          return GetTranslatedName(uid, UsageContext::ReferenceSite);
+                      });
+        hlsl += Join(mutatedBaseNames, ", ");
+        return hlsl;
+    }
+
         auto HlslStructuredDelcTagFromKind = [](Kind k)
         {
             switch (k)

@@ -23,7 +23,7 @@ namespace StdFs = std::filesystem;
 // For large features or milestones. Minor version allows for breaking changes. Existing tests can change.
 #define AZSLC_MINOR "8"   // last change: introduction of class inheritance
 // For small features or bug fixes. They cannot introduce breaking changes. Existing tests shouldn't change.
-#define AZSLC_REVISION "7"  // last change: enhanced grammar compliance with HLSL & robust line directive support
+#define AZSLC_REVISION "7"  // last change: enhanced grammar compliance with HLSL & robust line directive support & refactor of type qualifiler into typeinfoext
 
 
 namespace AZ::ShaderCompiler
@@ -417,7 +417,7 @@ int main(int argc, const char* argv[])
     cli.add_flag("-r", visitRecursively, "(Option of --visitsym) Visit recursively.");
 
     bool listPredefined = false;
-    cli.add_flag("--listpredefined", "Output a list of all predefined types in AZSLang.");
+    cli.add_flag("--listpredefined", listPredefined, "Output a list of all predefined types in AZSLang.");
 
     int maxSpaces = std::numeric_limits<int>::max();
     auto maxSpacesOpt = cli.add_option("--max-spaces", maxSpaces, "Will choose register spaces that do not extend past this limit.");

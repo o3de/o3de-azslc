@@ -786,6 +786,7 @@ namespace AZ::ShaderCompiler
             IdentifierUID m_varId;
             ExtendedTypeInfo m_typeInfo;
             azslParser::HlslSemanticContext* m_semanticCtx = nullptr;
+            azslParser::HlslSemanticContext* m_semanticCtx = nullptr;
             std::vector<azslParser::ArrayRankSpecifierContext*> m_arrayRankSpecifiers;
             AstVarInitializer* m_defaultValueExpression = nullptr;
         };
