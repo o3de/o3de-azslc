@@ -140,6 +140,16 @@ namespace AZ::ShaderCompiler
         //! Gets the IntermediateRepresentation object
         const IntermediateRepresentation* GetIR() const { return m_ir; }
 
+        //! Make a string that lists all type qualifiers/modifiers in HLSL format
+        static string GetTypeModifier(const ExtendedTypeInfo&, const Options& options, Modifiers bannedFlags = {});
+
+        //! Get HLSL form of in/out modifiers
+        static const char* GetInputModifier(const TypeQualifiers& typeQualifier);
+
+        //! Fabricate a HLSL snippet that represents the type stored in typeInfo. Relevant options relate to matrix qualifiers.
+        //! \param banned is the Flag you can setup to list a collection of type qualifiers you don't want to reproduce.
+        string GetExtendedTypeInfo(const ExtendedTypeInfo& extTypeInfo, const Options& options, Modifiers banned, std::function<string(const TypeRefInfo&)> translator) const;
+
     protected:
         //! Obtains a supplement emitter which provides per-platform emission functionality.
         const PlatformEmitter& GetPlatformEmitter() const;
@@ -164,10 +174,6 @@ namespace AZ::ShaderCompiler
         void AppendOptionRange(Json::Value& varOption, const IdentifierUID& varUid, const AZ::ShaderCompiler::VarInfo* varInfo, const Options& options) const;
 
         Json::Value GetVariantList(const Options& options, bool includeEmpty = false) const;
-
-        static const char* GetInputModifier(const TypeQualifiers& typeQualifier);
-
-        string GetExtendedTypeInfo(const ExtendedTypeInfo& extTypeInfo, std::function<string(const TypeRefInfo&)> translator) const;
 
         IntermediateRepresentation*      m_ir;
         TokenStream*                     m_tokens;

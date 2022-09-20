@@ -43,21 +43,18 @@ namespace AZ::ShaderCompiler
         void Run(const Options& options);
 
         //! For scope-migration-aware name emission of symbol names
-        string GetTranslatedName(QualifiedNameView mangledName, UsageContext qualification, ssize_t tokenId = NotOverToken) const;
+        string GetTranslatedName(QualifiedNameView mangledName, UsageContext context, ssize_t tokenId = NotOverToken) const;
 
-        string GetTranslatedName(const IdentifierUID& uid, UsageContext qualification, ssize_t tokenId = NotOverToken) const;
+        string GetTranslatedName(const IdentifierUID& uid, UsageContext context, ssize_t tokenId = NotOverToken) const;
 
-        string GetTranslatedName(const TypeRefInfo& typeRef, UsageContext qualification, ssize_t tokenId = NotOverToken) const;
+        string GetTranslatedName(const TypeRefInfo& typeRef, UsageContext context, ssize_t tokenId = NotOverToken) const;
 
-        string GetTranslatedName(const ExtendedTypeInfo& extType, UsageContext qualification, ssize_t tokenId = NotOverToken) const;
+        string GetTranslatedName(const ExtendedTypeInfo& extType, UsageContext context, const Options& options, Modifiers banned = {}, ssize_t tokenId = NotOverToken) const;
 
         //! Write the HLSL formatted shape of an attribute into a stream
         static void EmitAttribute(const AttributeInfo& attrInfo, Streamable& outstream);
 
         void SetCodeMutator(ICodeEmissionMutator* codeMutator) { m_codeMutator = codeMutator; }
-
-        //! Make a string that lists all type qualifiers/modifiers in HLSL format
-        static string GetTypeModifier(const ExtendedTypeInfo&, const Options& options, Modifiers bannedFlags = {});
 
         //! It would be nice that the clients don't push text through the passed "out" stream since it's not observed by the line counter;
         //! use this API in case of custom client text pushing.
@@ -84,7 +81,7 @@ namespace AZ::ShaderCompiler
 
         void EmitFunction(const FunctionInfo& funcSub, const IdentifierUID& id, EmitFunctionAs entityConfiguration, const Options& options);
 
-        void EmitTypeAlias(const IdentifierUID& uid, const TypeAliasInfo& aliasInfo) const;
+        void EmitTypeAlias(const IdentifierUID& uid, const TypeAliasInfo& aliasInfo, const Options& options) const;
 
         void EmitEnum(const IdentifierUID& uid, const ClassInfo& classInfo, const Options& options);
 
@@ -136,7 +133,7 @@ namespace AZ::ShaderCompiler
                 {
                     m_out << GetInputModifier(param.m_typeInfo.m_qualifiers) << " ";
 
-                    m_out << GetTranslatedName(param.m_typeInfo, UsageContext::ReferenceSite);
+                    m_out << GetTranslatedName(param.m_typeInfo, UsageContext::ReferenceSite, options);
 
                     if (!param.m_arrayRankSpecifiers.empty())
                     {

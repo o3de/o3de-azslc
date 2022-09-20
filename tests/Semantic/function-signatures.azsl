@@ -26,11 +26,11 @@ struct P { float3 c; };
 struct Attributes { float2 bary; };
 [shader( "closesthit" )]
 void closest(inout P a_payload : SV_RayPayload,
-			 Attributes attrib);
+             Attributes attrib);
 
 [shader("anyhit")]
 void closest(inout P a_payload : SV_RayPayload,
-			 in BuiltInTriangleIntersectionAttributes myAttr);
+             in BuiltInTriangleIntersectionAttributes myAttr);
 
 struct Payload {};
 struct VertexOut {};

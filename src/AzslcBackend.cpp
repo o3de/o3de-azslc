@@ -705,17 +705,60 @@ namespace AZ::ShaderCompiler
                            : (out ? "out" : ""));
     }
 
-    string Backend::GetExtendedTypeInfo(const ExtendedTypeInfo& extTypeInfo, std::function<string(const TypeRefInfo&)> translator) const
+    // static
+    string Backend::GetTypeModifier(const ExtendedTypeInfo& typeInfo, const Options& options, Modifiers bannedFlags /*= {}*/)
     {
-        string hlslString = "";
+        using namespace std::string_literals;
+        string modifiers;
+        bool isMatrix = typeInfo.m_coreType.m_arithmeticInfo.IsMatrix();
+        if (typeInfo.CheckHasStorageFlag(StorageFlag::ColumnMajor) && !(bannedFlags & StorageFlag::ColumnMajor))
+        {
+            modifiers = "column_major";
+        }
+        else if (typeInfo.CheckHasStorageFlag(StorageFlag::RowMajor) && !(bannedFlags & StorageFlag::RowMajor))
+        {
+            modifiers = "row_major";
+        }
+        else if (options.m_forceEmitMajor && isMatrix)
+        {
+            modifiers = options.m_emitRowMajor ? "row_major" : "column_major";
+        }
 
+        auto maybeSpace = [&modifiers](){ return modifiers.empty() ? "" : " "; };
+        using SF = StorageFlag;
+        static const StorageFlag toReEmit[] = {SF::Static, SF::Extern, SF::Inline,
+            SF::Const, SF::Volatile, SF::Precise, SF::Groupshared,
+            SF::Uniform, SF::Globallycoherent, SF::Unsigned};
+        for (int i = 0; i < std::size(toReEmit); ++i)
+        {
+            if (typeInfo.CheckHasStorageFlag(toReEmit[i]) && !(bannedFlags & toReEmit[i]))
+            {
+                modifiers += maybeSpace() + ToLower(StorageFlag::ToStr(toReEmit[i]));
+            }
+        }
+
+        if (typeInfo.CheckHasStorageFlag(StorageFlag::Other) && !(bannedFlags & StorageFlag::Other))
+        {
+            for (const auto& flag : typeInfo.m_qualifiers.m_others)
+            {
+                modifiers += " " + flag;
+            }
+        }
+
+        return modifiers;
+    }
+
+    string Backend::GetExtendedTypeInfo(const ExtendedTypeInfo& extTypeInfo, const Options& options, Modifiers banned, std::function<string(const TypeRefInfo&)> translator) const
+    {
+        string hlslString = GetTypeModifier(extTypeInfo, options, banned);
+        hlslString += hlslString.empty() ? "" : " ";
         if (extTypeInfo.m_coreType.m_typeClass == TypeClass::Alias)
         {
-            hlslString = GetExtendedTypeInfo(m_ir->GetSymbolSubAs<TypeAliasInfo>(extTypeInfo.m_coreType.m_typeId.GetName())->m_canonicalType, translator);
+            hlslString += GetExtendedTypeInfo(m_ir->GetSymbolSubAs<TypeAliasInfo>(extTypeInfo.m_coreType.m_typeId.GetName())->m_canonicalType, options, banned, translator);
         }
         else if (HasGenericParameter(extTypeInfo.m_coreType.m_typeClass) || !extTypeInfo.m_genericParameter.IsEmpty())
         {
-            hlslString = translator(extTypeInfo.m_coreType)
+            hlslString += translator(extTypeInfo.m_coreType)
                 + "<" + translator(extTypeInfo.m_genericParameter);
             if (extTypeInfo.m_genericDims.IsArray())
             {
@@ -725,7 +768,7 @@ namespace AZ::ShaderCompiler
         }
         else
         {
-            hlslString = translator(extTypeInfo.m_coreType);
+            hlslString += translator(extTypeInfo.m_coreType);
         }
 
         return hlslString;

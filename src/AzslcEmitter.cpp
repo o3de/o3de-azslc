@@ -145,7 +145,7 @@ namespace AZ::ShaderCompiler
                 if (IsTopLevelThroughTranslation(iteratedSymbolUid))
                 {
                     auto* aliasInfo = m_ir->GetSymbolSubAs<TypeAliasInfo>(iteratedSymbolName);
-                    EmitTypeAlias(iteratedSymbolUid, *aliasInfo);
+                    EmitTypeAlias(iteratedSymbolUid, *aliasInfo, options);
                 }
                 break;
             }
@@ -551,7 +551,7 @@ namespace AZ::ShaderCompiler
                 }
                 else if (info.IsKindOneOf(Kind::TypeAlias))
                 {
-                    EmitTypeAlias(uid, info.GetSubRefAs<TypeAliasInfo>());
+                    EmitTypeAlias(uid, info.GetSubRefAs<TypeAliasInfo>(), options);
                 }
                 else if (info.IsKindOneOf(Kind::Enum))
                 {
@@ -700,9 +700,10 @@ namespace AZ::ShaderCompiler
         }
     }
 
-    void CodeEmitter::EmitTypeAlias(const IdentifierUID& uid, const TypeAliasInfo& aliasInfo) const
+    void CodeEmitter::EmitTypeAlias(const IdentifierUID& uid, const TypeAliasInfo& aliasInfo, const Options& options) const
     {
-        m_out << "typedef " << GetTranslatedName(aliasInfo.m_canonicalType, UsageContext::ReferenceSite)
+        using SF = StorageFlag;
+        m_out << "typedef " << GetTranslatedName(aliasInfo.m_canonicalType, UsageContext::ReferenceSite, options)
               << " " << GetTranslatedName(uid, UsageContext::DeclarationSite) << ";\n";
     }
 
@@ -761,12 +762,14 @@ namespace AZ::ShaderCompiler
         // emit some modifiers only in case of first declaration/definition
         // because:    class C{ static vd A(); };
         //             static vd C::A(){}    // ill-formed HLSL. we can't repeat static here.
-        Modifiers forbidden = Modifiers{StorageFlag::Static} | StorageFlag::Inline | StorageFlag::Extern;
+        Modifiers forbidden;
         bool firstDecl = !AlreadyEmittedFunctionDeclaration(uid);
-        m_out << GetTypeModifier(funcSub.m_returnType, options, firstDecl ? Modifiers{} : forbidden) << " ";
-
+        if (!firstDecl)
+        {
+            forbidden = Modifiers{StorageFlag::Static} | StorageFlag::Inline | StorageFlag::Extern;
+        }
         // emit return type:
-        m_out << GetTranslatedName(funcSub.m_returnType, UsageContext::ReferenceSite) << " ";
+        m_out << GetTranslatedName(funcSub.m_returnType, UsageContext::ReferenceSite, options, forbidden) << " ";
         // emit Name
         if (entityConfiguration == EmitFunctionAs::Definition && funcSub.HasDeportedDefinition())
         {
@@ -811,49 +814,6 @@ namespace AZ::ShaderCompiler
         }
     }
 
-    // static
-    string CodeEmitter::GetTypeModifier(const ExtendedTypeInfo& typeInfo, const Options& options, Modifiers bannedFlags /*= {}*/)
-    {
-        using namespace std::string_literals;
-        string modifiers;
-        bool isMatrix = typeInfo.m_coreType.m_arithmeticInfo.IsMatrix();
-        if (typeInfo.CheckHasStorageFlag(StorageFlag::ColumnMajor) && !(bannedFlags & StorageFlag::ColumnMajor))
-        {
-            modifiers = "column_major";
-        }
-        else if (typeInfo.CheckHasStorageFlag(StorageFlag::RowMajor) && !(bannedFlags & StorageFlag::RowMajor))
-        {
-            modifiers = "row_major";
-        }
-        else if (options.m_forceEmitMajor && isMatrix)
-        {
-            modifiers = options.m_emitRowMajor ? "row_major" : "column_major";
-        }
-
-        auto maybeSpace = [&modifiers](){ return modifiers.empty() ? "" : " "; };
-        using SF = StorageFlag;
-        static const StorageFlag toReEmit[] = {SF::Static, SF::Extern, SF::Inline,
-            SF::Const, SF::Volatile, SF::Precise, SF::Groupshared,
-            SF::Uniform, SF::Globallycoherent, SF::Unsigned};
-        for (int i = 0; i < std::size(toReEmit); ++i)
-        {
-            if (typeInfo.CheckHasStorageFlag(toReEmit[i]) && !(bannedFlags & toReEmit[i]))
-            {
-                modifiers += maybeSpace() + ToLower(StorageFlag::ToStr(toReEmit[i]));
-            }
-        }
-
-        if (typeInfo.CheckHasStorageFlag(StorageFlag::Other) && !(bannedFlags & StorageFlag::Other))
-        {
-            for (const auto& flag : typeInfo.m_qualifiers.m_others)
-            {
-                modifiers += " " + flag;
-            }
-        }
-
-        return modifiers;
-    }
-
     void CodeEmitter::EmitVariableDeclaration(const VarInfo& varInfo, const IdentifierUID& uid, const Options& options, VarDeclHasFlag declOptions) const
     {
         // from MSDN: https://docs.microsoft.com/en-us/windows/desktop/direct3dhlsl/dx-graphics-hlsl-variable-syntax
@@ -887,15 +847,11 @@ namespace AZ::ShaderCompiler
             {
                 m_out << GetInputModifier(varInfo.m_typeInfoExt.m_qualifiers) << " ";
             }
-            // type qualifiers (storage class, modifiers...)
-            if (!(declOptions & VarDeclHas::NoModifiers))
-            {
-                m_out << GetTypeModifier(varInfo.m_typeInfoExt, options) << " ";
-            }
             // type
             if (!(declOptions & VarDeclHas::NoType) || (declOptions & VarDeclHas::OptionDefine))
             {
-                m_out << GetTranslatedName(varInfo.m_typeInfoExt, UsageContext::ReferenceSite) + " ";
+                auto bannedModifiers = (declOptions & VarDeclHas::NoModifiers) ? ~Modifiers{(StorageFlag::EnumType)0} : Modifiers{};
+                m_out << GetTranslatedName(varInfo.m_typeInfoExt, UsageContext::ReferenceSite, options, bannedModifiers) + " ";
             }
             // var name
             m_out << GetTranslatedName(uid.m_name, UsageContext::DeclarationSite);
@@ -1076,25 +1032,25 @@ namespace AZ::ShaderCompiler
     }
 
     //! For scope-migration-aware name emission of symbol names
-    string CodeEmitter::GetTranslatedName(QualifiedNameView mangledName, UsageContext qualification, ssize_t tokenId /*= NotOverToken*/) const
+    string CodeEmitter::GetTranslatedName(QualifiedNameView mangledName, UsageContext context, ssize_t tokenId /*= NotOverToken*/) const
     {
-        return m_translations.GetTranslatedName(mangledName, qualification, tokenId);
+        return m_translations.GetTranslatedName(mangledName, context, tokenId);
     }
 
-    string CodeEmitter::GetTranslatedName(const IdentifierUID& uid, UsageContext qualification, ssize_t tokenId /*= NotOverToken*/) const
+    string CodeEmitter::GetTranslatedName(const IdentifierUID& uid, UsageContext context, ssize_t tokenId /*= NotOverToken*/) const
     {
-        return GetTranslatedName(uid.m_name, qualification, tokenId);
+        return GetTranslatedName(uid.m_name, context, tokenId);
     }
 
-    string CodeEmitter::GetTranslatedName(const TypeRefInfo& typeRef, UsageContext qualification, ssize_t tokenId /*= NotOverToken*/) const
+    string CodeEmitter::GetTranslatedName(const TypeRefInfo& typeRef, UsageContext context, ssize_t tokenId /*= NotOverToken*/) const
     {
-        return GetTranslatedName(typeRef.m_typeId, qualification, tokenId);
+        return GetTranslatedName(typeRef.m_typeId, context, tokenId);
     }
 
-    string CodeEmitter::GetTranslatedName(const ExtendedTypeInfo& extTypeInfo, UsageContext qualification, ssize_t tokenId /*= NotOverToken*/) const
+    string CodeEmitter::GetTranslatedName(const ExtendedTypeInfo& extTypeInfo, UsageContext context, const Options& options, Modifiers forbidden /*= {}*/, ssize_t tokenId /*= NotOverToken*/) const
     {
-        return GetExtendedTypeInfo(extTypeInfo,
-                                   [this, qualification, tokenId](const TypeRefInfo& tri){ return GetTranslatedName(tri, qualification, tokenId); });
+        return GetExtendedTypeInfo(extTypeInfo, options, forbidden,
+                                   [this, context, tokenId](const TypeRefInfo& tri){ return GetTranslatedName(tri, context, tokenId); });
     }
 
     void CodeEmitter::EmitSRGDataView(const IdentifierUID& tId, const Options& options, const RootSigDesc& rootSig) const
@@ -1103,7 +1059,7 @@ namespace AZ::ShaderCompiler
         auto   bindSet = BindingPair::Set::Merged;
         auto&  bindInfo = rootSig.Get(tId);
         auto*  varInfo = m_ir->GetSymbolSubAs<VarInfo>(tId.m_name);
-        string varType = GetTranslatedName(varInfo->m_typeInfoExt, UsageContext::DeclarationSite);
+        string varType = GetTranslatedName(varInfo->m_typeInfoExt, UsageContext::DeclarationSite, options);
         auto   registerTypeLetter = ToLower(BindingType::ToStr(RootParamTypeToBindingType(bindInfo.m_type)));
         optional<string> stringifiedLogicalSpace = std::to_string(bindInfo.m_registerBinding.m_pair[bindSet].m_logicalSpace);
 
