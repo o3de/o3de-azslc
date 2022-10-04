@@ -36,12 +36,12 @@ def doTests(compiler, silent, azdxcpath):
 
     # expect success when using --unique-idx
     sampleFilePath = os.path.abspath(os.path.join(workDir, "../Semantic/unbounded-arrays-unique-idx-should-pass.azsl"))
-    if testhelper.verifyEmissionPatterns(sampleFilePath, compiler, silent, ["--unique-idx",]) : result += 1
+    if testhelper.verifyEmissionPatterns(sampleFilePath, compiler, silent, ["--unique-idx","--namespace=dx"]) : result += 1
     else: resultFailed += 1
     
     # expect success when using --unique-idx
     sampleFilePath = os.path.abspath(os.path.join(workDir, "../Semantic/unbounded-arrays-unique-idx-should-pass-2srgs.azsl"))
-    if testhelper.verifyEmissionPatterns(sampleFilePath, compiler, silent, ["--unique-idx",]) : result += 1
+    if testhelper.verifyEmissionPatterns(sampleFilePath, compiler, silent, ["--unique-idx","--namespace=dx"]) : result += 1
     else: resultFailed += 1
 
     testhelper.printFailedTestList(silent)
