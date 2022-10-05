@@ -23,7 +23,7 @@ namespace StdFs = std::filesystem;
 // For large features or milestones. Minor version allows for breaking changes. Existing tests can change.
 #define AZSLC_MINOR "8"   // last change: introduction of class inheritance
 // For small features or bug fixes. They cannot introduce breaking changes. Existing tests shouldn't change.
-#define AZSLC_REVISION "7"  // last change: enhanced grammar compliance with HLSL & robust line directive support & refactor of type qualifiler into typeinfoext
+#define AZSLC_REVISION "8"  // last change: enhanced grammar compliance with HLSL & robust line directive support & refactor of type qualifiler into typeinfoext
 
 
 namespace AZ::ShaderCompiler

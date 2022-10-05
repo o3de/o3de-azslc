@@ -277,6 +277,7 @@ namespace AZ::ShaderCompiler
             vector<StorageFlag> bag;
             auto end = std::copy_if(StorageFlag::Enumerate{}.begin(), StorageFlag::Enumerate{}.end(), std::back_inserter(bag),
                                     [&](auto sf) -> bool { return (m_flag & sf) && (sf & ~StorageFlag::Other); });
+            // Join will call operator<< on StorageFlag::EnumType for stringification
             return string{Trim(Join(bag.begin(), bag.end(), " ") + " " + Join(m_others.begin(), m_others.end(), " "))};
         }
 

@@ -36,7 +36,6 @@ ByteAddressBuffer : 'ByteAddressBuffer';
 Break : 'break';
 Case : 'case';
 CBuffer : 'cbuffer';
-Center : 'center';
 Centroid : 'centroid';
 ConstantBuffer : 'constantbuffer';
 ConstantBufferCamel : 'ConstantBuffer';
@@ -435,10 +434,12 @@ HLSLSemanticSystem:
   | 'sv_'       (Nondigit | Digit)*
 ;
 
-// unfortunately common words need to become reserved keywords, precluding their use as Identifier:
-Indices : 'indices';   // mesh-shader parameter qualifier
-Vertices : 'vertices'; // mesh-shader parameter qualifier
-Payload : 'payload';   // mesh-shader parameter qualifier & hit-shader optional qualifier
+// Those keywords are removed from the vocabulary, as of 1.8.8 (were present from 1.8.5)
+// since they can be emulated with a lazy Identifier recognition in the qualifier rule
+//Center : 'center';
+//Indices : 'indices';   // mesh-shader parameter qualifier
+//Vertices : 'vertices'; // mesh-shader parameter qualifier
+//Payload : 'payload';   // mesh-shader parameter qualifier & hit-shader optional qualifier
 
 Identifier
     :   Nondigit (Nondigit | Digit)*

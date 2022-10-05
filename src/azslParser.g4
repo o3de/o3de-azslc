@@ -386,7 +386,7 @@ packOffsetNode:
 ;
 
 storageFlags:
-    storageFlag*
+    storageFlag*?    // *? lazy Kleene star. this allows the use of Identifier as a subrule without swallowing typenames under the storage rule.
 ;
 
 storageFlag:
@@ -411,7 +411,6 @@ storageFlag:
     |   UNorm
     // Interpolation modifiers
     |   Linear
-    |   Center
     |   Centroid
     |   Nointerpolation
     |   Noperspective
@@ -420,15 +419,14 @@ storageFlag:
     |   In
     |   Out
     |   Inout
-    |   Indices   // mesh shader qualifiers
-    |   Vertices
-    |   Payload   // ray shader optional qualifier, mesh shader mandatory
     // Geometry shader primitive type
     |   Point
     |   Line_
     |   Triangle
     |   LineAdj
     |   TriangleAdj
+    // catch-all
+    |   Identifier
 ;
 
 // note that in FXC "int static" (that is `storageFlags type storageFlags`) wasn't valid.

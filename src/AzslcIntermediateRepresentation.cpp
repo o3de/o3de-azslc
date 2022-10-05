@@ -306,9 +306,15 @@ namespace AZ::ShaderCompiler
 
     void DumpSymbols(IntermediateRepresentation& ir)
     {
+        std::unordered_set<IdentifierUID> seen; // avoid functions delc/def repetitions
         // in YAML form
         for (auto& uid : ir.m_symbols.GetOrderedSymbols())
         {
+            if (seen.find(uid) != seen.end())
+            {
+                continue;
+            }
+            seen.insert(uid);
             auto& [_, sym] = *ir.m_symbols.GetIdAndKindInfo(uid.m_name);
             assert(uid == _);
             cout << "Symbol " << Decorate("'", uid.m_name) << ":\n";
@@ -323,17 +329,9 @@ namespace AZ::ShaderCompiler
                 //  but they don't have actual type or declaration line, so we skip them here.
                 cout << "  line: " << (sub.m_declNode ? std::to_string(sub.m_declNode->start->getLine()) : "NA") << "\n";
                 cout << "  type:\n" << ToYaml(sub.m_typeInfoExt, ir, "    ") << "\n";
+                cout << "  storage: " << sub.m_typeInfoExt.m_qualifiers.GetDisplayName() << "\n";
                 cout << "  array dim: \"" << sub.m_typeInfoExt.m_arrayDims.ToString() << "\"\n";
                 cout << "  has sampler state: " << (sub.m_samplerState ? "yes\n" : "no\n");
-                cout << "  storage: ";
-                for (auto sf : StorageFlag::Enumerate{})
-                {
-                    auto flag = StorageFlag{sf};
-                    if (sub.CheckHasStorageFlag(flag))
-                    {
-                        cout << StorageFlag::ToStr(flag) << " ";
-                    }
-                }
                 cout << "\n";
                 if (!holds_alternative<monostate>(sub.m_constVal))
                 {
@@ -366,6 +364,7 @@ namespace AZ::ShaderCompiler
                 cout << "  is method: " << sub.m_isMethod << "\n";
                 cout << "  is virtual: " << sub.m_isVirtual << "\n";
                 cout << "  return type:\n" << ToYaml(sub.m_returnType, ir, "    ") << "\n";
+                cout << "  storage: " << sub.m_returnType.m_qualifiers.GetDisplayName() << "\n";
                 cout << "  has overriding children:\n" << ToYaml(sub.m_overrides.begin(), sub.m_overrides.end(), "    ");
                 cout << "  is hiding base symbol: '" << (sub.m_base ? sub.m_base->m_name.c_str() : "") << "'\n";
                 cout << "  parameters:\n";
