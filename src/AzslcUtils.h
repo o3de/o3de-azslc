@@ -283,9 +283,7 @@ namespace AZ::ShaderCompiler
         void OrMerge(const TypeQualifiers& src)
         {
             m_flag |= src.m_flag;
-            unordered_set<string> fresh{m_others.begin(), m_others.end()};
-            fresh.insert(src.m_others.begin(), src.m_others.end());
-            m_others = vector<string>{fresh.begin(), fresh.end()};
+            StableMerge(m_others, src.m_others);  // stable is key to not disturb emission tests accross platforms that could hash differently if using unordered_sets.
         }
     };
 

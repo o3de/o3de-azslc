@@ -589,6 +589,41 @@ namespace AZ
     {
         return (value > 0) && !(value & (value - 1));
     }
+
+    //! Insert rhs at the end of lhs
+    template<typename T>
+    void AppendVector(vector<T>& lhs, vector<T> const& rhs)
+    {
+        using std::begin, std::end;
+        lhs.insert(end(lhs), begin(rhs), end(rhs));
+    }
+
+    //! Stable algorithm to uniquify elements of a vector (preserving order).
+    //! Solution Mohammed Hossain/Yuri https://stackoverflow.com/a/34341344/893406
+    template<typename T>
+    size_t RemoveDuplicatesKeepOrder(vector<T>& vec)
+    {
+        unordered_set<T> seen;
+        auto newEnd = std::remove_if(vec.begin(), vec.end(), [&seen](const T& value)
+                                     {
+                                         if (seen.find(value) != std::end(seen))
+                                             return true;
+
+                                         seen.insert(value);
+                                         return false;
+                                     });
+        vec.erase(newEnd, vec.end());
+        return vec.size();
+    }
+
+    //! Append rhs to lhs and remove duplicates
+    template<typename T>
+    void StableMerge(vector<T>& lhs, vector<T> const& rhs)
+    {
+        AppendVector(lhs, rhs);
+        RemoveDuplicatesKeepOrder(lhs);
+    }
+
 }
 
 #ifndef NDEBUG
