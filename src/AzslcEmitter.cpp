@@ -471,7 +471,7 @@ namespace AZ::ShaderCompiler
         auto lastEmitted = Infimum(m_alreadyEmittedPreprocessorLineDirectives, curHlslLine);
         if (lastEmitted != m_alreadyEmittedPreprocessorLineDirectives.cend())
         {
-            // verify if we can skip the line emission if current stream line feed is still in synch with expectations
+            // verify if we can skip the line emission if current stream line feed is still in sync with expectations
             //  image:
             //            in sync                  out of sync
             //  1 | #line 1                1 | #line 1

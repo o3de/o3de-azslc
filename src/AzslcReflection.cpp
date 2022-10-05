@@ -498,7 +498,7 @@ namespace AZ::ShaderCompiler
                 IsProductType(varClass) ? "Struct"    : TypeClass::ToStr(varClass).data();
             memberLayout["typeName"]         = varInfo.GetTypeId().m_name;         
 
-            size = varInfo.m_typeInfoExt.GetTotalSize(layoutPacking, options.m_emitRowMajor);
+            size = varInfo.m_typeInfoExt.GetTotalSize(layoutPacking, options.m_forceMatrixRowMajor);
             auto startAt = offset;
 
             // Alignment start
@@ -584,7 +584,7 @@ namespace AZ::ShaderCompiler
             else if (varInfo.m_typeInfoExt.IsArray())
             {
                 // Get the size of one element from total size
-                size = varInfo.m_typeInfoExt.GetSingleElementSize(layoutPacking, options.m_emitRowMajor);
+                size = varInfo.m_typeInfoExt.GetSingleElementSize(layoutPacking, options.m_forceMatrixRowMajor);
             }
             else if (varInfo.GetTypeClass() == TypeClass::Enum)
             {

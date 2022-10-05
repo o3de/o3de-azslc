@@ -11,6 +11,9 @@
 
 namespace AZ
 {
+    //! This class aims at being an abstract base to replace std::ostream which is not deriveable.
+    //! With this facility, stream operator << becomes virtualizable, and emitters/reflectors may stream to
+    //! various types of special streaming service, notably the "linefeed counter" you'll find in NewLineCounterStream.h
     class Streamable
     {
     public:

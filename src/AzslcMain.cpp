@@ -146,7 +146,7 @@ namespace AZ::ShaderCompiler
         VisitTokens(r, byTypeClass, notTypes);
         bool notType = notTypes.find(token->getText()) != notTypes.end();
         bool notIdentifier = r->getVocabulary().getSymbolicName(token->getType()) != "Identifier";
-        bool firstIsalpha(token->getText()[0]);
+        bool firstIsalpha(isalpha(token->getText()[0]));
         return notType && notIdentifier && firstIsalpha;
     }
 
@@ -595,12 +595,12 @@ int main(int argc, const char* argv[])
             }
             else if (Zpr)
             {
-                emitOptions.m_emitRowMajor = true;
+                emitOptions.m_forceMatrixRowMajor = true;
                 emitOptions.m_forceEmitMajor = true;
             }
             else if (Zpc)
             {
-                emitOptions.m_emitRowMajor = false; // Default
+                emitOptions.m_forceMatrixRowMajor = false; // Default
                 emitOptions.m_forceEmitMajor = true;
             }
 
@@ -626,7 +626,7 @@ int main(int argc, const char* argv[])
             MiddleEndConfiguration middleEndConfigration{emitOptions.m_rootConstantsMaxSize,
                                                          emitOptions.m_packConstantBuffers,
                                                          emitOptions.m_packDataBuffers,
-                                                         emitOptions.m_emitRowMajor,
+                                                         emitOptions.m_forceMatrixRowMajor,
                                                          emitOptions.m_padRootConstantCB,
                                                          emitOptions.m_skipAlignmentValidation};
             ir.MiddleEnd(middleEndConfigration, &lineFinder);

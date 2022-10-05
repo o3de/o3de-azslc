@@ -721,7 +721,7 @@ namespace AZ::ShaderCompiler
         }
         else if (options.m_forceEmitMajor && isMatrix)
         {
-            modifiers = options.m_emitRowMajor ? "row_major" : "column_major";
+            modifiers = options.m_forceMatrixRowMajor ? "row_major" : "column_major";
         }
 
         auto maybeSpace = [&modifiers](){ return modifiers.empty() ? "" : " "; };
@@ -796,7 +796,7 @@ namespace AZ::ShaderCompiler
                 }
 
                 // GetTotalSize of each member of the structure
-                uint32_t size = varInfo.m_typeInfoExt.GetTotalSize(options.m_packDataBuffers, options.m_emitRowMajor);
+                uint32_t size = varInfo.m_typeInfoExt.GetTotalSize(options.m_packDataBuffers, options.m_forceMatrixRowMajor);
 
                 numberOf32bitRootConstants += (size / 4);
             }

@@ -117,7 +117,7 @@ namespace AZ::ShaderCompiler
         if (!scopeKind.IsKindOneOf(Kind::Class, Kind::ShaderResourceGroup))
         {
             throw AzslcOrchestratorException{ORCHESTRATOR_DEPORTED_METHOD_DEFINITION,
-                    ctx->start, "Only class and SRG may have deported method definitions"};
+                ctx->start, "Only class and SRG may have deported method definitions"};
         }
         IdentifierUID holdingScope = GetCurrentScopeIdAndKind().first;
         if (! (holdingScope.m_name == "/" || holdingScope == scopeUid))
@@ -142,7 +142,7 @@ namespace AZ::ShaderCompiler
         if (!optionalIdentifier)
         {
             throw AzslcOrchestratorException{ORCHESTRATOR_NO_DECLERATION, ctx->start,
-                    ConcatString((scopeIsClass ? "class " : "SRG "), scopeUid.m_name, " doesn't have a declaration for ", decoratedUqName)};
+                ConcatString((scopeIsClass ? "class " : "SRG "), scopeUid.m_name, " doesn't have a declaration for ", decoratedUqName)};
         }
         // verify also the kind of the member
         auto* originalDeclarationAsFunc = m_symbols->GetAsSub<FunctionInfo>(*optionalIdentifier);
@@ -151,8 +151,8 @@ namespace AZ::ShaderCompiler
             Kind realKindOfOriginallyDeclaredMember = m_symbols->GetIdAndKindInfo(optionalIdentifier->GetName())->second.GetKind();
             throw AzslcOrchestratorException{ORCHESTRATOR_UNEXPECTED_KIND,
                 ctx->start, ConcatString((scopeIsClass ? "class " : "SRG "), scopeUid.m_name,
-                     " holds a member ", optionalIdentifier->m_name,
-                     " but it is of kind ", string{ Kind::ToStr(realKindOfOriginallyDeclaredMember) },
+                                         " holds a member ", optionalIdentifier->m_name,
+                                         " but it is of kind ", string{ Kind::ToStr(realKindOfOriginallyDeclaredMember) },
                                          " instead of expected ", string{ Kind::ToStr(Kind::Function) })};
         }
         // now we're good.
@@ -213,12 +213,12 @@ namespace AZ::ShaderCompiler
             if (isScopeCompositeType)
             {
                 throw AzslcOrchestratorException{ORCHESTRATOR_OVERLY_QUALIFIED, ctx->Name,
-                        ConcatString(ctx->getText(), " is overly qualified. In-class declarations spawn new identifiers, and don't have to refer to existing symbols.")};
+                    ConcatString(ctx->getText(), " is overly qualified. In-class declarations spawn new identifiers, and don't have to refer to existing symbols.")};
             }
             else
             {
                 throw AzslcOrchestratorException{ORCHESTRATOR_DEPORTED_METHOD, ctx->Name,
-                        ConcatString(ctx->getText(), "is a deported method declaration, which is considered ill-formed. You can make it a definition (with a body), or delete that statement.")};
+                    ConcatString(ctx->getText(), "is a deported method declaration, which is considered ill-formed. You can make it a definition (with a body), or delete that statement.")};
             }
         }
         IdAndKind* symbol = m_symbols->GetIdAndKindInfo(decoratedName);
@@ -452,9 +452,8 @@ namespace AZ::ShaderCompiler
         aliasInfo.m_canonicalType = CreateExtendedTypeInfo(existingTypeCtx, {});
         if (!aliasInfo.m_canonicalType.IsClassFound())
         {
-            throw AzslcOrchestratorException{ORCHESTRATOR_INVALID_TYPEALIAS_TARGET,
-                                            existingTypeCtx->start,
-                    ConcatString("target type ", existingTypeCtx->getText() + " not understood in typealias expression")};
+            throw AzslcOrchestratorException{ORCHESTRATOR_INVALID_TYPEALIAS_TARGET, existingTypeCtx->start,
+                ConcatString("target type ", existingTypeCtx->getText() + " not understood in typealias expression")};
         }
         assert(aliasInfo.m_canonicalType.m_coreType.m_typeClass != TypeClass::Alias);
         // further registration in containing scopes
@@ -551,7 +550,7 @@ namespace AZ::ShaderCompiler
         if (varInfo.CheckHasStorageFlag(StorageFlag::Inline))
         {
             throw AzslcOrchestratorException{ORCHESTRATOR_INVALID_INLINED_QUALIFIER, ctx->start,
-                    "inline qualification on variables is ill-formed"};
+                "inline qualification on variables is ill-formed"};
         }
         bool global = curScopeId.GetName() == "/";
         bool isOption = varInfo.CheckHasStorageFlag(StorageFlag::Option);
@@ -563,17 +562,17 @@ namespace AZ::ShaderCompiler
             if (arrayDims.IsArray())
             {
                 throw AzslcOrchestratorException{ORCHESTRATOR_INVALID_NONGLOBAL_OPTION_OR_ROOTCONSTANT, ctx->start,
-                        "arrays can not be declared as rootconstants."};
+                    "arrays can not be declared as rootconstants."};
             }
             if (!global)
             {
                 throw AzslcOrchestratorException{ORCHESTRATOR_INVALID_NONGLOBAL_OPTION_OR_ROOTCONSTANT, ctx->start,
-                        "rootconstant or option qualifier is only accepted at top-level scope"};
+                    "rootconstant or option qualifier is only accepted at top-level scope"};
             }
             if (hasExplicitLocalFlag)
             {
                 throw AzslcOrchestratorException{ORCHESTRATOR_INVALID_QUALIFIER_MIX, ctx->start,
-                        "static, groupshared qualifiers cannot be used with the rootconstant or option qualifier"};
+                    "static, groupshared qualifiers cannot be used with the rootconstant or option qualifier"};
             }
             if (varInfo.CheckHasStorageFlag(StorageFlag::Const))
             {
@@ -633,12 +632,12 @@ namespace AZ::ShaderCompiler
             if (global && !varInfo.CheckHasStorageFlag(StorageFlag::Rootconstant))
             {
                 throw AzslcOrchestratorException{ORCHESTRATOR_ILLEGAL_GLOBAL_VARIABLE, nameIdentifier,
-                        ConcatString(Decorate("'", idText), " extern global variables are ill-formed in AZSL. You might want an internal variable (static or groupshared), a rootconstant, an option, or to put your resource in a ShaderResourceGroup.") };
+                    ConcatString(Decorate("'", idText), " extern global variables are ill-formed in AZSL. You might want an internal variable (static or groupshared), a rootconstant, an option, or to put your resource in a ShaderResourceGroup.") };
             }
             if (HasStandardInitializer(ctx))
             {
                 throw AzslcOrchestratorException{ORCHESTRATOR_EXTERNAL_VARIABLE_WITH_INITIALIZER, nameIdentifier,
-                        ConcatString(Decorate("'", idText), " extern variables can't be initialized from the shader side, since their values are set by bindings.") };
+                    ConcatString(Decorate("'", idText), " extern variables can't be initialized from the shader side, since their values are set by bindings.") };
             }
         }
 
@@ -652,7 +651,7 @@ namespace AZ::ShaderCompiler
             if (HasStandardInitializer(ctx) && !isStaticConst)
             {
                 throw AzslcOrchestratorException{ ORCHESTRATOR_MEMBER_VARIABLE_WITH_INITIALIZER, nameIdentifier,
-                        ConcatString(idText, " default-member-initializers are not supported.") };
+                    ConcatString(idText, " default-member-initializers are not supported.") };
             }
         }
         if (curScopeKind.GetKind() == Kind::Interface)
@@ -660,7 +659,7 @@ namespace AZ::ShaderCompiler
             // this is an impossible case because the parser doesn't accept these constructs.
             // but let's say one day we have an API that allows constructing AST programmatically.
             throw AzslcOrchestratorException{ORCHESTRATOR_ILLEGAL_MEMBER_VARIABLE_IN_INTERFACE,
-                    nameIdentifier, "member variables in interfaces are forbidden."};
+                nameIdentifier, "member variables in interfaces are forbidden."};
         }
         if (enclosedBySRG)
         {
@@ -694,8 +693,8 @@ namespace AZ::ShaderCompiler
         const bool isUnboundedArray = arrayDims.IsUnbounded();
         if (!isUnboundedArray && !arrayDims.AreAllDimsFullyConstantFolded())
         {
-            throw AzslcOrchestratorException{ORCHESTRATOR_ILLEGAL_FOLDABLE_ARRAY_DIMENSIONS, ctx->start
-                    , GetNonEasyToFoldMessage(arrayDims)};
+            throw AzslcOrchestratorException{ORCHESTRATOR_ILLEGAL_FOLDABLE_ARRAY_DIMENSIONS, ctx->start,
+                GetNonEasyToFoldMessage(arrayDims)};
         }
 
         auto& [srgUid, srgKind] = GetCurrentScopeIdAndKind();
@@ -726,16 +725,16 @@ namespace AZ::ShaderCompiler
         {
             if (isUnboundedArray)
             {
-                throw AzslcOrchestratorException{ORCHESTRATOR_ILLEGAL_FOLDABLE_ARRAY_DIMENSIONS, ctx->start
-                        , GetNonEasyToFoldMessage(arrayDims)};
+                throw AzslcOrchestratorException{ORCHESTRATOR_ILLEGAL_FOLDABLE_ARRAY_DIMENSIONS, ctx->start,
+                    GetNonEasyToFoldMessage(arrayDims)};
             }
             if (!varInfo.GetTypeRefInfo().IsPackable())
             {
                 throw AzslcOrchestratorException{ORCHESTRATOR_NON_PACKABLE_TYPE_IN_SRG_CONSTANT, ctx->start,
-                                                 ConcatString(varInfo.GetTypeId().m_name,
-                                                              " is of kind ",
-                                                              TypeClass::ToStr(varInfo.GetTypeClass()),
-                                                              " which is a non packable kind of type.")};
+                    ConcatString(varInfo.GetTypeId().m_name,
+                                 " is of kind ",
+                                 TypeClass::ToStr(varInfo.GetTypeClass()),
+                                 " which is a non packable kind of type.")};
             }
             auto& classInfo = srgInfo.m_implicitStruct;
             classInfo.PushMember(varUid, Kind::Variable);
@@ -744,8 +743,8 @@ namespace AZ::ShaderCompiler
         {
             if (isUnboundedArray)
             {
-                throw AzslcOrchestratorException{ORCHESTRATOR_ILLEGAL_FOLDABLE_ARRAY_DIMENSIONS, ctx->start
-                        , GetNonEasyToFoldMessage(arrayDims)};
+                throw AzslcOrchestratorException{ORCHESTRATOR_ILLEGAL_FOLDABLE_ARRAY_DIMENSIONS, ctx->start,
+                    GetNonEasyToFoldMessage(arrayDims)};
             }
             assert(varInfo.StorageFlagIsLocalLinkage(true));
             srgInfo.m_nonexternVariables.push_back(varUid);
@@ -913,7 +912,7 @@ namespace AZ::ShaderCompiler
         if (!ctx->Partial() && !ctx->Semantic)
         {
             throw AzslcOrchestratorException{ORCHESTRATOR_INVALID_SEMANTIC_DECLARATION,
-                    ctx->Name, "A semantic is mandatory on the declaration of a non-partial ShaderResourceGroup."};
+                ctx->Name, "A semantic is mandatory on the declaration of a non-partial ShaderResourceGroup."};
         }
         auto& symbol       = AddIdentifier(uqNameView, Kind::ShaderResourceGroup, line);
         // now fillup what we can about the kindinfo:
@@ -940,7 +939,7 @@ namespace AZ::ShaderCompiler
             if (!baseSymbol)
             {
                 throw AzslcOrchestratorException{ORCHESTRATOR_UNSPECIFIED_BASE_SYMBOL,
-                        ctx->start, ConcatString("Base symbol "s, baseName, " not found")};
+                    ctx->start, ConcatString("Base symbol "s, baseName, " not found")};
             }
             // register base in the class info IR
             targetClassInfo->PushBase(baseSymbol->first);
@@ -1427,7 +1426,7 @@ namespace AZ::ShaderCompiler
             {
                 auto baseKindStr = Kind::ToStr(baseKind).data();
                 throw AzslcOrchestratorException{ORCHESTRATOR_HIDING_SYMBOL_BASE, ctx->Identifier()->getSymbol(),
-                        ConcatString("function ", thisFuncId.m_name, " is hiding a symbol of a base, that is not of Function kind, but is ", baseKindStr)};
+                    ConcatString("function ", thisFuncId.m_name, " is hiding a symbol of a base, that is not of Function kind, but is ", baseKindStr)};
             }
             auto& baseFuncSubInfo = baseFuncKind.GetSubRefAs<FunctionInfo>();
             if (std::find(baseFuncSubInfo.m_overrides.begin(),  baseFuncSubInfo.m_overrides.end(), thisFuncId) == baseFuncSubInfo.m_overrides.end())
@@ -1445,14 +1444,14 @@ namespace AZ::ShaderCompiler
             if (GetCurrentParentScopeIdAndKind().second.GetKind() != Kind::Class)
             {   // free function case (or in interface !)
                 throw AzslcOrchestratorException{ORCHESTRATOR_INVALID_OVERRIDE_SPECIFIER_CLASS, ctx->Identifier()->getSymbol(),
-                        ConcatString("function ", thisFuncId.m_name, " has override specifier but is not part of a class")};
+                    ConcatString("function ", thisFuncId.m_name, " has override specifier but is not part of a class")};
             }
             else
             {   // in-class case
                 if (!parentFunction)
                 {
                     throw AzslcOrchestratorException{ORCHESTRATOR_INVALID_OVERRIDE_SPECIFIER_BASE, ctx->Identifier()->getSymbol(),
-                            ConcatString("method ", thisFuncId.m_name, " has override specifier but is not found in any base")};
+                        ConcatString("method ", thisFuncId.m_name, " has override specifier but is not found in any base")};
                 }
             }
         }

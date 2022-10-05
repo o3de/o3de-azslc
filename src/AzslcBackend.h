@@ -31,7 +31,7 @@ namespace AZ::ShaderCompiler
         bool m_useUniqueIndices = false;
         bool m_emitConstantBufferBody = false;
         bool m_emitRootSig = false;
-        bool m_emitRowMajor = false;     //!< False by default (HLSL standard)
+        bool m_forceMatrixRowMajor = false;     //!< False by default (HLSL standard)
         bool m_forceEmitMajor = false;   //!< True if either -Zpc or -Zpr was specified
         bool m_padRootConstantCB = false; //!< If True, the emitted root constant CB will padded to 16-byte boundary.
         bool m_skipAlignmentValidation = false; //! < If True, disables validation of a known DXC issue when certain word or 2-words size variables are preceded by some MatrixRxC variables.
