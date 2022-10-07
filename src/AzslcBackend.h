@@ -8,6 +8,7 @@
 #pragma once
 
 #include "AzslcListener.h"
+#include "NewLineCounterStream.h"
 
 #include "jsoncpp/dist/json/json.h"
 #include "AzslcRegisters.h"
@@ -31,7 +32,7 @@ namespace AZ::ShaderCompiler
         bool m_useUniqueIndices = false;
         bool m_emitConstantBufferBody = false;
         bool m_emitRootSig = false;
-        bool m_emitRowMajor = false;     //!< False by default (HLSL standard)
+        bool m_forceMatrixRowMajor = false;     //!< False by default (HLSL standard)
         bool m_forceEmitMajor = false;   //!< True if either -Zpc or -Zpr was specified
         bool m_padRootConstantCB = false; //!< If True, the emitted root constant CB will padded to 16-byte boundary.
         bool m_skipAlignmentValidation = false; //! < If True, disables validation of a known DXC issue when certain word or 2-words size variables are preceded by some MatrixRxC variables.
@@ -134,12 +135,22 @@ namespace AZ::ShaderCompiler
     class Backend
     {
     public:
-        Backend(IntermediateRepresentation* ir, TokenStream* tokens, std::ostream& out)
-        : m_ir(ir), m_tokens(tokens), m_out(out)
+        Backend(IntermediateRepresentation* ir, TokenStream* tokens)
+        : m_ir(ir), m_tokens(tokens)
         {}
 
         //! Gets the IntermediateRepresentation object
         const IntermediateRepresentation* GetIR() const { return m_ir; }
+
+        //! Make a string that lists all type qualifiers/modifiers in HLSL format
+        static string GetTypeModifier(const ExtendedTypeInfo&, const Options& options, Modifiers bannedFlags = {});
+
+        //! Get HLSL form of in/out modifiers
+        static const char* GetInputModifier(const TypeQualifiers& typeQualifier);
+
+        //! Fabricate a HLSL snippet that represents the type stored in typeInfo. Relevant options relate to matrix qualifiers.
+        //! \param banned is the Flag you can setup to list a collection of type qualifiers you don't want to reproduce.
+        string GetExtendedTypeInfo(const ExtendedTypeInfo& extTypeInfo, const Options& options, Modifiers banned, std::function<string(const TypeRefInfo&)> translator) const;
 
     protected:
         //! Obtains a supplement emitter which provides per-platform emission functionality.
@@ -148,11 +159,9 @@ namespace AZ::ShaderCompiler
         //! Gets the next and increments tokenIndex. TokenIndex must be in the [misc::Interval.a, misc::Interval.b] range. Token cannot be nullptr.
         auto GetNextToken(ssize_t& tokenIndex, size_t channel = Token::DEFAULT_CHANNEL) const -> antlr4::Token*;
 
-        //! Extract an interval of text out of the source token stream, and append it to @output
-        virtual void GetTextInStream(misc::Interval interval, std::ostream& output) const;
+        virtual void EmitTranspiledTokens(misc::Interval interval, Streamable& output) const;
 
-        //! Extract an interval of text out of the source token stream
-        string GetTextAsString(misc::Interval interval) const;
+        string GetTranspiledTokens(misc::Interval interval) const;
 
         string GetInitializerClause(const AZ::ShaderCompiler::VarInfo* varInfo) const;
 
@@ -168,13 +177,8 @@ namespace AZ::ShaderCompiler
 
         Json::Value GetVariantList(const Options& options, bool includeEmpty = false) const;
 
-        static const char* GetInputModifier(TypeQualifier typeQualifier);
-
-        string GetExtendedTypeInfo(const ExtendedTypeInfo& extTypeInfo, std::function<string(const TypeRefInfo&)> translator) const;
-
-        std::ostream&               m_out;
-        IntermediateRepresentation* m_ir;
-        TokenStream*                m_tokens;
+        IntermediateRepresentation*      m_ir;
+        TokenStream*                     m_tokens;
         
         // On some platforms (DX12), descriptor arrays occupy an individual register slot, and spaces are used
         // to prevent overlapping ranges. When an unbounded array is encountered, we immediately assign it to
@@ -204,9 +208,9 @@ namespace AZ::ShaderCompiler
     // don't use for HLSL emission (this doesn't go through translation)
     string UnmangleTrimedName(const ExtendedTypeInfo& extTypeInfo);
 
-    std::ostream &operator << (std::ostream &out, const SamplerStateDesc::AddressMode& addressMode);
-    std::ostream &operator << (std::ostream &out, const SamplerStateDesc::ComparisonFunc& compFunc);
-    std::ostream &operator << (std::ostream &out, const SamplerStateDesc::BorderColor& borderColor);
-    std::ostream &operator << (std::ostream &out, const SamplerStateDesc& samplerDesc);
-    std::ostream &operator << (std::ostream &out, const SamplerStateDesc::ReductionType& redcType);
+    Streamable& operator << (Streamable& out, const SamplerStateDesc::AddressMode& addressMode);
+    Streamable& operator << (Streamable& out, const SamplerStateDesc::ComparisonFunc& compFunc);
+    Streamable& operator << (Streamable& out, const SamplerStateDesc::BorderColor& borderColor);
+    Streamable& operator << (Streamable& out, const SamplerStateDesc& samplerDesc);
+    Streamable& operator << (Streamable& out, const SamplerStateDesc::ReductionType& redcType);
 }

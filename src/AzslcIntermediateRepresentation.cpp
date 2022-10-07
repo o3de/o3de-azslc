@@ -110,7 +110,8 @@ namespace AZ::ShaderCompiler
     }
 
     //! execute any logic that relates to intermediate treatment that would need to be done between front end and back end
-    void IntermediateRepresentation::MiddleEnd(const MiddleEndConfiguration& middleEndconfigration)
+    void IntermediateRepresentation::MiddleEnd(const MiddleEndConfiguration& middleEndconfigration,
+                                               PreprocessorLineDirectiveFinder* lineFinder)
     {
         // At this point we have an order apparition vector that stores symbols in the immediate naive
         // order in which they are first seen in the source code.
@@ -129,7 +130,7 @@ namespace AZ::ShaderCompiler
 
         if (!middleEndconfigration.m_skipAlignmentValidation)
         {
-            ValidateAlignmentIssueWhenScalarOrFloat2PrecededByMatrix(middleEndconfigration);
+            ValidateAlignmentIssueWhenScalarOrFloat2PrecededByMatrix(middleEndconfigration, lineFinder);
         }
     }
 
@@ -305,9 +306,15 @@ namespace AZ::ShaderCompiler
 
     void DumpSymbols(IntermediateRepresentation& ir)
     {
+        std::unordered_set<IdentifierUID> seen; // avoid functions delc/def repetitions
         // in YAML form
         for (auto& uid : ir.m_symbols.GetOrderedSymbols())
         {
+            if (seen.find(uid) != seen.end())
+            {
+                continue;
+            }
+            seen.insert(uid);
             auto& [_, sym] = *ir.m_symbols.GetIdAndKindInfo(uid.m_name);
             assert(uid == _);
             cout << "Symbol " << Decorate("'", uid.m_name) << ":\n";
@@ -322,17 +329,9 @@ namespace AZ::ShaderCompiler
                 //  but they don't have actual type or declaration line, so we skip them here.
                 cout << "  line: " << (sub.m_declNode ? std::to_string(sub.m_declNode->start->getLine()) : "NA") << "\n";
                 cout << "  type:\n" << ToYaml(sub.m_typeInfoExt, ir, "    ") << "\n";
+                cout << "  storage: " << sub.m_typeInfoExt.m_qualifiers.GetDisplayName() << "\n";
                 cout << "  array dim: \"" << sub.m_typeInfoExt.m_arrayDims.ToString() << "\"\n";
                 cout << "  has sampler state: " << (sub.m_samplerState ? "yes\n" : "no\n");
-                cout << "  storage: ";
-                for (auto sf : StorageFlag::Enumerate{})
-                {
-                    auto flag = StorageFlag{sf};
-                    if (sub.CheckHasStorageFlag(flag))
-                    {
-                        cout << StorageFlag::ToStr(flag) << " ";
-                    }
-                }
                 cout << "\n";
                 if (!holds_alternative<monostate>(sub.m_constVal))
                 {
@@ -365,6 +364,7 @@ namespace AZ::ShaderCompiler
                 cout << "  is method: " << sub.m_isMethod << "\n";
                 cout << "  is virtual: " << sub.m_isVirtual << "\n";
                 cout << "  return type:\n" << ToYaml(sub.m_returnType, ir, "    ") << "\n";
+                cout << "  storage: " << sub.m_returnType.m_qualifiers.GetDisplayName() << "\n";
                 cout << "  has overriding children:\n" << ToYaml(sub.m_overrides.begin(), sub.m_overrides.end(), "    ");
                 cout << "  is hiding base symbol: '" << (sub.m_base ? sub.m_base->m_name.c_str() : "") << "'\n";
                 cout << "  parameters:\n";
@@ -631,8 +631,8 @@ namespace AZ::ShaderCompiler
                 string typeName = FormatString("uint%d", padSize / 4);
 
                 ExtractedTypeExt padType = { UnqualifiedNameView(typeName), nullptr };
-                varInfo.m_typeInfoExt = ExtendedTypeInfo{ m_sema.CreateTypeRefInfo(padType),
-                                 {}, {}, {}, Packing::MatrixMajor::Default };
+                varInfo.m_typeInfoExt = ExtendedTypeInfo{m_sema.CreateTypeRefInfo(padType), {},
+                                                         {}, {}, {}, Packing::MatrixMajor::Default };
 
                 newVarKind.GetSubRefAs<VarInfo>() = varInfo;
                 rootConstantStructKindInfo.GetSubRefAs<ClassInfo>().PushMember(newVarUid, Kind::Variable);
@@ -642,7 +642,8 @@ namespace AZ::ShaderCompiler
         m_rootConstantStructUID = rootConstantStructUid;
     }
 
-    void IntermediateRepresentation::ValidateAlignmentIssueWhenScalarOrFloat2PrecededByMatrix(const MiddleEndConfiguration& middleEndconfigration)
+    void IntermediateRepresentation::ValidateAlignmentIssueWhenScalarOrFloat2PrecededByMatrix(const MiddleEndConfiguration& middleEndconfigration,
+                                                                                              PreprocessorLineDirectiveFinder* lineFinder)
     {
         //! Helper lambda to check if a symbol is a matrix, it also returns
         //! the number of columns in @numColumns
@@ -876,25 +877,22 @@ namespace AZ::ShaderCompiler
             }
 
             // Let's get the line number where @insertBeforeThisUid was found in the flat AZSL file.
-            const auto * tmpThis = this; // To disambiguate which version of GetSymbolSubAs<> to call.
-            const auto * varInfo = tmpThis->GetSymbolSubAs<VarInfo>(insertBeforeThisUid.GetName());
+            const auto* constThis = this; // To disambiguate which cv-version of GetSymbolSubAs<> to call.
+            const auto* varInfo = constThis->GetSymbolSubAs<VarInfo>(insertBeforeThisUid.GetName());
             size_t lineOfDeclaration = varInfo->GetOriginalLineNumber();
-            const LineDirectiveInfo* lineInfo = GetNearestPreprocessorLineDirective(lineOfDeclaration);
-            if (!lineInfo)
+            const LineDirectiveInfo* lineInfo = lineFinder->GetNearestPreprocessorLineDirective(lineOfDeclaration);
+            if (!lineInfo || lineOfDeclaration == 0)
             {
-                // When the LineDirectiveInfo* is null, it means We have detected a variable that was added
+                // When the LineDirectiveInfo* is null (or at 0), it means We have detected a variable that was added
                 // by AZSLc itself. e.g. Root Constant padding, etc.
                 // In such case, this is not an issue We want to interfere with.
                 return {};
             }
-            const auto originallineNumber = GetLineNumberInOriginalSourceFile(*lineInfo, lineOfDeclaration);
-
+            const auto virtualLine = lineFinder->GetVirtualLineNumber(*lineInfo, lineOfDeclaration);
             string solution = FormatString("- A 'float%d' variable should be added before the variable '%s' in '%s %s' at Line number %zu of '%s'\n",
-                prepadType == PrepadType::Float2 ? 2 : 3, insertBeforeThisUid.GetNameLeaf().c_str(), typeName.c_str(), parentName.data(),
-                originallineNumber, lineInfo->m_containingFilename.c_str());
-
+                                           prepadType == PrepadType::Float2 ? 2 : 3, insertBeforeThisUid.GetNameLeaf().c_str(), typeName.c_str(), parentName.data(),
+                                           virtualLine, lineInfo->m_containingFilename.c_str());
             return solution;
-
         };
 
         string solutionsReport;
@@ -952,36 +950,5 @@ namespace AZ::ShaderCompiler
         }
         return memberList[memberList.size() - 1];
     }
-
-
-    //////////////////////////////////////////////////////////////////////////
-    // PreprocessorLineDirective overrides...
-    const LineDirectiveInfo* IntermediateRepresentation::GetNearestPreprocessorLineDirective(size_t azslLineNumber) const
-    {
-        if (!azslLineNumber)
-        {
-            return nullptr;
-        }
-
-        auto lineBefore = m_lineMap.lower_bound(azslLineNumber);
-        if (lineBefore != m_lineMap.begin() && (lineBefore != m_lineMap.end() || m_lineMap.size() > 0))
-        {
-            lineBefore--;
-            return &lineBefore->second;
-        }
-        return nullptr;
-    }
-
-    void IntermediateRepresentation::OverrideAzslcExceptionFileAndLine(size_t azslLineNumber) const
-    {
-        const LineDirectiveInfo* lineInfo = GetNearestPreprocessorLineDirective(azslLineNumber);
-        if (!lineInfo)
-        {
-            return;
-        }
-        AzslcException::s_currentSourceFileName = lineInfo->m_containingFilename;
-        AzslcException::s_sourceFileLineNumber = GetLineNumberInOriginalSourceFile(*lineInfo, azslLineNumber);
-    }
-    ///////////////////////////////////////////////////////////////////////////
 
 }  // end of namespace AZ::ShaderCompiler

@@ -21,9 +21,11 @@ namespace StdFs = std::filesystem;
 // Correspond to the supported version of the AZSL language.
 #define AZSLC_MAJOR "1"
 // For large features or milestones. Minor version allows for breaking changes. Existing tests can change.
-#define AZSLC_MINOR "8"   // introduction of class inheritance
+#define AZSLC_MINOR "8"   // last change: introduction of class inheritance
 // For small features or bug fixes. They cannot introduce breaking changes. Existing tests shouldn't change.
-#define AZSLC_REVISION "4"
+#define AZSLC_REVISION "8"  // last change: enhanced grammar compliance with HLSL & robust line directive support & refactor of type qualifiler into typeinfoext
+
+
 namespace AZ::ShaderCompiler
 {
     DiagnosticStream verboseCout;
@@ -32,15 +34,14 @@ namespace AZ::ShaderCompiler
 
     using MapOfStringViewToSetOfString = map<string_view, set<string>>;
 
-    // out argument: classifiedTokens
-    // filter: is a predicate for condition to check to pass registration
-    template <typename FilterFunction>
-    void ClassifyAllTokens(const azslLexer* lexer, MapOfStringViewToSetOfString& classifiedTokens, FilterFunction&& filter = nullptr)
+    template <typename TypeClassFilterPredicate = std::nullptr_t>
+    void VisitTokens(const antlr4::Recognizer* recognizer,
+                     MapOfStringViewToSetOfString& acceptedToken, set<string>& notTypes1,  // out
+                     TypeClassFilterPredicate tcFilter = nullptr)
     {
         // loop over all keywords
-        const auto& vocabulary = lexer->getVocabulary();
+        const auto& vocabulary = recognizer->getVocabulary();
         size_t maxToken = vocabulary.getMaxTokenType();
-        set<string> notTypes1;
         for (size_t ii = 0; ii < maxToken; ++ii)
         {
             string token = vocabulary.getLiteralName(ii);
@@ -49,9 +50,9 @@ namespace AZ::ShaderCompiler
             {
                 TypeClass tc = AnalyzeTypeClass(TentativeName{token});
                 bool accept = true;
-                if constexpr (!is_same_v<std::nullptr_t, std::remove_reference_t<decltype(filter)>>)
+                if constexpr (!is_same_v<std::nullptr_t, std::remove_reference_t<decltype(tcFilter)>>)
                 {
-                    accept = filter(tc);
+                    accept = tcFilter(tc);
                 }
 
                 if (tc == TypeClass::IsNotType)
@@ -61,11 +62,19 @@ namespace AZ::ShaderCompiler
 
                 if (accept)
                 {
-                    classifiedTokens[TypeClass::ToStr(tc)].emplace(std::move(token));
+                    acceptedToken[TypeClass::ToStr(tc)].emplace(std::move(token));
                 }
             }
         }
+    }
 
+    // out argument: classifiedTokens
+    // filter: is a predicate for condition to check to pass registration
+    template <typename FilterFunction>
+    void ClassifyAllTokens(const azslLexer* lexer, MapOfStringViewToSetOfString& classifiedTokens, FilterFunction filter)
+    {
+        set<string> notTypes1;
+        VisitTokens(lexer, classifiedTokens, notTypes1, filter);
         // now. because of names such as StructuredBuffer or matrix, need to have a generic appendix to mean something,
         // they will be classified as IsNotType. So we need to re-attempt analysis by appending something parseable.
 
@@ -130,6 +139,17 @@ namespace AZ::ShaderCompiler
         } // end for
     }
 
+    bool IsKeyword(const antlr4::Recognizer* r, antlr4::Token* token)
+    {
+        MapOfStringViewToSetOfString byTypeClass;
+        set<string> notTypes;
+        VisitTokens(r, byTypeClass, notTypes);
+        bool notType = notTypes.find(token->getText()) != notTypes.end();
+        bool notIdentifier = r->getVocabulary().getSymbolicName(token->getType()) != "Identifier";
+        bool firstIsalpha(isalpha(token->getText()[0]));
+        return notType && notIdentifier && firstIsalpha;
+    }
+
     void DumpClassifiedTokensToYaml(const MapOfStringViewToSetOfString& classifiedTokens)
     {
         for (const auto& [category, tokens] : classifiedTokens)
@@ -151,9 +171,9 @@ namespace AZ::ShaderCompiler
     }
 
     //! iterates on tokens and build the line number mapping (from preprocessor line directives)
-    void ConstructLineMap(vector<std::unique_ptr<Token>>* allTokens, IntermediateRepresentation* irOut)
+    void ConstructLineMap(vector<std::unique_ptr<Token>>* allTokens, PreprocessorLineDirectiveFinder* lineFinder)
     {
-        string lastNonEmptyFileName = AzslcException::s_currentSourceFileName;
+        string lastNonEmptyFileName = lineFinder->m_physicalSourceFileName;
         for (auto& token : *allTokens) // auto& because each element is a unique_ptr we can't copy
         {
             if (token->getType() == azslLexer::LineDirective)
@@ -183,14 +203,13 @@ namespace AZ::ShaderCompiler
                 {
                     lastNonEmptyFileName = directiveInfo.m_containingFilename;
                 }
-                irOut->m_lineMap[token->getLine()] = directiveInfo;
+                lineFinder->PushLineDirective(directiveInfo);
             }
         }
-        if (irOut->m_lineMap.find(1) == irOut->m_lineMap.end())
+        if (lineFinder->m_lineMap.find(1) == lineFinder->m_lineMap.end())
         {
-            // if we have no line directives, add one that can be found by lower_bound
-            LineDirectiveInfo catchAllDirective{1, 1, AzslcException::s_currentSourceFileName};
-            irOut->m_lineMap[1] = catchAllDirective;
+            // if we have no line directives on line 1, add one before the file's first line (at 0), that can always be found by Infimum
+            lineFinder->PushLineDirective({0, 1, lineFinder->m_physicalSourceFileName});
         }
     }
 }
@@ -473,7 +492,10 @@ int main(int argc, const char* argv[])
         }
 
         const string inputFileName = useStdin ? "" : inputFile;
-        AzslcException::s_currentSourceFileName = useStdin ? "stdin" : inputFile;
+        PreprocessorLineDirectiveFinder lineFinder;
+        lineFinder.m_physicalSourceFileName = useStdin ? "stdin" : inputFile;
+        // setup the line finder address on the exception system so that errors are canonically mutated to "virtual line space"
+        AzslcException::s_lineFinder = &lineFinder;
 
         bool useOutputFile = !output.empty();
         const string outputFileName = output;
@@ -487,13 +509,20 @@ int main(int argc, const char* argv[])
         {
             throw std::runtime_error("syntax errors present");
         }
-        ConstructLineMap(&allTokens, &ir);
+        ConstructLineMap(&allTokens, &lineFinder);
         lexer.reset();
-        auto azslParserEventListener = AzslParserEventListener(ir);
+        AzslParserEventListener azslParserEventListener;
         azslParser parser(&tokens);
         parser.removeErrorListeners();
+        azslParserEventListener.m_isKeywordPredicate = IsKeyword;
         parser.addErrorListener(&azslParserEventListener);
         tree::ParseTree *tree = parser.compilationUnit();
+
+        if (ast)
+        {
+            PrintAst(tree, parser);
+            syntax = true; // ast print is a syntax only build.
+        }
 
         if (parser.getNumberOfSyntaxErrors() > 0)
         {
@@ -511,7 +540,7 @@ int main(int argc, const char* argv[])
                 ir.m_metaData.m_insource = StdFs::absolute(inSource).lexically_normal().generic_string();
             }
             tree::ParseTreeWalker walker;
-            Texture2DMSto2DCodeMutator texture2DMSto2DCodeMutator(&ir);
+            Texture2DMSto2DCodeMutator texture2DMSto2DCodeMutator(&ir, &tokens);
             SemaCheckListener semanticListener{&ir};
             warningCout.m_onErrorCallback = [](string_view message) {
                 throw AzslcException{WX_WARNINGS_AS_ERRORS, "as-error", string{message}};
@@ -574,12 +603,12 @@ int main(int argc, const char* argv[])
             }
             else if (Zpr)
             {
-                emitOptions.m_emitRowMajor = true;
+                emitOptions.m_forceMatrixRowMajor = true;
                 emitOptions.m_forceEmitMajor = true;
             }
             else if (Zpc)
             {
-                emitOptions.m_emitRowMajor = false; // Default
+                emitOptions.m_forceMatrixRowMajor = false; // Default
                 emitOptions.m_forceEmitMajor = true;
             }
 
@@ -605,10 +634,10 @@ int main(int argc, const char* argv[])
             MiddleEndConfiguration middleEndConfigration{emitOptions.m_rootConstantsMaxSize,
                                                          emitOptions.m_packConstantBuffers,
                                                          emitOptions.m_packDataBuffers,
-                                                         emitOptions.m_emitRowMajor,
+                                                         emitOptions.m_forceMatrixRowMajor,
                                                          emitOptions.m_padRootConstantCB,
                                                          emitOptions.m_skipAlignmentValidation};
-            ir.MiddleEnd(middleEndConfigration);
+            ir.MiddleEnd(middleEndConfigration, &lineFinder);
             if (noMS)
             {
                 texture2DMSto2DCodeMutator.RunMiddleEndMutations();
@@ -632,11 +661,6 @@ int main(int argc, const char* argv[])
             if (dumpsym)
             {
                 DumpSymbols(ir);
-                doEmission = false;
-            }
-            else if (ast)
-            {
-                PrintAst(tree, parser);
                 doEmission = false;
             }
             else if (!visitName.empty())
@@ -705,17 +729,17 @@ int main(int argc, const char* argv[])
 
                 if (full)
                 { // Combine the default emission and the ia, om, srg, options, bindingdep commands
-                    CodeEmitter emitter{&ir, &tokens, out};
+                    CodeEmitter emitter{&ir, &tokens, out, &lineFinder};
                     if (noMS)
                     {
                         emitter.SetCodeMutator(&texture2DMSto2DCodeMutator);
                     }
-                    out << "// HLSL emission by " << versionString << "\n";
+                    emitter << "// HLSL emission by " << versionString << "\n";
                     emitter.Run(emitOptions);
 
                     prepareOutputAndCall("ia", [&](CodeReflection& r) { r.DumpShaderEntries(); });
                     prepareOutputAndCall("om", [&](CodeReflection& r) { r.DumpOutputMergerLayout(); });
-                    prepareOutputAndCall("srg", [&](CodeReflection& r) { r.DumpSRGLayout(emitOptions); });
+                    prepareOutputAndCall("srg", [&](CodeReflection& r) { r.DumpSRGLayout(emitOptions, &lineFinder); });
                     prepareOutputAndCall("options", [&](CodeReflection& r) { r.DumpVariantList(emitOptions); });
                     prepareOutputAndCall("bindingdep", [&](CodeReflection& r) { r.DumpResourceBindingDependencies(emitOptions); });
                 }
@@ -729,7 +753,7 @@ int main(int argc, const char* argv[])
                 }
                 else if (srg)
                 { // Reflect the Shader Resource Groups layout
-                    reflecter.DumpSRGLayout(emitOptions);
+                    reflecter.DumpSRGLayout(emitOptions, &lineFinder);
                 }
                 else if (options)
                 { // Reflect the list of available variant options for this shader
@@ -741,12 +765,12 @@ int main(int argc, const char* argv[])
                 }
                 else
                 { // Emit the shader source code
-                    CodeEmitter emitter{&ir, &tokens, out};
+                    CodeEmitter emitter{&ir, &tokens, out, &lineFinder};
                     if (noMS)
                     {
                         emitter.SetCodeMutator(&texture2DMSto2DCodeMutator);
                     }
-                    out << "// HLSL emission by " << versionString << "\n";
+                    emitter << "// HLSL emission by " << versionString << "\n";
                     emitter.Run(emitOptions);
                 }
             }

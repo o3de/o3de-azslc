@@ -44,7 +44,7 @@ namespace AZ
 namespace AZ::ShaderCompiler
 {
     // to activate argument dependent lookup from template utilities in AzslcUtils, this must be in a reachable namespace
-    std::ostream& operator << (std::ostream& out, const AttributeInfo::Argument& arg)
+    Streamable& operator << (Streamable& out, const AttributeInfo::Argument& arg)
     {
         if (holds_alternative<string>(arg))
         {
@@ -73,7 +73,7 @@ namespace AZ::ShaderCompiler
         return out;
     }
 
-    std::ostream& operator << (std::ostream& out, const AttributeInfo& attr)
+    Streamable& operator << (Streamable& out, const AttributeInfo& attr)
     {
         if (!attr.m_namespace.empty())
         {
@@ -117,7 +117,10 @@ namespace AZ::ShaderCompiler
             const QualifiedNameView iteratedSymbolName = iteratedSymbolUid.GetName();
             const Kind iteratedSymbolKind = m_ir->GetKind(iteratedSymbolUid);
 
-            EmitPreprocessorLineDirective(iteratedSymbolName);
+            if (IsTopLevelThroughTranslation(iteratedSymbolUid))
+            {
+                EmitPreprocessorLineDirective(iteratedSymbolName);
+            }
 
             switch (iteratedSymbolKind)
             {
@@ -142,7 +145,7 @@ namespace AZ::ShaderCompiler
                 if (IsTopLevelThroughTranslation(iteratedSymbolUid))
                 {
                     auto* aliasInfo = m_ir->GetSymbolSubAs<TypeAliasInfo>(iteratedSymbolName);
-                    EmitTypeAlias(iteratedSymbolUid, *aliasInfo);
+                    EmitTypeAlias(iteratedSymbolUid, *aliasInfo, options);
                 }
                 break;
             }
@@ -190,7 +193,7 @@ namespace AZ::ShaderCompiler
                 auto* funcSub = m_ir->GetSymbolSubAs<FunctionInfo>(iteratedSymbolName);
                 const bool alreadyDeclared = AlreadyEmittedFunctionDeclaration(iteratedSymbolUid);
                 assert(!funcSub->IsEmpty());
-                const EmitFunctionAs form = funcSub->HasUniqueDeclarationThroughDefinition() || alreadyDeclared ?
+                const EmitFunctionAs form = (funcSub->HasUniqueDeclarationThroughDefinition() || alreadyDeclared) ?
                     EmitFunctionAs::Definition : EmitFunctionAs::Declaration;
                 EmitFunction(*funcSub, iteratedSymbolUid, form, options);
                 break;
@@ -460,23 +463,35 @@ namespace AZ::ShaderCompiler
 
     void CodeEmitter::EmitPreprocessorLineDirective(size_t azslLineNumber)
     {
-        const LineDirectiveInfo* lineDirectiveInfo = m_ir->GetNearestPreprocessorLineDirective(azslLineNumber);
-        if (!lineDirectiveInfo)
+        if (azslLineNumber == 0)
+            return;  // protect for this invalid case. seems to happen for "virtual" symbols (like OverloadSet)
+
+        size_t supposedVirtualLine = m_lineFinder->GetVirtualLineNumber(azslLineNumber);
+        size_t curHlslLine = m_out.GetLineCount() + 1;  // "lines" is a space that is 1-based indexed.
+        auto lastEmitted = Infimum(m_alreadyEmittedPreprocessorLineDirectives, curHlslLine);
+        if (lastEmitted != m_alreadyEmittedPreprocessorLineDirectives.cend())
         {
-            return;
+            // verify if we can skip the line emission if current stream line feed is still in sync with expectations
+            //  image:
+            //            in sync                  out of sync
+            //  1 | #line 1                1 | #line 1
+            //  2 | code                   2 | code
+            //  3 | newSymbol              3 | code
+            //                             4 | #line 2
+            //                             5 | newSymbol
+
+            size_t curHlslPhysicalDistance = curHlslLine - lastEmitted->first;
+            size_t lastVirtualSet = lastEmitted->second;
+            size_t nonAdjustedCurrentLandingLine = lastVirtualSet + curHlslPhysicalDistance - 1;  // -1 because line directives specify the NEXT line
+            if (nonAdjustedCurrentLandingLine == supposedVirtualLine)
+                return; // no need to emit. we can skip
         }
-
-        const auto physicalTokenLine = lineDirectiveInfo->m_physicalTokenLine;
-        if (m_alreadyEmittedPreprocessorLineDirectives.find(physicalTokenLine) != m_alreadyEmittedPreprocessorLineDirectives.end())
-        {
-            return;
-        }
-
-        const string& originalFileName = StdFs::absolute(lineDirectiveInfo->m_containingFilename).lexically_normal().generic_string();
-        const auto lineNumber = lineDirectiveInfo->m_forcedLineNumber;
-        m_out << "#line " << lineNumber << " \"" << originalFileName << "\"\n";
-
-        m_alreadyEmittedPreprocessorLineDirectives.insert(physicalTokenLine);
+        // get the original file as absolute path:
+        const string& originalFileName = StdFs::absolute( m_lineFinder->GetVirtualFileName(azslLineNumber) ).lexically_normal().generic_string();
+        // emit the line:
+        m_out << "#line " << supposedVirtualLine << " \"" << originalFileName << "\"\n";
+        // remember it:
+        m_alreadyEmittedPreprocessorLineDirectives[curHlslLine] = supposedVirtualLine;
     }
 
     void CodeEmitter::EmitPreprocessorLineDirective(QualifiedNameView symbolName)
@@ -502,8 +517,6 @@ namespace AZ::ShaderCompiler
 
     void CodeEmitter::EmitStruct(const ClassInfo& classInfo, string_view structuredSymName, const Options& options)
     {
-        EmitEmptyLinesToLineNumber(classInfo.GetOriginalLineNumber());
-
         auto HlslStructuredDelcTagFromKind = [](Kind k)
         {
             switch (k)
@@ -538,7 +551,7 @@ namespace AZ::ShaderCompiler
                 }
                 else if (info.IsKindOneOf(Kind::TypeAlias))
                 {
-                    EmitTypeAlias(uid, info.GetSubRefAs<TypeAliasInfo>());
+                    EmitTypeAlias(uid, info.GetSubRefAs<TypeAliasInfo>(), options);
                 }
                 else if (info.IsKindOneOf(Kind::Enum))
                 {
@@ -622,16 +635,17 @@ namespace AZ::ShaderCompiler
     static string Undecorate(string_view decoration, const AttributeInfo::Argument& arg)
     {
         std::stringstream ss;
-        ss << arg;
+        MakeOStreamStreamable soss(ss);
+        (Streamable&)soss << arg;
         return string{AZ::Undecorate(decoration, ss.str())};
     }
 
     void CodeEmitter::EmitAttribute(const AttributeInfo& attrInfo) const
     {
-        return EmitAttribute(attrInfo, Backend::m_out);
+        return EmitAttribute(attrInfo, m_out);
     }
 
-    void CodeEmitter::EmitAttribute(const AttributeInfo& attrInfo, std::ostream& outstream)
+    void CodeEmitter::EmitAttribute(const AttributeInfo& attrInfo, Streamable& outstream)
     {
         if (attrInfo.m_attribute == "verbatim")
         {
@@ -648,7 +662,6 @@ namespace AZ::ShaderCompiler
                 if (holds_alternative<string>(attrInfo.m_argList[0]))
                 {
                     string poFormat{ Trim(get<string>(attrInfo.m_argList[0]), "\"") };
-                    OutputFormat hint = OutputFormat::FromStr(poFormat);
                     outstream << "#pragma OutputFormatHint(default " << poFormat << ")\n";
                 }
                 else if (attrInfo.m_argList.size() > 1 &&
@@ -659,7 +672,6 @@ namespace AZ::ShaderCompiler
                     if (rtIndex >= 0 && rtIndex <= 7)
                     {
                         string poFormat{ Trim(get<string>(attrInfo.m_argList[1]), "\"") };
-                        OutputFormat hint = OutputFormat::FromStr(poFormat);
                         outstream << "#pragma OutputFormatHint(target " << rtIndex << " " << poFormat << ")\n";
                     }
                 }
@@ -682,22 +694,21 @@ namespace AZ::ShaderCompiler
         {
             // We don't block any attributes we don't understand - pass them through
             outstream << ((attrInfo.m_category == AttributeCategory::Single) ? "[" : "[[")
-                  << attrInfo
-                  << ((attrInfo.m_category == AttributeCategory::Single) ? "]" : "]]")
-                  << "\n";
+                      << attrInfo
+                      << ((attrInfo.m_category == AttributeCategory::Single) ? "]" : "]]")
+                      << "\n";
         }
     }
 
-    void CodeEmitter::EmitTypeAlias(const IdentifierUID& uid, const TypeAliasInfo& aliasInfo) const
+    void CodeEmitter::EmitTypeAlias(const IdentifierUID& uid, const TypeAliasInfo& aliasInfo, const Options& options) const
     {
-        m_out << "typedef " << GetTranslatedName(aliasInfo.m_canonicalType, UsageContext::ReferenceSite)
+        using SF = StorageFlag;
+        m_out << "typedef " << GetTranslatedName(aliasInfo.m_canonicalType, UsageContext::ReferenceSite, options)
               << " " << GetTranslatedName(uid, UsageContext::DeclarationSite) << ";\n";
     }
 
     void CodeEmitter::EmitEnum(const IdentifierUID& uid, const ClassInfo& classInfo, const Options& options)
     {
-        EmitEmptyLinesToLineNumber(classInfo.GetOriginalLineNumber());
-
         const auto& enumInfo = get<EnumerationInfo>(classInfo.m_subInfo);
 
         EmitAllAttachedAttributes(uid);
@@ -746,20 +757,19 @@ namespace AZ::ShaderCompiler
 
         AstFuncSig* node = funcSub.m_defNode ? funcSub.m_defNode : funcSub.m_declNode;
 
-        EmitEmptyLinesToLineNumber(funcSub.GetOriginalLineNumber(emitAsDefinition));
-
         EmitAllAttachedAttributes(uid);
 
-        // emit modifiers in case of first declaration/definition
+        // emit some modifiers only in case of first declaration/definition
         // because:    class C{ static vd A(); };
         //             static vd C::A(){}    // ill-formed HLSL. we can't repeat static here.
-        if (!AlreadyEmittedFunctionDeclaration(uid))
+        Modifiers forbidden;
+        bool firstDecl = !AlreadyEmittedFunctionDeclaration(uid);
+        if (!firstDecl)
         {
-            m_out << GetTypeModifier(funcSub, options) << " ";
+            forbidden = Modifiers{StorageFlag::Static} | StorageFlag::Inline | StorageFlag::Extern;
         }
-
         // emit return type:
-        m_out << GetTranslatedName(funcSub.m_returnType, UsageContext::ReferenceSite) << " ";
+        m_out << GetTranslatedName(funcSub.m_returnType, UsageContext::ReferenceSite, options, forbidden) << " ";
         // emit Name
         if (entityConfiguration == EmitFunctionAs::Definition && funcSub.HasDeportedDefinition())
         {
@@ -798,92 +808,14 @@ namespace AZ::ShaderCompiler
             auto funcDefNode = ExtractSpecificParent<azslParser::HlslFunctionDefinitionContext>(astNode);
             auto blockInterval = funcDefNode->block()->getSourceInterval();
             m_out << "\n";
-            EmitText(blockInterval);
+            EmitTranspiledTokens(blockInterval);
             m_out << "\n\n";
             m_alreadyEmittedFunctionDefinitions.insert(uid);
         }
     }
 
-    // static
-    string CodeEmitter::GetTypeModifier(const VarInfo& var, const Options& options)
-    {
-        using namespace std::string_literals;
-        string modifiers;
-        bool isMatrix = IsArithmetic(var.GetTypeClass()) && var.m_typeInfoExt.m_coreType.m_arithmeticInfo.IsMatrix();
-        if (var.CheckHasStorageFlag(StorageFlag::ColumnMajor))
-        {
-            modifiers = "column_major";
-        }
-        else if (var.CheckHasStorageFlag(StorageFlag::RowMajor))
-        {
-            modifiers = "row_major";
-        }
-        else if (options.m_forceEmitMajor && isMatrix)
-        {
-            modifiers = options.m_emitRowMajor ? "row_major" : "column_major";
-        }
-
-        auto maybeSpace = [&modifiers](){ return modifiers.empty() ? "" : " "; };
-        if (var.CheckHasStorageFlag(StorageFlag::Volatile))
-        {
-            modifiers += maybeSpace() + "volatile"s;
-        }
-        if (var.CheckHasStorageFlag(StorageFlag::Precise))
-        {
-            modifiers += maybeSpace() + "precise"s;
-        }
-        if (var.CheckHasStorageFlag(StorageFlag::Groupshared))
-        {
-            modifiers += maybeSpace() + "groupshared"s;
-        }
-        if (var.CheckHasStorageFlag(StorageFlag::Extern))
-        {
-            assert(false); // should never get there. extern is banned from azsl
-        }
-        if (var.CheckHasStorageFlag(StorageFlag::Static))
-        {
-            modifiers += maybeSpace() + "static"s;
-        }
-        if (var.CheckHasStorageFlag(StorageFlag::Const))
-        {
-            modifiers += maybeSpace() + "const"s;
-        }
-        if (var.CheckHasStorageFlag(StorageFlag::Inline))
-        {
-            // inline should not be added as modifier for variables in HLSL. But in HLSL6 can be useful for functions
-        }
-        if (var.CheckHasStorageFlag(StorageFlag::Unknown))
-        {
-            for (const auto& flag : var.m_unknownQualifiers)
-            {
-                modifiers += " " + flag;
-            }
-        }
-        return modifiers;
-    }
-
-    // static
-    string CodeEmitter::GetTypeModifier(const FunctionInfo& func, const Options& options)
-    {
-        using namespace std::string_literals;
-        string modifiers;
-
-        auto maybeSpace = [&modifiers](){ return modifiers.empty() ? "" : " "; };
-        if (func.CheckHasStorageFlag(StorageFlag::Static))
-        {
-            modifiers += maybeSpace() + "static"s;
-        }
-        if (func.CheckHasStorageFlag(StorageFlag::Inline))
-        {
-            modifiers += maybeSpace() + "inline"s;
-        }
-        return modifiers;
-    }
-
     void CodeEmitter::EmitVariableDeclaration(const VarInfo& varInfo, const IdentifierUID& uid, const Options& options, VarDeclHasFlag declOptions) const
     {
-        EmitEmptyLinesToLineNumber(varInfo.GetOriginalLineNumber());
-
         // from MSDN: https://docs.microsoft.com/en-us/windows/desktop/direct3dhlsl/dx-graphics-hlsl-variable-syntax
         // [Storage_Class] [Type_Modifier] Type Name[Index] [: Semantic] [: Packoffset] [: Register]; [Annotations] [= Initial_Value]
         // example of valid HLSL statement:
@@ -913,17 +845,13 @@ namespace AZ::ShaderCompiler
             // parameter in/out modifiers
             if (declOptions & VarDeclHas::InOutModifiers)
             {
-                m_out << GetInputModifier(varInfo.m_typeQualifier) << " ";
-            }
-            // type qualifiers (storage class, modifiers...)
-            if (!(declOptions & VarDeclHas::NoModifiers))
-            {
-                m_out << GetTypeModifier(varInfo, options) << " ";
+                m_out << GetInputModifier(varInfo.m_typeInfoExt.m_qualifiers) << " ";
             }
             // type
             if (!(declOptions & VarDeclHas::NoType) || (declOptions & VarDeclHas::OptionDefine))
             {
-                m_out << GetTranslatedName(varInfo.m_typeInfoExt, UsageContext::ReferenceSite) + " ";
+                auto bannedModifiers = (declOptions & VarDeclHas::NoModifiers) ? ~Modifiers{(StorageFlag::EnumType)0} : Modifiers{};
+                m_out << GetTranslatedName(varInfo.m_typeInfoExt, UsageContext::ReferenceSite, options, bannedModifiers) + " ";
             }
             // var name
             m_out << GetTranslatedName(uid.m_name, UsageContext::DeclarationSite);
@@ -933,7 +861,7 @@ namespace AZ::ShaderCompiler
                 for (auto* rankCtx : varInfo.m_declNode->ArrayRankSpecifiers)
                 {
                     // the brackets are included by the rule arrayRankSpecifier
-                    EmitText(rankCtx->getSourceInterval());
+                    EmitTranspiledTokens(rankCtx->getSourceInterval());
                 }
             }
             else if (!varInfo.GetArrayDimensions().Empty())
@@ -967,7 +895,7 @@ namespace AZ::ShaderCompiler
                 if (initClause)
                 {
                     m_out << " ";
-                    EmitText(initClause->getSourceInterval());
+                    EmitTranspiledTokens(initClause->getSourceInterval());
                 }
                 else  // fallback on a potentially folded value, that has chances to work for constants like enumerators
                 {
@@ -1063,8 +991,6 @@ namespace AZ::ShaderCompiler
         const auto* varInfo = m_ir->GetSymbolSubAs<VarInfo>(cId.m_name);
         auto cbName = ReplaceSeparators(cId.m_name, Underscore);
 
-        EmitEmptyLinesToLineNumber(varInfo->GetOriginalLineNumber());
-
         assert(varInfo->IsConstantBuffer());
         // note: instead of redoing this work ad-hoc, EmitText could be used directly on the ext type.
         const auto genericType = "<" + GetTranslatedName(varInfo->m_typeInfoExt.m_genericParameter, UsageContext::ReferenceSite) + ">";
@@ -1090,8 +1016,6 @@ namespace AZ::ShaderCompiler
         const auto& bindInfo = rootSig.Get(sId);
         const auto* varInfo = m_ir->GetSymbolSubAs<VarInfo>(sId.m_name);
 
-        EmitEmptyLinesToLineNumber(varInfo->GetOriginalLineNumber());
-
         const string spaceX = ", space" + std::to_string(bindInfo.m_registerBinding.m_pair[bindSet].m_logicalSpace);
         m_out << (varInfo->m_samplerState->m_isComparison ? "SamplerComparisonState " : "SamplerState ")
               << ReplaceSeparators(sId.m_name, Underscore);
@@ -1108,25 +1032,25 @@ namespace AZ::ShaderCompiler
     }
 
     //! For scope-migration-aware name emission of symbol names
-    string CodeEmitter::GetTranslatedName(QualifiedNameView mangledName, UsageContext qualification, ssize_t tokenId /*= NotOverToken*/) const
+    string CodeEmitter::GetTranslatedName(QualifiedNameView mangledName, UsageContext context, ssize_t tokenId /*= NotOverToken*/) const
     {
-        return m_translations.GetTranslatedName(mangledName, qualification, tokenId);
+        return m_translations.GetTranslatedName(mangledName, context, tokenId);
     }
 
-    string CodeEmitter::GetTranslatedName(const IdentifierUID& uid, UsageContext qualification, ssize_t tokenId /*= NotOverToken*/) const
+    string CodeEmitter::GetTranslatedName(const IdentifierUID& uid, UsageContext context, ssize_t tokenId /*= NotOverToken*/) const
     {
-        return GetTranslatedName(uid.m_name, qualification, tokenId);
+        return GetTranslatedName(uid.m_name, context, tokenId);
     }
 
-    string CodeEmitter::GetTranslatedName(const TypeRefInfo& typeRef, UsageContext qualification, ssize_t tokenId /*= NotOverToken*/) const
+    string CodeEmitter::GetTranslatedName(const TypeRefInfo& typeRef, UsageContext context, ssize_t tokenId /*= NotOverToken*/) const
     {
-        return GetTranslatedName(typeRef.m_typeId, qualification, tokenId);
+        return GetTranslatedName(typeRef.m_typeId, context, tokenId);
     }
 
-    string CodeEmitter::GetTranslatedName(const ExtendedTypeInfo& extTypeInfo, UsageContext qualification, ssize_t tokenId /*= NotOverToken*/) const
+    string CodeEmitter::GetTranslatedName(const ExtendedTypeInfo& extTypeInfo, UsageContext context, const Options& options, Modifiers forbidden /*= {}*/, ssize_t tokenId /*= NotOverToken*/) const
     {
-        return GetExtendedTypeInfo(extTypeInfo,
-                                   [this, qualification, tokenId](const TypeRefInfo& tri){ return GetTranslatedName(tri, qualification, tokenId); });
+        return GetExtendedTypeInfo(extTypeInfo, options, forbidden,
+                                   [this, context, tokenId](const TypeRefInfo& tri){ return GetTranslatedName(tri, context, tokenId); });
     }
 
     void CodeEmitter::EmitSRGDataView(const IdentifierUID& tId, const Options& options, const RootSigDesc& rootSig) const
@@ -1135,11 +1059,9 @@ namespace AZ::ShaderCompiler
         auto   bindSet = BindingPair::Set::Merged;
         auto&  bindInfo = rootSig.Get(tId);
         auto*  varInfo = m_ir->GetSymbolSubAs<VarInfo>(tId.m_name);
-        string varType = GetTranslatedName(varInfo->m_typeInfoExt, UsageContext::DeclarationSite);
+        string varType = GetTranslatedName(varInfo->m_typeInfoExt, UsageContext::DeclarationSite, options);
         auto   registerTypeLetter = ToLower(BindingType::ToStr(RootParamTypeToBindingType(bindInfo.m_type)));
         optional<string> stringifiedLogicalSpace = std::to_string(bindInfo.m_registerBinding.m_pair[bindSet].m_logicalSpace);
-
-        EmitEmptyLinesToLineNumber(varInfo->GetOriginalLineNumber());
 
         // depending on platforms we may have supplementary attributes or/and type modifier.
         auto [prefix, suffix] = GetPlatformEmitter().GetDataViewHeaderFooter(*this, tId, bindInfo.m_registerBinding.m_pair[bindSet].m_registerIndex, registerTypeLetter, stringifiedLogicalSpace);
@@ -1159,7 +1081,7 @@ namespace AZ::ShaderCompiler
         m_out << suffix;
 
         auto interval = m_ir->m_scope.m_scopeIntervals[tId];
-        EmitText(interval);
+        EmitTranspiledTokens(interval);
         m_out << ";\n\n";
     }
 
@@ -1223,8 +1145,6 @@ namespace AZ::ShaderCompiler
         RootSigDesc::SrgDesc srgDesc;
         srgDesc.m_uid = srgId;
 
-        EmitEmptyLinesToLineNumber(srgInfo.GetOriginalLineNumber());
-
         m_out << "/* Generated code from ";
         // We don't emit the SRG attributes (only as a comment), but they can be accessed by the srgId if needed
         EmitAllAttachedAttributes(srgId);
@@ -1277,8 +1197,7 @@ namespace AZ::ShaderCompiler
     }
 
     // override of the base method, to incorporate symbol and expression mutations
-    template <class StreamLike>
-    void CodeEmitter::GetTextInStreamInternal(misc::Interval interval, StreamLike& output, bool emitNewLines) const
+    void CodeEmitter::EmitTranspiledTokens(misc::Interval interval, Streamable& output) const
     {
         const ICodeEmissionMutator* codeMutator = m_codeMutator;
 
@@ -1288,11 +1207,6 @@ namespace AZ::ShaderCompiler
         {
             auto* token = GetNextToken(ii /*inout*/);
             
-            if (emitNewLines)
-            {
-                EmitEmptyLinesToLineNumber(token->getLine());
-            }
-
             const auto tokenIndex = token->getTokenIndex();
 
             const CodeMutation* codeMutation = codeMutator ? codeMutator->GetMutation(tokenIndex) : nullptr;
@@ -1357,32 +1271,6 @@ namespace AZ::ShaderCompiler
             {
                 output << codeMutation->m_append.value();
             }
-        }
-    }
-
-    void CodeEmitter::GetTextInStream(misc::Interval interval, std::ostream& output) const
-    {
-        if (m_out.IsTheSameStream(output))
-        {
-            GetTextInStreamInternal(interval, m_out, true);
-        }
-        else
-        {
-            GetTextInStreamInternal(interval, output, false);
-        }
-    }
-
-    void CodeEmitter::EmitText(misc::Interval interval) const
-    {
-        // extract interval (with necessary internal translations) and add it to m_out stream
-        GetTextInStream(interval, Backend::m_out);
-    }
-
-    void CodeEmitter::EmitEmptyLinesToLineNumber(size_t originalLineNumber) const
-    {
-        while (m_out.GetLineCount() < originalLineNumber)
-        {
-            m_out << "\n";
         }
     }
 }

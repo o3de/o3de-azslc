@@ -200,24 +200,9 @@ namespace AZ::ShaderCompiler
             {
                 toReturn = TypeClass::TypeofExpression;
             }
-        }
-        return toReturn;
-    }
-
-    // Get TypeClass for type inside a functype context
-    inline TypeClass AnalyzeTypeClass(AstFuncType* funcTypeNode)
-    {
-        TypeClass toReturn = TypeClass::IsNotType;
-        if (funcTypeNode != nullptr)
-        {
-            if (funcTypeNode->Void())
+            else if (typeNode->Void())
             {
                 toReturn = TypeClass::Void;
-            }
-            else
-            {
-                AstType* typeNode = funcTypeNode->type();
-                toReturn = AnalyzeTypeClass(typeNode);
             }
         }
         return toReturn;
@@ -244,17 +229,17 @@ namespace AZ::ShaderCompiler
                           || unit->Declarations[0]->attributedFunctionDeclaration() == nullptr
                           || unit->Declarations[0]->attributedFunctionDeclaration()->functionDeclaration() == nullptr
                           || unit->Declarations[0]->attributedFunctionDeclaration()->functionDeclaration()->hlslFunctionDeclaration() == nullptr;
-        AstFuncType* funcTypeNode = nullptr;
+        AstType* typeNode = nullptr;
         if (!failCondition)
         {
-            funcTypeNode = unit->Declarations[0]->
-                               attributedFunctionDeclaration()->
-                                   functionDeclaration()->
-                                       hlslFunctionDeclaration()->
-                                           leadingTypeFunctionSignature()->
-                                               functionType();
+            typeNode = unit->Declarations[0]->
+                            attributedFunctionDeclaration()->
+                                functionDeclaration()->
+                                    hlslFunctionDeclaration()->
+                                        leadingTypeFunctionSignature()->
+                                            type();
         }
-        return AnalyzeTypeClass(funcTypeNode);
+        return AnalyzeTypeClass(typeNode);
     }
 
     struct TentativeName

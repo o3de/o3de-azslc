@@ -23,8 +23,7 @@ namespace AZ::ShaderCompiler
     //! Deals with jobs that requires access to both Scope and SymbolTable
     struct SemanticOrchestrator
     {
-        SemanticOrchestrator(SymbolAggregator* sema, ScopeTracker* scope, azslLexer* lexer,
-            PreprocessorLineDirectiveFinder* preprocessorLineDirectiveFinder = nullptr);
+        SemanticOrchestrator(SymbolAggregator* sema, ScopeTracker* scope, azslLexer* lexer);
 
         //! Helper shortcut: uses the current scope as a starting location to lookup a symbol.
         //! Returns whatever SymbolAggretator's eponymous returns.
@@ -150,7 +149,7 @@ namespace AZ::ShaderCompiler
             return symbol;
         }
 
-        auto RegisterTypeAlias(string_view newIdentifier, AstFuncType* existingTypeCtx, azslParser::TypeAliasingDefinitionStatementContext* ctx) -> IdAndKind&;
+        auto RegisterTypeAlias(string_view newIdentifier, AstType* existingTypeCtx, azslParser::TypeAliasingDefinitionStatementContext* ctx) -> IdAndKind&;
 
         auto RegisterSRGSemantic(AstSRGSemanticDeclNode* ctx) -> IdAndKind&;
 
@@ -208,7 +207,6 @@ namespace AZ::ShaderCompiler
         auto TypeofExpr(azslParser::ExpressionExtContext* ctx) const -> QualifiedName;
         auto TypeofExpr(azslParser::OtherExpressionContext* ctx) const -> QualifiedName;
         auto TypeofExpr(AstType* ctx) const -> QualifiedName;
-        auto TypeofExpr(AstFuncType* ctx) const -> QualifiedName;
         auto TypeofExpr(AstIdExpr* ctx) const -> QualifiedName;
         auto TypeofExpr(azslParser::IdentifierExpressionContext* ctx) const -> QualifiedName;
         auto TypeofExpr(azslParser::MemberAccessExpressionContext* ctx) const -> QualifiedName;
@@ -325,7 +323,7 @@ namespace AZ::ShaderCompiler
         }
 
         // lookup the symbol database for a type of a given name (or discover the name through an Ast context) and compose a TypeRefInfo
-        // ArgumentType maybe UnqualifiedNameView or a TypeCtx (AstType or AstFuncType)
+        // ArgumentType maybe UnqualifiedNameView or a AstType
         template< typename ContextOrNameT >
         auto CreateTypeRefInfo(ContextOrNameT typeNameOrCtx, OnNotFoundOrWrongKind policy = OnNotFoundOrWrongKind::CopeByCopy) const -> TypeRefInfo
         {
@@ -342,14 +340,14 @@ namespace AZ::ShaderCompiler
         }
 
         // Just a helper function to compose the bigger version, that contains more data that can't be stored in the core type (TypeRefInfo).
-        // Array dimensions and mtxMajor are usually stored in VarInfo for example. If you have a custom way to discover them, use this helper to make your own ExtendedTypeInfo
-        auto CreateExtendedTypeInfo(AstType* ctx, ArrayDimensions dims, Packing::MatrixMajor mtxMajor) const -> ExtendedTypeInfo;
-        auto CreateExtendedTypeInfo(AstFuncType* ctx, ArrayDimensions dims, Packing::MatrixMajor mtxMajor) const -> ExtendedTypeInfo;
+        // Array dimensions are usually stored in VarInfo for example. If you have a custom way to discover them, use this helper to make your own ExtendedTypeInfo
+        auto CreateExtendedTypeInfo(AstType* ctx, ArrayDimensions dims) const -> ExtendedTypeInfo;
+
         // Helper func which folds any possible generic dimensions into the extracted composed type
         bool TryFoldGenericArrayDimensions(ExtractedComposedType& extType, vector<tree::TerminalNode*>& genericDims) const;
 
         // another helper to streamline what to do directly with the result from ExtractTypeNameFromAstContext function families.
-        auto CreateExtendedTypeInfo(const ExtractedComposedType& extractedComposed, ArrayDimensions dims, Packing::MatrixMajor mtxMajor) const -> ExtendedTypeInfo;
+        auto CreateExtendedTypeInfo(const ExtractedComposedType&, const TypeQualifiers&, ArrayDimensions) const -> ExtendedTypeInfo;
 
         //! check if current scope is a structured user defined type ("struct", "class" or "interface")
         bool IsScopeStructClassInterface() const;
@@ -381,48 +379,10 @@ namespace AZ::ShaderCompiler
         //! queries whether a function has default parameters
         bool HasAnyDefaultParameterValue(const IdentifierUID& functionUid) const;
 
-        void ThrowAzslcOrchestratorException(uint32_t errorCode, optional<size_t> line, optional<size_t> column, const string& message) const
-        {
-            if (line && m_preprocessorLineDirectiveFinder)
-            {
-                m_preprocessorLineDirectiveFinder->OverrideAzslcExceptionFileAndLine(line.value());
-            }
-            throw AzslcOrchestratorException(errorCode, line, column, message);
-        }
-
-        void ThrowAzslcOrchestratorException(uint32_t errorCode, Token* token, const string& message) const
-        {
-            if (token && m_preprocessorLineDirectiveFinder)
-            {
-                m_preprocessorLineDirectiveFinder->OverrideAzslcExceptionFileAndLine(token->getLine());
-            }
-            throw AzslcOrchestratorException(errorCode, token, message);
-        }
-
-        void ThrowRedeclarationAsDifferentKindInternal(string_view symbolName, Kind newKind, const KindInfo& kindInfo, size_t lineNumber) const
-        {
-            if (lineNumber && m_preprocessorLineDirectiveFinder)
-            {
-                m_preprocessorLineDirectiveFinder->OverrideAzslcExceptionFileAndLine(lineNumber);
-            }
-            ThrowRedeclarationAsDifferentKind(symbolName, newKind, kindInfo, lineNumber);
-        }
-
-        void CheckQualifersAreOnlyInlineOrStatic(TypeQualifier qualifier, size_t line) const
-        {
-            auto okFlags = TypeQualifier{ StorageFlag::Inline } | StorageFlag::Static;
-            if (qualifier & ~okFlags)
-            {
-                ThrowAzslcOrchestratorException(ORCHESTRATOR_DISALLOWED_FUNCTION_MODIFIER, line,
-                    none, " Functions can only have either static or inline modifiers.");
-            }
-        }
-
     public:
         SymbolAggregator* m_symbols;
         ScopeTracker*     m_scope;
         azslLexer*        m_lexer;
-        PreprocessorLineDirectiveFinder* m_preprocessorLineDirectiveFinder;
         UnboundedArraysValidator m_unboundedArraysValidator;
 
         //! cached property informing of the presence of at least one input attachment use.

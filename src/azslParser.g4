@@ -26,7 +26,7 @@ topLevelDeclaration:
     |   attributedSrgDefinition         // AZSLc specific
     |   attributedSrgSemantic           // AZSLc specific
     |   Semi
-;       
+;
 
 // Amazon: AZSL has scopes, and identifiers can be qualified
 idExpression:
@@ -147,7 +147,7 @@ functionParams:
 ;
 
 functionParam:
-    attributeSpecifierAny* storageFlags type Name=Identifier? unnamedVariableDeclarator
+    attributeSpecifierAny* type Name=Identifier? unnamedVariableDeclarator
 ;
 
 hlslSemantic:
@@ -340,10 +340,8 @@ arguments:
 // TYPES
 // --------------------------------------
 
-// note that in FXC "int static" (that is `storageFlags type storageFlags`) wasn't valid.
-// but in DXC it's flexible like in C/C++, so we have a restriction compared to DXC here.
 variableDeclaration:
-    attributeSpecifierAny* storageFlags type variableDeclarators
+    attributeSpecifierAny* type variableDeclarators
 ;
 
 variableDeclarators:
@@ -388,25 +386,29 @@ packOffsetNode:
 ;
 
 storageFlags:
-    storageFlag*
+    storageFlag*?    // *? lazy Kleene star. this allows the use of Identifier as a subrule without swallowing typenames under the storage rule.
 ;
 
 storageFlag:
     // Type modifiers
         Const
+    |   Unsigned
     |   RowMajor
     |   ColumnMajor
     // Storage classes
     |   Extern
     |   Inline
-    |   Rootconstant
-    |   Option
+    |   Rootconstant   // AZSL specific
+    |   Option         // AZSL
     |   Precise
     |   Shared
     |   Groupshared
     |   Static
     |   Uniform
     |   Volatile
+    |   Globallycoherent
+    |   SNorm
+    |   UNorm
     // Interpolation modifiers
     |   Linear
     |   Centroid
@@ -423,12 +425,14 @@ storageFlag:
     |   Triangle
     |   LineAdj
     |   TriangleAdj
+    // catch-all
+    |   Identifier
 ;
 
+// note that in FXC "int static" (that is `storageFlags type storageFlags`) wasn't valid.
+// but in DXC it's flexible like in C/C++, so we have a restriction compared to DXC here.
 type:
-        predefinedType
-    |   userDefinedType
-    |   typeofExpression
+	storageFlags (predefinedType | userDefinedType | typeofExpression | Void)
 ;
 
 predefinedType:
@@ -505,18 +509,20 @@ samplerStatePredefinedType:
         Sampler
     |   SamplerCapitalS
     |   SamplerState
+    |   SamplerStateCamel
     |   SamplerComparisonState
 ;
 
 scalarType:
         Bool
     |   Int
+    |   Int16_t
     |   Int32_t
     |   Int64_t
     |   Uint
+    |   Uint16_t
     |   Uint32_t
     |   Uint64_t
-    |   UnsignedInt
     |   Dword
     |   Half
     |   Float
@@ -771,7 +777,7 @@ literal:
 
 // leading type means a function where the return type is stated first (contrary to trailing type)
 leadingTypeFunctionSignature:
-    storageFlags functionType (ClassName=userDefinedType ColonColon)? Name=Identifier
+    type (ClassName=userDefinedType ColonColon)? Name=Identifier
     genericParameterList?
     LeftParen functionParams? RightParen
     Override? hlslSemantic?  // AZSL+
@@ -785,11 +791,6 @@ hlslFunctionDefinition:
 hlslFunctionDeclaration:
     leadingTypeFunctionSignature
     Semi
-;
-
-functionType:
-        type
-    |   Void
 ;
 
 userDefinedType:
@@ -807,12 +808,12 @@ associatedTypeDeclaration:
 
 // typedef support (extension of fxc accepted language, but normal for dxc)
 typedefStatement:
-    KW_Typedef ExistingType=functionType NewTypeName=Identifier Semi
+    KW_Typedef ExistingType=type NewTypeName=Identifier Semi
 ;
 
 // swift/slang-like manner of writing typedef. also close to C++11 using
 typealiasStatement:
-    KW_TypeAlias NewTypeName=Identifier '=' ExistingType=functionType Semi
+    KW_TypeAlias NewTypeName=Identifier '=' ExistingType=type Semi
 ;
 
 typeAliasingDefinitionStatement:
@@ -820,7 +821,7 @@ typeAliasingDefinitionStatement:
 ;
 
 typeofExpression:
-    KW_Typeof '(' (Expr=expressionExt|functionType) ')' ('::' SubQualification=idExpression)?
+    KW_Typeof '(' (Expr=expressionExt|type) ')' ('::' SubQualification=idExpression)?
 ;
 
 genericParameterList:

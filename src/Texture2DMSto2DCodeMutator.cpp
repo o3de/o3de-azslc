@@ -321,7 +321,7 @@ namespace AZ::ShaderCompiler
             }
 
             //Semantics can be part of a struct, or function parameters.
-            if (ParamContextOverVariableDeclarator(varInfo->m_declNode))
+            if (ParamContextOverUnnamedVariableDeclarator(varInfo->m_declNode))
             {
                 // This is a function parameter.
                 IdentifierUID functionUid = IdentifierUID{ GetParentName(uid.GetName()) };
@@ -336,18 +336,35 @@ namespace AZ::ShaderCompiler
         }
     }
 
+    static vector<Token*> NodeTokens(ParserRuleContext* node, TokenStream* stream)
+    {
+        vector<Token*> tokens;
+        misc::Interval src = node->getSourceInterval();
+        for (ssize_t i = src.a; i <= src.b; ++i)
+        {
+            tokens.push_back(stream->get(i));
+        }
+        return tokens;
+    }
+
     //! A helper method that figures out how a function argument should look like
     //! when mutated into a local variable.
-    static string GetLocalVariableStringFromFunctionArgument(const UnqualifiedName& uqName, AstUnnamedVarDecl* ctx, const char * initializationValue)
+    static string GetLocalVariableStringFromFunctionArgument(TokenStream* stream, const UnqualifiedName& uqName, AstUnnamedVarDecl* ctx, const char * initializationValue)
     {
         azslParser::FunctionParamContext* paramCtx = nullptr;
-        auto typeCtx = ExtractTypeFromVariableDeclarator(ctx, &paramCtx);
-        auto variableTypeStr = typeCtx->getText();
+        auto typeCtx = ExtractTypeFromUnnamedVariableDeclarator(ctx, &paramCtx);
+        auto tokens = NodeTokens(typeCtx, stream);
+        vector<string> stringlets;
+        TransformCopy(tokens, stringlets, [&](Token* t) { return t->getText(); });
+        vector<string> filtered;
+        std::copy_if(stringlets.begin(), stringlets.end(), std::back_inserter(filtered), [&](auto subtok)
+                     { return subtok != "in" && subtok != "out" && subtok != "inout" && !IsAllWhitespaces(subtok); });
+        string typeHlsl = Join(filtered, " ");
         if (initializationValue)
         {
-            return FormatString("%s %s = (%s)%s;\n", variableTypeStr.c_str(), uqName.c_str(), variableTypeStr.c_str(), initializationValue);
+            return FormatString("%s %s = (%s)%s;\n", typeHlsl.c_str(), uqName.c_str(), typeHlsl.c_str(), initializationValue);
         }
-        return FormatString("%s %s;\n", variableTypeStr.c_str(), uqName.c_str());
+        return FormatString("%s %s;\n", typeHlsl.c_str(), uqName.c_str());
     }
 
     void Texture2DMSto2DCodeMutator::DropMultiSamplingSystemSemanticFromFunction(const IdentifierUID& varUid, const VarInfo* varInfo, const string& systemSemanticName, const IdentifierUID& functionUid)
@@ -386,7 +403,7 @@ namespace AZ::ShaderCompiler
             initializationValue = "-1";
         }
 
-        auto newCode = GetLocalVariableStringFromFunctionArgument(varUid.GetNameLeaf(), varInfo->m_declNode, initializationValue.c_str());
+        auto newCode = GetLocalVariableStringFromFunctionArgument(m_stream, varUid.GetNameLeaf(), varInfo->m_declNode, initializationValue.c_str());
 
         // The idea is to find the TokenIndex of the opening bracket "{",
         // Once we know that TokenIndex we can add code mutation as an appended
@@ -432,7 +449,7 @@ namespace AZ::ShaderCompiler
         {
             initializationValue = "-1";
         }
-        auto newCode = GetLocalVariableStringFromFunctionArgument(varUid.GetNameLeaf(), varInfo->m_declNode, initializationValue.c_str());
+        auto newCode = GetLocalVariableStringFromFunctionArgument(m_stream, varUid.GetNameLeaf(), varInfo->m_declNode, initializationValue.c_str());
         auto tokenIndex = varInfo->m_declNode->start->getTokenIndex();
         CodeMutation mutation;
         mutation.m_prepend.emplace("static const ");

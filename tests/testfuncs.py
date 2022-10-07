@@ -156,7 +156,7 @@ def dumpKeywords(compilerPath):
             return (None, False)
         return (tokens, code == 0)
 
-def verifyAllPredicates(predicates, j, silent=True):
+def verifyAllPredicates(predicates, code, silent=True):
     import clr
     import pprint
     import inspect
@@ -176,5 +176,5 @@ def verifyAllPredicates(predicates, j, silent=True):
     if not allok and not silent:
         print ("dump as parsed:")
         pp = pprint.PrettyPrinter(indent=2, width=160)
-        pp.pprint(j)
+        pp.pprint(code)
     return allok

@@ -388,9 +388,6 @@ public:
   virtual void enterHlslFunctionDeclaration(azslParser::HlslFunctionDeclarationContext * /*ctx*/) override { }
   virtual void exitHlslFunctionDeclaration(azslParser::HlslFunctionDeclarationContext * /*ctx*/) override { }
 
-  virtual void enterFunctionType(azslParser::FunctionTypeContext * /*ctx*/) override { }
-  virtual void exitFunctionType(azslParser::FunctionTypeContext * /*ctx*/) override { }
-
   virtual void enterUserDefinedType(azslParser::UserDefinedTypeContext * /*ctx*/) override { }
   virtual void exitUserDefinedType(azslParser::UserDefinedTypeContext * /*ctx*/) override { }
 

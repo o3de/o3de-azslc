@@ -2,6 +2,6 @@
 "float MySRG_Luminosity ( float )"
 "void MySRG_DoStuff ( )"
 # here is the important part, we can see that the unresolved call is translated anyway.
-"half x = :: MySRG_Luminosity ( 0.5 h ) ;"
+"half x = :: MySRG_Luminosity ( 0 . 5 h ) ;"
 "void MySRG2_DoStuff ( )"
-"half x = :: MySRG_Luminosity ( 0.5 ) ;"
+"half x = :: MySRG_Luminosity ( 0 . 5 ) ;"
