@@ -15,8 +15,9 @@ if "%~1" == "" (
 pushd
 
 cd "%~dp0\src\generated\java"
-set antlr4=java org.antlr.v4.Tool
-set grun=java org.antlr.v4.gui.TestRig
+
+SET CLASSPATH=.;"..\..\external\antlr-4.9.3-complete.jar";%CLASSPATH%
+set grun=java -cp %CLASSPATH% org.antlr.v4.gui.TestRig
 %grun% azsl compilationUnit -gui "%thepath%"
 
 popd

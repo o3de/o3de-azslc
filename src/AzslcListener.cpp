@@ -31,7 +31,7 @@ namespace AZ::ShaderCompiler
         else if (auto* typeofExpression = As<azslParser::TypeofExpressionContext*>(ctx->parent))
         {
             QualifiedName startupScope = typeofExpression->Expr ? m_ir->m_sema.TypeofExpr(typeofExpression->Expr)
-                                                                : m_ir->m_sema.TypeofExpr(typeofExpression->functionType());
+                                                                : m_ir->m_sema.TypeofExpr(typeofExpression->type());
             if (m_ir->m_sema.VerifyTypeIsScopeComposable(startupScope).first)
             {
                 m_ir->m_sema.RegisterSeenat(ctx, startupScope);
@@ -94,48 +94,6 @@ namespace AZ::ShaderCompiler
     void SemaCheckListener::exitSamplerBodyDeclaration(azslParser::SamplerBodyDeclarationContext* ctx)
     {
         m_ir->m_scope.ExitScope(ctx->RightBrace()->getSourceInterval().b);
-    }
-
-    void SemaCheckListener::enterConstantBufferTemplated(azslParser::ConstantBufferTemplatedContext* ctx)
-    {
-        // Diagnose undue usage: any scope/contexts are not OK for constant buffers (which are not view types).
-        // Originally the grammar was strictly enforcing at the syntax level that CB appears only in SRG scope.
-        // But for canonicalization with predefined types, now their presence will parse correctly at any place a type rule can appear.
-
-        // the current rule has only one parent: predefinedType, itself has only one parent: type
-        auto* typeNode = As<azslParser::TypeContext*>(ctx->parent->parent);
-        // but the type rule has many parents, exhaustively:
-        //   streamOutputPredefinedType, structuredBufferPredefinedType  (as generics)
-        //   constantBufferTemplated (yes ! because it's generic it has an unrestricted type rule -> risk of recursion. let's forbid it semantically)
-        // and
-        //  functionType         not tolerable to return a constantbuffer, except if parent rule is typealias
-        //  functionParam        not tolerable to pass as argument
-        //  typedefStatement     tolerable anywhere
-        //  CastExpression       let's go the lenient route and accept it whatever it will end up meaning
-        //  variableDeclaration  tolerable depending on scope (SRG: ok, other: no)
-
-        bool isFunctionTypeInTypeAlias = Is<azslParser::FunctionTypeContext>(typeNode->parent) && Is3ParentRuleOfType<azslParser::TypeAliasingDefinitionStatementContext*>(typeNode);
-        if (DynamicTypeIsAnyOf<azslParser::StreamOutputPredefinedTypeContext,
-                               azslParser::StructuredBufferPredefinedTypeContext,
-                               azslParser::ConstantBufferTemplatedContext,
-                               azslParser::FunctionTypeContext,
-                               azslParser::FunctionParamContext>(typeNode->parent)
-            && !isFunctionTypeInTypeAlias)
-        {
-            throw AzslcException(ADVANCED_SYNTAX_CONSTANT_BUFFER_RESTRICTION,
-                                 "Syntax",
-                                 ctx->start,
-                                 "impossible to use ConstantBuffer in that context");
-        }
-
-        bool immediateScopeIsSRG = m_ir->m_sema.GetCurrentScopeIdAndKind().second.GetKind() == Kind::ShaderResourceGroup;
-        if (Is<azslParser::VariableDeclarationContext>(typeNode->parent) && !immediateScopeIsSRG)
-        {   // note that it's only OK in immediate scope, not "as one of the parents, however distant".
-            throw AzslcException(ADVANCED_SYNTAX_CONSTANT_BUFFER_ONLY_IN_SRG,
-                                 "Syntax",
-                                 ctx->start,
-                                 "ConstantBuffer variable declarations may only appear in ShaderResourceGroup");
-        }
     }
 
     void SemaCheckListener::enterSrgDefinition(azslParser::SrgDefinitionContext* ctx)

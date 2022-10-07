@@ -103,8 +103,6 @@ namespace AZ::ShaderCompiler
         EMITTER_UNDEFINED_SRG_MEMBER = 267u,
 
         // others
-        ADVANCED_SYNTAX_CONSTANT_BUFFER_RESTRICTION = 512u,
-        ADVANCED_SYNTAX_CONSTANT_BUFFER_ONLY_IN_SRG = 513u,
         ADVANCED_SYNTAX_DOUBLE_SCOPE_RESOLUTION = 514u,
         ADVANCED_RESERVED_NAME_USED = 515u,
         ADVANCED_SYNTAX_FUNCTION_IN_STRUCT = 516u,
@@ -115,21 +113,21 @@ namespace AZ::ShaderCompiler
     public:
         AzslcException(uint32_t errorCode, const char* const errorType, optional<size_t> line, optional<size_t> column, const string& message)
             : antlr4::RuntimeException(message),
-                m_errorCode(errorCode),
-                m_errorType(errorType),
-                m_line(line),
-                m_column(column), 
-                m_errorMessage("")
+              m_errorCode(errorCode),
+              m_errorType(errorType),
+              m_line(line),
+              m_column(column),
+              m_errorMessage("")
         {
             BakeErrorMessage();
         }
 
         AzslcException(uint32_t errorCode, const char* const errorType, Token* token, const string& message)
             : RuntimeException(message),
-                m_token(token),
-                m_errorCode(errorCode),
-                m_errorType(errorType),
-                m_errorMessage("")
+              m_token(token),
+              m_errorCode(errorCode),
+              m_errorType(errorType),
+              m_errorMessage("")
         {
             if (m_token)
             {
@@ -146,13 +144,13 @@ namespace AZ::ShaderCompiler
         }
 
         AzslcException(uint32_t errorCode, const char* const errorType, const string& message)
-            : RuntimeException(message), 
-                m_token(nullptr), 
-                m_errorCode(errorCode), 
-                m_errorType(errorType),
-                m_line(none),
-                m_column(none),
-                m_errorMessage("")
+            : RuntimeException(message),
+              m_token(nullptr),
+              m_errorCode(errorCode),
+              m_errorType(errorType),
+              m_line(none),
+              m_column(none),
+              m_errorMessage("")
         {
             BakeErrorMessage();
         }
@@ -167,9 +165,12 @@ namespace AZ::ShaderCompiler
             return m_errorCode;
         }
 
-        static string MakeErrorMessage(string_view line, string_view column, string_view errorType, bool error, string_view code, string_view message)
+        static string MakeErrorMessage(string_view filename, string_view line, string_view column, string_view errorType, bool error, string_view code, string_view message)
         {
-            return ConcatString(s_currentSourceFileName,
+            // global filename for error messages. visual studio standard build-tool error format is:
+            // {filename(line# [, column#]) | toolname} : [ any text ] {error | warning} code+number:localizable string [ any text ]
+            // so to respect this, we're going to simplify the API by setting the report file here.
+            return ConcatString(filename,
                                 "(", line, ",", column, ") : ",
                                 errorType,
                                 error ? " error" : " warning",
@@ -180,11 +181,8 @@ namespace AZ::ShaderCompiler
     protected:
         void BakeErrorMessage()
         {
-            if (s_sourceFileLineNumber)
-            {
-                m_line = *s_sourceFileLineNumber;
-            }
-            m_errorMessage = MakeErrorMessage(m_line ? ToString(*m_line) : "",
+            m_errorMessage = MakeErrorMessage(s_lineFinder->GetVirtualFileName(m_line ? *m_line : 0),
+                                              m_line ? ToString(s_lineFinder->GetVirtualLineNumber(*m_line)) : "",
                                               m_column ? ToString(*m_column) : "",
                                               m_errorType ? m_errorType : "",
                                               m_errorCode != WX_WARNINGS_AS_ERRORS,
@@ -193,13 +191,7 @@ namespace AZ::ShaderCompiler
         }
 
     public:
-        //! global filename for error messages. visual studio standard build-tool error format is:
-        //! {filename(line# [, column#]) | toolname} : [ any text ] {error | warning} code+number:localizable string [ any text ]
-        //! so to respect this, we're going to simplify the API by setting the report file here.
-        static inline string s_currentSourceFileName;
-
-        //! If set, it overrides @m_line.
-        static inline optional<size_t> s_sourceFileLineNumber;
+        static inline PreprocessorLineDirectiveFinder* s_lineFinder;
 
     protected:
         const uint16_t m_errorCode;
@@ -216,29 +208,26 @@ namespace AZ::ShaderCompiler
         inline static const char* const ErrorType = "Semantic";
 
     public:
-        AzslcOrchestratorException(uint32_t errorCode, optional<size_t> line,optional<size_t> column, const string& message)
+        AzslcOrchestratorException(uint32_t errorCode, optional<size_t> line, optional<size_t> column, const string& message)
             : AzslcException(errorCode,
-                ErrorType,
-                line,
-                column,
-                message)
-        {
-        }
+                             ErrorType,
+                             line,
+                             column,
+                             message)
+        {}
 
         AzslcOrchestratorException(uint32_t errorCode, Token* token, const string& message)
-            : AzslcException(errorCode, 
-                ErrorType,
-                token,
-                message)
-        {
-        }
+            : AzslcException(errorCode,
+                             ErrorType,
+                             token,
+                             message)
+        {}
 
         AzslcOrchestratorException(uint32_t errorCode, const string& message)
             : AzslcException(errorCode,
-                ErrorType,
-                message)
-        {
-        }
+                             ErrorType,
+                             message)
+        {}
     };
 
     class AzslcIrException final : public AzslcException
@@ -247,12 +236,13 @@ namespace AZ::ShaderCompiler
         inline static const char* const ErrorType = "IR";
 
     public:
-        AzslcIrException(uint32_t errorCode, const string& message)
-            : AzslcException(errorCode, 
-                ErrorType,
-                message)
-        {
-        }
+        AzslcIrException(uint32_t errorCode, const string& message, optional<size_t> line = none)
+            : AzslcException(errorCode,
+                             ErrorType,
+                             line,
+                             none,
+                             message)
+        {}
     };
 
     class AzslcEmitterException final : public AzslcException
@@ -263,61 +253,41 @@ namespace AZ::ShaderCompiler
     public:
         AzslcEmitterException(uint32_t errorCode, optional<size_t> line, optional<size_t> column, const string& message)
             : AzslcException(errorCode,
-                ErrorType,
-                line,
-                column,
-                message)
-        {
-        }
+                             ErrorType,
+                             line,
+                             column,
+                             message)
+        {}
 
         AzslcEmitterException(uint32_t errorCode, Token* token, const string& message)
-            : AzslcException(errorCode, 
-                ErrorType,
-                token,
-                message)
-        {
-        }
+            : AzslcException(errorCode,
+                             ErrorType,
+                             token,
+                             message)
+        {}
 
         AzslcEmitterException(uint32_t errorCode, const string& message)
             : AzslcException(errorCode,
-                ErrorType,
-                message)
-        {
-        }
+                             ErrorType,
+                             message)
+        {}
     };
 
     class AzslParserEventListener final : public antlr4::BaseErrorListener
     {
     public:
-        explicit AzslParserEventListener(PreprocessorLineDirectiveFinder& lineDirectiveFinder) : m_lineDirectiveFinder(lineDirectiveFinder) {}
-        AzslParserEventListener() = delete;
-        ~AzslParserEventListener() override = default;
-
         void syntaxError(antlr4::Recognizer* recognizer, antlr4::Token* offendingSymbol, size_t line,
-            size_t charPositionInLine, const string &msg, std::exception_ptr e) override
+            size_t charPositionInLine, const string& msg, std::exception_ptr e) override
         {
-            string errorMessage;
-            const LineDirectiveInfo* lineDirectiveInfo = m_lineDirectiveFinder.GetNearestPreprocessorLineDirective(line);
-            if (!lineDirectiveInfo)
-            {
-                errorMessage = std::move(AzslcException::MakeErrorMessage(ToString(line),
-                    ToString(charPositionInLine + 1),
-                    "syntax",
-                    true,
-                    ToString(static_cast<int>(PARSER_SYNTAX_ERROR)),
-                    msg));
-            }
-            else
-            {
-                auto absoluteLineNumberInIncludedFile = m_lineDirectiveFinder.GetLineNumberInOriginalSourceFile(*lineDirectiveInfo, line);
-                AzslcException::s_currentSourceFileName = lineDirectiveInfo->m_containingFilename;
-                errorMessage = std::move(AzslcException::MakeErrorMessage(ToString(absoluteLineNumberInIncludedFile),
-                    ToString(charPositionInLine + 1),
-                    "syntax",
-                    true,
-                    ToString(static_cast<int>(PARSER_SYNTAX_ERROR)),
-                    msg));
-            }
+            bool isKeyword = m_isKeywordPredicate(recognizer, offendingSymbol);
+            using Ex = AzslcException;
+            string errorMessage = Ex::MakeErrorMessage(Ex::s_lineFinder->GetVirtualFileName(line),
+                                                       ToString(Ex::s_lineFinder->GetVirtualLineNumber(line)),
+                                                       ToString(charPositionInLine + 1),
+                                                       "syntax",
+                                                       true,
+                                                       ToString(PARSER_SYNTAX_ERROR),
+                                                       ConcatString(msg, " (", offendingSymbol->getText(), isKeyword ? " is a keyword)" : " was unexpected)"));
 
             antlr4::ParseCancellationException parseException(errorMessage);
             if (e)
@@ -329,6 +299,8 @@ namespace AZ::ShaderCompiler
                 throw parseException;
             }
         }
+
+        std::function<bool(antlr4::Recognizer*, antlr4::Token* )> m_isKeywordPredicate;
 
         void reportAmbiguity(antlr4::Parser *recognizer, const antlr4::dfa::DFA &dfa, size_t startIndex, size_t stopIndex, bool exact,
             const antlrcpp::BitSet &ambigAlts, antlr4::atn::ATNConfigSet *configs) override
@@ -344,9 +316,6 @@ namespace AZ::ShaderCompiler
             size_t prediction, antlr4::atn::ATNConfigSet *configs) override
         {
         }
-
-    private:
-        PreprocessorLineDirectiveFinder& m_lineDirectiveFinder;
     };
 
     inline void OutputNestedAndException(const exception& e)

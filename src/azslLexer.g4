@@ -6,7 +6,7 @@ modifications by Amazon. C 2018
  */
 lexer grammar azslLexer;
 
-channels { PREPROCESSOR }
+channels { PREPROCESSOR, COMMENTS }
 
 AppendStructuredBuffer : 'AppendStructuredBuffer';
 Bool : 'bool';
@@ -36,9 +36,9 @@ ByteAddressBuffer : 'ByteAddressBuffer';
 Break : 'break';
 Case : 'case';
 CBuffer : 'cbuffer';
+Centroid : 'centroid';
 ConstantBuffer : 'constantbuffer';
 ConstantBufferCamel : 'ConstantBuffer';
-Centroid : 'centroid';
 Class : 'class';
 ColumnMajor : 'column_major';
 Const : 'const';
@@ -70,6 +70,7 @@ Double4x3 : 'double4x3';
 Double4x4 : 'double4x4';
 Else : 'else';
 Enum : 'enum';
+Export : 'export';
 Extern : 'extern';
 FeedbackTexture2D : 'FeedbackTexture2D';
 FeedbackTexture2DArray : 'FeedbackTexture2DArray';
@@ -96,6 +97,7 @@ Float4x3 : 'float4x3';
 Float4x4 : 'float4x4';
 For : 'for';
 Groupshared : 'groupshared';
+Globallycoherent : 'globallycoherent';
 Global: 'global';
 Half : 'half';
 Half1 : 'half1';
@@ -125,6 +127,7 @@ Rootconstant : 'rootconstant';   // Amazon extension
 Inout : 'inout' | 'in out';
 InputPatch : 'InputPatch';
 Int : 'int';
+Int16_t : 'int16_t';
 Int32_t : 'int32_t';
 Int64_t : 'int64_t';
 Int1 : 'int1';
@@ -165,6 +168,9 @@ Packoffset : 'packoffset';
 Point : 'point';
 PointStream : 'PointStream';
 Precise : 'precise';
+// 'payload' is a free identifier as well, DXC has a hard literal keyword that disrupts semantic understanding in some contexts
+// notably as variable declarator, if you mention payload it will say «'payload' object must be an in parameter»
+// but actually the name the programmer choses doesn't have to be 'payload'. (Also SV_RayPayload appears to be a fake semantic)
 RasterizerOrderedBuffer : 'RasterizerOrderedBuffer';
 RasterizerOrderedByteAddressBuffer : 'RasterizerOrderedByteAddressBuffer';
 RasterizerOrderedStructuredBuffer : 'RasterizerOrderedStructuredBuffer';
@@ -190,14 +196,17 @@ Sample : 'sample';
 Sampler : 'sampler';
 SamplerCapitalS : 'Sampler';
 SamplerComparisonState : 'SamplerComparisonState';
-SamplerState : 'SamplerState';
+SamplerStateCamel : 'SamplerState';
+SamplerState : 'sampler_state';
 Shared : 'shared';
+SNorm : 'snorm';
 Static : 'static';
 Struct : 'struct';
 StructuredBuffer : 'StructuredBuffer';
 SubpassInput : 'SubpassInput';
 SubpassInputMS : 'SubpassInputMS';
 Switch : 'switch';
+TBuffer : 'tbuffer';
 Texture1D : 'Texture1D';
 Texture1DArray : 'Texture1DArray';
 Texture2D : 'Texture2D';
@@ -213,12 +222,9 @@ TriangleStream : 'TriangleStream';
 Uniform : 'uniform';
 // For the --listpredefined option to work, we absolutely need all types to exist in (simple) rules
 // that can return strings from Vocabulary::getLiteralName()
-// so that rule: Uint : 'uint' | 'unsigned int' | 'dword' # can't be used because it's non-trivialness makes it a non-citizen.
+// so that rule: Uint : 'uint' | 'dword' # can't be used because it's non-trivialness makes it a non-citizen.
 // I tried to recompose the rule with fragments, but fragment also are not listed in the vocabulary. (_literalNames)
 Uint : 'uint';
-Uint32_t : 'uint32_t';
-Uint64_t : 'uint64_t';
-UnsignedInt : 'unsigned int';
 Uint1 : 'uint1';
 Uint2 : 'uint2';
 Uint3 : 'uint3';
@@ -239,6 +245,11 @@ Uint4x1 : 'uint4x1';
 Uint4x2 : 'uint4x2';
 Uint4x3 : 'uint4x3';
 Uint4x4 : 'uint4x4';
+Uint16_t : 'uint16_t';
+Uint32_t : 'uint32_t';
+Uint64_t : 'uint64_t';
+UNorm : 'unorm';
+Unsigned : 'unsigned';
 Dword : 'dword';
 // Amazon addition: DXC didn't advertise it, but the vector/matrix forms of dword are now accepted
 Dword1 : 'dword1';
@@ -266,7 +277,7 @@ Volatile : 'volatile';
 Void : 'void';
 While : 'while';
 
-// libray subobject types from modern HLSL:
+// library subobject types from modern HLSL:
 StateObjectConfig : 'StateObjectConfig';
 LocalRootSignature : 'LocalRootSignature';
 GlobalRootSignature : 'GlobalRootSignature';
@@ -376,25 +387,26 @@ Dot : '.';
 True : 'true';
 False : 'false';
 
-// AMAZON
+// AZSL extensions
 KW_AssociatedType : 'associatedtype' ;
 KW_TypeAlias : 'typealias' ;
 KW_Typedef : 'typedef' ;
 KW_Fundamental : 'fundamental' ; // [GFX TODO]
 KW_Typeof : 'typeof' ;  // simple decltype-like operator
 
-// AZSLc extensions
+// AZSL SRG
+FrequencyId : 'FrequencyId';
+ShaderVariantFallback : 'ShaderVariantFallback';
+ShaderResourceGroupSemantic : 'ShaderResourceGroupSemantic';
+ShaderResourceGroup : 'ShaderResourceGroup';
+
+// AZSLc-specific internal access keywords
 KW_ext_print_message : '__azslc_print_message' ;
 KW_ext_print_symbol : '__azslc_print_symbol' ;
 KW_ext_prtsym_fully_qualified : '__azslc_prtsym_fully_qualified' ;
 KW_ext_prtsym_least_qualified : '__azslc_prtsym_least_qualified' ;
 KW_ext_prtsym_constint_value : '__azslc_prtsym_constint_value' ;
 
-// AZSL SRG
-FrequencyId : 'FrequencyId';
-ShaderVariantFallback : 'ShaderVariantFallback';
-ShaderResourceGroupSemantic : 'ShaderResourceGroupSemantic';
-ShaderResourceGroup : 'ShaderResourceGroup';
 
 HLSLSemanticStream:
     'BINORMAL'      Digit*
@@ -421,6 +433,13 @@ HLSLSemanticSystem:
   | 'sV_'       (Nondigit | Digit)*
   | 'sv_'       (Nondigit | Digit)*
 ;
+
+// Those keywords are removed from the vocabulary, as of 1.8.8 (were present from 1.8.5)
+// since they can be emulated with a lazy Identifier recognition in the qualifier rule
+//Center : 'center';
+//Indices : 'indices';   // mesh-shader parameter qualifier
+//Vertices : 'vertices'; // mesh-shader parameter qualifier
+//Payload : 'payload';   // mesh-shader parameter qualifier & hit-shader optional qualifier
 
 Identifier
     :   Nondigit (Nondigit | Digit)*
@@ -543,20 +562,20 @@ LineDirective
     ;
 
 Whitespace
-    :   [ \t]+ -> skip
+    :   [ \t]+ -> channel(HIDDEN)
     ;
 
 Newline
     :   (   '\r' '\n'?
         |   '\n'
-        )  -> skip
+        )  -> channel(HIDDEN)
     ;
 
 // Amazon: The original mode switches from Tim Jones were not working.
 BlockComment
-    :   '/*' .*? '*/' -> channel(HIDDEN)
+    :   '/*' .*? '*/' -> channel(COMMENTS)
     ;
 
 LineComment
-    :   '//' ~[\r\n]* -> channel(HIDDEN)
+    :   '//' ~[\r\n]* -> channel(COMMENTS)
     ;

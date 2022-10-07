@@ -111,10 +111,11 @@ namespace AZ::ShaderCompiler
                     const auto& samplerInfo = *memberInfo->m_samplerState;
                     if (!samplerInfo.m_isDynamic)
                     {
-                        rootParam << "            \"StaticSampler(s" << std::to_string(param.m_registerBinding.m_pair[querySet].m_registerIndex)
-                                  << ", space = " << std::to_string(param.m_registerBinding.m_pair[querySet].m_logicalSpace)
-                                  << ", visibility=SHADER_VISIBILITY_ALL"
-                                  << samplerInfo << ")";
+                        Streamable&& s{MakeOStreamStreamable{rootParam}};
+                        s << "            \"StaticSampler(s" << std::to_string(param.m_registerBinding.m_pair[querySet].m_registerIndex)
+                          << ", space = " << std::to_string(param.m_registerBinding.m_pair[querySet].m_logicalSpace)
+                          << ", visibility=SHADER_VISIBILITY_ALL"
+                          << samplerInfo << ")";
                         rootAttrList.push_back(rootParam.str());
                     }
                 }

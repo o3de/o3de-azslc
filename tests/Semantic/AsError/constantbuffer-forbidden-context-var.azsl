@@ -1,5 +1,0 @@
-struct S{};
-void func()
-{
-    ConstantBuffer<S> var;  // #EC 513 'ConstantBuffer variable declarations may only appear in ShaderResourceGroup'
-}

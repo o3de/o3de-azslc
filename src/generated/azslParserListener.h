@@ -386,9 +386,6 @@ public:
   virtual void enterHlslFunctionDeclaration(azslParser::HlslFunctionDeclarationContext *ctx) = 0;
   virtual void exitHlslFunctionDeclaration(azslParser::HlslFunctionDeclarationContext *ctx) = 0;
 
-  virtual void enterFunctionType(azslParser::FunctionTypeContext *ctx) = 0;
-  virtual void exitFunctionType(azslParser::FunctionTypeContext *ctx) = 0;
-
   virtual void enterUserDefinedType(azslParser::UserDefinedTypeContext *ctx) = 0;
   virtual void exitUserDefinedType(azslParser::UserDefinedTypeContext *ctx) = 0;
 

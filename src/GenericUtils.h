@@ -10,6 +10,7 @@
 #include "StdUtils.h"
 #include "MetaUtils.h"
 
+#include "StreamableInterface.h"
 #include <sstream>
 
 #define AZ_STRINGIFY(x) #x
@@ -18,6 +19,37 @@
 
 namespace AZ
 {
+    // exception type of VisitFirstNonNull
+    struct AllNull : std::runtime_error
+    {
+        using runtime_error::runtime_error;
+    };
+    // Type-heterogeneity-preserving multi pointer object single visitor.
+    // Returns whatever the passed functor would.
+    // Throws if all passed objects are null.
+    template <typename Lambda, typename T>
+    invoke_result_t<Lambda, T*> VisitFirstNonNull(Lambda functor, T* object) noexcept(false)
+    {
+        if (object)
+        {
+            return functor(object);
+        }
+        throw AllNull{ "no non-null object passed" };
+    }
+
+    template <typename Lambda, typename T, typename... TOther>
+    invoke_result_t<Lambda, T*> VisitFirstNonNull(Lambda functor, T*object, TOther*... rest) noexcept(false)
+    {
+        if (object)
+        {
+            return functor(object);
+        }
+        else
+        {
+            return VisitFirstNonNull(functor, rest...);
+        }
+    }
+
     // Create substring views of views. Works like python slicing operator [n:m] with limited modulo semantics.
     // what I ultimately desire is the range v.3 feature eg `letters[{2,end-2}]`
     // http://ericniebler.com/2014/12/07/a-slice-of-python-in-c/
@@ -156,6 +188,11 @@ namespace AZ
         return haystack;
     }
 
+    inline bool IsAllWhitespaces(string_view s)
+    {
+        return std::all_of(s.begin(), s.end(), [&](char c) { return std::isspace(c); });
+    }
+
     /// tells whether a position in a string is surrounded by round braces
     /// e.g. true  for arguments {"a(b)", 2}
     /// e.g. true  for arguments {"a()", 1}  by convention
@@ -212,14 +249,15 @@ namespace AZ
     template< typename Iter >
     string Join(Iter begin, Iter end, string_view separator = "")
     {
-        if (begin == end)
+        if (!(begin != end))
             return "";
 
         std::stringstream ss;
-        ss << *begin;
+        Streamable&& wrap{MakeOStreamStreamable{ss}};
+        wrap << *begin;
 
-        auto aggregate = [&ss, &separator](auto s) { ss << separator.data() << s; };
-        std::for_each(std::next(begin), end, aggregate);
+        auto aggregate = [&wrap, &separator](auto s) { wrap << separator.data() << s; };
+        std::for_each(++begin, end, aggregate);
 
         return ss.str();
     }
@@ -428,6 +466,12 @@ namespace AZ
             return f;
         }
 
+        friend Flag& operator &= (Flag& f, const Flag& f2)
+        {
+            f.m_value &= f2.m_value;
+            return f;
+        }
+
         friend Flag& operator |= (Flag& f, EnumType e)
         {
             f.m_value |= static_cast<UnderlyingT>(e);
@@ -443,6 +487,16 @@ namespace AZ
         friend Flag operator ~ (const Flag& a_f)
         {
             return Flag(EnumType(~a_f.m_value));
+        }
+
+        bool operator == (const Flag& rhs) const
+        {
+            return m_value == rhs.m_value;
+        }
+
+        bool operator != (const Flag& rhs) const
+        {
+            return m_value != rhs.m_value;
         }
 
         explicit operator bool() const
@@ -535,6 +589,41 @@ namespace AZ
     {
         return (value > 0) && !(value & (value - 1));
     }
+
+    //! Insert rhs at the end of lhs
+    template<typename T>
+    void AppendVector(vector<T>& lhs, vector<T> const& rhs)
+    {
+        using std::begin, std::end;
+        lhs.insert(end(lhs), begin(rhs), end(rhs));
+    }
+
+    //! Stable algorithm to uniquify elements of a vector (preserving order).
+    //! Solution Mohammed Hossain/Yuri https://stackoverflow.com/a/34341344/893406
+    template<typename T>
+    size_t RemoveDuplicatesKeepOrder(vector<T>& vec)
+    {
+        unordered_set<T> seen;
+        auto newEnd = std::remove_if(vec.begin(), vec.end(), [&seen](const T& value)
+                                     {
+                                         if (seen.find(value) != std::end(seen))
+                                             return true;
+
+                                         seen.insert(value);
+                                         return false;
+                                     });
+        vec.erase(newEnd, vec.end());
+        return vec.size();
+    }
+
+    //! Append rhs to lhs and remove duplicates
+    template<typename T>
+    void StableMerge(vector<T>& lhs, vector<T> const& rhs)
+    {
+        AppendVector(lhs, rhs);
+        RemoveDuplicatesKeepOrder(lhs);
+    }
+
 }
 
 #ifndef NDEBUG
@@ -619,6 +708,9 @@ namespace AZ::Tests
             assert(FindInterval(intervals, 6) == intervals.cend());
             assert(FindInterval(intervals, 8) != intervals.cend());
             assert(FindInterval(intervals, 1) == intervals.cend());
+
+            auto high = Infimum(intervals, 20);
+            assert(high->first == 8);
         }
 
         assert(Replace("Srg/A", "/", "::") == "Srg::A");

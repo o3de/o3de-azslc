@@ -13,7 +13,10 @@ namespace AZ::ShaderCompiler
 {
     struct CodeReflection : Backend
     {
-        using Backend::Backend;
+        CodeReflection(IntermediateRepresentation* ir, TokenStream* tokens, std::ostream& out)
+            : Backend(ir, tokens),
+              m_out(out)
+        {}
 
         // bring all non code emitting features here.
 
@@ -31,7 +34,7 @@ namespace AZ::ShaderCompiler
 
         //! Reflect resource groups layout
         //! @param options  user configuration parsed from command line
-        void DumpSRGLayout(const Options& options) const;
+        void DumpSRGLayout(const Options& options, PreprocessorLineDirectiveFinder* lineFinder) const;
 
         //! Reflect shader options
         //! @param options  user configuration parsed from command line
@@ -71,5 +74,7 @@ namespace AZ::ShaderCompiler
         bool IsNonOverloaded(const IdentifierUID& uid) const;
 
         bool IsPotentialEntryPoint(const IdentifierUID& uid) const;
+
+        std::ostream& m_out;
     };
 }

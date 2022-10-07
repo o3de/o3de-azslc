@@ -31,7 +31,7 @@ namespace AZ::ShaderCompiler
         , public ICodeEmissionMutator
     {
         Texture2DMSto2DCodeMutator() = delete;
-        explicit Texture2DMSto2DCodeMutator(IntermediateRepresentation* ir) : m_ir(ir) {}
+        explicit Texture2DMSto2DCodeMutator(IntermediateRepresentation* ir, CommonTokenStream* stream) : m_ir(ir), m_stream(stream) {}
         virtual ~Texture2DMSto2DCodeMutator() = default;
 
         ///////////////////////////////////////////////////////////////////////
@@ -91,6 +91,8 @@ namespace AZ::ShaderCompiler
 
         //! Cached when RunMiddleEndMutations is called.
         IntermediateRepresentation* m_ir = nullptr;
+
+        CommonTokenStream* m_stream = nullptr;
 
         //! A map of TokenIndex to Mutation. If a TokenIndex is present,
         //! it means it should produce mutated text during emission.

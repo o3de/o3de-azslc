@@ -180,31 +180,27 @@ bool IsInRange(in float val, in float min, in float max)
     return (val >= min && val <= max);
 }
 
-
-// TODO Support the static keyword
-// Can functions *not* be inlined?
-// static 
-uint3 Load3x16BitIndices(uint offsetBytes, ByteAddressBuffer Indices)
+static uint3 Load3x16BitIndices(uint offsetBytes, ByteAddressBuffer Indices)
 {
-    uint3 indices;
+    uint3 indices_;
     const uint dwordAlignedOffset = offsetBytes & ~3;
     const uint2 four16BitIndices = Indices.Load2(dwordAlignedOffset);
 
 
     if (dwordAlignedOffset == offsetBytes)
     {
-        indices.x = four16BitIndices.x & 0xffff;
-        indices.y = (four16BitIndices.x >> 16) & 0xffff;
-        indices.z = four16BitIndices.y & 0xffff;
+        indices_.x = four16BitIndices.x & 0xffff;
+        indices_.y = (four16BitIndices.x >> 16) & 0xffff;
+        indices_.z = four16BitIndices.y & 0xffff;
     }
     else
     {
-        indices.x = (four16BitIndices.x >> 16) & 0xffff;
-        indices.y = four16BitIndices.y & 0xffff;
-        indices.z = (four16BitIndices.y >> 16) & 0xffff;
+        indices_.x = (four16BitIndices.x >> 16) & 0xffff;
+        indices_.y = four16BitIndices.y & 0xffff;
+        indices_.z = (four16BitIndices.y >> 16) & 0xffff;
     }
 
-    return indices;
+    return indices_;
 }
 
 
@@ -323,17 +319,17 @@ bool SolveQuadraticEqn(float a, float b, float c, out float x0, out float x1)
 }
 
 
-float3 CalculateNormalForARaySphereHit(in Ray ray, in float thit, float3 center)
+float3 CalculateNormalForARaySphereHit(in Ray ray, in float thit, float3 a_center)
 {
     float3 hitPosition = ray.origin + thit * ray.direction;
-    return normalize(hitPosition - center);
+    return normalize(hitPosition - a_center);
 }
 
 
 
-bool SolveRaySphereIntersectionEquation(in Ray ray, out float tmin, out float tmax, in float3 center, in float radius)
+bool SolveRaySphereIntersectionEquation(in Ray ray, out float tmin, out float tmax, in float3 a_center, in float radius)
 {
-    float3 L = ray.origin - center;
+    float3 L = ray.origin - a_center;
     float a = dot(ray.direction, ray.direction);
     float b = 2 * dot(ray.direction, L);
     float c = dot(L, L) - radius * radius;
@@ -341,11 +337,11 @@ bool SolveRaySphereIntersectionEquation(in Ray ray, out float tmin, out float tm
 }
 
 
-bool RaySphereIntersectionTest(in Ray ray, out float thit, out float tmax, in ProceduralPrimitiveAttributes attr, in float3 center = float3(0, 0, 0), in float radius = 1)
+bool RaySphereIntersectionTest(in Ray ray, out float thit, out float tmax, in ProceduralPrimitiveAttributes attr, in float3 a_center = float3(0, 0, 0), in float radius = 1)
 {
     float t0, t1;
 
-    if (!SolveRaySphereIntersectionEquation(ray, t0, t1, center, radius)) return false;
+    if (!SolveRaySphereIntersectionEquation(ray, t0, t1, a_center, radius)) return false;
     tmax = t1;
 
     if (t0 < RayTMin())
@@ -353,7 +349,7 @@ bool RaySphereIntersectionTest(in Ray ray, out float thit, out float tmax, in Pr
 
         if (t1 < RayTMin()) return false;
 
-        attr.normal = CalculateNormalForARaySphereHit(ray, t1, center);
+        attr.normal = CalculateNormalForARaySphereHit(ray, t1, a_center);
         if (IsAValidHit(ray, t1, attr.normal))
         {
             thit = t1;
@@ -362,14 +358,14 @@ bool RaySphereIntersectionTest(in Ray ray, out float thit, out float tmax, in Pr
     }
     else
     {
-        attr.normal = CalculateNormalForARaySphereHit(ray, t0, center);
+        attr.normal = CalculateNormalForARaySphereHit(ray, t0, a_center);
         if (IsAValidHit(ray, t0, attr.normal))
         {
             thit = t0;
             return true;
         }
 
-        attr.normal = CalculateNormalForARaySphereHit(ray, t1, center);
+        attr.normal = CalculateNormalForARaySphereHit(ray, t1, a_center);
         if (IsAValidHit(ray, t1, attr.normal))
         {
             thit = t1;
@@ -381,11 +377,11 @@ bool RaySphereIntersectionTest(in Ray ray, out float thit, out float tmax, in Pr
 
 
 
-bool RaySolidSphereIntersectionTest(in Ray ray, out float thit, out float tmax, in float3 center = float3(0, 0, 0), in float radius = 1)
+bool RaySolidSphereIntersectionTest(in Ray ray, out float thit, out float tmax, in float3 a_center = float3(0, 0, 0), in float radius = 1)
 {
     float t0, t1;
 
-    if (!SolveRaySphereIntersectionEquation(ray, t0, t1, center, radius))
+    if (!SolveRaySphereIntersectionEquation(ray, t0, t1, a_center, radius))
         return false;
 
 
@@ -483,7 +479,7 @@ bool RayAABBIntersectionTest(Ray ray, float3 aabb[2], out float thit, out Proced
 
 struct Metaball
 {
-    float3 center;
+    float3 m_center;
     float radius;
 };
 
@@ -492,7 +488,7 @@ struct Metaball
 
 float CalculateMetaballPotential(in float3 position, in Metaball blob, out float distance)
 {
-    distance = length(position - blob.center);
+    distance = length(position - blob.m_center);
 
     if (distance <= blob.radius)
     {
@@ -558,7 +554,7 @@ void InitializeAnimatedMetaballs(out Metaball blobs[3], in float elapsedTime, in
     float tAnimate = CalculateAnimationInterpolant(elapsedTime, cycleDuration);
     for (uint j = 0; j < 3; j++)
     {
-        blobs[j].center = lerp(keyFrameCenters[j][0], keyFrameCenters[j][1], tAnimate);
+        blobs[j].m_center = lerp(keyFrameCenters[j][0], keyFrameCenters[j][1], tAnimate);
         blobs[j].radius = radii[j];
     }
 }
@@ -575,7 +571,7 @@ void FindIntersectingMetaballs(in Ray ray, out float tmin, out float tmax, inout
     for (uint i = 0; i < 3; i++)
     {
         float _thit, _tmax;
-        if (RaySolidSphereIntersectionTest(ray, _thit, _tmax, blobs[i].center, blobs[i].radius))
+        if (RaySolidSphereIntersectionTest(ray, _thit, _tmax, blobs[i].m_center, blobs[i].radius))
         {
             tmin = min(_thit, tmin);
             tmax = max(_tmax, tmax);
@@ -1201,10 +1197,10 @@ void MyClosestHitShader_Triangle(inout RayPayload rayPayload, in BuiltInTriangle
     uint baseIndex = PrimitiveIndex() * triangleIndexStride;
 
 
-    const uint3 indices = Load3x16BitIndices(baseIndex, g_indices);
+    const uint3 indices_ = Load3x16BitIndices(baseIndex, g_indices);
 
 
-    float3 triangleNormal = g_vertices[indices[0]].normal;
+    float3 triangleNormal = g_vertices[indices_[0]].normal;
 
 
 

@@ -10,7 +10,6 @@
 #include "AzslcBackend.h"
 #include "AzslcSymbolTranslation.h"
 #include "AzslcCodeEmissionMutator.h"
-#include "NewLineCounterStream.h"
 
 namespace Json
 {
@@ -27,12 +26,11 @@ namespace AZ::ShaderCompiler
 
     struct CodeEmitter : Backend
     {
-        using Backend::Backend;
-
-        CodeEmitter(IntermediateRepresentation* ir, TokenStream* tokens, std::ostream& out)
+        CodeEmitter(IntermediateRepresentation* ir, TokenStream* tokens, std::ostream& out, PreprocessorLineDirectiveFinder* lineFinder)
             :
-            Backend(ir, tokens, out),
-            m_out(out)
+            Backend(ir, tokens),
+            m_out(out),
+            m_lineFinder(lineFinder)
         {}
 
         //! Create a companion database of mutations on the IR, through which the emitter backend can query symbols scope and names.
@@ -45,18 +43,27 @@ namespace AZ::ShaderCompiler
         void Run(const Options& options);
 
         //! For scope-migration-aware name emission of symbol names
-        string GetTranslatedName(QualifiedNameView mangledName, UsageContext qualification, ssize_t tokenId = NotOverToken) const;
+        string GetTranslatedName(QualifiedNameView mangledName, UsageContext context, ssize_t tokenId = NotOverToken) const;
 
-        string GetTranslatedName(const IdentifierUID& uid, UsageContext qualification, ssize_t tokenId = NotOverToken) const;
+        string GetTranslatedName(const IdentifierUID& uid, UsageContext context, ssize_t tokenId = NotOverToken) const;
 
-        string GetTranslatedName(const TypeRefInfo& typeRef, UsageContext qualification, ssize_t tokenId = NotOverToken) const;
+        string GetTranslatedName(const TypeRefInfo& typeRef, UsageContext context, ssize_t tokenId = NotOverToken) const;
 
-        string GetTranslatedName(const ExtendedTypeInfo& extType, UsageContext qualification, ssize_t tokenId = NotOverToken) const;
+        string GetTranslatedName(const ExtendedTypeInfo& extType, UsageContext context, const Options& options, Modifiers banned = {}, ssize_t tokenId = NotOverToken) const;
 
         //! Write the HLSL formatted shape of an attribute into a stream
-        static void EmitAttribute(const AttributeInfo& attrInfo, std::ostream& outstream);
+        static void EmitAttribute(const AttributeInfo& attrInfo, Streamable& outstream);
 
         void SetCodeMutator(ICodeEmissionMutator* codeMutator) { m_codeMutator = codeMutator; }
+
+        //! It would be nice that the clients don't push text through the passed "out" stream since it's not observed by the line counter;
+        //! use this API in case of custom client text pushing.
+        template< typename Streamable >
+        CodeEmitter& operator << (Streamable&& s)
+        {
+            m_out << s;
+            return *this;
+        }
 
     protected:
 
@@ -74,7 +81,7 @@ namespace AZ::ShaderCompiler
 
         void EmitFunction(const FunctionInfo& funcSub, const IdentifierUID& id, EmitFunctionAs entityConfiguration, const Options& options);
 
-        void EmitTypeAlias(const IdentifierUID& uid, const TypeAliasInfo& aliasInfo) const;
+        void EmitTypeAlias(const IdentifierUID& uid, const TypeAliasInfo& aliasInfo, const Options& options) const;
 
         void EmitEnum(const IdentifierUID& uid, const ClassInfo& classInfo, const Options& options);
 
@@ -91,12 +98,6 @@ namespace AZ::ShaderCompiler
 
         //! Emits get function definitions for root constants
         void EmitGetFunctionsForRootConstants(const ClassInfo& classInfo, string_view bufferName) const;
-
-        // for all sorts of const/static/groupshared/matrixmajor....
-        static string GetTypeModifier(const VarInfo&, const Options& options);
-
-        // for all sorts of inline/static/....
-        static string GetTypeModifier(const FunctionInfo&, const Options& options);
 
         //! That is a list of code elements we possibly want to emit (e.g when we emit a variable declaration)
         MAKE_REFLECTABLE_ENUM_POWER( VarDeclHas,
@@ -130,15 +131,15 @@ namespace AZ::ShaderCompiler
                 }
                 else
                 {
-                    m_out << GetInputModifier(param.m_typeQualifier) << " ";
+                    m_out << GetInputModifier(param.m_typeInfo.m_qualifiers) << " ";
 
-                    m_out << GetTranslatedName(param.m_typeInfo, UsageContext::ReferenceSite);
+                    m_out << GetTranslatedName(param.m_typeInfo, UsageContext::ReferenceSite, options);
 
                     if (!param.m_arrayRankSpecifiers.empty())
                     {
                         for (auto* rankCtx : param.m_arrayRankSpecifiers)
                         {
-                            EmitText(rankCtx->getSourceInterval());
+                            EmitTranspiledTokens(rankCtx->getSourceInterval());
                         }
                     }
 
@@ -149,7 +150,7 @@ namespace AZ::ShaderCompiler
 
                     if (param.m_defaultValueExpression)
                     {
-                        EmitText(param.m_defaultValueExpression->getSourceInterval());
+                        EmitTranspiledTokens(param.m_defaultValueExpression->getSourceInterval());
                     }
                 }
 
@@ -180,10 +181,10 @@ namespace AZ::ShaderCompiler
         void EmitSRG(const SRGInfo& srgInfo, const IdentifierUID& srgId, const Options& options, const RootSigDesc& rootSig);
 
         //! Advanced logic (targeted transpilation transforms included) interval-as-text extractor from source token stream
-        void GetTextInStream(misc::Interval interval, std::ostream& output) const override;
-
         //! Will copy function body original tokens, skipping comments, reformatting if possible, and translating variable declarations when needed, as well as mutating reference names of migrated SRG contents.
-        void EmitText(misc::Interval interval) const;
+        void EmitTranspiledTokens(misc::Interval interval, Streamable& output) const override;
+
+        void EmitTranspiledTokens(misc::Interval interval) const { EmitTranspiledTokens(interval, m_out); }
 
         //! Move a symbol to a different scope. Currently used to strip SRGs of their symbols, so that SRGs are effectively erased.
         void MigrateASTSubTree(const IdentifierUID& azslSymbol, QualifiedNameView landingScope);
@@ -211,7 +212,7 @@ namespace AZ::ShaderCompiler
         SymbolTranslation m_translations;
         unordered_set<IdentifierUID> m_alreadyEmittedFunctionDeclarations;
         unordered_set<IdentifierUID> m_alreadyEmittedFunctionDefinitions;
-        unordered_set<size_t> m_alreadyEmittedPreprocessorLineDirectives;
+        map<size_t, size_t> m_alreadyEmittedPreprocessorLineDirectives;
 
         IdentifierUID m_shaderVariantFallbackUid;
         
@@ -220,19 +221,15 @@ namespace AZ::ShaderCompiler
         ICodeEmissionMutator* m_codeMutator = nullptr;
 
         //! We keep track here of the number of lines that have been emitted.
-        //! The idea is to try to keep the number of lines between the input and the output files
-        //! as close to each other as possible.
-        //! Each symbol has an original line number where it appeared and if the number of output lines
-        //! is less We fill with '\n' (new line) characters until they match.
+        //! Each symbol has an original line number (virtual and physical) where it appeared,
+        //! and emission will also have line directives to remap errors from further tools to the original azsl.
+        //! To avoid spamming the output with line directives, we can keep track of whether a deviation
+        //! has been introduced since the last emitted line directive and the desired virtual line of the currently emitted code construct.
         mutable NewLineCounterStream m_out;
-        void EmitEmptyLinesToLineNumber(size_t originalLineNumber) const;
 
-        //! This template takes over the previous implementation of
-        //! void GetTextInStream(misc::Interval interval, std::ostream& output) const override;
-        //! The idea is that by using the template We only have to write the same code once
-        //! whether We are using a regular std::ostream or an instance of NewLineCounterStream.
-        template <class StreamLike>
-        void GetTextInStreamInternal(misc::Interval interval, StreamLike& output, bool emitNewLines) const;
+        PreprocessorLineDirectiveFinder* m_lineFinder;
+
+
 
         //! This is a readability function for class emission code. Serves for HLSL declarator of classes
         string EmitInheritanceList(const ClassInfo& clInfo);

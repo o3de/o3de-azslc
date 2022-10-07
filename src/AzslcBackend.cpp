@@ -69,7 +69,7 @@ namespace AZ::ShaderCompiler
     // Define emission for sampler states
     // Reference: https://github.com/Microsoft/DirectXShaderCompiler/blob/master/tools/clang/unittests/HLSL/FunctionTest.cpp
 
-    std::ostream &operator << (std::ostream &out, const SamplerStateDesc::AddressMode& addressMode)
+    Streamable& operator << (Streamable& out, const SamplerStateDesc::AddressMode& addressMode)
     {
         return out << ((addressMode == SamplerStateDesc::AddressMode::Wrap)   ? "TEXTURE_ADDRESS_WRAP"
                      : (addressMode == SamplerStateDesc::AddressMode::Clamp)  ? "TEXTURE_ADDRESS_CLAMP"
@@ -78,7 +78,7 @@ namespace AZ::ShaderCompiler
                      :                                                          "TEXTURE_ADDRESS_MIRROR_ONCE");
     }
 
-    std::ostream &operator << (std::ostream &out, const SamplerStateDesc::ComparisonFunc& compFunc)
+    Streamable& operator << (Streamable& out, const SamplerStateDesc::ComparisonFunc& compFunc)
     {
         return out << ((compFunc == SamplerStateDesc::ComparisonFunc::Never)        ? "COMPARISON_NEVER"
                      : (compFunc == SamplerStateDesc::ComparisonFunc::Less)         ? "COMPARISON_LESS"
@@ -90,14 +90,14 @@ namespace AZ::ShaderCompiler
                      :                                                                "COMPARISON_ALWAYS");
     }
 
-    std::ostream &operator << (std::ostream &out, const SamplerStateDesc::BorderColor& borderColor)
+    Streamable& operator << (Streamable& out, const SamplerStateDesc::BorderColor& borderColor)
     {
         return out << ((borderColor == SamplerStateDesc::BorderColor::OpaqueBlack) ? "STATIC_BORDER_COLOR_OPAQUE_BLACK"
                      : (borderColor == SamplerStateDesc::BorderColor::OpaqueWhite) ? "STATIC_BORDER_COLOR_OPAQUE_WHITE"
                      :                                                               "STATIC_BORDER_COLOR_TRANSPARENT_BLACK");
     }
 
-    std::ostream &operator << (std::ostream &out, const SamplerStateDesc& samplerDesc)
+    Streamable& operator << (Streamable& out, const SamplerStateDesc& samplerDesc)
     {
         // Resolving the filter is the hardest part of the emission
         out << ", filter = FILTER_";
@@ -241,7 +241,7 @@ namespace AZ::ShaderCompiler
         return pair;
     }
 
-    std::ostream &operator << (std::ostream &out, const SamplerStateDesc::ReductionType& redcType)
+    Streamable& operator << (Streamable& out, const SamplerStateDesc::ReductionType& redcType)
     {
         return out << ((redcType == SamplerStateDesc::ReductionType::Comparison)  ? "Comparison"
                      : (redcType == SamplerStateDesc::ReductionType::Filter)      ? "Filter"
@@ -280,7 +280,7 @@ namespace AZ::ShaderCompiler
         return token;
     }
 
-    void Backend::GetTextInStream(misc::Interval interval, std::ostream& output) const
+    void Backend::EmitTranspiledTokens(misc::Interval interval, Streamable& output) const
     {
         ssize_t ii = interval.a;
         while (ii <= interval.b)
@@ -291,12 +291,13 @@ namespace AZ::ShaderCompiler
         }
     }
 
-    string Backend::GetTextAsString(misc::Interval interval) const
+    string Backend::GetTranspiledTokens(misc::Interval interval) const
     {
         static std::stringstream ss;
         ss.str({});
         ss.clear();
-        GetTextInStream(interval, ss);
+        MakeOStreamStreamable soss(ss);
+        EmitTranspiledTokens(interval, soss);
         return ss.str();
     }
 
@@ -310,7 +311,7 @@ namespace AZ::ShaderCompiler
         }
 
         auto* initClause = varInfo->m_declNode->variableInitializer()->standardVariableInitializer();
-        return RemoveWhitespaces(GetTextAsString(initClause->getSourceInterval()));
+        return RemoveWhitespaces(GetTranspiledTokens(initClause->getSourceInterval()));
     }
 
     void Backend::AppendOptionRange(Json::Value& varOption, const IdentifierUID& varUid, const VarInfo* varInfo, const Options& options) const
@@ -355,7 +356,7 @@ namespace AZ::ShaderCompiler
                 if (!rangeAttribute)
                 {
                     throw AzslcEmitterException(EMITTER_INTEGER_HAS_NO_RANGE,
-                                                none, none, ConcatString("Option (", varUid.m_name, ") must specify a range with a minimum and maximum values"));
+                                                none, none, ConcatString("Option (", varUid.m_name, ") must decorate declaration with an attribute [range(minimum value, maximum value)]"));
                 }
 
                 if (rangeAttribute->m_argList.size() != 2)
@@ -693,7 +694,8 @@ namespace AZ::ShaderCompiler
         return rootSig;
     }
 
-    const char* Backend::GetInputModifier(TypeQualifier typeQualifier)
+    //static
+    const char* Backend::GetInputModifier(const TypeQualifiers& typeQualifier)
     {
         const bool in = TypeHasStorageFlag(typeQualifier, StorageFlag::In);
         const bool out = TypeHasStorageFlag(typeQualifier, StorageFlag::Out);
@@ -703,17 +705,60 @@ namespace AZ::ShaderCompiler
                            : (out ? "out" : ""));
     }
 
-    string Backend::GetExtendedTypeInfo(const ExtendedTypeInfo& extTypeInfo, std::function<string(const TypeRefInfo&)> translator) const
+    // static
+    string Backend::GetTypeModifier(const ExtendedTypeInfo& typeInfo, const Options& options, Modifiers bannedFlags /*= {}*/)
     {
-        string hlslString = "";
+        using namespace std::string_literals;
+        string modifiers;
+        bool isMatrix = typeInfo.m_coreType.m_arithmeticInfo.IsMatrix();
+        if (typeInfo.CheckHasStorageFlag(StorageFlag::ColumnMajor) && !(bannedFlags & StorageFlag::ColumnMajor))
+        {
+            modifiers = "column_major";
+        }
+        else if (typeInfo.CheckHasStorageFlag(StorageFlag::RowMajor) && !(bannedFlags & StorageFlag::RowMajor))
+        {
+            modifiers = "row_major";
+        }
+        else if (options.m_forceEmitMajor && isMatrix)
+        {
+            modifiers = options.m_forceMatrixRowMajor ? "row_major" : "column_major";
+        }
 
+        auto maybeSpace = [&modifiers](){ return modifiers.empty() ? "" : " "; };
+        using SF = StorageFlag;
+        static const StorageFlag toReEmit[] = {SF::Static, SF::Extern, SF::Inline,
+            SF::Const, SF::Volatile, SF::Precise, SF::Groupshared,
+            SF::Uniform, SF::Globallycoherent, SF::Unsigned};
+        for (int i = 0; i < std::size(toReEmit); ++i)
+        {
+            if (typeInfo.CheckHasStorageFlag(toReEmit[i]) && !(bannedFlags & toReEmit[i]))
+            {
+                modifiers += maybeSpace() + ToLower(StorageFlag::ToStr(toReEmit[i]));
+            }
+        }
+
+        if (typeInfo.CheckHasStorageFlag(StorageFlag::Other) && !(bannedFlags & StorageFlag::Other))
+        {
+            for (const auto& flag : typeInfo.m_qualifiers.m_others)
+            {
+                modifiers += " " + flag;
+            }
+        }
+
+        return modifiers;
+    }
+
+    string Backend::GetExtendedTypeInfo(const ExtendedTypeInfo& extTypeInfo, const Options& options, Modifiers banned, std::function<string(const TypeRefInfo&)> translator) const
+    {
+        string hlslString = GetTypeModifier(extTypeInfo, options, banned);
+        hlslString += hlslString.empty() ? "" : " ";
         if (extTypeInfo.m_coreType.m_typeClass == TypeClass::Alias)
         {
-            hlslString = GetExtendedTypeInfo(m_ir->GetSymbolSubAs<TypeAliasInfo>(extTypeInfo.m_coreType.m_typeId.GetName())->m_canonicalType, translator);
+            hlslString += GetExtendedTypeInfo(m_ir->GetSymbolSubAs<TypeAliasInfo>(extTypeInfo.m_coreType.m_typeId.GetName())->m_canonicalType, options, banned, translator);
         }
         else if (HasGenericParameter(extTypeInfo.m_coreType.m_typeClass) || !extTypeInfo.m_genericParameter.IsEmpty())
         {
-            hlslString = translator(extTypeInfo.m_coreType)
+            hlslString += translator(extTypeInfo.m_coreType)
                 + "<" + translator(extTypeInfo.m_genericParameter);
             if (extTypeInfo.m_genericDims.IsArray())
             {
@@ -723,7 +768,7 @@ namespace AZ::ShaderCompiler
         }
         else
         {
-            hlslString = translator(extTypeInfo.m_coreType);
+            hlslString += translator(extTypeInfo.m_coreType);
         }
 
         return hlslString;
@@ -751,7 +796,7 @@ namespace AZ::ShaderCompiler
                 }
 
                 // GetTotalSize of each member of the structure
-                uint32_t size = varInfo.m_typeInfoExt.GetTotalSize(options.m_packDataBuffers, options.m_emitRowMajor);
+                uint32_t size = varInfo.m_typeInfoExt.GetTotalSize(options.m_packDataBuffers, options.m_forceMatrixRowMajor);
 
                 numberOf32bitRootConstants += (size / 4);
             }

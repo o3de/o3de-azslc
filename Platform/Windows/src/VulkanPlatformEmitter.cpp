@@ -57,7 +57,8 @@ namespace AZ::ShaderCompiler
             stream << "#ifdef AZ_USE_SUBPASSINPUT\n";
             inputAttachmentIndexAttribute->m_namespace = "vk";
             inputAttachmentIndexAttribute->m_category = AttributeCategory::Sequence;
-            CodeEmitter::EmitAttribute(*inputAttachmentIndexAttribute, stream);
+            MakeOStreamStreamable soss(stream);
+            CodeEmitter::EmitAttribute(*inputAttachmentIndexAttribute, soss);
             stream << "[[vk::binding(" << bindInfoRegisterIndex;
             if (stringifiedLogicalSpace)
             {

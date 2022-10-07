@@ -39,7 +39,6 @@ namespace AZ::ShaderCompiler
     extern Endl             azEndl;
 
     using AstType                       = azslParser::TypeContext;                  // all usertypes and predefined, but cannot be Void
-    using AstFuncType                   = azslParser::FunctionTypeContext;          // all (can be Void)
     using AstTypeofNode                 = azslParser::TypeofExpressionContext;
     using AstPredefinedTypeNode         = azslParser::PredefinedTypeContext;
     using AstClassDeclNode              = azslParser::ClassDefinitionContext;
@@ -87,7 +86,7 @@ namespace AZ::ShaderCompiler
     inline string DiagLine(size_t line)
     {
         using namespace std::string_literals;
-        return AzslcException::s_currentSourceFileName + "("s + std::to_string(line) + "):";
+        return AzslcException::s_lineFinder->GetVirtualFileName(line) + "("s + std::to_string(line) + "):";
     }
 
     inline string DiagLine(optional<int> line)
@@ -115,7 +114,8 @@ namespace AZ::ShaderCompiler
     inline void PrintWarning(DiagnosticStream& stream, Warn::EnumType level, optional<size_t> lineNumber, optional<size_t> column, Types&&... messageBits)
     {
         stream << PushLevel{} << level
-               << AzslcException::MakeErrorMessage(lineNumber ? ToString(*lineNumber) : "", column ? ToString(*column) : "",
+               << AzslcException::MakeErrorMessage(lineNumber ? AzslcException::s_lineFinder->GetVirtualFileName(*lineNumber) : "",
+                                                   lineNumber ? ToString(AzslcException::s_lineFinder->GetVirtualLineNumber(*lineNumber)) : "", column ? ToString(*column) : "",
                                                    "", false, "", ConcatString(messageBits..., "\n"))
                << PopLevel{};
     }
@@ -134,24 +134,9 @@ namespace AZ::ShaderCompiler
         PrintWarning(warningCout, level, token->getLine(), token->getCharPositionInLine() + 1, messageBits...);
     }
 
-    inline bool WasParsedAsPredefinedType(AstType* ctx)
-    {
-        return ctx->predefinedType();
-    }
-
-    inline bool WasParsedAsPredefinedType(AstFuncType* ctx)
-    {
-        return ctx->Void() || WasParsedAsPredefinedType(ctx->type());
-    }
-
     inline AstTypeofNode* ExtractTypeofAstNode(AstType* ctx)
     {
         return ctx->typeofExpression();
-    }
-
-    inline AstTypeofNode* ExtractTypeofAstNode(AstFuncType* ctx)
-    {
-        return ctx->type() ? ExtractTypeofAstNode(ctx->type()) : nullptr;
     }
 
     template<typename AnyOther>
@@ -273,9 +258,35 @@ namespace AZ::ShaderCompiler
     }
 
     MAKE_REFLECTABLE_ENUM_POWER (StorageFlag,
-        Static, Const, Extern, Shared, Groupshared, Precise, Uniform, Volatile, RowMajor, ColumnMajor, In, Out, InOut, Inline, Option, Enumerator, Rootconstant, Unknown
+        Static, Const, Unsigned, RowMajor, ColumnMajor, Extern, Inline, Rootconstant, Option, Precise, Groupshared, Uniform, Volatile, Globallycoherent, In, Out, InOut, Enumerator, Other
     );
-    using TypeQualifier = Flag<StorageFlag>;
+
+    inline Streamable& operator << (Streamable& out, StorageFlag::EnumType sf)
+    {
+        return out << ToLower(StorageFlag::ToStr(sf));
+    }
+
+    using Modifiers = Flag<StorageFlag>;
+    struct TypeQualifiers
+    {
+        Modifiers      m_flag;
+        vector<string> m_others;    // For qualifiers we didn't add to the enum
+
+        string GetDisplayName() const
+        {
+            vector<StorageFlag> bag;
+            auto end = std::copy_if(StorageFlag::Enumerate{}.begin(), StorageFlag::Enumerate{}.end(), std::back_inserter(bag),
+                                    [&](auto sf) -> bool { return (m_flag & sf) && (sf & ~StorageFlag::Other); });
+            // Join will call operator<< on StorageFlag::EnumType for stringification
+            return string{Trim(Join(bag.begin(), bag.end(), " ") + " " + Join(m_others.begin(), m_others.end(), " "))};
+        }
+
+        void OrMerge(const TypeQualifiers& src)
+        {
+            m_flag |= src.m_flag;
+            StableMerge(m_others, src.m_others);  // stable is key to not disturb emission tests accross platforms that could hash differently if using unordered_sets.
+        }
+    };
 
     struct ArrayDimensions
     {
@@ -746,23 +757,34 @@ namespace AZ::ShaderCompiler
 
         inline uint32_t PackedSizeof(int indexInAzslPredefined_Scalar)
         {
-            // the array is generated but it's expected to look like: {"bool", "double", "dword", "float", "half", "int", "int32_t", "int64_t", "uint", "uint32_t", "uint64_t", "unsigned int"}
+            // the array is generated but it's expected to look like:
+            // {"bool", "double", "dword", "float", "half", "int", "int16_t", "int32_t", "int64_t", "uint", "uint16_t", "uint32_t", "uint64_t"}
             // just update that code if it changes one day, the assert will pop.
-            if (indexInAzslPredefined_Scalar == 1 || indexInAzslPredefined_Scalar == 7 || indexInAzslPredefined_Scalar == 10)
+            if (indexInAzslPredefined_Scalar == 1 || indexInAzslPredefined_Scalar == 8 || indexInAzslPredefined_Scalar == 12)
             {
                 assert(string_view{"double"} == AZ::ShaderCompiler::Predefined::Scalar[1]);
-				assert(string_view{"int64_t"} == AZ::ShaderCompiler::Predefined::Scalar[7]);
-				assert(string_view{"uint64_t"} == AZ::ShaderCompiler::Predefined::Scalar[10]);
+				assert(string_view{"int64_t"} == AZ::ShaderCompiler::Predefined::Scalar[8]);
+				assert(string_view{"uint64_t"} == AZ::ShaderCompiler::Predefined::Scalar[12]);
                 // Shader packing reference:
                 // https://docs.microsoft.com/en-us/windows/desktop/direct3dhlsl/dx-graphics-hlsl-packing-rules
                 return 8;
+            }
+            else if (indexInAzslPredefined_Scalar == 4 || indexInAzslPredefined_Scalar == 6 || indexInAzslPredefined_Scalar == 10)
+            {
+                // https://github.com/microsoft/DirectXShaderCompiler/wiki/Buffer-Packing
+                //   extract: "with -enable-16bit-types: HLSL half type maps to native 16-bit float16_t type"
+                //            "native 16-bit types have storage size of 16-bits (as expected)"
+                assert(string_view{"half"} == AZ::ShaderCompiler::Predefined::Scalar[4]);
+                assert(string_view{"int16_t"} == AZ::ShaderCompiler::Predefined::Scalar[6]);
+                assert(string_view{"uint16_t"} == AZ::ShaderCompiler::Predefined::Scalar[10]);
+                return 2;
             }
             else if (indexInAzslPredefined_Scalar < 0)
             {
                 return 0;  // non-predefined case, surely meaning UDT.
             }
             assert(indexInAzslPredefined_Scalar < AZ::ShaderCompiler::Predefined::Scalar.size()); // #craefulgang.
-            return 4;
+            return 4;  // bool is 32 too.
         }
     };
 
@@ -1034,7 +1056,7 @@ namespace AZ::ShaderCompiler
         return ExtractSpecificParent<AstVarInitializer>(ctx);
     }
 
-    inline azslParser::FunctionParamContext* ParamContextOverVariableDeclarator(AstUnnamedVarDecl* ctx)
+    inline azslParser::FunctionParamContext* ParamContextOverUnnamedVariableDeclarator(AstUnnamedVarDecl* ctx)
     {
         return As<azslParser::FunctionParamContext*>(ctx->parent);
     }
@@ -1044,9 +1066,9 @@ namespace AZ::ShaderCompiler
         return As<azslParser::VariableDeclarationContext*>(ctx->parent->parent);
     }
 
-    inline azslParser::TypeContext* ExtractTypeFromVariableDeclarator(AstUnnamedVarDecl* ctx, azslParser::FunctionParamContext** funcParamContextOut = nullptr)
+    inline azslParser::TypeContext* ExtractTypeFromUnnamedVariableDeclarator(AstUnnamedVarDecl* ctx, azslParser::FunctionParamContext** funcParamContextOut = nullptr)
     {
-        auto* paramCtx = ParamContextOverVariableDeclarator(ctx);
+        auto* paramCtx = ParamContextOverUnnamedVariableDeclarator(ctx);
         if (paramCtx != nullptr)
         {
             if (funcParamContextOut)
@@ -1087,86 +1109,44 @@ namespace AZ::ShaderCompiler
 
     inline bool TypeIsSamplerComparisonState(AstUnnamedVarDecl* ctx)
     {
-        auto* typeCtx = ExtractTypeFromVariableDeclarator(ctx);
+        auto* typeCtx = ExtractTypeFromUnnamedVariableDeclarator(ctx);
         return typeCtx->predefinedType() &&
                typeCtx->predefinedType()->samplerStatePredefinedType() &&
                typeCtx->predefinedType()->samplerStatePredefinedType()->SamplerComparisonState();
     }
 
-
-    inline azslParser::StorageFlagsContext* ExtractStorageFlagsFromVariableDeclarator(AstUnnamedVarDecl* ctx)
+    inline azslParser::StorageFlagsContext* ExtractStorageFlagsFromUnnamedVariableDeclarator(AstUnnamedVarDecl* ctx)
     {
-        auto* paramCtx = ParamContextOverVariableDeclarator(ctx);
-        if (paramCtx != nullptr)
-        {
-            return paramCtx->storageFlags();
-        }
-        auto* varDeclCtx = VarDeclContextOverVariableDeclarator(As<AstNamedVarDecl*>(ctx->parent));
-        if (varDeclCtx != nullptr)
-        {
-            return varDeclCtx->storageFlags();
-        }
-        return nullptr;
-    }
-
-    inline bool IsFlag(azslParser::StorageFlagContext* ctx, StorageFlag flag)
-    {
-        switch (flag)
-        {
-        case StorageFlag::Const: return ctx->Const();
-        case StorageFlag::Extern: return ctx->Extern();
-        case StorageFlag::Groupshared: return ctx->Groupshared();
-        case StorageFlag::Precise: return ctx->Precise();
-        case StorageFlag::Shared: return ctx->Shared();
-        case StorageFlag::Static: return ctx->Static();
-        case StorageFlag::Uniform: return ctx->Uniform();
-        case StorageFlag::Volatile: return ctx->Volatile();
-        case StorageFlag::RowMajor: return ctx->RowMajor();
-        case StorageFlag::ColumnMajor: return ctx->ColumnMajor();
-        case StorageFlag::In: return ctx->In();
-        case StorageFlag::Out: return ctx->Out();
-        case StorageFlag::InOut: return ctx->Inout();
-        case StorageFlag::Inline: return ctx->Inline();
-        case StorageFlag::Rootconstant: return ctx->Rootconstant();
-        case StorageFlag::Option: return ctx->Option();
-        case StorageFlag::Enumerator: return false; // Not a data-driven flag
-        case StorageFlag::Unknown: return false; // Not a data-driven flag
-        default: break;
-        }
-        return false;
+        return ExtractTypeFromUnnamedVariableDeclarator(ctx)->storageFlags();
     }
 
     inline StorageFlag AsFlag(azslParser::StorageFlagContext* ctx)
     {
-        return ctx->Const()        ? StorageFlag::Const
-             : ctx->Extern()       ? StorageFlag::Extern
-             : ctx->Groupshared()  ? StorageFlag::Groupshared
-             : ctx->Precise()      ? StorageFlag::Precise
-             : ctx->Shared()       ? StorageFlag::Shared
-             : ctx->Static()       ? StorageFlag::Static
-             : ctx->Uniform()      ? StorageFlag::Uniform
-             : ctx->Volatile()     ? StorageFlag::Volatile
-             : ctx->RowMajor()     ? StorageFlag::RowMajor
-             : ctx->ColumnMajor()  ? StorageFlag::ColumnMajor
-             : ctx->In()           ? StorageFlag::In
-             : ctx->Out()          ? StorageFlag::Out
-             : ctx->Inout()        ? StorageFlag::InOut
-             : ctx->Inline()       ? StorageFlag::Inline
-             : ctx->Option()       ? StorageFlag::Option
-             : ctx->Rootconstant() ? StorageFlag::Rootconstant
+        return ctx->Const()            ? StorageFlag::Const
+             : ctx->Extern()           ? StorageFlag::Extern
+             : ctx->Groupshared()      ? StorageFlag::Groupshared
+             : ctx->Precise()          ? StorageFlag::Precise
+             : ctx->Static()           ? StorageFlag::Static
+             : ctx->Uniform()          ? StorageFlag::Uniform
+             : ctx->Volatile()         ? StorageFlag::Volatile
+             : ctx->Globallycoherent() ? StorageFlag::Globallycoherent
+             : ctx->RowMajor()         ? StorageFlag::RowMajor
+             : ctx->ColumnMajor()      ? StorageFlag::ColumnMajor
+             : ctx->In()               ? StorageFlag::In
+             : ctx->Out()              ? StorageFlag::Out
+             : ctx->Inout()            ? StorageFlag::InOut
+             : ctx->Inline()           ? StorageFlag::Inline
+             : ctx->Option()           ? StorageFlag::Option
+             : ctx->Rootconstant()     ? StorageFlag::Rootconstant
+             : ctx->Unsigned()         ? StorageFlag::Unsigned
+            // Everything else can still be stored, but won't be checked in any special way:
+            // linear, centroid, noninterpolation, noperspective, sample, point, line, triangle, lineadk, triangleadj, indices, vertices, etc...
+             : StorageFlag::Other;
+    }
 
-            // Everything unknown can still be stored, but won't be checked in any special way
-             : ctx->Linear()          ? StorageFlag::Unknown
-             : ctx->Centroid()        ? StorageFlag::Unknown
-             : ctx->Nointerpolation() ? StorageFlag::Unknown
-             : ctx->Noperspective()   ? StorageFlag::Unknown
-             : ctx->Sample()          ? StorageFlag::Unknown
-             : ctx->Point()           ? StorageFlag::Unknown
-             : ctx->Line_()           ? StorageFlag::Unknown
-             : ctx->Triangle()        ? StorageFlag::Unknown
-             : ctx->LineAdj()         ? StorageFlag::Unknown
-             : ctx->TriangleAdj()     ? StorageFlag::Unknown
-             :                          StorageFlag::Unknown;
+    inline bool IsFlag(azslParser::StorageFlagContext* ctx, StorageFlag flag)
+    {
+        return AsFlag(ctx) == flag;
     }
 
     // Either just a string, or string + its original source node.
@@ -1301,27 +1281,17 @@ namespace AZ::ShaderCompiler
         {
             return ExtractComposedTypeNamesFromAstContext(ctx->userDefinedType(), genericDims);
         }
-        else if (WasParsedAsPredefinedType(ctx))
+        else if (ctx->predefinedType())
         {
             return ExtractComposedTypeNamesFromAstContext(ctx->predefinedType(), genericDims);
         }
-        // this could be a typeof, let's return the node for further resolve !
-        return {ExtractedTypeExt{UnqualifiedName{ctx->getText()}, ctx}};
-    }
-
-    //! from function type context (highest type level)
-    inline ExtractedComposedType ExtractComposedTypeNamesFromAstContext(AstFuncType* ctx)
-    {
-        if (ctx->type())
-        {
-            return ExtractComposedTypeNamesFromAstContext(ctx->type());
-        }
         else if (ctx->Void())
         {
-            assert(string_view{AZ::ShaderCompiler::Predefined::Void[0]} == ctx->getText());
-            return {UnqualifiedName{ctx->getText()}}; // "void"
+            assert(string_view{AZ::ShaderCompiler::Predefined::Void[0]} == ctx->Void()->getText());
+            return {UnqualifiedName{ctx->Void()->getText()}}; // "void"
         }
-        throw std::logic_error((DiagLine(ctx->start) + " internal error: can't extract name on unsupported expression"));
+        // this could be a typeof, let's return the node for further resolve!
+        return {ExtractedTypeExt{UnqualifiedName{ctx->getText()}, ctx}};
     }
 
     //! Parse an HLSL semantic from a context into (semantic name, semantic index, is system value)
