@@ -322,7 +322,7 @@ namespace AZ::ShaderCompiler
         {
             vector<string> asStrs;
             TransformCopy(m_dimensions, asStrs,
-                          [](int d) -> string { return d == Unknown ? "?" : d == Unbounded ? "" : std::to_string(d); });
+                          [](int d) -> string { return d == Unknown ? "<unrecognized-expr>" : d == Unbounded ? "" : std::to_string(d); });
             return asStrs.empty() ? "" : prefix + Join(asStrs.begin(), asStrs.end(), separator) + suffix;
         }
 
@@ -369,7 +369,7 @@ namespace AZ::ShaderCompiler
         //! a[][3] (or a[var][3]) will be a vector of {unknown,3}
         //!  (note: if `var` is a statically foldable const expression, then it has a chance to resolved to its initial value)
         //! empty {} means "not an array"
-        vector<unsigned int> m_dimensions;
+        vector<int> m_dimensions;
     };
 
     //! OutputFormat

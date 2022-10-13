@@ -233,5 +233,8 @@ namespace AZ::ShaderCompiler
 
         //! This is a readability function for class emission code. Serves for HLSL declarator of classes
         string EmitInheritanceList(const ClassInfo& clInfo);
+
+        //! Given an SRG parameter, determines the space it belongs to based on the platform
+        int ResolveBindingSpace(const RootSigDesc::SrgParamDesc& bindInfo, BindingPair::Set bindSet) const;
     };
 }

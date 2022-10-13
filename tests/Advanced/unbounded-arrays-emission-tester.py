@@ -23,9 +23,8 @@ resultFailed = 0
 def doTests(compiler, silent, azdxcpath):
     """
     This test validates:
-        1. Compilation fails if an SRG has multiple unbounded arrays when --unique-idx is used.
-        2. unbounded-arrays-unique-idx-should-pass.azsl with --unique-idx used to fail in v1.7.19, should pass now.
-        2. unbounded-arrays-unique-idx-should-pass-2srgs.azsl with --unique-idx should pass too, because each SRG gets a unique register space.
+        1. unbounded-arrays-unique-idx-should-pass.azsl with --unique-idx used to fail in v1.7.19, should pass now.
+        2. unbounded-arrays-unique-idx-should-pass-2srgs.azsl with --unique-idx should pass too, because each unbounded array is in a unique register space.
     """
     global result
     global resultFailed
@@ -34,30 +33,15 @@ def doTests(compiler, silent, azdxcpath):
     # You can get it once doTests() is called, but not during initialization of the module,
     #  because at that time it will still be set to the working directory of the calling script
     workDir = os.getcwd().replace('\\', '/')
-            
-    # expect to fail with --unique-idx
-    sampleFilePath = os.path.abspath(os.path.join(workDir, "../Semantic/unbounded-arrays1.azsl"))
-    stderr, failed = testfuncs.buildAndGetError(sampleFilePath, compiler, silent, ["--unique-idx"])
-    if failed:
-        result += 1
-        if not silent:
-            stderr = stderr.decode('utf-8')
-            print (fg.CYAN + style.BRIGHT +
-               "unbounded-arrays-emission-tester.py: "+
-               "Good, got expected error when using --unique-idx: " + stderr + style.RESET_ALL)
-    else:
-        resultFailed += 1
-        if not silent:
-            print(style.BRIGHT + fg.RED + "failed unbounded-arrays-emission-tester.py: was expecting error when using --unique-idx." + style.RESET_ALL)
-    
+
     # expect success when using --unique-idx
     sampleFilePath = os.path.abspath(os.path.join(workDir, "../Semantic/unbounded-arrays-unique-idx-should-pass.azsl"))
-    if testhelper.verifyEmissionPatterns(sampleFilePath, compiler, silent, ["--unique-idx",]) : result += 1
+    if testhelper.verifyEmissionPatterns(sampleFilePath, compiler, silent, ["--unique-idx","--namespace=dx"]) : result += 1
     else: resultFailed += 1
     
     # expect success when using --unique-idx
     sampleFilePath = os.path.abspath(os.path.join(workDir, "../Semantic/unbounded-arrays-unique-idx-should-pass-2srgs.azsl"))
-    if testhelper.verifyEmissionPatterns(sampleFilePath, compiler, silent, ["--unique-idx",]) : result += 1
+    if testhelper.verifyEmissionPatterns(sampleFilePath, compiler, silent, ["--unique-idx","--namespace=dx"]) : result += 1
     else: resultFailed += 1
 
     testhelper.printFailedTestList(silent)

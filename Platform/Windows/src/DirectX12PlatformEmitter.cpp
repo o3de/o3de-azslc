@@ -126,5 +126,4 @@ namespace AZ::ShaderCompiler
 
         return Decorate("#define sig ", Join(rootAttrList, ", \" \\\n"), "\"\n\n");
     }
-    
 }

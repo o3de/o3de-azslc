@@ -192,9 +192,9 @@ namespace AZ::ShaderCompiler
     }
 
     void PadToAttributeMutator::InsertScopePaddings(ClassInfo* classInfo,
-                                                  const IdentifierUID& scopeUid,
-                                                  const MapOfVarInfoUidToPadding& varInfoUidToPadMap,
-                                                  const MiddleEndConfiguration& middleEndconfigration)
+                                                    const IdentifierUID& scopeUid,
+                                                    const MapOfVarInfoUidToPadding& varInfoUidToPadMap,
+                                                    const MiddleEndConfiguration& middleEndconfigration)
     {
         uint32_t nextMemberOffset = 0;
         auto& memberFields = classInfo->GetMemberFields();
@@ -410,7 +410,7 @@ namespace AZ::ShaderCompiler
 
 
     size_t PadToAttributeMutator::InsertPaddingVariables(ClassInfo* classInfo, const IdentifierUID& scopeUid,
-                                                      size_t insertionIndex, uint32_t startingOffset, uint32_t numBytesToAdd)
+                                                         size_t insertionIndex, uint32_t startingOffset, uint32_t numBytesToAdd)
     {
         auto getFloatTypeNameOfSize = +[](uint32_t sizeInBytes) -> const char *
         {
@@ -421,7 +421,7 @@ namespace AZ::ShaderCompiler
             return floatNames[idx];
         };
 
-        auto createVariableInSymbolTable = [&](QualifiedNameView parentName, const string& typeName, UnqualifiedName varName, uint32_t itemsCount = 0) -> IdentifierUID
+        auto createVariableInSymbolTable = [&](QualifiedNameView parentName, const string& typeName, UnqualifiedName varName, int itemsCount = 0) -> IdentifierUID
         {
             QualifiedName dummySymbolFieldName{ JoinPath(parentName, varName) };
 

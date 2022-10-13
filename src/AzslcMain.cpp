@@ -23,7 +23,7 @@ namespace StdFs = std::filesystem;
 // For large features or milestones. Minor version allows for breaking changes. Existing tests can change.
 #define AZSLC_MINOR "8"   // last change: introduction of class inheritance
 // For small features or bug fixes. They cannot introduce breaking changes. Existing tests shouldn't change.
-#define AZSLC_REVISION "8"  // last change: enhanced grammar compliance with HLSL & robust line directive support & refactor of type qualifiler into typeinfoext
+#define AZSLC_REVISION "9"  // last change: resource unbounded arrays support
 
 
 namespace AZ::ShaderCompiler
@@ -328,12 +328,12 @@ int main(int argc, const char* argv[])
 
     bool uniqueIdx = false;
     cli.add_flag("--unique-idx", uniqueIdx, "Use unique indices for all registers. e.g. b0, t0, u0, s0 becomes b0, t1, u2, s3. Use on platforms that don't differentiate registers by resource type.");
-
+    
     bool cbBody = false;
     cli.add_flag("--cb-body", cbBody, "Emit ConstantBuffer body rather than using <T>.");
 
     bool rootSig = false;
-    cli.add_flag("--root-sig", rootSig, "Emit RootSignature for parameter binding in the shader.");
+    cli.add_flag("--root-sig", rootSig, "Emit RootSignature for parameter binding in the shader. --namespace must also be used to select a specific API.");
 
     int rootConst = 0;
     auto rootConstOpt = cli.add_option("--root-const", rootConst, "Maximum size in bytes of the root constants buffer.");
@@ -357,7 +357,9 @@ int main(int argc, const char* argv[])
     cli.add_flag("--pack-opengl", packOpenGL, "Pack buffers using strict OpenGL packing rules (Vector-strict std140 for uniforms and std430 for storage buffers).");
 
     std::vector<std::string> namespaces;
-    cli.add_option("--namespace", namespaces, "Activate an attribute namespace. May be used multiple times to activate multiple namespaces.");
+    cli.add_option("--namespace", namespaces, 
+        "Activate an attribute namespace. May be used multiple times to activate multiple namespaces. "
+        "Activating a namespace may also activate corresponding API-specific features, like dx for DirectX 12, vk for Vulkan, and mt for Metal.");
 
     bool ia = false;
     cli.add_flag("--ia", ia, "Output a list of vs entries with their Input Assembler layouts *and* a list of CS entries and their numthreads.");
@@ -484,6 +486,11 @@ int main(int argc, const char* argv[])
             throw std::runtime_error("input file could not be opened");
         }
 
+        if (rootSig && namespaces.empty())
+        {
+            throw std::runtime_error("--root-sig requested but no API was selected. Use a --namespace option as well.");
+        }
+
         const string inputFileName = useStdin ? "" : inputFile;
         PreprocessorLineDirectiveFinder lineFinder;
         lineFinder.m_physicalSourceFileName = useStdin ? "stdin" : inputFile;
@@ -552,7 +559,8 @@ int main(int argc, const char* argv[])
             std::for_each(namespaces.begin(), namespaces.end(),
                 [&](const string& space) { ir.AddAttributeNamespaceFilter(space); });
 
-            UnboundedArraysValidator::Options unboundedArraysValidationOptions = { uniqueIdx };
+            UnboundedArraysValidator::Options unboundedArraysValidationOptions;
+            unboundedArraysValidationOptions.m_useUniqueIndicesEnabled = uniqueIdx;
             if (*maxSpacesOpt)
             {
                 unboundedArraysValidationOptions.m_maxSpaces = maxSpaces;

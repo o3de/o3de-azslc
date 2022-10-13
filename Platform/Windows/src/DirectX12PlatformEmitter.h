@@ -22,6 +22,9 @@ namespace AZ::ShaderCompiler
         [[nodiscard]]
         string GetRootSig(const CodeEmitter& codeEmitter, const RootSigDesc& rootSig, const Options& options, BindingPair::Set signatureQuery) const override final;
 
+        bool RequiresUniqueSpaceForUnboundedArrays() const override {return true;}
+
+
     private:
         DirectX12PlatformEmitter() : PlatformEmitter {} {};
     };

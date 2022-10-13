@@ -1,4 +1,4 @@
-/*
+﻿/*
  * Copyright (c) Contributors to the Open 3D Engine Project.
  * For complete copyright and license terms please see the LICENSE at the root of this distribution.
  * 
@@ -225,7 +225,7 @@ namespace AZ::ShaderCompiler
         }
     }
 
-    void MultiBindingLocationMaker::SignalRegisterIncrement(BindingType regType, int count /* = 1*/)
+    void MultiBindingLocationMaker::SignalIncrementRegister(BindingType regType, int count)
     {
         m_untainted.m_registerPos[regType] += count;
         m_merged.m_registerPos[regType] += count;
@@ -571,9 +571,35 @@ namespace AZ::ShaderCompiler
         }
 
         auto regType = RootParamTypeToBindingType(paramType);
-        auto srgElementDesc = RootSigDesc::SrgParamDesc{ id, paramType, bindInfo.GetCurrent(regType), count, -1, isUnboundedArray};
+
+        BindingPair binding = bindInfo.GetCurrent(regType);
+        if (isUnboundedArray
+            && GetPlatformEmitter().RequiresUniqueSpaceForUnboundedArrays() /* refer to note¹ hereunder*/ )
+        {
+            //  note¹: On o3de/Atom, the vulkan RHI assumes SRG binding IDs to be 0-7 as there are fixed data structures
+            //         using a MaxSRGs of 8 in the code. Adapting the RHI to remove this assumption would have been costly,
+            //         therefore RequiresUniqueSpaceForUnboundedArrays is now true only for --namespace=dx.
+
+            // Use a unique register space for every unbounded array because in DirectX 12 unbounded arrays consume
+            // all remaining registers for that resource type. By making a unique space for each unbounded array
+            // we support an unlimited number of them.
+            // Note that this does not impact other platforms, where register spaces don't matter (DXC ignores them)
+            // and unbounded arrays do not consume all remaining registers.
+            // Also, on dx12 we don't necessarily need to call SignalIncrementRegister() in this case, and could instead
+            // just use register 0 because the register space is unique, but since other platforms ignore the register
+            // space it's easier to also increment the register on all platforms.
+            
+            binding.m_pair[BindingPair::Set::Untainted].m_logicalSpace = m_unboundedSpillSpace;
+            binding.m_pair[BindingPair::Set::Merged].m_logicalSpace = m_unboundedSpillSpace;
+            ++m_unboundedSpillSpace;
+        }
+
+        bindInfo.SignalIncrementRegister(regType, count);
+
+        auto srgElementDesc = RootSigDesc::SrgParamDesc{ id, paramType, binding, count, -1, isUnboundedArray};
+
         rootSig.m_descriptorMap.emplace(id, srgElementDesc);
-        bindInfo.SignalRegisterIncrement(regType, count);
+
         return srgElementDesc;
     }
 
