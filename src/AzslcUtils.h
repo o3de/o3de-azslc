@@ -266,6 +266,11 @@ namespace AZ::ShaderCompiler
         return out << ToLower(StorageFlag::ToStr(sf));
     }
 
+    inline Streamable& operator << (Streamable& out, StorageFlag sf)
+    {
+        return out << sf.m_value;
+    }
+
     using Modifiers = Flag<StorageFlag>;
     struct TypeQualifiers
     {
