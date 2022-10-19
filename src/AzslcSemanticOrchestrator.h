@@ -10,6 +10,7 @@
 #include "AzslcScopeTracker.h"
 #include "PreprocessorLineDirectiveFinder.h"
 #include "AzslcUnboundedArraysValidator.h"
+#include "AzslcKindInfo.h"
 
 namespace AZ::ShaderCompiler
 {
@@ -292,7 +293,7 @@ namespace AZ::ShaderCompiler
                 // because only generic parameters may be further AstNodes. And since we ignore them for now (collapsing behavior), we're set.
                 uqName = core.m_node ? UnqualifiedName{LookupType(core.m_node, policy).m_name} : core.m_name;
             }
-            auto* idkind = LookupSymbol(uqName);
+            IdAndKind* idkind = LookupSymbol(uqName);
             if (idkind)
             {
                 if (idkind->second.GetKind() == Kind::TypeAlias)
