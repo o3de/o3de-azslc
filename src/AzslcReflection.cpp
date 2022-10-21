@@ -661,7 +661,7 @@ namespace AZ::ShaderCompiler
             // Try to locate the original filename where this SRG is declared
             size_t physical = srgInfo->m_declNode->getStart()->getLine();
             srgLayout["originalFileName"]   = StdFs::absolute(lineFinder->GetVirtualFileName(physical)).lexically_normal().generic_string();
-            srgLayout["originalLineNumber"] = lineFinder->GetVirtualLineNumber(physical);
+            srgLayout["originalLineNumber"] = static_cast<Json::Value::UInt64>(lineFinder->GetVirtualLineNumber(physical));
 
             auto semantic = m_ir->GetSymbolSubAs<ClassInfo>(srgInfo->m_semantic->GetName())->Get<SRGSemanticInfo>();
 
