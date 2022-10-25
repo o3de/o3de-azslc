@@ -170,7 +170,7 @@ namespace AZ::ShaderCompiler
             // define a single generic visitor functor for the variant.
             // We are lucky that all AST nodes have a start object.
             // So this code compiles and work for all 5 types of nodes.
-            return std::visit([](auto&& arg)
+            return StdUtils::visit([](auto&& arg)
                                    {
                                        return static_cast<antlr4::ParserRuleContext*>(arg);
                                    }, m_declNodeVt);
@@ -185,7 +185,7 @@ namespace AZ::ShaderCompiler
         //! get Name token from declaration contexts
         const Token* GetDeclNodeNameToken() const
         {
-            return std::visit([](auto&& arg)
+            return StdUtils::visit([](auto&& arg)
                                    {
                                        return arg->Name;
                                    }, m_declNodeVt);
@@ -204,13 +204,13 @@ namespace AZ::ShaderCompiler
         template<typename T>
         T* Get()
         {
-            return (std::holds_alternative<T>(m_subInfo)) ? &std::get<T>(m_subInfo) : (T*)nullptr;
+            return (holds_alternative<T>(m_subInfo)) ? &get<T>(m_subInfo) : (T*)nullptr;
         }
 
         template<typename T>
         const T* Get() const
         {
-            return (std::holds_alternative<T>(m_subInfo)) ? &std::get<T>(m_subInfo) : (T*)nullptr;
+            return (holds_alternative<T>(m_subInfo)) ? &get<T>(m_subInfo) : (T*)nullptr;
         }
 
         Kind                           m_kind;   // which of class/struct/interface/srgsemantic ? (repetition of data in the upper KindInfo)
@@ -868,14 +868,14 @@ namespace AZ::ShaderCompiler
         template<typename T>
         const T* GetSubAs() const
         {
-            return (std::holds_alternative<T>(m_subInfo)) ? &std::get<T>(m_subInfo) : (const T*)nullptr;
+            return (holds_alternative<T>(m_subInfo)) ? &get<T>(m_subInfo) : (const T*)nullptr;
         }
 
         //! mutable version
         template<typename T>
         T* GetSubAs()
         {
-            return (std::holds_alternative<T>(m_subInfo)) ? &std::get<T>(m_subInfo) : (T*)nullptr;
+            return (holds_alternative<T>(m_subInfo)) ? &get<T>(m_subInfo) : (T*)nullptr;
         }
 
         //! Throwing version (bad_access) of above helper, gets a reference on success
@@ -972,7 +972,7 @@ namespace AZ::ShaderCompiler
         template<typename Visitor>
         auto VisitSub(Visitor&& v) const
         {
-            return std::visit(std::forward<Visitor>(v), m_subInfo);
+            return StdUtils::visit(std::forward<Visitor>(v), m_subInfo);
         }
 
     private:
