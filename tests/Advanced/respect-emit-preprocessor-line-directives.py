@@ -33,12 +33,14 @@ def validateFilesAppearInLineDirectives(hlslContent, fileList, silent):
         m = regexp.match(hlslLine)
         if not m:
             continue
-        #If there's a match it better match the file at the top of the stack
-        if m.group(1).endswith(fileList[0]):
-            del fileList[0]
+        f0 = m.group(1).endswith(fileList[0])  # check top of stack
+        f1 = False if len(fileList) <= 1 else m.group(1).endswith(fileList[1]) # or second position to allow progression in the list
+        if f0 or f1:
+            if f1: del fileList[0]  # forget about a file only after its potential repetition is finished
             if len(fileList) == 0:
                 break;
-    return len(fileList) == 0
+        else: print(fg.RED + f"problem: was expecting to find {fileList[0]} or {fileList[1]}" + fg.RESET)
+    return len(fileList) <= 1
 
 def testSampleFileCompilationEmitsPreprocessorLineDirectives(theFile, compilerPath, silent):
     if not silent:
@@ -73,6 +75,7 @@ def CreateTmpFileWithSyntaxError(theFile, goodSearchLine, badReplaceLine):
             else:
                 tmpFileContent.append("{}\n".format(line))
     if not foundGoodSearchLine:
+        print(fg.RED + f"fail: {goodSearchLine} not found in {fileName}" + fg.RESET)
         return None
     
     with open(tmpFilePath, 'w') as outFp:
@@ -99,18 +102,23 @@ def testErrorReportUsesPreprocessorLineDirectives(theFile, compilerPath, silent,
     stderr, failed = testfuncs.buildAndGetError(filePathOfTmpFile, compilerPath, silent, [])
     stderr = stderr.decode('utf-8')
     if not failed:
+        print(fg.RED + "fail: expected non-buildable didn't report a build error." + fg.RESET)
         return False
     if not silent:
         print (fg.CYAN+ style.BRIGHT+
                "testSyntaxErrorReportUsesPreprocessorLineDirectives: "+
                "Good, good compiler error, now let's make sure the source file is mentioned..."+ style.RESET_ALL)
     if not searchFilename in stderr:
+        print(fg.RED + f"fail: didn't find {searchFilename} in stderr" + fg.RESET)
         return False
     if not silent:
         print (fg.CYAN+ style.BRIGHT+
                "testSyntaxErrorReportUsesPreprocessorLineDirectives: "+
                "Good, The search file was mentioned, now let's check the type of error..."+ style.RESET_ALL)
-    return errorType in stderr
+    ok = errorType in stderr
+    if not ok:
+        print(fg.RED + f"fail: err #{errorType} not in stderr" + fg.RESET)
+    return ok
 
 result = 0  # to define for sub-tests
 resultFailed = 0
@@ -125,7 +133,9 @@ def doTests(compiler, silent, azdxcpath):
     
     if testSampleFileCompilationEmitsPreprocessorLineDirectives(os.path.join(workDir, "RespectEmitLine/main.azsl.mcpp"),
                                                                 compiler, silent): result += 1
-    else: resultFailed += 1
+    else:
+        print(fg.RED + "fail: testSampleFileCompilationEmitsPreprocessorLineDirectives" + fg.RESET)
+        resultFailed += 1
     
     if not silent: print("\n")
     if testErrorReportUsesPreprocessorLineDirectives(os.path.join(workDir, "RespectEmitLine/main.azsl.mcpp"),
@@ -133,7 +143,9 @@ def doTests(compiler, silent, azdxcpath):
                                                            "ShaderResourceGroup SRG2 : Slot2", "ShaderResour ceGroup SRG2 : Slot2",
                                                            "level2.azsli",
                                                            "syntax error"): result += 1
-    else: resultFailed += 1
+    else:
+        print(fg.RED + "fail: testErrorReportUsesPreprocessorLineDirectives" + fg.RESET)
+        resultFailed += 1
     
     if not silent: print("\n")
     if testErrorReportUsesPreprocessorLineDirectives(os.path.join(workDir, "RespectEmitLine/main.azsl.mcpp"),

@@ -27,6 +27,8 @@ ShaderResourceGroupSemantic MainSlot
 {
     FrequencyId = 3;
 };
+static bool nonElipsableObject = false; // use an object with persistence on HLSL side to force appearance of "srg_semantics" in pound-lines
+
 #line 15 "level0.azsli"
 
 ShaderResourceGroup SRG0 : Slot0
