@@ -29,17 +29,19 @@ def validateFilesAppearInLineDirectives(hlslContent, fileList, silent):
     """
     regexp = re.compile('#\s*line\s+\d+\s*"(.*)"$')
     hlslLines = hlslContent.splitlines()
+    found0 = False
     for hlslLine in hlslLines:
         m = regexp.match(hlslLine)
         if not m:
             continue
         f0 = m.group(1).endswith(fileList[0])  # check top of stack
-        f1 = False if len(fileList) <= 1 else m.group(1).endswith(fileList[1]) # or second position to allow progression in the list
+        f1 = len(fileList) > 1 and m.group(1).endswith(fileList[1]) # or second position to allow progression in the list
         if f0 or f1:
-            if f1: del fileList[0]  # forget about a file only after its potential repetition is finished
+            if found0 and f1: del fileList[0]  # forget about a file only after its potential repetition is finished
             if len(fileList) == 0:
                 break;
-        else: print(fg.RED + f"problem: was expecting to find {fileList[0]} or {fileList[1]}" + fg.RESET)
+            found0 = f0
+        else: print(fg.RED + f"problem: was expecting to find {fileList[0]} or {fileList[1]} (but got {m.group(1).rsplit('/',1)[-1]})" + fg.RESET)
     return len(fileList) <= 1
 
 def testSampleFileCompilationEmitsPreprocessorLineDirectives(theFile, compilerPath, silent):
