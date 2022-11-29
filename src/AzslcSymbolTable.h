@@ -23,13 +23,17 @@ namespace AZ::ShaderCompiler
 
         auto GetIdAndKindInfo(QualifiedNameView symbol) const -> const IdAndKind*;
 
-        /// Register a fresh entry in the symbol map. No KindInfo filled up, the client must do it.
-        /// Will return a reference to the newly inserted data.
-        /// Will throw in case of ODR violation.
+        //! Register a fresh entry in the symbol map. No KindInfo filled up, the client must do it.
+        //! Will return a reference to the newly inserted data.
+        //! Will throw in case of ODR violation.
         auto AddIdentifier(QualifiedNameView symbol, Kind kind, optional<size_t> lineNumber = none) -> IdAndKind&;
 
-        /// Return true if found and deleted
-        bool DeleteIdentifier(IdentifierUID name);
+        //! Can be used to hack the position of a symbol added late, after the phase of semantic check.
+        //! Typically hidden symbols added by the compiler such as implicit structs or padding fields.
+        void MigrateOrder(const IdentifierUID& symbol, const IdentifierUID& before);
+
+        //! Return true if found and deleted
+        bool DeleteIdentifier(const IdentifierUID& name);
 
         // [GFX TODO]2: use densemap/oahm to avoid fragmentation (depends on [Task 5])
         IdToKindMap           m_symbols;   // declarations of any kind and attached information (unordered bag, but O(1+) lookup)
