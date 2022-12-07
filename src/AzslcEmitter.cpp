@@ -935,7 +935,10 @@ namespace AZ::ShaderCompiler
 
             for (auto cId : srgInfo.m_CBs)
             {
-                EmitSRGCB(cId, options, rootSig);
+                if (!m_ir->GetSymbolSubAs<VarInfo>(cId.GetName())->StorageFlagIsLocalLinkage(true))
+                {
+                    EmitSRGCB(cId, options, rootSig);
+                }
             }
 
             return;
@@ -951,8 +954,11 @@ namespace AZ::ShaderCompiler
 
         for (const auto& cId : srgInfo.m_CBs)
         {
-            const auto& uqName = cId.GetNameLeaf();
-            m_out << "    CBVArrayView " << uqName << ";\n";
+            if (!m_ir->GetSymbolSubAs<VarInfo>(cId.GetName())->StorageFlagIsLocalLinkage(true))
+            {
+                const auto& uqName = cId.GetNameLeaf();
+                m_out << "    CBVArrayView " << uqName << ";\n";
+            }
         }
 
         if (!srgInfo.m_implicitStruct.GetMemberFields().empty())
@@ -965,15 +971,18 @@ namespace AZ::ShaderCompiler
 
         for (const auto& cId : srgInfo.m_CBs)
         {
-            const auto* memberInfo = m_ir->GetSymbolSubAs<VarInfo>(cId.m_name);
-            const auto& cbName = ReplaceSeparators(cId.m_name, Underscore);
-            const auto& uqName = cId.GetNameLeaf();
-
-            if (memberInfo->IsConstantBuffer())
+            if (!m_ir->GetSymbolSubAs<VarInfo>(cId.GetName())->StorageFlagIsLocalLinkage(true))
             {
-                const auto& templatedCB = "RegularBuffer<" + GetTranslatedName(memberInfo->GetGenericParameterTypeId(), UsageContext::ReferenceSite) + "> ";
+                const auto* memberInfo = m_ir->GetSymbolSubAs<VarInfo>(cId.m_name);
+                const auto& cbName = ReplaceSeparators(cId.m_name, Underscore);
+                const auto& uqName = cId.GetNameLeaf();
 
-                m_out << "static const " << templatedCB << cbName << " = " << templatedCB << "(" << uqName << ");\n";
+                if (memberInfo->IsConstantBuffer())
+                {
+                    const auto& templatedCB = "RegularBuffer<" + GetTranslatedName(memberInfo->GetGenericParameterTypeId(), UsageContext::ReferenceSite) + "> ";
+
+                    m_out << "static const " << templatedCB << cbName << " = " << templatedCB << "(" << uqName << ");\n";
+                }
             }
         }
 
@@ -1152,12 +1161,20 @@ namespace AZ::ShaderCompiler
 
         for (const auto& t : srgInfo.m_srViews)
         {
-            EmitSRGDataView(t, options, rootSig);
+            // (*1) non-extern symbols are not visible resources, and are emitted by canonical EmitVariableDeclaration path
+            if (!m_ir->GetSymbolSubAs<VarInfo>(t.GetName())->StorageFlagIsLocalLinkage(true))
+            {
+                EmitSRGDataView(t, options, rootSig);
+            }
         }
 
         for (const auto& s : srgInfo.m_samplers)
         {
-            EmitSRGSampler(s, options, rootSig);
+            // same as (*1)
+            if (!m_ir->GetSymbolSubAs<VarInfo>(s.GetName())->StorageFlagIsLocalLinkage(true))
+            {
+                EmitSRGSampler(s, options, rootSig);
+            }
         }
 
         EmitSRGCBUnified(srgInfo, srgId, options, rootSig);

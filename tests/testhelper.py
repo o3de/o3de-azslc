@@ -28,7 +28,7 @@ def reset():
     global lastEnd
     lastEnd = 0
 
-def found(needle, haystack):
+def found(needle, haystack, negative):
     '''search a regex in a haystack'''
     global lastEnd  # ugly state retention to avoid headaches with the lambdas calling this.
     words = re.split("\s", needle)
@@ -40,8 +40,8 @@ def found(needle, haystack):
     matchObject = p.search(consumed)
     if matchObject:
         lastEnd = matchObject.end()
-        return True
-    return False
+        return not negative
+    return negative
 
 # parse the argument mentioned in the shader source file Ex : Cmdargs: --namespace=vk   or Cmdargs: ['--unique-idx', '--root-sig', '--root-const', '0']
 def parse_strlist(sl):
@@ -80,12 +80,14 @@ def verifyEmissionPattern(azslFile, patternsFileName, compilerPath, silent, argL
         with io.open(patternsFileName, encoding="utf-8") as f:
             i = 0
             for line in f:
+                negation = line.startswith('^')
+                if negation:
+                    line=line[1:]
                 if line.startswith("\""):
                     line = line.strip().strip('"') #remove quotes at start&end
-                    if not silent: print (fg.CYAN + "Verify (" + str(i) + "): " + line + style.RESET_ALL)
-                    predicates.append(lambda line=line: found(line, shaderCode))
+                    if not silent: print (fg.CYAN + "Verify (" + str(i) + ")" + (" not" if negation else "") + " : " + line + style.RESET_ALL)
+                    predicates.append(lambda line=line, negation=negation: found(line, shaderCode, negation))
                     i = i+1
-
         reset()
         ok = testfuncs.verifyAllPredicates(predicates, shaderCode, silent)
     return ok
