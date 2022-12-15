@@ -25,7 +25,6 @@ namespace StdFs = std::filesystem;
 // For small features or bug fixes. They cannot introduce breaking changes. Existing tests shouldn't change.
 #define AZSLC_REVISION "12"  // last change: reduce useless sharp-line directives
 
-
 namespace AZ::ShaderCompiler
 {
     DiagnosticStream verboseCout;
