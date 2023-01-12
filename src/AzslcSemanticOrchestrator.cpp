@@ -320,7 +320,7 @@ namespace AZ::ShaderCompiler
         // try to fetch the overload-set:
         IdAndKind* overloadSetIdKind = m_symbols->GetIdAndKindInfo(fqUndecoratedName);
         OverloadSetInfo* overloadSet = overloadSetIdKind ? overloadSetIdKind->second.GetSubAs<OverloadSetInfo>() : nullptr;
-        if (!overloadSetIdKind)  // don't exist yet. it must be the first occurrence of this function's core name.
+        if (!overloadSet)  // don't exist yet. it must be the first occurrence of this function's core name.
         {
             // create and prepare a brand new overload-set
             overloadSetIdKind = &m_symbols->AddIdentifier(fqUndecoratedName, Kind::OverloadSet, line);

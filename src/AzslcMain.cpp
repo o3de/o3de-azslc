@@ -25,7 +25,6 @@ namespace StdFs = std::filesystem;
 // For small features or bug fixes. They cannot introduce breaking changes. Existing tests shouldn't change.
 #define AZSLC_REVISION "13"  // last change: fix of static samplers in SRG get double emission
 
-
 namespace AZ::ShaderCompiler
 {
     DiagnosticStream verboseCout;

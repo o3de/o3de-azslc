@@ -117,11 +117,6 @@ namespace AZ::ShaderCompiler
             const QualifiedNameView iteratedSymbolName = iteratedSymbolUid.GetName();
             const Kind iteratedSymbolKind = m_ir->GetKind(iteratedSymbolUid);
 
-            if (IsTopLevelThroughTranslation(iteratedSymbolUid))
-            {
-                EmitPreprocessorLineDirective(iteratedSymbolName);
-            }
-
             switch (iteratedSymbolKind)
             {
                 // top-level enums, structs and classes, as well as immediate-type-declaration enum/structs (`struct S{} s;`)
@@ -132,6 +127,8 @@ namespace AZ::ShaderCompiler
             {
                 if (IsTopLevelThroughTranslation(iteratedSymbolUid))
                 {
+                    EmitPreprocessorLineDirective(iteratedSymbolName);
+
                     auto* classInfo = m_ir->GetSymbolSubAs<ClassInfo>(iteratedSymbolName);
                     iteratedSymbolKind == Kind::Enum ?
                           EmitEnum(iteratedSymbolUid, *classInfo, options)
@@ -144,6 +141,8 @@ namespace AZ::ShaderCompiler
             {
                 if (IsTopLevelThroughTranslation(iteratedSymbolUid))
                 {
+                    EmitPreprocessorLineDirective(iteratedSymbolName);
+
                     auto* aliasInfo = m_ir->GetSymbolSubAs<TypeAliasInfo>(iteratedSymbolName);
                     EmitTypeAlias(iteratedSymbolUid, *aliasInfo, options);
                 }
@@ -175,6 +174,7 @@ namespace AZ::ShaderCompiler
                         break;
                     }
 
+                    EmitPreprocessorLineDirective(iteratedSymbolName);
                     EmitVariableDeclaration(*varInfo, iteratedSymbolUid, options, VarDeclHasFlag(VarDeclHas::Initializer));
                     m_out << ";\n";
                 }
@@ -183,6 +183,8 @@ namespace AZ::ShaderCompiler
                 // SRG
             case Kind::ShaderResourceGroup:
             {
+                EmitPreprocessorLineDirective(iteratedSymbolName);
+
                 auto* srgSub = m_ir->GetSymbolSubAs<SRGInfo>(iteratedSymbolName);
                 EmitSRG(*srgSub, iteratedSymbolUid, options, rootSig);
                 break;
@@ -190,6 +192,8 @@ namespace AZ::ShaderCompiler
                 // function
             case Kind::Function:
             {
+                EmitPreprocessorLineDirective(iteratedSymbolName);
+
                 auto* funcSub = m_ir->GetSymbolSubAs<FunctionInfo>(iteratedSymbolName);
                 const bool alreadyDeclared = AlreadyEmittedFunctionDeclaration(iteratedSymbolUid);
                 assert(!funcSub->IsEmpty());

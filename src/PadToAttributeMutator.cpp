@@ -477,7 +477,7 @@ namespace AZ::ShaderCompiler
         {
             const auto alignedOffset = Packing::AlignUp(startingOffset, 16);
             const auto deltaBytes = alignedOffset - startingOffset;
-            if (deltaBytes < numBytesToAdd)
+            if (deltaBytes < numBytesToAdd && deltaBytes != 0)
             {
                 string typeName = getFloatTypeNameOfSize(deltaBytes);
                 auto variableName = FormatString("__pad_at%u", startingOffset);
@@ -489,6 +489,7 @@ namespace AZ::ShaderCompiler
                 else
                 {
                     classInfo->InsertBefore(newVarUid, Kind::Variable, insertBeforeThisUid);
+                    m_ir.m_symbols.m_elastic.MigrateOrder(newVarUid, insertBeforeThisUid);
                 }
                 numAddedVariables++;
                 numBytesToAdd -= deltaBytes;
@@ -510,6 +511,7 @@ namespace AZ::ShaderCompiler
                 else
                 {
                     classInfo->InsertBefore(newVarUid, Kind::Variable, insertBeforeThisUid);
+                    m_ir.m_symbols.m_elastic.MigrateOrder(newVarUid, insertBeforeThisUid);
                 }
                 numAddedVariables++;
                 numBytesToAdd -= (numFloat4s << 4);
@@ -530,6 +532,7 @@ namespace AZ::ShaderCompiler
             else
             {
                 classInfo->InsertBefore(newVarUid, Kind::Variable, insertBeforeThisUid);
+                m_ir.m_symbols.m_elastic.MigrateOrder(newVarUid, insertBeforeThisUid);
             }
             numAddedVariables++;
         }
