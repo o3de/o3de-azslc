@@ -685,13 +685,13 @@ namespace AZ::ShaderCompiler
         else if (attrInfo.m_attribute == "partial")
         {
             // Reserved for ShaderResourceGroup use. Do not re-emit
-            outstream << "// Attribute not re-emitted by design - [[" << attrInfo << "]]\n ";
+            outstream << "// original attribute: [[" << attrInfo << "]]\n ";
         }
 
         else if (attrInfo.m_attribute == "range")
         {
             // Reserved for integer type option variables. Do not re-emit
-            outstream << "// Attribute not re-emitted by design - [[" << attrInfo << "]]\n ";
+            outstream << "// original attribute: [[" << attrInfo << "]]\n ";
         }
 
         else
@@ -1140,14 +1140,66 @@ namespace AZ::ShaderCompiler
         EmitGetShaderKeyFunctionDeclaration(getterUid, returnType);
 
         m_out << "\n{\n";
-        if (keySizeInBits > 0)
+        if (keySizeInBits > 0)  // Emit the option getter function body using CB access and bit decoding.
         {
-            m_out << "    uint shaderKey = (" << GetTranslatedName(shaderKeyUid, UsageContext::ReferenceSite) << "[" << arraySlot << "]." << suffix[swizzle] << " >> " << keyOffsetBits << ") & " << mask << ";\n";
+            m_out << "    uint shaderKey = ((" << GetTranslatedName(shaderKeyUid, UsageContext::ReferenceSite)
+                  << "[" << arraySlot << "]." << suffix[swizzle] << " >> " << keyOffsetBits << ") & " << mask << ")";
+            // Also we need to reproduce the "range minimal" value as an addition post big-field extraction.
+            // because the CB compact storage into bits of an uint4 does not incorporate the offset of the range
+            // because they are "useless" (compressable) entropy bits that would take space in the key.
+            if (returnType.m_typeId.m_name.find("int") != string::npos)  // if type int/uint/int16_t... then it's an integer range.
+            {
+                if (auto attrInfo = m_ir->m_symbols.GetAttribute(getterUid, "range"))
+                {
+                    // Presence of the correct arglist has already been verified in Backend::AppendOptionRange
+                    m_out << " + " << ExtractValueAsInt64(get<ConstNumericVal>(attrInfo->m_argList[0]));
+                }
+            }
+            else if (returnType.m_typeClass == TypeClass::Enum)
+            {
+                // In the case of an enumeration,
+                // recovering the correct value will depend if there are jumps in the enumerators.
+                // To discover that, we will use the presence of initializers.
+                // one initializer on the first enumerator is a special case because it still allows
+                // us to reconstruct the value from an integer cast and a +first enumerator.
+                // In a case of disparate enumerators, we'll need to reconstruct the values
+                // by emitting a switch case.
+                // We don't want that switch case as a generic case, that could simplify azslc's source
+                // but it risks slowing down the shader runtime. Sort of a pay-what-you-use principle.
+                auto& enumClassInfo = *m_ir->GetSymbolSubAs<ClassInfo>(returnType.m_typeId.GetName());
+                auto& enumerators = enumClassInfo.GetOrderedMembers();
+                bool otherInitializers = std::any_of(enumerators.begin() + 1, enumerators.end(),
+                                                     [&](const IdentifierUID& e)
+                                                     {
+                                                         auto& var = *m_ir->GetSymbolSubAs<VarInfo>(e.GetName());
+                                                         return !!var.m_declNodeEnum->Value;
+                                                     });
+                if (otherInitializers)
+                {
+                    m_out << ";\n    switch (shaderKey)\n    {\n";
+                    for (int i = 0; i < enumerators.size(); ++i)
+                    {
+                        m_out << "        case " << i << ": shaderKey = (" << GetTranslatedName(returnType, UsageContext::ReferenceSite) << ")"
+                              << GetTranslatedName(enumerators[i], UsageContext::ReferenceSite) << "; break;\n";
+                    }
+                    m_out << "    }";
+                }
+                else
+                {
+                    // add the value of the first enumerator (by emitting its name)
+                    m_out << " + " << GetTranslatedName(enumerators.front(), UsageContext::ReferenceSite);  // we can access front with no defense because keySize would be 0 if there are no enumerators.
+                }
+            }
+            m_out << ";\n";
             m_out << "    return (" << GetTranslatedName(returnType, UsageContext::ReferenceSite) << ") shaderKey;\n";
         }
         else
         {
-            m_out << "    " << GetTranslatedName(returnType, UsageContext::ReferenceSite) << " val = " << defaultValue << ";\n";
+            // In the case of an empty enumeration type (no enumerators) or empty range, the keySize will be 0
+            // and this if-branch will be taken. if the programmer specified no initializer clause,
+            // this would produce unbuildable HLSL and error in generatored code. We really don't want that
+            // as it would be hard to diagnose for users. As a reasonable behavior, we can emit val = 0.
+            m_out << "    " << GetTranslatedName(returnType, UsageContext::ReferenceSite) << " val = " << (defaultValue.empty() ? "0" : defaultValue) << ";\n";
             m_out << "    return val;\n";
         }
         m_out << "}\n\n";

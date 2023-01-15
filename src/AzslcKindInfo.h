@@ -392,6 +392,7 @@ namespace AZ::ShaderCompiler
         inline size_t              GetOriginalLineNumber () const;
 
         AstUnnamedVarDecl*         m_declNode = nullptr;
+        AstEnumeratorDecl*         m_declNodeEnum = nullptr;
         UnqualifiedName            m_identifier;
         bool                       m_srgMember = false;
         bool                       m_isPublic = true;

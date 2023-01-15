@@ -44,6 +44,7 @@ namespace AZ::ShaderCompiler
     using AstClassDeclNode              = azslParser::ClassDefinitionContext;
     using AstStructDeclNode             = azslParser::StructDefinitionContext;
     using AstEnumDeclNode               = azslParser::EnumDefinitionContext;
+    using AstEnumeratorDecl             = azslParser::EnumeratorDeclaratorContext;
     using AstInterfaceDeclNode          = azslParser::InterfaceDefinitionContext;
     using AstSRGSemanticDeclNode        = azslParser::SrgSemanticContext;
     using AstSRGSemanticMemberDeclNode  = azslParser::SrgSemanticMemberDeclarationContext;
