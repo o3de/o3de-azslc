@@ -17,6 +17,8 @@ option enum class F { v = 10, v2 } o_s3;
 
 option enum G { gv, gv2 = 4, gv3 } o_s4;
 
+option enum Empty { } o_y = 1;
+
 float4 MainPS(float2 uv : TEXCOORD0) : SV_Target0
 {
     return o_stuff;

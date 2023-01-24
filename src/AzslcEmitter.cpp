@@ -1187,7 +1187,7 @@ namespace AZ::ShaderCompiler
                 else
                 {
                     // add the value of the first enumerator (by emitting its name)
-                    m_out << " + " << GetTranslatedName(enumerators.front(), UsageContext::ReferenceSite);  // we can access front with no defense because keySize would be 0 if there are no enumerators.
+                    m_out << " + (uint)" << GetTranslatedName(enumerators.front(), UsageContext::ReferenceSite);  // we can access front with no defense because keySize would be 0 if there are no enumerators.
                 }
             }
             m_out << ";\n";
@@ -1199,7 +1199,9 @@ namespace AZ::ShaderCompiler
             // and this if-branch will be taken. if the programmer specified no initializer clause,
             // this would produce unbuildable HLSL and error in generatored code. We really don't want that
             // as it would be hard to diagnose for users. As a reasonable behavior, we can emit val = 0.
-            m_out << "    " << GetTranslatedName(returnType, UsageContext::ReferenceSite) << " val = " << (defaultValue.empty() ? "0" : defaultValue) << ";\n";
+            string typeAsStr = GetTranslatedName(returnType, UsageContext::ReferenceSite);
+            // "<type> val = (cast expr to <type>) 0 or default;"
+            m_out << "    " << typeAsStr << " val = (" << typeAsStr << ")" << (defaultValue.empty() ? "0" : defaultValue) << ";\n";
             m_out << "    return val;\n";
         }
         m_out << "}\n\n";
