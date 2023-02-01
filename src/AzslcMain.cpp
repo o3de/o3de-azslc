@@ -23,7 +23,8 @@ namespace StdFs = std::filesystem;
 // For large features or milestones. Minor version allows for breaking changes. Existing tests can change.
 #define AZSLC_MINOR "8"   // last change: introduction of class inheritance
 // For small features or bug fixes. They cannot introduce breaking changes. Existing tests shouldn't change.
-#define AZSLC_REVISION "14"  // last change: add min in option value key-extracter's function for range & enum
+#define AZSLC_REVISION "15"  // last change: add min in option value key-extracter's function for range & enum
+                    // "14"          change: [5a1b711] Fixing order of multiple unbounded arrays when unique indices are used.
 
 namespace AZ::ShaderCompiler
 {

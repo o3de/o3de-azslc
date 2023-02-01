@@ -636,7 +636,7 @@ namespace AZ::ShaderCompiler
 
             for (const auto tId : srgInfo->m_srViews)
             {
-                if (useUniqueIndices && !srgInfo->m_unboundedArrays.empty() && srgInfo->m_unboundedArrays[0] == tId)
+                if (useUniqueIndices && std::find(srgInfo->m_unboundedArrays.begin(), srgInfo->m_unboundedArrays.end(), tId) != srgInfo->m_unboundedArrays.end())
                 {
                     // This variable will be added to the end of the binding table.
                     // See: "REMARK: --unique-idx" a few lines below.
@@ -679,12 +679,13 @@ namespace AZ::ShaderCompiler
             // they are sharing the same register index range. Because an unbounded array
             // takes ownership of the remaining register range within a register space, it always
             // must be added after that last resource in the register space.
-            if (useUniqueIndices && !srgInfo->m_unboundedArrays.empty())
+            if (useUniqueIndices)
             {
-                // Only srgInfo->m_unboundedArrays[0] is reflected because the "AzslcSemanticOrchestrator" already
-                // makes sure that only one unbounded array is declared inside the SRG when --unique-idx is enabled.
-                srgDesc.m_parameters.push_back(
-                    ReflectOneExternalResourceAndWrapWithUnifyIndices(srgInfo->m_unboundedArrays[0], bindInfo, rootSig));
+                for (const auto tId : srgInfo->m_unboundedArrays)
+                {
+                    srgDesc.m_parameters.push_back(
+                        ReflectOneExternalResourceAndWrapWithUnifyIndices(tId, bindInfo, rootSig));
+                }
             }
 
             bindInfo.SignalIncrementSpace(/*overshoot callback:*/[&, srgInfo = srgInfo, srgUid = srgUid](int numSpaces, int spacesAvailable)
