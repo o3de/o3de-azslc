@@ -37,10 +37,15 @@ def found(needle, haystack, negative):
     pttrn = "\s+".join(words) # free number of spaces between each needle.
     p = re.compile(pttrn)
     consumed = haystack[lastEnd:]  # we search on the rest only. not the whole string at each time.
+    #print("consumed is", fg.YELLOW, f"{consumed[:80]}...{consumed[-20:]}", fg.RESET)
     matchObject = p.search(consumed)
     if matchObject:
-        lastEnd = matchObject.end()
+        lastEnd += matchObject.end()
+        #print(f"found {fg.MAGENTA} {matchObject} {fg.RESET} last end updated to {lastEnd}")
+        #print(f"verification: consumed[span]={fg.GREEN}{consumed[matchObject.start():matchObject.end()]}{fg.RESET}\n")
         return not negative
+    #else:
+        #print(f"searched pattern was {fg.RED}{pttrn}{fg.RESET}\n")
     return negative
 
 # parse the argument mentioned in the shader source file Ex : Cmdargs: --namespace=vk   or Cmdargs: ['--unique-idx', '--root-sig', '--root-const', '0']

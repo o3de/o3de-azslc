@@ -386,16 +386,16 @@ namespace AZ::ShaderCompiler
         auto& [enumId, parentKindInfo] = *m_symbols->GetIdAndKindInfo(enumQn);
         auto& enumInfo = parentKindInfo.GetSubRefAs<ClassInfo>();
 
-        size_t line           = ctx->Name->getLine();
-        auto enumeratorName   = UnqualifiedName{ctx->Name->getText()};
-        auto& [uid, var]      = AddIdentifier(enumeratorName, Kind::Variable, line);
-        auto& varInfo         = var.GetSubAfterInitAs<Kind::Variable>();
+        size_t line            = ctx->Name->getLine();
+        auto enumeratorName    = UnqualifiedName{ctx->Name->getText()};
+        auto& [uid, var]       = AddIdentifier(enumeratorName, Kind::Variable, line);
+        auto& varInfo          = var.GetSubAfterInitAs<Kind::Variable>();
         if (ctx->Value)
         {
             varInfo.m_constVal = FoldEvalStaticConstExprNumericValue(ctx->Value);
         }
-        varInfo.m_declNode    = nullptr;
-        Modifiers modifiers = Modifiers{StorageFlag::Static} |
+        varInfo.m_declNodeEnum = ctx;
+        Modifiers modifiers    = Modifiers{StorageFlag::Static} |
             StorageFlag::Const | StorageFlag::Enumerator;
 
         varInfo.m_typeInfoExt = ExtendedTypeInfo{CreateTypeRefInfo(UnqualifiedNameView{enumQn}, OnNotFoundOrWrongKind::Diagnose), {},
