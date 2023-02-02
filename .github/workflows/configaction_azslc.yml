@@ -29,10 +29,10 @@ jobs:
         sudo apt-spy2 check
         sudo apt-spy2 fix --commit
         sudo apt-get update
-        sudo apt-get install gcc-8
-        sudo apt-get install g++-8
-        echo "::set-env name=CC::gcc-8"
-        echo "::set-env name=CXX::g++-8"
+        sudo apt-get install gcc
+        sudo apt-get install g++
+        echo "::set-env name=CC::gcc"
+        echo "::set-env name=CXX::g++"
         sudo apt-get install uuid-dev
         python -m pip install --upgrade pip
         pip install pyyaml
