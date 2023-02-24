@@ -238,8 +238,10 @@ namespace AZ::ShaderCompiler
             {
                 PrintWarning(Warn::W1, ctx->start, "ignored redundant redeclaration of function ", decoratedName,
                              ", ", GetFirstSeenLineMessage(symbol->second));
+                funcInfo->m_multiFwds = FMF_FwdDeclRedundancy;
                 return *symbol;
             }
+            funcInfo->m_multiFwds = FMF_SeenDef;
             auto originalKind = symbol->second.GetKind();
             if (originalKind != Kind::Function)  // verify that we're not transforming a lychee into a melon
             {

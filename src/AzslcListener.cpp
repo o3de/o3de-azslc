@@ -221,13 +221,17 @@ namespace AZ::ShaderCompiler
 
     void SemaCheckListener::exitFunctionParam(azslParser::FunctionParamContext* ctx)
     {   // we use the exit rule to let the time to inlined-UDT-decl to get registered through the type rule visit first.
-        if (!ctx->Name)
+        auto& funcInfo = m_ir->m_sema.GetCurrentScopeSubInfoAs<FunctionInfo>();
+        if (funcInfo.m_multiFwds != FMF_FwdDeclRedundancy)  // when in that state, we don't accept parameter registration
         {
-            m_ir->m_sema.RegisterNamelessFunctionParameter(ctx);
-        }
-        else
-        {
-            m_ir->m_sema.RegisterVar(ctx->Name, ctx->unnamedVariableDeclarator());
+            if (!ctx->Name)
+            {
+                m_ir->m_sema.RegisterNamelessFunctionParameter(ctx);
+            }
+            else
+            {
+                m_ir->m_sema.RegisterVar(ctx->Name, ctx->unnamedVariableDeclarator());
+            }
         }
     }
 
