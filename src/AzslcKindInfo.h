@@ -395,7 +395,7 @@ namespace AZ::ShaderCompiler
         AstEnumeratorDecl*         m_declNodeEnum = nullptr;
         UnqualifiedName            m_identifier;
         bool                       m_srgMember = false;
-        bool                       m_isPublic = true;
+        bool                       m_isPublic = true;  // this isn't class access visibility, this is for generated fields
         ConstNumericVal            m_constVal;   // (attempted folded) initializer value for simple scalars
         optional<SamplerStateDesc> m_samplerState;
         ExtendedTypeInfo           m_typeInfoExt;
@@ -644,6 +644,14 @@ namespace AZ::ShaderCompiler
         unordered_map<size_t, IdentifierUID> m_argCounts; //!< number of parameters as keys to a unique candidate that has this count.
     };
 
+    //! This is a small state machine for function registration step tracking (e.g. decl, decl, def)
+    enum FunctionMultiForwards
+    {
+        FMF_None,  // no redundant declarators
+        FMF_FwdDeclRedundancy,  // at least one redundant declarators (warning has been produced)
+        FMF_SeenDef  // now encountered definition block
+    };
+
     struct FunctionInfo
     {
         //! tells if the FunctionInfo object hasn't been initialized
@@ -782,6 +790,7 @@ namespace AZ::ShaderCompiler
         bool                      m_isVirtual    = false;     //!< is a method from an interface
         vector< IdentifierUID >   m_overrides;                //!< list of implementing functions in child classes
         optional< IdentifierUID > m_base;   //!< points to the overridden function in the base interface, if applies. only supports one base
+        FunctionMultiForwards     m_multiFwds    = FMF_None;  //!< presence of redundant prototype-only declarations
         struct Parameter
         {
             IdentifierUID m_varId;
