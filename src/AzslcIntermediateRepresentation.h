@@ -14,7 +14,6 @@
 
 namespace AZ::ShaderCompiler
 {
-
     //! We limit the maximum number of render targets to 8, with indices in the range [0..7]
     static const uint32_t kMaxRenderTargets = 8;
 
@@ -304,12 +303,6 @@ namespace AZ::ShaderCompiler
         // Returns info for the last variable inside the struct or class named @structUid.
         // If @structUid is not struct or class, then it returns nullptr.
         IdentifierUID GetLastMemberVariable(const IdentifierUID& structUid);
-
-        //! Determine a heurisitcal global order between options in the program, using "impacted code size" static analysis.
-        void AnalyzeOptionRanks();
-
-        //! Estimate a score proportional to how much code is "child" to the AST node at `location`
-        int AnalyzeImpact(TokensLocation const& location);
 
         // the maps of all variables, functions, etc, from the source code (things with declarations and a name).
         SymbolAggregator      m_symbols;

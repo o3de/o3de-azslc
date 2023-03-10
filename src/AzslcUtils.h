@@ -958,15 +958,22 @@ namespace AZ::ShaderCompiler
         return UnqualifiedName{ctx->Name->getText()};
     }
 
-    template <typename ParentType>
-    bool Is3ParentRuleOfType(antlr4::ParserRuleContext* ctx)
+    //! Get a pointer to the first parent that happens to be of type `SearchType`
+    //! with a limit depth of `maxDepth` parents to search through
+    template <typename SearchType>
+    SearchType DeepParentAs(tree::ParseTree* ctx, int maxDepth)
     {
-        if (ctx == nullptr || ctx->parent == nullptr || ctx->parent->parent == nullptr)  // input canonicalization
+        if (auto* searchTypeNode = As<SearchType>(ctx))
         {
-            return false;
+            return searchTypeNode;
         }
-        auto threeUp = ctx->parent->parent->parent;
-        return dynamic_cast<ParentType>(threeUp);
+        return maxDepth <= 0 || !ctx ? nullptr : DeepParentAs<SearchType>(ctx->parent, maxDepth - 1);
+    }
+
+    template <typename ParentType>
+    bool Is3ParentRuleOfType(tree::ParseTree* ctx)
+    {
+        return DeepParentAs<ParentType>(ctx, 3);
     }
 
     // is def

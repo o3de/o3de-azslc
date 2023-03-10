@@ -630,6 +630,8 @@ namespace AZ::ShaderCompiler
     void CodeReflection::DumpVariantList(const Options& options) const
     {
         m_out << GetVariantList(options);
+        m_out << "\n";
+        AnalyzeOptionRanks();
     }
 
     static void ReflectBinding(Json::Value& output, const RootSigDesc::SrgParamDesc& bindInfo)
@@ -857,7 +859,8 @@ namespace AZ::ShaderCompiler
         for (auto& seenat : kindInfo->GetSeenats())
         {
             assert(uid == seenat.m_referredDefinition);
-            // TODO: the assumption that intervals where distinct doesnt hold anymore now that we have unnamed scopes
+            // careful of the invariant: distinct intervals. (can't support functions nested in functions nor imbricated block scopes)
+            // ok for now because AZSL/HLSL don't have lambdas
             auto intervalIter = FindInterval(scopes, seenat.m_where.m_focusedTokenId, [](ssize_t key, auto& value)
                                              {
                                                  return value.first.properlyContains({key, key});
@@ -909,16 +912,9 @@ namespace AZ::ShaderCompiler
         uint32_t numOf32bitConst  = GetNumberOf32BitConstants(options, m_ir->m_rootConstantStructUID);
         RootSigDesc rootSignature = BuildSignatureDescription(options, numOf32bitConst);
 
-        // prepare a lookup acceleration data structure for reverse mapping tokens to scopes.
-        MapOfBeginToSpanAndUid scopeStartToFunctionIntervals;
-        for (auto& [uid, interval] : m_ir->m_scope.m_scopeIntervals)
-        {
-            if (m_ir->GetKind(uid) == Kind::Function)  // Filter out unnamed blocs and types. We need a set of disjoint intervals as an invariant for the next algorithm.
-            {
-                // the reason to choose .a as the key is so we can query using Infimum (sort of lower_bound)
-                scopeStartToFunctionIntervals[interval.a] = std::make_pair(interval, uid);
-            }
-        }
+        // Prepare a lookup acceleration data structure for reverse mapping tokens to scopes.
+        // (truth: we need a set of disjoint intervals as an invariant for the following algorithm)
+        GenerateScopeStartToFunctionIntervalsReverseMap();
 
         Json::Value srgRoot(Json::objectValue);
         // Order the reflection by SRG for convenience
@@ -968,7 +964,7 @@ namespace AZ::ShaderCompiler
                     else
                     {
                         set<IdentifierUID> dependencyList;
-                        DiscoverTopLevelFunctionDependencies(srgParam.m_uid, dependencyList, scopeStartToFunctionIntervals);
+                        DiscoverTopLevelFunctionDependencies(srgParam.m_uid, dependencyList, m_functionIntervals);
                         srgMember[srgParam.m_uid.GetNameLeaf()] = makeJsonNodeForOneResource(dependencyList, srgParam, {});
                     }
                 }
@@ -981,7 +977,7 @@ namespace AZ::ShaderCompiler
                     for (auto& srgConstant : srgInfo->m_implicitStruct.GetMemberFields())
                     {
                         allConstants.append({ srgConstant.GetNameLeaf() });
-                        DiscoverTopLevelFunctionDependencies(srgConstant, dependencyList, scopeStartToFunctionIntervals);
+                        DiscoverTopLevelFunctionDependencies(srgConstant, dependencyList, m_functionIntervals);
                     }
                     // variant fallback support
                     if (srgInfo->m_shaderVariantFallback)
@@ -992,7 +988,7 @@ namespace AZ::ShaderCompiler
                         {
                             if (varSub->CheckHasStorageFlag(StorageFlag::Option))
                             {
-                                DiscoverTopLevelFunctionDependencies(varUid, dependencyList, scopeStartToFunctionIntervals);
+                                DiscoverTopLevelFunctionDependencies(varUid, dependencyList, m_functionIntervals);
                             }
                         }
                     }
@@ -1003,5 +999,127 @@ namespace AZ::ShaderCompiler
         }
 
         m_out << srgRoot;
+    }
+
+    void CodeReflection::AnalyzeOptionRanks() const
+    {
+        // make sure we have the function scope lookup cache ready
+        GenerateScopeStartToFunctionIntervalsReverseMap();
+        // loop over variables
+        for (auto& [uid, varInfo, kindInfo] : m_ir->m_symbols.GetOrderedSymbolsOfSubType_3<VarInfo>())
+        {
+            // only options
+            if (varInfo->CheckHasStorageFlag(StorageFlag::Option))
+            {
+                int impactScore = 0;
+                // loop over appearances over the program
+                for (Seenat& ref : kindInfo->GetSeenats())
+                {
+                    // determine an impact score
+                    impactScore += AnalyzeImpact(ref.m_where)  // dependent code that may be skipped depending on the value of that ref
+                        + 1;  // by virtue of being mentioned (seenat), we count the reference as an access of cost 1.
+                }
+                m_out << "Option " << uid.GetName() << " has impact " << impactScore << "\n";
+            }
+        }
+    }
+
+    int CodeReflection::AnalyzeImpact(TokensLocation const& location) const
+    {
+        // find the node at `location`:
+        ParserRuleContext* node = m_ir->m_tokenMap.GetNode(location.m_focusedTokenId);
+        // go up tree to meet a block node that has visitable depth:
+        // can be any of if/for/while/switch
+        //  4 is an arbitrary depth, enough to search up things like `for (a, b<(ref+1), c)` binary op->braces->cmp expr->cond->for
+        if (auto* whileNode = DeepParentAs<azslParser::WhileStatementContext*>(node->parent, 3))
+        {
+            node = whileNode->embeddedStatement();
+        }
+        else if (auto* ifNode = DeepParentAs<azslParser::IfStatementContext*>(node->parent, 3))
+        {
+            node = ifNode->embeddedStatement();
+        }
+        else if (auto* forNode = DeepParentAs<azslParser::ForStatementContext*>(node->parent, 4))
+        {
+            node = forNode->embeddedStatement();
+        }
+        else if (auto* switchNode = DeepParentAs<azslParser::SwitchStatementContext*>(node->parent, 3))
+        {
+            node = switchNode->switchBlock();
+        }
+        int score = 0;
+        AnalyzeImpact(node, score);
+        return score;
+    }
+
+    void CodeReflection::AnalyzeImpact(ParserRuleContext* astNode, int& scoreAccumulator) const
+    {
+        for (auto& c : astNode->children)
+        {
+            if (auto* callNode = As<azslParser::FunctionCallExpressionContext*>(c))
+            {
+                // get function score in FunctionInfo if cached, compute it and store if not.
+                // to access the function symbol info we need the current scope, the function call name and perform a lookup.
+                auto intervalIter = FindInterval(m_functionIntervals, (ssize_t)callNode->start->getTokenIndex(),
+                                                 [](ssize_t key, auto& value)
+                                                 {
+                                                     return value.first.properlyContains({key, key});
+                                                 });
+                if (intervalIter != m_functionIntervals.cend())
+                {
+                    const IdentifierUID& encloser = intervalIter->second.second;
+                    // lookup function at AST node `callNode` from scope `encloser`
+                    if (auto* idExpr = As<azslParser::IdentifierExpressionContext*>(callNode->Expr))
+                    {
+                        UnqualifiedName funcName = ExtractNameFromIdExpression(idExpr->idExpression());
+                        m_ir->m_sema.ResolveOverload(
+                        IdAndKind* symbolMeantUnderCallNode = m_ir->m_symbols.LookupSymbol(encloser.GetName(), funcName);
+                        auto* funcInfo = symbolMeantUnderCallNode->second.GetSubAs<FunctionInfo>();
+                        if (funcInfo->m_costScore == -1)
+                        {
+                            funcInfo->m_costScore = 0;
+                            using AstFDef = azslParser::HlslFunctionDefinitionContext;
+                            AnalyzeImpact(polymorphic_downcast<AstFDef*>(funcInfo->m_defNode->parent)->block(),
+                                          funcInfo->m_costScore);  // recurse and cache if not already done
+                        }
+                        scoreAccumulator += funcInfo->m_costScore;
+                    }
+                    // other cases forfeited for now, but that would at least be braces (f)() or MAE x.m()
+                }
+                else // no interval found
+                {
+                    // function calls outside of function bodies can appear in an initializer:
+                    //    int g_a = MakeA();  // global init
+                    //    class C { int m_a = CompA();  // constructor init (invalid AZSL/HLSL)
+                    //    class D { void Method(int a_a = DefaultA());  // default parameter value
+                    // in any case, extracting the scope is impossible with this system.
+                    // we forfeit evaluation of a score
+                }
+            }
+            else if (auto* node = As<ParserRuleContext*>(c))
+            {
+                AnalyzeImpact(node, scoreAccumulator); // recurse down to make sure to capture embedded calls, like e.g. "x ? f() : 0;"
+            }
+            if (auto* leaf = As<tree::TerminalNode*>(c))
+            {
+                // determine cost by number of full expressions separated by semicolon
+                scoreAccumulator += leaf->getSymbol()->getType() == azslLexer::Semi;
+            }
+        }
+    }
+
+    void CodeReflection::GenerateScopeStartToFunctionIntervalsReverseMap() const
+    {
+        if (m_functionIntervals.empty())
+        {
+            for (auto& [uid, interval] : m_ir->m_scope.m_scopeIntervals)
+            {
+                if (m_ir->GetKind(uid) == Kind::Function)  // Filter out unnamed blocs and types.
+                {
+                    // the reason to choose .a as the key is so we can query using Infimum (sort of lower_bound)
+                    m_functionIntervals[interval.a] = std::make_pair(interval, uid);
+                }
+            }
+        }
     }
 }

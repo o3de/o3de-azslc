@@ -791,6 +791,7 @@ namespace AZ::ShaderCompiler
         vector< IdentifierUID >   m_overrides;                //!< list of implementing functions in child classes
         optional< IdentifierUID > m_base;   //!< points to the overridden function in the base interface, if applies. only supports one base
         FunctionMultiForwards     m_multiFwds    = FMF_None;  //!< presence of redundant prototype-only declarations
+        int                       m_costScore    = -1;        //!< heuristical static analysis of the amount of instructions contained
         struct Parameter
         {
             IdentifierUID m_varId;

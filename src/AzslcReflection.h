@@ -11,6 +11,8 @@
 
 namespace AZ::ShaderCompiler
 {
+    using MapOfBeginToSpanAndUid = map<ssize_t, pair< misc::Interval, IdentifierUID> >;
+
     struct CodeReflection : Backend
     {
         CodeReflection(IntermediateRepresentation* ir, TokenStream* tokens, std::ostream& out)
@@ -45,6 +47,9 @@ namespace AZ::ShaderCompiler
         //! @param options  user configuration parsed from command line
         void DumpResourceBindingDependencies(const Options& options) const;
 
+        //! Determine a heurisitcal global order between options in the program, using "impacted code size" static analysis.
+        void AnalyzeOptionRanks() const;
+
     private:
 
         //! Builds member variable packing information and adds it to the membersContainer
@@ -63,7 +68,6 @@ namespace AZ::ShaderCompiler
 
         bool BuildOMStruct(const ExtendedTypeInfo& returnTypeRef, string_view semanticOverride, Json::Value& jsonVal, int& semanticIndex) const;
 
-        using MapOfBeginToSpanAndUid = map<ssize_t, pair< misc::Interval, IdentifierUID> >;
         //! Populate a list of functions where a symbol appear as potentially used
         //! @param uid      The symbol to start the dependency analysis on
         //! @param output   Any dependency symbol will be appended to this set
@@ -74,6 +78,16 @@ namespace AZ::ShaderCompiler
         bool IsNonOverloaded(const IdentifierUID& uid) const;
 
         bool IsPotentialEntryPoint(const IdentifierUID& uid) const;
+
+        // Estimate a score proportional to how much code is "child" to the AST node at `location`
+        int AnalyzeImpact(TokensLocation const& location) const;
+
+        // Recursive internal detail version
+        void AnalyzeImpact(ParserRuleContext* astNode, int& scoreAccumulator) const;
+
+        //! Useful for static analysis on dependencies or option ranks
+        void GenerateScopeStartToFunctionIntervalsReverseMap() const;
+        mutable MapOfBeginToSpanAndUid m_functionIntervals; //< cache for the result of above function call
 
         std::ostream& m_out;
     };

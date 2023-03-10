@@ -1277,7 +1277,6 @@ namespace AZ::ShaderCompiler
         const ICodeEmissionMutator* codeMutator = m_codeMutator;
 
         ssize_t ii = interval.a;
-        bool wasInPreprocessorDirective = false;  // record a state to detect exit of directives, because they need to reside on their own lines
         while (ii <= interval.b)
         {
             auto* token = GetNextToken(ii /*inout*/);

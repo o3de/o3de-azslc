@@ -332,7 +332,6 @@ namespace AZ::ShaderCompiler
                 cout << "  storage: " << sub.m_typeInfoExt.m_qualifiers.GetDisplayName() << "\n";
                 cout << "  array dim: \"" << sub.m_typeInfoExt.m_arrayDims.ToString() << "\"\n";
                 cout << "  has sampler state: " << (sub.m_samplerState ? "yes\n" : "no\n");
-                cout << "\n";
                 if (!holds_alternative<monostate>(sub.m_constVal))
                 {
                     cout << "  val: " << ExtractValueAsInt64(sub.m_constVal) << "\n";
@@ -950,30 +949,4 @@ namespace AZ::ShaderCompiler
         }
         return memberList[memberList.size() - 1];
     }
-
-    void IntermediateRepresentation::AnalyzeOptionRanks()
-    {
-        // loop over variables
-        for (auto& [uid, varInfo, kindInfo] : m_symbols.GetOrderedSymbolsOfSubType_3<VarInfo>())
-        {
-            // only options
-            if (varInfo->CheckHasStorageFlag(StorageFlag::Option))
-            {
-                int impactScore = 0;
-                // loop over appearances over the program
-                for (Seenat& ref : kindInfo->GetSeenats())
-                {
-                    // determine an impact score
-                    impactScore += AnalyzeImpact(ref.m_where);
-                }
-            }
-        }
-    }
-
-    int IntermediateRepresentation::AnalyzeImpact(TokensLocation const& location)
-    {
-        // find the node at location:
-        return 0;
-    }
-
 }  // end of namespace AZ::ShaderCompiler
