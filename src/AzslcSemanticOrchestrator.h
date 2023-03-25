@@ -222,6 +222,9 @@ namespace AZ::ShaderCompiler
         auto TypeofExpr(azslParser::LiteralExpressionContext* ctx) const -> QualifiedName;
         auto TypeofExpr(azslParser::LiteralContext* ctx) const -> QualifiedName;
         auto TypeofExpr(azslParser::CommaExpressionContext* ctx) const -> QualifiedName;
+        auto TypeofExpr(azslParser::PostfixUnaryExpressionContext* ctx) const -> QualifiedName;
+        auto TypeofExpr(azslParser::PrefixUnaryExpressionContext* ctx) const -> QualifiedName;
+        auto TypeofExpr(azslParser::BinaryExpressionContext* ctx) const -> QualifiedName;
 
         //! Parse the AST from a variable declaration and attempt to extract array dimensions integer constants [dim1][dim2]...
         //! Return: <true> on success, <false> otherwise
@@ -330,7 +333,7 @@ namespace AZ::ShaderCompiler
         {
             auto typeId      = LookupType(typeNameOrCtx, policy);
             auto tClass      = GetTypeClass(typeId);
-            auto arithmetic  = IsNonGenericArithmetic(tClass) ? CreateArithmeticTypeInfo(typeId.GetName()) : ArithmeticTypeInfo{}; // TODO: canonicalize generics
+            auto arithmetic  = IsNonGenericArithmetic(tClass) ? CreateArithmeticTraits(typeId.GetName()) : ArithmeticTraits{}; // TODO: canonicalize generics
             return TypeRefInfo{typeId, arithmetic, tClass};
         }
 

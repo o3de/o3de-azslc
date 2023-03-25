@@ -260,24 +260,36 @@ namespace AZ::ShaderCompiler
         return result;
     }
 
-    /// Rows and Cols (this is specific to shader languages to identify vector and matrix types)
-    struct ArithmeticTypeInfo
+    /// Verifies that our hardcoded strings don't have typo, by checking against the lexer-extracted keywords stored in the Scalar array.
+    inline bool CheckExistScalarType(string_view scalarName)
     {
-        void ResolveSize()
+        return std::find(Predefined::Scalar.begin(),
+                         Predefined::Scalar.end(),
+                         scalarName) != Predefined::Scalar.end();
+    };
+
+    /// Assert validity of the type string, and form a "?<type>" tainted string to host a scalar type
+    inline QualifiedName MangleScalarType(string_view typeName)
+    {
+        assert(CheckExistScalarType(typeName));
+        return QualifiedName{"?" + string{typeName}};
+    };
+
+    /// Rows and Cols (this is specific to shader languages to identify vector and matrix types)
+    struct ArithmeticTraits
+    {
+        void ResolveBaseSizeAndRank()
         {
-            m_size = Packing::PackedSizeof(m_underlyingScalar);
+            m_baseSize = Packing::PackedSizeof(m_underlyingScalar);
+
+            
+            
         }
 
-        /// Get the size of a single base element
-        const uint32_t GetBaseSize() const
-        {
-            return m_size;
-        }
-
-                /// Get the size of a the element with regard to dimensions as well
+        /// Get the size of the whole type considering dimensions
         const uint32_t GetTotalSize() const
         {
-            return m_size * (m_cols > 0 ? m_cols : 1) * (m_rows > 0 ? m_rows : 1);
+            return m_baseSize * (m_cols > 0 ? m_cols : 1) * (m_rows > 0 ? m_rows : 1);
         }
 
         /// True if the type is a vector type. If it's a vector type it cannot be a matrix as well.
@@ -310,10 +322,11 @@ namespace AZ::ShaderCompiler
                 AZ::ShaderCompiler::Predefined::Scalar[m_underlyingScalar] : "<NA>";
         }
 
-        uint32_t m_size = 0;                     // In bytes. Size of 0 indicates TypeRefInfo which hasn't been resolved or is a struct
-        uint32_t m_rows = 0;                     // 0 means it's not a matrix (effective Rows = 1). 1 or more means a Matrix
-        uint32_t m_cols = 0;                     // 0 means it's not a vector (effective Cols = 1). 1 or more means a Vector or Matrix
-        int      m_underlyingScalar = -1;        // index into AZ::ShaderCompiler::Predefined::Scalar, all fundamentals end up in a scalar at its leaf.
+        uint32_t m_baseSize = 0;                 //< In bytes. Size of 0 indicates TypeRefInfo which hasn't been resolved or is a struct
+        uint32_t m_rows = 0;                     //< 0 means it's not a matrix (effective Rows = 1). 1 or more means a Matrix
+        uint32_t m_cols = 0;                     //< 0 means it's not a vector (effective Cols = 1). 1 or more means a Vector or Matrix
+        int      m_conversionRank = 0;           //< Used in conversions and promotions
+        int      m_underlyingScalar = -1;        //< Index into AZ::ShaderCompiler::Predefined::Scalar, all fundamentals end up in a scalar at its leaf.
     };
 
     //! TypeRefInfo holds resolved immutable information of a core type (the `matrix2x2` in `column_major matrix2x2 a[3];`)
@@ -323,7 +336,7 @@ namespace AZ::ShaderCompiler
     struct TypeRefInfo
     {
         TypeRefInfo() = default;
-        TypeRefInfo(IdentifierUID typeId, const ArithmeticTypeInfo& fundamentalInfo, TypeClass typeClass)
+        TypeRefInfo(IdentifierUID typeId, const ArithmeticTraits& fundamentalInfo, TypeClass typeClass)
             : m_arithmeticInfo{fundamentalInfo},
               m_typeClass{typeClass},
               m_typeId{typeId}
@@ -359,19 +372,19 @@ namespace AZ::ShaderCompiler
             return !operator==(lhs,rhs);
         }
 
-        IdentifierUID       m_typeId;
-        TypeClass           m_typeClass;
-        ArithmeticTypeInfo  m_arithmeticInfo;
+        IdentifierUID     m_typeId;
+        TypeClass         m_typeClass;
+        ArithmeticTraits  m_arithmeticInfo;
     };
 
     //! Run a syntactic analysis of an arithmetic type name and extract info on its composition
-    inline ArithmeticTypeInfo CreateArithmeticTypeInfo(QualifiedName a_typeName)
+    inline ArithmeticTraits CreateArithmeticTraits(QualifiedName a_typeName)
     {
         assert(IsArithmetic( /*slow*/AnalyzeTypeClass(TentativeName{a_typeName}) ));  // no need to call this function if you don't have a fundamental (non void)
         assert(!IsGenericArithmetic( /*slow*/AnalyzeTypeClass(TentativeName{a_typeName}) ));
         // ↑ fatal aspect. The input needs to be canonicalized earlier to minimize this function's complexity.
 
-        ArithmeticTypeInfo toReturn;
+        ArithmeticTraits toReturn;
 
         string typeName = UnMangle(a_typeName);
         size_t baseTypeLen = typeName.length();
@@ -422,7 +435,7 @@ namespace AZ::ShaderCompiler
         auto it = ::std::find(AZ::ShaderCompiler::Predefined::Scalar.begin(), AZ::ShaderCompiler::Predefined::Scalar.end(), baseType);
         assert(it != AZ::ShaderCompiler::Predefined::Scalar.end()); // baseType must exist in the Scalar bag by program invariant.
         toReturn.m_underlyingScalar = static_cast<int>( std::distance(AZ::ShaderCompiler::Predefined::Scalar.begin(), it) );
-        toReturn.ResolveSize();
+        toReturn.ResolveBaseSizeAndRank();
         return toReturn;
     }
 

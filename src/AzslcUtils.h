@@ -1047,6 +1047,13 @@ namespace AZ::ShaderCompiler
         return found ? found->argumentList() : nullptr;
     }
 
+    //! access the argument count at a function call site (from the AST)
+    inline size_t NumArgs(azslParser::FunctionCallExpressionContext* callCtx)
+    {
+        azslParser::ArgumentsContext* argsNode = callCtx->argumentList()->arguments();
+        return argsNode ? argsNode->expression().size() : 0;
+    }
+
     //! try to find a specific context type that this context would be a child of.
     template <typename LookedUp>
     inline LookedUp* ExtractSpecificParent(antlr4::ParserRuleContext* ctx)

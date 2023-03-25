@@ -1166,13 +1166,33 @@ namespace AZ::ShaderCompiler
                                      As<azslParser::AssignmentExpressionContext*>(ctx),
                                      As<azslParser::NumericConstructorExpressionContext*>(ctx),
                                      As<azslParser::LiteralExpressionContext*>(ctx),
-                                     As<azslParser::LiteralContext*>(ctx));
+                                     As<azslParser::LiteralContext*>(ctx),
+                                     As<azslParser::PrefixUnaryExpressionContext*>(ctx),
+                                     As<azslParser::PostfixUnaryExpressionContext*>(ctx));
         }
         catch (AllNull&)
         {
             verboseCout << ctx->start->getLine() << ": unsupported expression in typeof: " << typeid(ctx).name() << "\n";
             return {"<fail>"};
         }
+    }
+
+    QualifiedName SemanticOrchestrator::TypeofExpr(azslParser::PrefixUnaryExpressionContext* ctx) const
+    {
+        // among all possibilities Plus|Minus|Not|Tilde|PlusPlus|MinusMinus
+        // only "Not" returns a bool, the rest is transparent and returns the same type as rhs
+        return ctx->prefixUnaryOperator()->start->getType() == azslLexer::Not ? MangleScalarType("bool")
+            : TypeofExpr(ctx->Expr);
+    }
+
+    QualifiedName SemanticOrchestrator::TypeofExpr(azslParser::PostfixUnaryExpressionContext* ctx) const
+    {
+        return TypeofExpr(ctx->Expr); // in case of x++ or x-- the type is the type of x.
+    }
+
+    QualifiedName SemanticOrchestrator::TypeofExpr(azslParser::BinaryExpressionContext* ctx) const
+    {
+        return TypeofExpr(ctx->Expr);
     }
 
     QualifiedName SemanticOrchestrator::TypeofExpr(azslParser::ExpressionExtContext* ctx) const
@@ -1303,29 +1323,23 @@ namespace AZ::ShaderCompiler
 
     QualifiedName SemanticOrchestrator::TypeofExpr(azslParser::LiteralContext* ctx) const
     {
-        // verifies that our hardcoded strings don't have typo, by checking against the lexer-extracted keywords stored in the Scalar array.
-        auto checkExistType = [](string_view scalarName){return std::find(AZ::ShaderCompiler::Predefined::Scalar.begin(), AZ::ShaderCompiler::Predefined::Scalar.end(), scalarName) != AZ::ShaderCompiler::Predefined::Scalar.end();};
         // verifies that last or 1-before-last characters are a particular literal suffix. like in "56ul"
         auto hasSuffix = [](auto node, char s){return tolower(node->getText().back()) == s || tolower(Slice(node->getText(), -3, -2) == s);};
-        auto checkAndReturn = [&](string_view typeName)
-                              {
-                                  assert(checkExistType(typeName));
-                                  return QualifiedName{"?" + string{typeName}};
-                              };
+
         if (ctx->True() || ctx->False())
         {
-            return checkAndReturn("bool");
+            return MangleScalarType("bool");
         }
         else if (auto* literal = ctx->IntegerLiteral())
         {
-            return hasSuffix(literal, 'u') ? checkAndReturn("uint")
-                 : checkAndReturn("int");
+            return hasSuffix(literal, 'u') ? MangleScalarType("uint")
+                 : MangleScalarType("int");
         }
         else if (auto* literal = ctx->FloatLiteral())
         {
-            return hasSuffix(literal, 'h') ? checkAndReturn("half")
-                 : hasSuffix(literal, 'l') ? checkAndReturn("double")
-                 : checkAndReturn("float");
+            return hasSuffix(literal, 'h') ? MangleScalarType("half")
+                 : hasSuffix(literal, 'l') ? MangleScalarType("double")
+                 : MangleScalarType("float");
         }
         return {"<fail>"};
     }

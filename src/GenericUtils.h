@@ -379,14 +379,14 @@ namespace AZ
     // Is-One-Of will check if a variable is equal to any of the values listed on the other parameters.
     // Example: IsOneOf(variableKind, Function, Enumeration) is short for: variableKind == Function || variableKind == Enumeration.
     // 2 arguments count: recursion terminal overload.
-    template <typename T>
-    bool IsOneOf(T value, T tocheck)
+    template <typename T, typename U>
+    bool IsOneOf(T value, U tocheck)
     {
         return value == tocheck;
     }
     // Any argument count version
-    template <typename T, typename... Args>
-    bool IsOneOf(T value, T khead, Args... tail)
+    template <typename T, typename U, typename... Args>
+    bool IsOneOf(T value, U khead, Args... tail)
     {
         return value == khead || IsOneOf(value, tail...);
     }

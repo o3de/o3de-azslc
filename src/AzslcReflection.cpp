@@ -1072,17 +1072,63 @@ namespace AZ::ShaderCompiler
                     if (auto* idExpr = As<azslParser::IdentifierExpressionContext*>(callNode->Expr))
                     {
                         UnqualifiedName funcName = ExtractNameFromIdExpression(idExpr->idExpression());
-                        m_ir->m_sema.ResolveOverload(
-                        IdAndKind* symbolMeantUnderCallNode = m_ir->m_symbols.LookupSymbol(encloser.GetName(), funcName);
-                        auto* funcInfo = symbolMeantUnderCallNode->second.GetSubAs<FunctionInfo>();
-                        if (funcInfo->m_costScore == -1)
+                        IdAndKind* overload = m_ir->m_symbols.LookupSymbol(encloser.GetName(), funcName);
+                        if (!overload) // in case of function not found, we assume it's an intrinsic.
                         {
-                            funcInfo->m_costScore = 0;
-                            using AstFDef = azslParser::HlslFunctionDefinitionContext;
-                            AnalyzeImpact(polymorphic_downcast<AstFDef*>(funcInfo->m_defNode->parent)->block(),
-                                          funcInfo->m_costScore);  // recurse and cache if not already done
+                            if (IsOneOf(funcName, "CallShader", "TraceRay"))
+                            { // non measurable but assumed high
+                                scoreAccumulator += 50;
+                            }
+                            else if (IsOneOf(funcName, "InterlockedCompareStore", "InterlockedCompareExchange", "InterlockedExchange", "Append"))
+                            { // hardware locked memory ops, high weight
+                                scoreAccumulator += 10;
+                            }
+                            else if (IsOneOf(funcName, "Sample", "Load"))
+                            { // memory access is weighted in between
+                                scoreAccumulator += 5;
+                            }
+                            else
+                            { // unlisted intrinsics like lerp, log2, cos, distance.. will default to a cost of 1.
+                                scoreAccumulator += 1;
+                            }
                         }
-                        scoreAccumulator += funcInfo->m_costScore;
+                        else
+                        {
+                            azslParser::ArgumentListContext* args = GetArgumentListIfBelongsToFunctionCall(callNode);
+                            IdAndKind* symbolMeantUnderCallNode = m_ir->m_sema.ResolveOverload(overload, args);
+                            IdentifierUID concrete;
+                            if (!symbolMeantUnderCallNode || m_ir->GetKind(symbolMeantUnderCallNode->first) == Kind::OverloadSet)
+                            { // in case of strict selection failure, run a fuzzy select
+                                size_t numArgs = NumArgs(callNode);
+                                overload->second.GetSubAs<OverloadSetInfo>()->AnyOf(
+                                    [&](IdentifierUID const& uid)
+                                    {
+                                        auto* concreteFcInfo = m_ir->GetSymbolSubAs<FunctionInfo>(uid.GetName());
+                                        size_t numParams = concreteFcInfo->GetParameters(true).size();
+                                        if (numParams == numArgs)
+                                        {
+                                            concrete = uid;
+                                            return true;
+                                        }
+                                        return false;
+                                    }
+                                );
+                                // if still not enough to get a fix, it might be an ill-formed input. prefer to forfeit
+                            }
+                            else
+                            {
+                                concrete = symbolMeantUnderCallNode->first;
+                            }
+                            auto* funcInfo = m_ir->GetSymbolSubAs<FunctionInfo>(concrete.GetName());
+                            if (funcInfo->m_costScore == -1)
+                            {
+                                funcInfo->m_costScore = 0;
+                                using AstFDef = azslParser::HlslFunctionDefinitionContext;
+                                AnalyzeImpact(polymorphic_downcast<AstFDef*>(funcInfo->m_defNode->parent)->block(),
+                                              funcInfo->m_costScore);  // recurse and cache if not already done
+                            }
+                            scoreAccumulator += funcInfo->m_costScore;
+                        }
                     }
                     // other cases forfeited for now, but that would at least be braces (f)() or MAE x.m()
                 }
