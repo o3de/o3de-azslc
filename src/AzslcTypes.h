@@ -281,9 +281,46 @@ namespace AZ::ShaderCompiler
         void ResolveBaseSizeAndRank()
         {
             m_baseSize = Packing::PackedSizeof(m_underlyingScalar);
-
-            
-            
+            // establish the conversion rank:
+            auto getIndex = [](string_view s) -> int
+            {
+                auto const& Scalars = Predefined::Scalar;
+                return ::std::distance(Scalars.begin(),
+                                       ::std::find(Scalars.begin(), Scalars.end(), s));
+            };
+            // According to https://en.cppreference.com/w/cpp/language/usual_arithmetic_conversions
+            //   - No two signed have the same rank (even if same siezeof)
+            //   - rank of unsigned = rank of corresponding signed
+            //   - "standard" is > "extended" of same sizeof
+            //   - The rank of bool is the smallest
+            // That said, we will take inspiration from ASTContext::getIntegerRank of clang
+            // (which does not respect C++ visibly, since it takes bool's size into account, or has many equivalent ranks, in violation of rule 1)
+            static const unordered_map<int, int> subranks =
+            {
+                {getIndex("bool"), 1},
+                {getIndex("int16_t"), 2},
+                {getIndex("uint16_t"), 3}, // unsigned wins in case of subrank draw, according to arithmetic conversion rules
+                {getIndex("int"), 4},
+                {getIndex("uint"), 5},
+                {getIndex("dword"), 6},
+                {getIndex("int32_t"), 7},
+                {getIndex("uint32_t"), 8},
+                {getIndex("int64_t"), 9},
+                {getIndex("uint64_t"), 10},
+                {getIndex("half"), 11 << 5},  // floats win all conversions, even halfs
+                {getIndex("float"), 12 << 5},
+                {getIndex("double"), 13 << 5},
+            };
+            // `basesize` getter, but 1 for bool: (physical size of extern bool is considered 32bits in HLSL)
+            auto getRankSizeof = [&](int scalarId)
+            {
+                assert(string_view{"bool"} == Predefined::Scalar[0]);  // verify that 0 is the hard index of bool.
+                bool isBool = scalarId == 0;
+                return isBool ? 1 : m_baseSize;
+            };
+            // The shift method is taken from clang, I suppose it's a multi-parameter order cramed into bits.
+            // so because 10 is the largest subrank, shift by 4 should separate sizeof space and subank space.
+            m_conversionRank = (getRankSizeof(m_underlyingScalar) << 4) + subranks.at(m_underlyingScalar);
         }
 
         /// Get the size of the whole type considering dimensions

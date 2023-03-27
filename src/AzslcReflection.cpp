@@ -589,7 +589,7 @@ namespace AZ::ShaderCompiler
             else if (varInfo.GetTypeClass() == TypeClass::Enum)
             {
                 auto* asClassInfo = m_ir->GetSymbolSubAs<ClassInfo>(varInfo.GetTypeId().GetName());
-                size = asClassInfo->Get<EnumerationInfo>()->m_underlyingType.m_arithmeticInfo.GetBaseSize();
+                size = asClassInfo->Get<EnumerationInfo>()->m_underlyingType.m_arithmeticInfo.m_baseSize;
             }
 
             offset = Packing::PackNextChunk(layoutPacking, size, startAt);

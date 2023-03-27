@@ -248,7 +248,7 @@ namespace AZ::ShaderCompiler
         //! Get the size of a single element, ignoring array dimensions
         const uint32_t GetSingleElementSize(Packing::Layout layout, bool defaultRowMajor) const
         {
-            auto baseSize = m_coreType.m_arithmeticInfo.GetBaseSize();
+            auto baseSize = m_coreType.m_arithmeticInfo.m_baseSize;
             bool isRowMajor = (m_mtxMajor == Packing::MatrixMajor::RowMajor ||
                               (m_mtxMajor == Packing::MatrixMajor::Default && defaultRowMajor));
             auto rows = m_coreType.m_arithmeticInfo.m_rows;

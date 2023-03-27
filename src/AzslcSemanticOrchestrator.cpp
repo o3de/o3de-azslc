@@ -1168,7 +1168,8 @@ namespace AZ::ShaderCompiler
                                      As<azslParser::LiteralExpressionContext*>(ctx),
                                      As<azslParser::LiteralContext*>(ctx),
                                      As<azslParser::PrefixUnaryExpressionContext*>(ctx),
-                                     As<azslParser::PostfixUnaryExpressionContext*>(ctx));
+                                     As<azslParser::PostfixUnaryExpressionContext*>(ctx),
+                                     As<azslParser::BinaryExpressionContext*>(ctx));
         }
         catch (AllNull&)
         {
@@ -1192,7 +1193,24 @@ namespace AZ::ShaderCompiler
 
     QualifiedName SemanticOrchestrator::TypeofExpr(azslParser::BinaryExpressionContext* ctx) const
     {
-        return TypeofExpr(ctx->Expr);
+        using lex = azslLexer;
+        auto boolResultOperators = {lex::Less, lex::Greater, lex::LessEqual, lex::GreaterEqual, lex::NotEqual, lex::AndAnd, lex::OrOr};
+        if (IsIn(ctx->binaryOperator()->start->getType(), boolResultOperators))
+        {
+            return MangleScalarType("bool");
+        }
+        QualifiedName lhs = TypeofExpr(ctx->Left);
+        QualifiedName rhs = TypeofExpr(ctx->Right);
+        TypeRefInfo typeInfoLhs = CreateTypeRefInfo(UnqualifiedNameView{lhs});  // We tolerate a cast here because GetTypeRefInfo was designed to lookup types, but TypeofExpr has already looked up the type.
+        TypeRefInfo typeInfoRhs = CreateTypeRefInfo(UnqualifiedNameView{rhs});
+        if (typeInfoLhs.m_arithmeticInfo.IsEmpty() || typeInfoRhs.m_arithmeticInfo.IsEmpty())
+        {   // Case that shouldn't work in AZSL yet (but may work in HLSL2021)
+            // -> UDT operator. need operator overloading. We assume type is type of left expression.
+            return lhs;
+        }
+        // final logic in case of arithmetic type class: integer/float promotion.
+        return typeInfoLhs.m_arithmeticInfo.m_conversionRank > typeInfoRhs.m_arithmeticInfo.m_conversionRank ?
+            lhs : rhs;
     }
 
     QualifiedName SemanticOrchestrator::TypeofExpr(azslParser::ExpressionExtContext* ctx) const
