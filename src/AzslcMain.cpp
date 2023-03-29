@@ -23,8 +23,8 @@ namespace StdFs = std::filesystem;
 // For large features or milestones. Minor version allows for breaking changes. Existing tests can change.
 #define AZSLC_MINOR "8"   // last change: introduction of class inheritance
 // For small features or bug fixes. They cannot introduce breaking changes. Existing tests shouldn't change.
-#define AZSLC_REVISION "16"  // last change: fixup runtime error with redundant function declarations
-                    // "15"          change: add min in option value key-extracter's function for range & enum
+#define AZSLC_REVISION "17"  // last change: fixup alignment check logic_error because of lack of an inter-scope check limiter.
+                    // "16"          change: fixup runtime error with redundant function declarations
 
 namespace AZ::ShaderCompiler
 {
