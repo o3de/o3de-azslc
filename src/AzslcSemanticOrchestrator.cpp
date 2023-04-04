@@ -1205,12 +1205,37 @@ namespace AZ::ShaderCompiler
         TypeRefInfo typeInfoRhs = CreateTypeRefInfo(UnqualifiedNameView{rhs});
         if (typeInfoLhs.m_arithmeticInfo.IsEmpty() || typeInfoRhs.m_arithmeticInfo.IsEmpty())
         {   // Case that shouldn't work in AZSL yet (but may work in HLSL2021)
-            // -> UDT operator. need operator overloading. We assume type is type of left expression.
+            // -> UDT operator (would need support of operator overloading).
+            // We assume type is type of left expression.
+            // (what we really need to do is go get the return type of the overloaded operator)
             return lhs;
         }
+        // After this is, both sides are arithmetic types (scalar, vector, matrix).
+        // matrix op vector is a forbidden case,
+        //  e.g it won't do Y=MX (m*v->v), nor dotproduct-ing vectors for that matter (v*v->scalar)
+        // It will do component to component op and return more or less the same type.
+        // In case of dimension differences, it will truncate to smaller type
+        //  e.g float2 + float3 results in float2 with .z lost in implicit cast
+        //      same for float2x3 * float2x2 (results in float2x2)
+        // We assume that for * + - / % ^ | & << >>
+        bool lhsIsVecMat = typeInfoLhs.m_typeClass.IsOneOf(TypeClass::Vector, TypeClass::Matrix);
+        bool rhsIsVecMat = typeInfoRhs.m_typeClass.IsOneOf(TypeClass::Vector, TypeClass::Matrix);
+        if (lhsIsVecMat !=/*xor*/ rhsIsVecMat)
+        {
+            auto scalarOperand = lhsIsVecMat ? typeInfoRhs : typeInfoLhs;
+            auto vecmatOperand = lhsIsVecMat ? typeInfoLhs : typeInfoRhs;
+            // typeof(vecmat op scalar)->promoted(vecmat)
+            return vecmatOperand.m_arithmeticInfo.PromoteTruncateWith(scalarOperand.m_arithmeticInfo).GenTypeId();
+        }
+        //else if (lhsIsVecMat && rhsIsVecMat)
+        {
+            // typeof(vecmat op vecmat)->promoted(truncated(vecmat))
+            return typeInfoLhs.m_arithmeticInfo.PromoteTruncateWith(typeInfoRhs.m_arithmeticInfo).GenTypeId();
+        }
+        // case left: both sides are scalar.
         // final logic in case of arithmetic type class: integer/float promotion.
-        return typeInfoLhs.m_arithmeticInfo.m_conversionRank > typeInfoRhs.m_arithmeticInfo.m_conversionRank ?
-            lhs : rhs;
+        //return typeInfoLhs.m_arithmeticInfo.m_conversionRank > typeInfoRhs.m_arithmeticInfo.m_conversionRank ?
+        //    lhs : rhs;
     }
 
     QualifiedName SemanticOrchestrator::TypeofExpr(azslParser::ExpressionExtContext* ctx) const

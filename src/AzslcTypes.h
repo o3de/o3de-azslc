@@ -275,7 +275,7 @@ namespace AZ::ShaderCompiler
         return QualifiedName{"?" + string{typeName}};
     };
 
-    /// Rows and Cols (this is specific to shader languages to identify vector and matrix types)
+    //! Holds arithmetic-type-class information in small pieces (row, cols, base, size, rank...)
     struct ArithmeticTraits
     {
         void ResolveBaseSizeAndRank()
@@ -294,7 +294,6 @@ namespace AZ::ShaderCompiler
             //   - "standard" is > "extended" of same sizeof
             //   - The rank of bool is the smallest
             // That said, we will take inspiration from ASTContext::getIntegerRank of clang
-            // (which does not respect C++ visibly, since it takes bool's size into account, or has many equivalent ranks, in violation of rule 1)
             static const unordered_map<int, int> subranks =
             {
                 {getIndex("bool"), 1},
@@ -319,17 +318,17 @@ namespace AZ::ShaderCompiler
                 return isBool ? 1 : m_baseSize;
             };
             // The shift method is taken from clang, I suppose it's a multi-parameter order cramed into bits.
-            // so because 10 is the largest subrank, shift by 4 should separate sizeof space and subank space.
+            // so because 10 is the largest subrank, shift by 4 should separate sizeof space and subrank space.
             m_conversionRank = (getRankSizeof(m_underlyingScalar) << 4) + subranks.at(m_underlyingScalar);
         }
 
-        /// Get the size of the whole type considering dimensions
+        //! Get the size of the whole type considering dimensions
         const uint32_t GetTotalSize() const
         {
             return m_baseSize * (m_cols > 0 ? m_cols : 1) * (m_rows > 0 ? m_rows : 1);
         }
 
-        /// True if the type is a vector type. If it's a vector type it cannot be a matrix as well.
+        //! True if the type is a vector type. If it's a vector type it cannot be a matrix as well.
         const bool IsVector() const
         {
             // This treats special cases like 2x1, 3x1 and 4x1 as vectors
@@ -337,7 +336,7 @@ namespace AZ::ShaderCompiler
             return (m_cols == 1 && m_rows > 1) || (m_cols > 1 && m_rows == 0);
         }
 
-        /// True if the type is a matrix type. If it's a matrix type it cannot be a vector as well.
+        //! True if the type is a matrix type. If it's a matrix type it cannot be a vector as well.
         const bool IsMatrix() const
         {
             // This fails special cases like 2x1, 3x1 and 4x1,
@@ -346,17 +345,60 @@ namespace AZ::ShaderCompiler
             return m_rows > 0 && m_cols > 1;
         }
 
-        /// If initialized as a fundamental -> not empty.
+        //! If initialized as a fundamental -> not empty.
         const bool IsEmpty() const
         {
             return m_underlyingScalar == -1;
         }
 
-        // for pretty print
+        //! For pretty print
         string UnderlyingScalarToStr() const
         {
             return m_underlyingScalar >= 0 && m_underlyingScalar < AZ::ShaderCompiler::Predefined::Scalar.size() ?
                 AZ::ShaderCompiler::Predefined::Scalar[m_underlyingScalar] : "<NA>";
+        }
+
+        //! Create a canonicalized mangled name that should represent the identity of this arithmetic type.
+        QualifiedName GenTypeId() const
+        {
+            if (IsMatrix())
+            {
+                return QualifiedName{MangleScalarType(UnderlyingScalarToStr()) + ToString(m_rows) + "x" + ToString(m_cols)};
+            }
+            else if (IsVector())
+            {
+                return QualifiedName{MangleScalarType(UnderlyingScalarToStr()) + (m_rows > 0 ? ToString(m_rows) : ToString(m_cols))};
+            }
+            else
+            {
+                return QualifiedName{MangleScalarType(UnderlyingScalarToStr())};
+            }
+        }
+
+        //! Create a new arithmetic traits promoted by necessity (through a binary operation usually)
+        //! of compatibility with a second operand of arithmetic typeclass.
+        //! For example: type(half{} + int{})->half
+        //!              type(float3x3{} * double{})->double3x3
+        //! And with columns & rows truncated to the smallest operand,
+        //!   as part of the implicit necessary cast for operation compatibility.
+        ArithmeticTraits PromoteTruncateWith(const ArithmeticTraits& secondOperand) const
+        {
+            ArithmeticTraits copy{*this};
+            // The higher ranking underlying wins independently of global object size
+            if (secondOperand.m_conversionRank > m_conversionRank)
+            {
+                copy.m_underlyingScalar = secondOperand.m_underlyingScalar;
+            }
+            if (secondOperand.m_rows > 0 && m_rows > 0)
+            {
+                copy.m_rows = std::min(m_rows, secondOperand.m_rows);
+            }
+            if (secondOperand.m_cols > 0 && m_cols > 0)
+            {
+                copy.m_cols = std::min(m_cols, secondOperand.m_cols);
+            }
+            copy.ResolveBaseSizeAndRank();
+            return copy;
         }
 
         uint32_t m_baseSize = 0;                 //< In bytes. Size of 0 indicates TypeRefInfo which hasn't been resolved or is a struct
