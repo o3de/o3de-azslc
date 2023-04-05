@@ -323,13 +323,13 @@ namespace AZ::ShaderCompiler
         }
 
         //! Get the size of the whole type considering dimensions
-        const uint32_t GetTotalSize() const
+        uint32_t GetTotalSize() const
         {
             return m_baseSize * (m_cols > 0 ? m_cols : 1) * (m_rows > 0 ? m_rows : 1);
         }
 
         //! True if the type is a vector type. If it's a vector type it cannot be a matrix as well.
-        const bool IsVector() const
+        bool IsVector() const
         {
             // This treats special cases like 2x1, 3x1 and 4x1 as vectors
             // The behavior is consistent with dxc packing rules
@@ -337,7 +337,7 @@ namespace AZ::ShaderCompiler
         }
 
         //! True if the type is a matrix type. If it's a matrix type it cannot be a vector as well.
-        const bool IsMatrix() const
+        bool IsMatrix() const
         {
             // This fails special cases like 2x1, 3x1 and 4x1,
             //   but allows cases like 1x2, 1x3 and 1x4.
@@ -345,8 +345,13 @@ namespace AZ::ShaderCompiler
             return m_rows > 0 && m_cols > 1;
         }
 
-        //! If initialized as a fundamental -> not empty.
-        const bool IsEmpty() const
+        bool IsScalar() const
+        {
+            return m_rows <= 1 && m_cols <= 1;  // float, float1, float1x1 are scalars.
+        }
+
+        //! Non-created state
+        bool IsEmpty() const
         {
             return m_underlyingScalar == -1;
         }
@@ -373,32 +378,6 @@ namespace AZ::ShaderCompiler
             {
                 return QualifiedName{MangleScalarType(UnderlyingScalarToStr())};
             }
-        }
-
-        //! Create a new arithmetic traits promoted by necessity (through a binary operation usually)
-        //! of compatibility with a second operand of arithmetic typeclass.
-        //! For example: type(half{} + int{})->half
-        //!              type(float3x3{} * double{})->double3x3
-        //! And with columns & rows truncated to the smallest operand,
-        //!   as part of the implicit necessary cast for operation compatibility.
-        ArithmeticTraits PromoteTruncateWith(const ArithmeticTraits& secondOperand) const
-        {
-            ArithmeticTraits copy{*this};
-            // The higher ranking underlying wins independently of global object size
-            if (secondOperand.m_conversionRank > m_conversionRank)
-            {
-                copy.m_underlyingScalar = secondOperand.m_underlyingScalar;
-            }
-            if (secondOperand.m_rows > 0 && m_rows > 0)
-            {
-                copy.m_rows = std::min(m_rows, secondOperand.m_rows);
-            }
-            if (secondOperand.m_cols > 0 && m_cols > 0)
-            {
-                copy.m_cols = std::min(m_cols, secondOperand.m_cols);
-            }
-            copy.ResolveBaseSizeAndRank();
-            return copy;
         }
 
         uint32_t m_baseSize = 0;                 //< In bytes. Size of 0 indicates TypeRefInfo which hasn't been resolved or is a struct
@@ -516,6 +495,36 @@ namespace AZ::ShaderCompiler
         toReturn.m_underlyingScalar = static_cast<int>( std::distance(AZ::ShaderCompiler::Predefined::Scalar.begin(), it) );
         toReturn.ResolveBaseSizeAndRank();
         return toReturn;
+    }
+
+    //! Create a new arithmetic traits promoted by necessity (through a binary operation usually)
+    //! of compatibility with a second operand of arithmetic typeclass.
+    //! For example: type(half{} + int{})->half
+    //!              type(float3x3{} * double{})->double3x3
+    //! And with columns & rows truncated to the smallest operand,
+    //!   as part of the implicit necessary cast for operation compatibility.
+    inline ArithmeticTraits PromoteTruncateWith(Pair<ArithmeticTraits> operands)
+    {
+        auto [_1, _2] = operands;
+        // put the scalar last (will be useful later if there is only one scalar operand)
+        SwapIf(_1, _2, _1.IsScalar());
+        // now, let's construct the result in _1
+
+        if (_2.m_conversionRank > _1.m_conversionRank) // the higher ranking underlying wins; independently of full object size
+        {
+            _1.m_underlyingScalar = _2.m_underlyingScalar;
+        }
+        // cases: scalar-scalar : no dim change
+        //        vecmat-scalar : no dim change, since result is dim(vecmat) which is in _1
+        //        scalar-vecmat : impossible (sorted by swap above)
+        //        vecmat-vecmat : min(_1,_2)
+        if (!_1.IsScalar() && !_2.IsScalar())
+        {
+            _1.m_rows = std::min(_1.m_rows, _2.m_rows);
+            _1.m_cols = std::min(_1.m_cols, _2.m_cols);
+        }
+        _1.ResolveBaseSizeAndRank();
+        return _1;
     }
 
     MAKE_REFLECTABLE_ENUM(RootParamType,

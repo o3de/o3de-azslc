@@ -624,6 +624,15 @@ namespace AZ
         RemoveDuplicatesKeepOrder(lhs);
     }
 
+    //! Conditional swap algorithm
+    template<typename T>
+    void SwapIf(T&& a, T&& b, bool condition)
+    {
+        if (condition)
+        {
+            std::swap(std::forward<T>(a), std::forward<T>(b));
+        }
+    }
 }
 
 #ifndef NDEBUG
