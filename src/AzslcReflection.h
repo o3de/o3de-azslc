@@ -85,6 +85,9 @@ namespace AZ::ShaderCompiler
         // Recursive internal detail version
         void AnalyzeImpact(ParserRuleContext* astNode, int& scoreAccumulator) const;
 
+        // Function-call specific
+        void AnalyzeImpact(azslParser::FunctionCallExpressionContext* callNode, int& scoreAccumulator) const;
+
         //! Useful for static analysis on dependencies or option ranks
         void GenerateScopeStartToFunctionIntervalsReverseMap() const;
         mutable MapOfBeginToSpanAndUid m_functionIntervals; //< cache for the result of above function call

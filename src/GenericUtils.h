@@ -24,9 +24,9 @@ namespace AZ
     {
         using runtime_error::runtime_error;
     };
-    // Type-heterogeneity-preserving multi pointer object single visitor.
-    // Returns whatever the passed functor would.
-    // Throws if all passed objects are null.
+    //! Type-heterogeneity-preserving multi pointer object single visitor.
+    //! Returns whatever the passed functor would.
+    //! Throws if all passed objects are null.
     template <typename Lambda, typename T>
     invoke_result_t<Lambda, T*> VisitFirstNonNull(Lambda functor, T* object) noexcept(false)
     {
@@ -50,9 +50,9 @@ namespace AZ
         }
     }
 
-    // Create substring views of views. Works like python slicing operator [n:m] with limited modulo semantics.
-    // what I ultimately desire is the range v.3 feature eg `letters[{2,end-2}]`
-    // http://ericniebler.com/2014/12/07/a-slice-of-python-in-c/
+    //! Create substring views of views. Works like python slicing operator [n:m] with limited modulo semantics.
+    //! what I ultimately desire is the range v.3 feature eg `letters[{2,end-2}]`
+    //! http://ericniebler.com/2014/12/07/a-slice-of-python-in-c/
     inline constexpr string_view Slice(const string_view& in, int64_t st, int64_t end)
     {
         auto inSSize = (int64_t)in.size();
@@ -107,8 +107,8 @@ namespace AZ
     //https://developercommunity.visualstudio.com/content/problem/275141/c2131-expression-did-not-evaluate-to-a-constant-fo.html
     }
 
-    // ability to create size_t literals
-    // waiting for Working Group to get their stuff together https://groups.google.com/a/isocpp.org/forum/#!topic/std-proposals/tGoPjUeHlKo
+    //! ability to create size_t literals
+    //! waiting for Working Group to get their stuff together https://groups.google.com/a/isocpp.org/forum/#!topic/std-proposals/tGoPjUeHlKo
     inline constexpr std::size_t operator ""_sz(unsigned long long n)
     {
         return n;
@@ -145,7 +145,7 @@ namespace AZ
         return fileName.substr(0, lastIndex);
     }
 
-    // debug-build asserted dyn_cast, otherwise, release-build static_cast (idea from boost library)
+    //! debug-build asserted dyn_cast, otherwise, release-build static_cast (idea from boost library)
     template <typename To, typename From>
     To polymorphic_downcast(From instance)
     {
@@ -157,7 +157,7 @@ namespace AZ
         return static_cast<To>(instance);
     }
 
-    /// surround a string with a prefix and a suffix
+    //! surround a string with a prefix and a suffix
     inline string Decorate(string_view prefix, string_view body, string_view suffix)
     {
         std::stringstream ss;
@@ -167,13 +167,13 @@ namespace AZ
         return ss.str();
     }
 
-    /// 2 arguments version in case both sides are the same
+    //! 2 arguments version in case both sides are the same
     inline string Decorate(string_view prefixAndSuffix, string_view body)
     {
         return Decorate(prefixAndSuffix, body, prefixAndSuffix);
     }
 
-    /// reverse the effect of a symmetrical decoration
+    //! reverse the effect of a symmetrical decoration
     inline string_view Undecorate(string_view decoration, string_view body)
     {
         auto indexStart = StartsWith(body, decoration) ? decoration.length() : 0;
@@ -181,7 +181,7 @@ namespace AZ
         return Slice(body, indexStart, indexEnd);
     }
 
-    // Erase-Remove algorithm which removes all whitespaces from a string.
+    //! Erase-Remove algorithm which removes all whitespaces from a string.
     inline string RemoveWhitespaces(string haystack)
     {
         haystack.erase(std::remove_if(haystack.begin(), haystack.end(), [](unsigned char c) {return std::isspace(c); }), haystack.end());
@@ -193,14 +193,14 @@ namespace AZ
         return std::all_of(s.begin(), s.end(), [&](char c) { return std::isspace(c); });
     }
 
-    /// tells whether a position in a string is surrounded by round braces
-    /// e.g. true  for arguments {"a(b)", 2}
-    /// e.g. true  for arguments {"a()", 1}  by convention
-    /// e.g. false for arguments {"a()", 2}  by convention
-    /// e.g. false for arguments {"a(b)", 0}
-    /// e.g. false for arguments {"a(b)c", 4}
-    /// e.g. false for arguments {"a(b)c(d)", 4}
-    /// e.g. true  for arguments {"a((b)c(d))", 5}
+    //! tells whether a position in a string is surrounded by round braces
+    //! e.g. true  for arguments {"a(b)", 2}
+    //! e.g. true  for arguments {"a()", 1}  by convention
+    //! e.g. false for arguments {"a()", 2}  by convention
+    //! e.g. false for arguments {"a(b)", 0}
+    //! e.g. false for arguments {"a(b)c", 4}
+    //! e.g. false for arguments {"a(b)c(d)", 4}
+    //! e.g. true  for arguments {"a((b)c(d))", 5}
     inline bool WithinMatchedParentheses(string_view haystack, size_t charPosition)
     {
         const auto hayLen = haystack.length();
@@ -215,8 +215,8 @@ namespace AZ
         return nesting > 0;
     }
 
-    /// replace all occurrences of substring `sub` with substring `to` within haystack.
-    ///  e.g: Replace("aaa#aaa", "#", "_") gives-> "aaa_aaa"
+    //! replace all occurrences of substring `sub` with substring `to` within haystack.
+    //!  e.g: Replace("aaa#aaa", "#", "_") gives-> "aaa_aaa"
     inline string Replace(string haystack, string_view sub, string_view to)
     {
         decltype(sub.length()) pos = 0;
@@ -230,7 +230,7 @@ namespace AZ
         return haystack;
     }
 
-    // this one is inspired by the docopt utilities. trims whitespace by default, but can be used to trim quotes.
+    //! this one is inspired by the docopt utilities. trims whitespace by default, but can be used to trim quotes.
     constexpr inline string_view Trim(string_view haystack, string_view toTrim = " \t\n")
     {
         const auto strEnd = haystack.find_last_not_of(toTrim);
@@ -268,32 +268,54 @@ namespace AZ
         return std::find_if(begin, end, p) != end;
     }
 
-    /// argument in rangeV3-style version:
+    //! argument in rangeV3-style version:
     template< typename Container >
     string Join(const Container& c, string_view separator = "")
     {
         return Join(c.begin(), c.end(), separator);
     }
 
-    /// argument in rangeV3-style version:
+    //! argument in rangeV3-style version:
     template< typename Container, typename Predicate >
     bool Contains(const Container& c, Predicate p)
     {
         return Contains(c.begin(), c.end(), p);
     }
 
-    /// closest possible form of python's `in` keyword
+    //! closest possible form of python's `in` keyword
     template< typename Element, typename Container >
     bool IsIn(const Element& element, const Container& container)
     {
         return std::find(container.begin(), container.end(), element) != container.end();
     }
 
-    /// generate a new container with copy-and-mutated elements
+    //! generate a new container with copy-and-mutated elements
     template< typename Container, typename ContainerOut, typename Functor >
     void TransformCopy(const Container& in, ContainerOut& out, Functor mutator)
     {
         std::transform(in.begin(), in.end(), std::back_inserter(out), mutator);
+    }
+
+    enum class CopyIfPolicy { ForAll, InterruptAtFirstFalse };
+
+    //! inserts elements into the output iterator if they pass a predicate
+    template< typename InputIterator, typename Predicate, typename OutputIterator >
+    void CopyIf(InputIterator begin, InputIterator end,
+                Predicate pred,
+                OutputIterator out,
+                CopyIfPolicy policy)
+    {
+        for (auto it = begin; it != end; ++it)
+        {
+            if (pred(*it))
+            {
+                *out = *it;
+            }
+            else if (policy == CopyIfPolicy::InterruptAtFirstFalse)
+            {
+                break;
+            }
+        }
     }
 
     inline string Unescape(string_view escapedText)
@@ -531,7 +553,7 @@ namespace AZ
 #endif
     }
 
-    /// Log(N) find immediate lower element query in map-keys
+    //! Log(N) query to find the first immediately lower or equal element in a map's keys
     template< typename T, typename U >
     auto Infimum(map<T, U> const& ctr, T query)
     {
@@ -539,27 +561,98 @@ namespace AZ
         return it == ctr.begin() ? ctr.cend() : --it;
     }
 
-    /// Log(N) disjointed segments belong query
-    /// You can represent segments as you wish, as long as:
-    ///   you provide the predicate to determine belonging.
-    ///   map-keys are segment start points.
-    ///   segments don't overlap.
-    /// returns: iterator to found interval key, or cend()
+    //! Log(N) disjointed segments belong query
+    //! You can represent segments as you wish, as long as:
+    //!   you provide the predicate to determine belonging.
+    //!   map-keys are segment start points.
+    //!   segments don't overlap.
+    //! returns: iterator to found interval key, or cend()
     template< typename T, typename U, typename IntervalCheckPredicate >
-    auto FindInterval(const map<T, U>& ctr, const T& query, IntervalCheckPredicate&& isInIntervalPredicate)
+    auto FindIntervalInDisjointSet(const map<T, U>& ctr, const T& query, IntervalCheckPredicate&& isInIntervalPredicate)
     {
         auto inf = Infimum(ctr, query);
-        return inf == ctr.end() ? ctr.cend() : (isInIntervalPredicate(query, inf->second) ? inf : ctr.cend());
+        bool isInInterval = inf != ctr.cend() && isInIntervalPredicate(query, inf->second);
+        return isInInterval ? inf : ctr.cend();
     }
 
-    /// Log(N) disjointed segments belong query
-    /// segments are represented by their start points in the key, and last point in values. segments can't overlap.
-    /// returns: iterator to found interval key, or cend()
+    //! Log(N) disjointed segments belong query
+    //! segments are represented by their start points in the key, and last point in values. segments can't overlap.
+    //! returns: iterator to found interval key, or cend()
     template< typename T, typename U>
-    auto FindInterval(const map<T, U>& ctr, const T& query)
+    auto FindIntervalInDisjointSet(const map<T, U>& ctr, const T& query)
     {
-        return FindInterval(ctr, query, [](T q, U last) {return q <= last; });
+        return FindIntervalInDisjointSet(ctr, query, [](T q, U last) {return q <= last; });
     }
+
+    template< typename T >
+    struct Interval
+    {
+        bool IsEmpty() const { return b < a; }
+        bool operator== (Interval const& rhs) const { return a == rhs.a && b == rhs.b; }
+        bool operator< (Interval const& rhs) const { return a < rhs.a || (a == rhs.a && b < rhs.b); }
+        T a = (T)0;
+        T b = (T)-1;
+    };
+
+    //! In case of potential overlaps (not disjointed), this structure can support "is in" queries
+    template< typename T >
+    struct IntervalCollection
+    {
+        using Interval = Interval<T>;
+
+        //! Construction from an iterable collection of Interval typed elements
+        template< typename Iterator >
+        IntervalCollection(Iterator&& begin, Iterator&& end)
+            : m_obfirsts(begin, end), m_oblasts(begin, end)
+        {
+            std::sort(m_obfirsts.begin(), m_obfirsts.end(), [](auto i1, auto i2)
+                      {
+                          return i1.a < i2.a;
+                      });
+            std::sort(m_oblasts.begin(), m_oblasts.end(), [](auto i1, auto i2)
+                      {
+                          return i1.b < i2.b;
+                      });
+        }
+
+        //! Retrieve the subset of intervals activated by a point (query)
+        set<Interval> GetIntervalsSurrounding(T query)
+        {
+            // construct the set of intervals starting before:
+            set<Interval> startBefore;
+            CopyIf(m_obfirsts.begin(), m_obfirsts.end(),
+                   [=](auto interv) { return interv.a <= query; },
+                   std::inserter(startBefore, startBefore.end()),
+                   CopyIfPolicy::InterruptAtFirstFalse);  // because the obfirsts vector is sorted
+
+            // construct the set of intervals ending after:
+            set<Interval> endAfter;
+            CopyIf(m_oblasts.rbegin(), m_oblasts.rend(),  // reverse iteration
+                   [=](auto interv) { return interv.b >= query; },
+                   std::inserter(endAfter, endAfter.end()),
+                   CopyIfPolicy::InterruptAtFirstFalse);
+
+            set<Interval> result;
+            std::set_intersection(startBefore.begin(), startBefore.end(),
+                                  endAfter.begin(), endAfter.end(),
+                                  std::inserter(result, result.end()));
+            return result;
+        }
+
+        //! Get the interval surrounding query that has the closest start point to query.
+        //! In case of an interval collection representing a tree, that is,
+        //! each overlapping interval is fully contained in the bigger one,
+        //! the closest start is guaranteed to be the most "leaf" interval.
+        //! This is useful for scopes.
+        Interval GetClosestIntervalSurrounding(T query)
+        {
+            auto bag = GetIntervalsSurrounding(query);
+            return bag.empty() ? Interval{-1, -2} : *bag.rbegin();
+        }
+
+        vector<Interval> m_obfirsts;  // ordered by "firsts"
+        vector<Interval> m_oblasts;   // ordered by "lasts"
+    };
 
     template< typename Deduced >
     decltype(auto) CastToRValueReference(Deduced&& value)
@@ -567,7 +660,7 @@ namespace AZ
         return static_cast<std::remove_reference_t<Deduced>&&>(value);
     }
 
-    /// add a missing operator for convenience and shortness of code
+    //! add a missing operator for convenience and shortness of code
     inline bool operator == (string_view lhs, char rhs)
     {
         return lhs.length() == 1 && lhs[0] == rhs;
@@ -713,10 +806,10 @@ namespace AZ::Tests
             assert(yellow == intervals.cend());
             auto larger_than_all = Infimum(intervals, 15);
             assert(larger_than_all->first == 8);
-            assert(FindInterval(intervals, 4) != intervals.cend());
-            assert(FindInterval(intervals, 6) == intervals.cend());
-            assert(FindInterval(intervals, 8) != intervals.cend());
-            assert(FindInterval(intervals, 1) == intervals.cend());
+            assert(FindIntervalInDisjointSet(intervals, 4) != intervals.cend());
+            assert(FindIntervalInDisjointSet(intervals, 6) == intervals.cend());
+            assert(FindIntervalInDisjointSet(intervals, 8) != intervals.cend());
+            assert(FindIntervalInDisjointSet(intervals, 1) == intervals.cend());
 
             auto high = Infimum(intervals, 20);
             assert(high->first == 8);
@@ -734,6 +827,21 @@ namespace AZ::Tests
 
         assert(IsIn("hibou", std::initializer_list<const char*>{ "chouette", "hibou", "jay" }));
         assert(!IsIn("hibou", std::initializer_list<const char*>{ "chouette", "jay" }));
+
+        Interval<int> intvs[] = {{0,10}, {1,5}, {3,3}, {7,9}, {12,15}};
+        IntervalCollection<int> ic{std::begin(intvs), std::end(intvs)};
+        assert(ic.GetClosestIntervalSurrounding(-3).IsEmpty());
+        assert((ic.GetClosestIntervalSurrounding(0) == Interval<int>{0,10}));
+        assert((ic.GetClosestIntervalSurrounding(1) == Interval<int>{1,5}));
+        assert((ic.GetClosestIntervalSurrounding(3) == Interval<int>{3,3}));
+        assert((ic.GetClosestIntervalSurrounding(4) == Interval<int>{1,5}));
+        assert((ic.GetClosestIntervalSurrounding(6) == Interval<int>{0,10}));
+        assert((ic.GetClosestIntervalSurrounding(5) == Interval<int>{1,5}));
+        assert((ic.GetClosestIntervalSurrounding(7) == Interval<int>{7,9}));
+        assert((ic.GetClosestIntervalSurrounding(9) == Interval<int>{7,9}));
+        assert(ic.GetClosestIntervalSurrounding(11).IsEmpty());
+        assert((ic.GetClosestIntervalSurrounding(13) == Interval<int>{12,15}));
+        assert(ic.GetClosestIntervalSurrounding(16).IsEmpty());
     }
 }
 #endif

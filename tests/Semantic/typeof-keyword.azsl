@@ -19,7 +19,7 @@ top gettop();
 
 class A
 {
-	int a;
+    int a;
 };
 
 class B : A
@@ -83,16 +83,14 @@ void h()
     //   NumericConstructorExpression  float2(0,0)
     //   LiteralExpression             42
     //   CommaExpression               X, Y
-    // not supported:
     //   PostfixUnaryExpression        i++
     //   PrefixUnaryExpression         ++i
     //   BinaryExpression              i + j
-    // e.g. typeof(1 + 3) = <fail>
 
-     // mathematics
+    // mathematics
     __azslc_print_message("@check predicate ");
     __azslc_print_symbol(typeof(1 + 3), __azslc_prtsym_least_qualified);
-    __azslc_print_message(" == '<fail>'\n");
+    __azslc_print_message(" == 'int'\n");
 
     // literals
     __azslc_print_message("@check predicate ");
@@ -186,7 +184,7 @@ void h()
     __azslc_print_symbol(typeof(top::inner), __azslc_prtsym_fully_qualified);
     __azslc_print_message(" == '/top/inner'\n");
 
-	// class inheritance: parent member access using scope resolution operator
+    // class inheritance: parent member access using scope resolution operator
     __azslc_print_message("@check predicate ");
     __azslc_print_symbol(typeof(B::a), __azslc_prtsym_least_qualified);
     __azslc_print_message(" == 'int'\n");
@@ -445,4 +443,110 @@ void h()
     __azslc_print_message("@check predicate ");
     __azslc_print_symbol(typeof(INTVAR, INTVAR, DOUBLEVAR), __azslc_prtsym_least_qualified);
     __azslc_print_message(" == 'double'\n");
+
+    // binary arithmetic expression
+    __azslc_print_message("@check predicate ");
+    __azslc_print_symbol(typeof(1 + 1), __azslc_prtsym_least_qualified);
+    __azslc_print_message(" == 'int'\n");
+
+    // with float promotion
+    __azslc_print_message("@check predicate ");
+    __azslc_print_symbol(typeof(1 + 1.f), __azslc_prtsym_least_qualified);
+    __azslc_print_message(" == 'float'\n");
+
+    // with half promotion
+    __azslc_print_message("@check predicate ");
+    __azslc_print_symbol(typeof(1 + 1.h), __azslc_prtsym_least_qualified);
+    __azslc_print_message(" == 'half'\n");
+
+    // half and float to float promotion
+    __azslc_print_message("@check predicate ");
+    __azslc_print_symbol(typeof(1.f + 1.h), __azslc_prtsym_least_qualified);
+    __azslc_print_message(" == 'float'\n");
+
+    // int16_t to double promotion
+    __azslc_print_message("@check predicate ");
+    __azslc_print_symbol(typeof(1.l + int16_t(1)), __azslc_prtsym_least_qualified);
+    __azslc_print_message(" == 'double'\n");
+
+    // bool binary
+    __azslc_print_message("@check predicate ");
+    __azslc_print_symbol(typeof(1.l && int16_t(1)), __azslc_prtsym_least_qualified);
+    __azslc_print_message(" == 'bool'\n");
+
+    // lookedup
+    double d;
+    int64_t i64;
+    __azslc_print_message("@check predicate ");
+    __azslc_print_symbol(typeof(d || i64), __azslc_prtsym_least_qualified);
+    __azslc_print_message(" == 'bool'\n");
+
+    __azslc_print_message("@check predicate ");
+    __azslc_print_symbol(typeof(d - i64), __azslc_prtsym_least_qualified);
+    __azslc_print_message(" == 'double'\n");
+
+    // vector scalar
+    float4 f4;
+    __azslc_print_message("@check predicate ");
+    __azslc_print_symbol(typeof(2.f * f4), __azslc_prtsym_least_qualified);
+    __azslc_print_message(" == 'float4'\n");
+
+    __azslc_print_message("@check predicate ");
+    __azslc_print_symbol(typeof(f4 * 2.f), __azslc_prtsym_least_qualified);
+    __azslc_print_message(" == 'float4'\n");
+
+    __azslc_print_message("@check predicate ");
+    __azslc_print_symbol(typeof(d * f4), __azslc_prtsym_least_qualified);
+    __azslc_print_message(" == 'double4'\n");
+
+    __azslc_print_message("@check predicate ");
+    __azslc_print_symbol(typeof(f4 * d), __azslc_prtsym_least_qualified);
+    __azslc_print_message(" == 'double4'\n");
+
+    // matrix scalar
+    __azslc_print_message("@check predicate ");
+    __azslc_print_symbol(typeof(float() * float3x2()), __azslc_prtsym_least_qualified);
+    __azslc_print_message(" == 'float3x2'\n");
+
+    // matrix scalar with base type promotion
+    __azslc_print_message("@check predicate ");
+    __azslc_print_symbol(typeof(half3x2() * double()), __azslc_prtsym_least_qualified);
+    __azslc_print_message(" == 'double3x2'\n");
+
+    // truncations
+    __azslc_print_message("@check predicate ");
+    __azslc_print_symbol(typeof(float3() * float2()), __azslc_prtsym_least_qualified);
+    __azslc_print_message(" == 'float2'\n");
+
+    __azslc_print_message("@check predicate ");
+    __azslc_print_symbol(typeof(float4x4() * float2x2()), __azslc_prtsym_least_qualified);
+    __azslc_print_message(" == 'float2x2'\n");
+
+    // truncate & upcast
+    __azslc_print_message("@check predicate ");
+    __azslc_print_symbol(typeof(float4x4() * double2x2()), __azslc_prtsym_least_qualified);
+    __azslc_print_message(" == 'double2x2'\n");
+
+    // through alias
+    typealias d34m = double3x4;
+    typealias real = half;
+
+    __azslc_print_message("@check predicate ");
+    __azslc_print_symbol(typeof((d34m)0 * (real)0), __azslc_prtsym_least_qualified);
+    __azslc_print_message(" == 'double3x4'\n");
+    // note: the parser takes d32m() as a function call, this is the "most verxing parse" problem
+    //       float() is understood by the parser as a NumericConstructorExpression because it
+    //       has a list of the tokens representing all fundamental types.
+    //       but, with user defined identifiers, it can't branch into the "intended" context,
+    //       because ALL(*) Antlr4 parsers recognizes context free grammar only.
+    //       We could adopt a universal construction syntax Obj{} a la C++ for AZSL but it's not
+    //       compliant with the philosophy of not deviating from HLSL, which on its side doesn't really
+    //       accept constructor-type constructs. DXC just does it better here because clang parser is Turing complete.
+
+    d34m d34var;
+    real rVar;
+
+    __azslc_print_message("@check predicate ");
+    __azslc_print_symbol(typeof(rVar - d34var ), __azslc_prtsym_least_qualified);
+    __azslc_print_message(" == 'double3x4'\n");
 }

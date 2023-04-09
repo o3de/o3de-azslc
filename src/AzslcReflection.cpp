@@ -861,10 +861,10 @@ namespace AZ::ShaderCompiler
             assert(uid == seenat.m_referredDefinition);
             // careful of the invariant: distinct intervals. (can't support functions nested in functions nor imbricated block scopes)
             // ok for now because AZSL/HLSL don't have lambdas
-            auto intervalIter = FindInterval(scopes, seenat.m_where.m_focusedTokenId, [](ssize_t key, auto& value)
-                                             {
-                                                 return value.first.properlyContains({key, key});
-                                             });
+            auto intervalIter = FindIntervalInDisjointSet(scopes, seenat.m_where.m_focusedTokenId, [](ssize_t key, auto& value)
+                                                          {
+                                                              return value.first.properlyContains({key, key});
+                                                          });
             if (intervalIter != scopes.cend())
             {
                 const IdentifierUID& encloser = intervalIter->second.second;
@@ -1001,6 +1001,47 @@ namespace AZ::ShaderCompiler
         m_out << srgRoot;
     }
 
+    // Helper routine for option rank analysis
+    static int GuesstimateIntrinsicFunctionCost(string_view funcName)
+    {
+        if (IsOneOf(funcName, "CallShader", "TraceRay"))
+        { // non measurable but assumed high
+            return 100;
+        }
+        else if (IsOneOf(funcName, "Sample", "Load", "InterlockedCompareStore", "InterlockedCompareExchange", "InterlockedExchange", "Append"))
+        { // memory access, locked or not, will have high latency
+            return 10;
+        }
+        else
+        { // unlisted intrinsics like lerp, log2, cos, distance.. will default to a cost of 1.
+            return 1;
+        }
+    }
+
+    // Helper routine for option rank analysis. When picking AN overload is more useful than forfeiting.
+    // The function GetConcreteFunctionThatMatchesArgumentList forfeits when the overloadset contains
+    // strictly more than 1 concrete function with the queried arity. In our case, we prefer to just pick any.
+    static IdentifierUID PickAnyOverloadThatMatchesArgCount(IntermediateRepresentation* ir,
+                                                            azslParser::FunctionCallExpressionContext* callNode,
+                                                            KindInfo& overload)
+    {
+        IdentifierUID concrete;
+        size_t numArgs = NumArgs(callNode);
+        overload.GetSubAs<OverloadSetInfo>()->AnyOf(
+            [&](IdentifierUID const& uid)
+            {
+                auto* concreteFcInfo = ir->GetSymbolSubAs<FunctionInfo>(uid.GetName());
+                size_t numParams = concreteFcInfo->GetParameters(true).size();
+                if (numParams == numArgs)
+                {
+                    concrete = uid;  // we write the result through reference capture (not clean but convenient)
+                    return true;
+                }
+                return false;
+            });
+        return concrete;
+    }
+
     void CodeReflection::AnalyzeOptionRanks() const
     {
         // make sure we have the function scope lookup cache ready
@@ -1030,7 +1071,7 @@ namespace AZ::ShaderCompiler
         ParserRuleContext* node = m_ir->m_tokenMap.GetNode(location.m_focusedTokenId);
         // go up tree to meet a block node that has visitable depth:
         // can be any of if/for/while/switch
-        //  4 is an arbitrary depth, enough to search up things like `for (a, b<(ref+1), c)` binary op->braces->cmp expr->cond->for
+        //  4 is an arbitrary depth, enough to search up things like `for (a, b<(ref+1), c)` binaryop->braces->cmpexpr->cond->for
         if (auto* whileNode = DeepParentAs<azslParser::WhileStatementContext*>(node->parent, 3))
         {
             node = whileNode->embeddedStatement();
@@ -1058,89 +1099,8 @@ namespace AZ::ShaderCompiler
         {
             if (auto* callNode = As<azslParser::FunctionCallExpressionContext*>(c))
             {
-                // get function score in FunctionInfo if cached, compute it and store if not.
-                // to access the function symbol info we need the current scope, the function call name and perform a lookup.
-                auto intervalIter = FindInterval(m_functionIntervals, (ssize_t)callNode->start->getTokenIndex(),
-                                                 [](ssize_t key, auto& value)
-                                                 {
-                                                     return value.first.properlyContains({key, key});
-                                                 });
-                if (intervalIter != m_functionIntervals.cend())
-                {
-                    const IdentifierUID& encloser = intervalIter->second.second;
-                    // lookup function at AST node `callNode` from scope `encloser`
-                    if (auto* idExpr = As<azslParser::IdentifierExpressionContext*>(callNode->Expr))
-                    {
-                        UnqualifiedName funcName = ExtractNameFromIdExpression(idExpr->idExpression());
-                        IdAndKind* overload = m_ir->m_symbols.LookupSymbol(encloser.GetName(), funcName);
-                        if (!overload) // in case of function not found, we assume it's an intrinsic.
-                        {
-                            if (IsOneOf(funcName, "CallShader", "TraceRay"))
-                            { // non measurable but assumed high
-                                scoreAccumulator += 50;
-                            }
-                            else if (IsOneOf(funcName, "InterlockedCompareStore", "InterlockedCompareExchange", "InterlockedExchange", "Append"))
-                            { // hardware locked memory ops, high weight
-                                scoreAccumulator += 10;
-                            }
-                            else if (IsOneOf(funcName, "Sample", "Load"))
-                            { // memory access is weighted in between
-                                scoreAccumulator += 5;
-                            }
-                            else
-                            { // unlisted intrinsics like lerp, log2, cos, distance.. will default to a cost of 1.
-                                scoreAccumulator += 1;
-                            }
-                        }
-                        else
-                        {
-                            azslParser::ArgumentListContext* args = GetArgumentListIfBelongsToFunctionCall(callNode);
-                            IdAndKind* symbolMeantUnderCallNode = m_ir->m_sema.ResolveOverload(overload, args);
-                            IdentifierUID concrete;
-                            if (!symbolMeantUnderCallNode || m_ir->GetKind(symbolMeantUnderCallNode->first) == Kind::OverloadSet)
-                            { // in case of strict selection failure, run a fuzzy select
-                                size_t numArgs = NumArgs(callNode);
-                                overload->second.GetSubAs<OverloadSetInfo>()->AnyOf(
-                                    [&](IdentifierUID const& uid)
-                                    {
-                                        auto* concreteFcInfo = m_ir->GetSymbolSubAs<FunctionInfo>(uid.GetName());
-                                        size_t numParams = concreteFcInfo->GetParameters(true).size();
-                                        if (numParams == numArgs)
-                                        {
-                                            concrete = uid;
-                                            return true;
-                                        }
-                                        return false;
-                                    }
-                                );
-                                // if still not enough to get a fix, it might be an ill-formed input. prefer to forfeit
-                            }
-                            else
-                            {
-                                concrete = symbolMeantUnderCallNode->first;
-                            }
-                            auto* funcInfo = m_ir->GetSymbolSubAs<FunctionInfo>(concrete.GetName());
-                            if (funcInfo->m_costScore == -1)
-                            {
-                                funcInfo->m_costScore = 0;
-                                using AstFDef = azslParser::HlslFunctionDefinitionContext;
-                                AnalyzeImpact(polymorphic_downcast<AstFDef*>(funcInfo->m_defNode->parent)->block(),
-                                              funcInfo->m_costScore);  // recurse and cache if not already done
-                            }
-                            scoreAccumulator += funcInfo->m_costScore;
-                        }
-                    }
-                    // other cases forfeited for now, but that would at least be braces (f)() or MAE x.m()
-                }
-                else // no interval found
-                {
-                    // function calls outside of function bodies can appear in an initializer:
-                    //    int g_a = MakeA();  // global init
-                    //    class C { int m_a = CompA();  // constructor init (invalid AZSL/HLSL)
-                    //    class D { void Method(int a_a = DefaultA());  // default parameter value
-                    // in any case, extracting the scope is impossible with this system.
-                    // we forfeit evaluation of a score
-                }
+                // branch into an overload specialized for function lookup:
+                AnalyzeImpact(callNode, scoreAccumulator);
             }
             else if (auto* node = As<ParserRuleContext*>(c))
             {
@@ -1149,8 +1109,87 @@ namespace AZ::ShaderCompiler
             if (auto* leaf = As<tree::TerminalNode*>(c))
             {
                 // determine cost by number of full expressions separated by semicolon
-                scoreAccumulator += leaf->getSymbol()->getType() == azslLexer::Semi;
+                scoreAccumulator += leaf->getSymbol()->getType() == azslLexer::Semi;  // bool as 0 or 1 trick
             }
+        }
+    }
+
+    void CodeReflection::AnalyzeImpact(azslParser::FunctionCallExpressionContext* callNode, int& scoreAccumulator) const
+    {
+        // to access the function symbol info we need the current scope, the function call name and perform a lookup.
+
+        // figure out the scope at this token.
+        // theoretically should be something in the like of the body of another function,
+        // or an anonymous block within another function.
+        auto intervalIter = FindIntervalInDisjointSet(m_functionIntervals, (ssize_t)callNode->start->getTokenIndex(),
+                                                      [](ssize_t key, auto& value)
+                                                      {
+                                                          return value.first.properlyContains({key, key});
+                                                      });
+        if (intervalIter != m_functionIntervals.cend())
+        {
+            IdentifierUID encloser = intervalIter->second.second;
+
+            // Because we are past the end of the semantic analysis,
+            // the scope tracker is registering the last seen scope (surely "/").
+            // This is a stateful side-effect system unfortunately, and since we'll call
+            // some feature of the semantic orchestrator (like TypeofExpr) we need to hack
+            // the scope tracker:
+            m_ir->m_sema.m_scope->m_currentScopePath = encloser.GetName();
+            m_ir->m_sema.m_scope->UpdateCurScopeUID();
+
+            QualifiedName startupLookupScope = encloser.GetName();
+            UnqualifiedName funcName;
+            if (auto* idExpr = As<azslParser::IdentifierExpressionContext*>(callNode->Expr))
+            {
+                funcName = ExtractNameFromIdExpression(idExpr->idExpression());
+            }
+            else if (auto* maeExpr = As<AstMemberAccess*>(callNode->Expr))
+            {
+                startupLookupScope = m_ir->m_sema.TypeofExpr(maeExpr->LHSExpr);
+            }
+            IdAndKind* overload = m_ir->m_symbols.LookupSymbol(startupLookupScope, funcName);
+            if (!overload) // in case of function not found, we assume it's an intrinsic.
+            {
+                scoreAccumulator += GuesstimateIntrinsicFunctionCost(funcName);
+            }
+            else
+            {
+                azslParser::ArgumentListContext* args = GetArgumentListIfBelongsToFunctionCall(callNode);
+                IdAndKind* symbolMeantUnderCallNode = m_ir->m_sema.ResolveOverload(overload, args);
+                IdentifierUID concrete;
+                if (!symbolMeantUnderCallNode || m_ir->GetKind(symbolMeantUnderCallNode->first) == Kind::OverloadSet)
+                {   // in case of strict selection failure, run a fuzzy select
+                    concrete = PickAnyOverloadThatMatchesArgCount(m_ir, callNode, overload->second);
+                    // if still not enough to get a fix (concrete=={}), it might be an ill-formed input. prefer to forfeit
+                }
+                else
+                {
+                    concrete = symbolMeantUnderCallNode->first;
+                }
+
+                if (auto* funcInfo = m_ir->GetSymbolSubAs<FunctionInfo>(concrete.GetName()))
+                {
+                    if (funcInfo->m_costScore == -1)  // cost not yet discovered for this function
+                    {
+                        funcInfo->m_costScore = 0;
+                        using AstFDef = azslParser::HlslFunctionDefinitionContext;
+                        AnalyzeImpact(polymorphic_downcast<AstFDef*>(funcInfo->m_defNode->parent)->block(),
+                                      funcInfo->m_costScore);  // recurse and cache
+                    }
+                    scoreAccumulator += funcInfo->m_costScore;
+                }
+            }
+            // other cases forfeited for now, but that would at least include things like eg braces (f)()
+        }
+        else // no interval found
+        {
+            // function calls outside of function bodies can appear in an initializer:
+            //    int g_a = MakeA();  // global init
+            //    class C { int m_a = CompA();  // constructor init (invalid AZSL/HLSL)
+            //    class D { void Method(int a_a = DefaultA());  // default parameter value
+            // in any case, extracting the scope is impossible with this system.
+            // we forfeit evaluation of a score
         }
     }
 
