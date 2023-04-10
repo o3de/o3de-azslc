@@ -140,7 +140,7 @@ namespace AZ::ShaderCompiler
         {
             auto attempt = QualifiedName{JoinPath(path, name)};
             got = GetIdAndKindInfo(attempt);
-            exit = path == "/";
+            exit = path == "/" || path.empty();
             if (!got)
             {
                 if (auto* scopeAsClass = GetAsSub<ClassInfo>(IdentifierUID{GetParentName(attempt)})) // get enclosing class
