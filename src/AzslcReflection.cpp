@@ -629,9 +629,9 @@ namespace AZ::ShaderCompiler
 
     void CodeReflection::DumpVariantList(const Options& options) const
     {
+        AnalyzeOptionRanks();
         m_out << GetVariantList(options);
         m_out << "\n";
-        AnalyzeOptionRanks();
     }
 
     static void ReflectBinding(Json::Value& output, const RootSigDesc::SrgParamDesc& bindInfo)
@@ -1060,7 +1060,7 @@ namespace AZ::ShaderCompiler
                     impactScore += AnalyzeImpact(ref.m_where)  // dependent code that may be skipped depending on the value of that ref
                         + 1;  // by virtue of being mentioned (seenat), we count the reference as an access of cost 1.
                 }
-                m_out << "Option " << uid.GetName() << " has impact " << impactScore << "\n";
+                varInfo->m_estimatedCostImpact = impactScore;
             }
         }
     }

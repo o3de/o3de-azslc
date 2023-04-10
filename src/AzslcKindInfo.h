@@ -399,6 +399,7 @@ namespace AZ::ShaderCompiler
         ConstNumericVal            m_constVal;   // (attempted folded) initializer value for simple scalars
         optional<SamplerStateDesc> m_samplerState;
         ExtendedTypeInfo           m_typeInfoExt;
+        int                        m_estimatedCostImpact = -1;  //!< Cached value calculated by AnalyzeOptionRanks
     };
 
     // VarInfo methods definitions

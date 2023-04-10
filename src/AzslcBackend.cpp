@@ -449,6 +449,7 @@ namespace AZ::ShaderCompiler
             // We reserve the right to change it in the future so we make it explicit attribute here
             shaderOption["order"] = optionOrder;
             optionOrder++;
+            shaderOption["costImpact"] = varInfo->m_estimatedCostImpact;
 
             bool isUdt = IsUserDefined(varInfo->GetTypeClass());
             assert(isUdt || IsPredefinedType(varInfo->GetTypeClass()));
