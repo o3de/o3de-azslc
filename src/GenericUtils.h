@@ -600,11 +600,15 @@ namespace AZ
     {
         using Interval = Interval<T>;
 
-        //! Construction from an iterable collection of Interval typed elements
-        template< typename Iterator >
-        IntervalCollection(Iterator&& begin, Iterator&& end)
-            : m_obfirsts(begin, end), m_oblasts(begin, end)
+        void Add(Interval i)
         {
+            m_obfirsts.emplace_back(i);
+        }
+
+        //! doesn't respect RAII but for the sake of performance and convenience this is easier this way
+        void Seal()
+        {
+            m_oblasts = m_obfirsts;
             std::sort(m_obfirsts.begin(), m_obfirsts.end(), [](auto i1, auto i2)
                       {
                           return i1.a < i2.a;
@@ -613,27 +617,30 @@ namespace AZ
                       {
                           return i1.b < i2.b;
                       });
+            m_sealed = true;
         }
 
         //! Retrieve the subset of intervals activated by a point (query)
-        set<Interval> GetIntervalsSurrounding(T query)
+        set<Interval> GetIntervalsSurrounding(T query) const
         {
-            // construct the set of intervals starting before:
-            set<Interval> startBefore;
-            CopyIf(m_obfirsts.begin(), m_obfirsts.end(),
-                   [=](auto interv) { return interv.a <= query; },
-                   std::inserter(startBefore, startBefore.end()),
-                   CopyIfPolicy::InterruptAtFirstFalse);  // because the obfirsts vector is sorted
+            assert(m_sealed);
+            // find the "set" of intervals starting before:
+            auto firstsSubEnd = std::lower_bound(m_obfirsts.begin(), m_obfirsts.end(),
+                                                 query,
+                                                 [=](auto interv, T q) { return interv.a <= q; });
 
-            // construct the set of intervals ending after:
-            set<Interval> endAfter;
+            // find the "set" of intervals ending after:
+            static vector<Interval> endAfter;
+            endAfter.clear();
             CopyIf(m_oblasts.rbegin(), m_oblasts.rend(),  // reverse iteration
                    [=](auto interv) { return interv.b >= query; },
-                   std::inserter(endAfter, endAfter.end()),
+                   std::back_inserter(endAfter),
                    CopyIfPolicy::InterruptAtFirstFalse);
+            // for set_intersection to work, the less<> predicate has to work for both ranges
+            std::sort(endAfter.begin(), endAfter.end());
 
             set<Interval> result;
-            std::set_intersection(startBefore.begin(), startBefore.end(),
+            std::set_intersection(m_obfirsts.begin(), firstsSubEnd,
                                   endAfter.begin(), endAfter.end(),
                                   std::inserter(result, result.end()));
             return result;
@@ -644,7 +651,7 @@ namespace AZ
         //! each overlapping interval is fully contained in the bigger one,
         //! the closest start is guaranteed to be the most "leaf" interval.
         //! This is useful for scopes.
-        Interval GetClosestIntervalSurrounding(T query)
+        Interval GetClosestIntervalSurrounding(T query) const
         {
             auto bag = GetIntervalsSurrounding(query);
             return bag.empty() ? Interval{-1, -2} : *bag.rbegin();
@@ -652,6 +659,7 @@ namespace AZ
 
         vector<Interval> m_obfirsts;  // ordered by "firsts"
         vector<Interval> m_oblasts;   // ordered by "lasts"
+        bool m_sealed = false;
     };
 
     template< typename Deduced >
@@ -829,7 +837,9 @@ namespace AZ::Tests
         assert(!IsIn("hibou", std::initializer_list<const char*>{ "chouette", "jay" }));
 
         Interval<int> intvs[] = {{0,10}, {1,5}, {3,3}, {7,9}, {12,15}};
-        IntervalCollection<int> ic{std::begin(intvs), std::end(intvs)};
+        IntervalCollection<int> ic;
+        std::for_each(std::begin(intvs), std::end(intvs), [&](auto i) {ic.Add(i); });
+        ic.Seal();
         assert(ic.GetClosestIntervalSurrounding(-3).IsEmpty());
         assert((ic.GetClosestIntervalSurrounding(0) == Interval<int>{0,10}));
         assert((ic.GetClosestIntervalSurrounding(1) == Interval<int>{1,5}));

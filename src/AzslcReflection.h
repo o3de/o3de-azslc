@@ -12,6 +12,7 @@
 namespace AZ::ShaderCompiler
 {
     using MapOfBeginToSpanAndUid = map<ssize_t, pair< misc::Interval, IdentifierUID> >;
+    using MapOfIntervalToUid = map<Interval<ssize_t>, IdentifierUID>;
 
     struct CodeReflection : Backend
     {
@@ -89,8 +90,10 @@ namespace AZ::ShaderCompiler
         void AnalyzeImpact(azslParser::FunctionCallExpressionContext* callNode, int& scoreAccumulator) const;
 
         //! Useful for static analysis on dependencies or option ranks
-        void GenerateScopeStartToFunctionIntervalsReverseMap() const;
-        mutable MapOfBeginToSpanAndUid m_functionIntervals; //< cache for the result of above function call
+        void GenerateTokenScopeIntervalToUidReverseMap() const;
+        mutable MapOfBeginToSpanAndUid m_functionIntervals;  //< only functions because they are guaranteed to be disjointed (largely simplifies queries)
+        mutable IntervalCollection<ssize_t> m_intervals;  //< augmented version with anonymous blocks (slower query)
+        mutable MapOfIntervalToUid m_intervalToUid;  //< side by side data since we don't want to weight the interval struct with a payload
 
         std::ostream& m_out;
     };

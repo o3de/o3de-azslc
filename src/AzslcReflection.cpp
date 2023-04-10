@@ -914,7 +914,7 @@ namespace AZ::ShaderCompiler
 
         // Prepare a lookup acceleration data structure for reverse mapping tokens to scopes.
         // (truth: we need a set of disjoint intervals as an invariant for the following algorithm)
-        GenerateScopeStartToFunctionIntervalsReverseMap();
+        GenerateTokenScopeIntervalToUidReverseMap();
 
         Json::Value srgRoot(Json::objectValue);
         // Order the reflection by SRG for convenience
@@ -1044,8 +1044,8 @@ namespace AZ::ShaderCompiler
 
     void CodeReflection::AnalyzeOptionRanks() const
     {
-        // make sure we have the function scope lookup cache ready
-        GenerateScopeStartToFunctionIntervalsReverseMap();
+        // make sure we have the scope lookup cache ready
+        GenerateTokenScopeIntervalToUidReverseMap();
         // loop over variables
         for (auto& [uid, varInfo, kindInfo] : m_ir->m_symbols.GetOrderedSymbolsOfSubType_3<VarInfo>())
         {
@@ -1121,14 +1121,10 @@ namespace AZ::ShaderCompiler
         // figure out the scope at this token.
         // theoretically should be something in the like of the body of another function,
         // or an anonymous block within another function.
-        auto intervalIter = FindIntervalInDisjointSet(m_functionIntervals, (ssize_t)callNode->start->getTokenIndex(),
-                                                      [](ssize_t key, auto& value)
-                                                      {
-                                                          return value.first.properlyContains({key, key});
-                                                      });
-        if (intervalIter != m_functionIntervals.cend())
+        auto interval = m_intervals.GetClosestIntervalSurrounding(callNode->start->getTokenIndex());
+        if (!interval.IsEmpty())
         {
-            IdentifierUID encloser = intervalIter->second.second;
+            IdentifierUID encloser = m_intervalToUid[interval];
 
             // Because we are past the end of the semantic analysis,
             // the scope tracker is registering the last seen scope (surely "/").
@@ -1147,6 +1143,7 @@ namespace AZ::ShaderCompiler
             else if (auto* maeExpr = As<AstMemberAccess*>(callNode->Expr))
             {
                 startupLookupScope = m_ir->m_sema.TypeofExpr(maeExpr->LHSExpr);
+                funcName = ExtractNameFromIdExpression(maeExpr->Member);
             }
             IdAndKind* overload = m_ir->m_symbols.LookupSymbol(startupLookupScope, funcName);
             if (!overload) // in case of function not found, we assume it's an intrinsic.
@@ -1193,7 +1190,7 @@ namespace AZ::ShaderCompiler
         }
     }
 
-    void CodeReflection::GenerateScopeStartToFunctionIntervalsReverseMap() const
+    void CodeReflection::GenerateTokenScopeIntervalToUidReverseMap() const
     {
         if (m_functionIntervals.empty())
         {
@@ -1204,7 +1201,11 @@ namespace AZ::ShaderCompiler
                     // the reason to choose .a as the key is so we can query using Infimum (sort of lower_bound)
                     m_functionIntervals[interval.a] = std::make_pair(interval, uid);
                 }
+                auto i = Interval<ssize_t>{interval.a, interval.b};
+                m_intervals.Add(i);
+                m_intervalToUid[i] = uid;
             }
+            m_intervals.Seal();
         }
     }
 }
