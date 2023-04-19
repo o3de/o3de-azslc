@@ -598,9 +598,9 @@ namespace AZ
     template< typename T >
     struct IntervalCollection
     {
-        using Interval = Interval<T>;
+        using IntervalT = Interval<T>;
 
-        void Add(Interval i)
+        void Add(IntervalT i)
         {
             m_obfirsts.emplace_back(i);
         }
@@ -621,7 +621,7 @@ namespace AZ
         }
 
         //! Retrieve the subset of intervals activated by a point (query)
-        set<Interval> GetIntervalsSurrounding(T query) const
+        set<IntervalT> GetIntervalsSurrounding(T query) const
         {
             assert(m_sealed);
             // find the "set" of intervals starting before:
@@ -630,7 +630,7 @@ namespace AZ
                                                  [=](auto interv, T q) { return interv.a <= q; });
 
             // find the "set" of intervals ending after:
-            static vector<Interval> endAfter;
+            static vector<IntervalT> endAfter;
             endAfter.clear();
             CopyIf(m_oblasts.rbegin(), m_oblasts.rend(),  // reverse iteration
                    [=](auto interv) { return interv.b >= query; },
@@ -639,7 +639,7 @@ namespace AZ
             // for set_intersection to work, the less<> predicate has to work for both ranges
             std::sort(endAfter.begin(), endAfter.end());
 
-            set<Interval> result;
+            set<IntervalT> result;
             std::set_intersection(m_obfirsts.begin(), firstsSubEnd,
                                   endAfter.begin(), endAfter.end(),
                                   std::inserter(result, result.end()));
@@ -651,14 +651,14 @@ namespace AZ
         //! each overlapping interval is fully contained in the bigger one,
         //! the closest start is guaranteed to be the most "leaf" interval.
         //! This is useful for scopes.
-        Interval GetClosestIntervalSurrounding(T query) const
+        IntervalT GetClosestIntervalSurrounding(T query) const
         {
             auto bag = GetIntervalsSurrounding(query);
-            return bag.empty() ? Interval{-1, -2} : *bag.rbegin();
+            return bag.empty() ? IntervalT{-1, -2} : *bag.rbegin();
         }
 
-        vector<Interval> m_obfirsts;  // ordered by "firsts"
-        vector<Interval> m_oblasts;   // ordered by "lasts"
+        vector<IntervalT> m_obfirsts;  // ordered by "firsts"
+        vector<IntervalT> m_oblasts;   // ordered by "lasts"
         bool m_sealed = false;
     };
 
