@@ -718,6 +718,11 @@ namespace AZ::ShaderCompiler
         {
             const IdentifierUID uid = orderedSymbols[symbolIndex];
             KindInfo* kindInfo = GetKindInfo(uid);
+            if (IsGlobal(uid.GetName()))
+            {
+                continue; // no reason to align things in the global scope,
+                          // options and rootconstant will be align-checked through their implicit structs.
+            }
 
             // We need to keep track of the structs for which the last member is
             // a float3x3.
@@ -772,10 +777,15 @@ namespace AZ::ShaderCompiler
             // 2- a float2x2, float3x2, float4x2,
             //    float2x3, float3x3, float4x3.
             //! Helper lambda to get the previously declared variable.
-            auto getPreviousVarInfo = [&](ssize_t& startSearchSymbolIndex /*in out*/) -> VarInfo* {
+            auto getPreviousVarInfo = [&](ssize_t& startSearchSymbolIndex /*in out*/, string_view scope) -> VarInfo*
+            {
                 while (startSearchSymbolIndex >= 0)
                 {
                     const auto& prevSymbolUid = orderedSymbols[startSearchSymbolIndex];
+                    if (GetParentName(prevSymbolUid.GetName()) != scope)
+                    {
+                        return nullptr;  // we can't relate variables that don't even belong to same struct or srg
+                    }
                     KindInfo* prevKindInfo = GetKindInfo(prevSymbolUid);
                     VarInfo* prevVarInfo = prevKindInfo->GetSubAs<VarInfo>();
                     if (prevVarInfo)
@@ -788,7 +798,7 @@ namespace AZ::ShaderCompiler
             };
 
             ssize_t prevSymbolIndex = symbolIndex - 1;
-            const VarInfo* prevVarInfo = getPreviousVarInfo(prevSymbolIndex);
+            const VarInfo* prevVarInfo = getPreviousVarInfo(prevSymbolIndex, GetParentName(uid.GetName()));
             if (prevVarInfo == nullptr)
             {
                 // Nothing to do, keep going.
