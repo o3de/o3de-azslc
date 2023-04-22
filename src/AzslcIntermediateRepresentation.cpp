@@ -121,6 +121,7 @@ namespace AZ::ShaderCompiler
         // We're not going to transform our flat vector to tree and to vector again,
         // instead we'll shift around the elements to respect that order.
         // And to do so, we'll use a dependency DAG and a topological solver.
+        verboseCout << "--Middle End--\n";
 
         m_symbols.ReorderBySymbolDependency();
 

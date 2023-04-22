@@ -1052,52 +1052,80 @@ namespace AZ::ShaderCompiler
             // only options
             if (varInfo->CheckHasStorageFlag(StorageFlag::Option))
             {
+                verboseCout << "Analyzing " << uid << "\n";
                 int impactScore = 0;
                 // loop over appearances over the program
                 for (Seenat& ref : kindInfo->GetSeenats())
                 {
+                    verboseCout << "Seenat line " << ref.m_where.m_line << "\n";
                     // determine an impact score
                     impactScore += AnalyzeImpact(ref.m_where)  // dependent code that may be skipped depending on the value of that ref
                         + 1;  // by virtue of being mentioned (seenat), we count the reference as an access of cost 1.
                 }
                 varInfo->m_estimatedCostImpact = impactScore;
+                verboseCout << uid << " final cost " << impactScore << "\n";
             }
         }
+    }
+
+    template< typename CtxT >
+    bool SetNextNodeIfPartOfTypeCtxTCondViaNParents(
+        ParserRuleContext*& node,
+        int maxDepth)
+    {
+        if (auto* searchNode = DeepParentAs<CtxT*>(node, maxDepth))
+        {
+            if (IsParentOf(searchNode->Condition, node))
+            {
+                node = searchNode->embeddedStatement();
+                return true;
+            }
+        }
+        return false;
     }
 
     int CodeReflection::AnalyzeImpact(TokensLocation const& location) const
     {
         // find the node at `location`:
         ParserRuleContext* node = m_ir->m_tokenMap.GetNode(location.m_focusedTokenId);
-        // go up tree to meet a block node that has visitable depth:
-        // can be any of if/for/while/switch
-        //  4 is an arbitrary depth, enough to search up things like `for (a, b<(ref+1), c)` binaryop->braces->cmpexpr->cond->for
-        if (auto* whileNode = DeepParentAs<azslParser::WhileStatementContext*>(node->parent, 3))
+        // the "belonging" statements that we will consider, before recursing:
+        using AstIf     = azslParser::IfStatementContext;
+        using AstFor    = azslParser::ForStatementContext;
+        using AstWhile  = azslParser::WhileStatementContext;
+        using AstDo     = azslParser::DoStatementContext;
+        using AstSwitch = azslParser::SwitchStatementContext;
+        // go up the tree to meet one of them using arbitrary max depths of {5,6,7},
+        // just enough to search up things like `for (a, b<(ref+1), c)` idExpr->IdentifierExpression->OtherExpression->BinaryExpr->ParenthesisExpr->BinaryExpr->Condition->For
+        int complexityFactor = 1;
+        bool isNonLoop = SetNextNodeIfPartOfTypeCtxTCondViaNParents<AstIf>(node, 6);
+        if (!isNonLoop && (SetNextNodeIfPartOfTypeCtxTCondViaNParents<AstFor>(node, 7)
+                           || SetNextNodeIfPartOfTypeCtxTCondViaNParents<AstWhile>(node, 6)
+                           || SetNextNodeIfPartOfTypeCtxTCondViaNParents<AstDo>(node, 6)))
         {
-            node = whileNode->embeddedStatement();
+            complexityFactor = 2; // arbitrarily augment loop scores by virtue of assuming they repeat O(N=2)
         }
-        else if (auto* ifNode = DeepParentAs<azslParser::IfStatementContext*>(node->parent, 3))
+        else if (auto* switchNode = DeepParentAs<AstSwitch*>(node, 5))
         {
-            node = ifNode->embeddedStatement();
-        }
-        else if (auto* forNode = DeepParentAs<azslParser::ForStatementContext*>(node->parent, 4))
-        {
-            node = forNode->embeddedStatement();
-        }
-        else if (auto* switchNode = DeepParentAs<azslParser::SwitchStatementContext*>(node->parent, 3))
-        {
-            node = switchNode->switchBlock();
+            if (IsParentOf(switchNode->Expr, node))
+            {
+                node = switchNode->switchBlock();
+            }
         }
         int score = 0;
         AnalyzeImpact(node, score);
-        return score;
+        return score * complexityFactor;
     }
 
     void CodeReflection::AnalyzeImpact(ParserRuleContext* astNode, int& scoreAccumulator) const
     {
         for (auto& c : astNode->children)
         {
-            if (auto* callNode = As<azslParser::FunctionCallExpressionContext*>(c))
+            if (auto* leaf = As<tree::TerminalNode*>(c))
+            {
+                // determine cost by number of full expressions separated by semicolon
+                scoreAccumulator += leaf->getSymbol()->getType() == azslLexer::Semi;  // bool as 0 or 1 trick
+            }
+            else if (auto* callNode = As<azslParser::FunctionCallExpressionContext*>(c))
             {
                 // branch into an overload specialized for function lookup:
                 AnalyzeImpact(callNode, scoreAccumulator);
@@ -1105,11 +1133,6 @@ namespace AZ::ShaderCompiler
             else if (auto* node = As<ParserRuleContext*>(c))
             {
                 AnalyzeImpact(node, scoreAccumulator); // recurse down to make sure to capture embedded calls, like e.g. "x ? f() : 0;"
-            }
-            if (auto* leaf = As<tree::TerminalNode*>(c))
-            {
-                // determine cost by number of full expressions separated by semicolon
-                scoreAccumulator += leaf->getSymbol()->getType() == azslLexer::Semi;  // bool as 0 or 1 trick
             }
         }
     }
@@ -1173,8 +1196,10 @@ namespace AZ::ShaderCompiler
                         using AstFDef = azslParser::HlslFunctionDefinitionContext;
                         AnalyzeImpact(polymorphic_downcast<AstFDef*>(funcInfo->m_defNode->parent)->block(),
                                       funcInfo->m_costScore);  // recurse and cache
+                        verboseCout << " " << concrete << " analyzed at " << funcInfo->m_costScore << "\n";
                     }
                     scoreAccumulator += funcInfo->m_costScore;
+                    verboseCout << " " << concrete << " call score " << funcInfo->m_costScore << " added. now " << scoreAccumulator << "\n";
                 }
             }
             // other cases forfeited for now, but that would at least include things like eg braces (f)()
