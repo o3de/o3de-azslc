@@ -1097,7 +1097,7 @@ public:
   public:
     WhileStatementContext(EmbeddedStatementContext *ctx);
 
-    azslParser::ExpressionExtContext *condition = nullptr;
+    azslParser::ExpressionExtContext *Condition = nullptr;
     antlr4::tree::TerminalNode *While();
     antlr4::tree::TerminalNode *LeftParen();
     antlr4::tree::TerminalNode *RightParen();
