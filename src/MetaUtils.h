@@ -366,6 +366,10 @@ namespace AZ
 
     template <class Default, template<class...> class Op, class... Args>
     using DetectedOr_t = typename DetectedOr<Default, Op, Args...>::type;
+
+    //! define a Pair typealias that has two same T, without the need to repeat yourself
+    template <typename T>
+    using Pair = std::pair<T, T>;
 }
 
 #ifndef NDEBUG

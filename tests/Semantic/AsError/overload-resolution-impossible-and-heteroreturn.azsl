@@ -2,12 +2,13 @@ struct A {};
 struct B {};
 
 A make(int);
-B make(uint);
+B make(float);
 
 void main()
 {
     float x = 0.5;
-    A a = make((int)floor(x) + 1);  // #EC 41
+    A a = make(floor(x));  // #EC 41
+    //    make((int)floor(x));  // help azslc knowing about unregistered functions by casting to force the type.
 }
 /*Semantic Error 41: line 10::14 '(10): unable to match arguments (<fail>) to a registered overload. candidates are:
 /make(?int)

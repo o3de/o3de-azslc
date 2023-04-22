@@ -20,7 +20,7 @@ namespace AZ::ShaderCompiler
             auto& [uid, kindInfo] = st.AddIdentifier(azirName, Kind::Type);  // the kind is Type because all predefined are stored as such.
             auto& typeInfo        = kindInfo.GetSubAfterInitAs<Kind::Type>();
             auto typeClass        = TypeClass::FromStr(bag.m_name);
-            auto arithmetic       = IsNonGenericArithmetic(typeClass) ? CreateArithmeticTypeInfo(azirName) : ArithmeticTypeInfo{}; // TODO: canonicalize generics
+            auto arithmetic       = IsNonGenericArithmetic(typeClass) ? CreateArithmeticTraits(azirName) : ArithmeticTraits{}; // TODO: canonicalize generics
             typeInfo = TypeRefInfo{uid, arithmetic, typeClass};
         }
     }
@@ -140,7 +140,7 @@ namespace AZ::ShaderCompiler
         {
             auto attempt = QualifiedName{JoinPath(path, name)};
             got = GetIdAndKindInfo(attempt);
-            exit = path == "/";
+            exit = path == "/" || path.empty();
             if (!got)
             {
                 if (auto* scopeAsClass = GetAsSub<ClassInfo>(IdentifierUID{GetParentName(attempt)})) // get enclosing class

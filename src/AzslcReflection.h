@@ -11,6 +11,9 @@
 
 namespace AZ::ShaderCompiler
 {
+    using MapOfBeginToSpanAndUid = map<ssize_t, pair< misc::Interval, IdentifierUID> >;
+    using MapOfIntervalToUid = map<Interval<ssize_t>, IdentifierUID>;
+
     struct CodeReflection : Backend
     {
         CodeReflection(IntermediateRepresentation* ir, TokenStream* tokens, std::ostream& out)
@@ -45,6 +48,9 @@ namespace AZ::ShaderCompiler
         //! @param options  user configuration parsed from command line
         void DumpResourceBindingDependencies(const Options& options) const;
 
+        //! Determine a heurisitcal global order between options in the program, using "impacted code size" static analysis.
+        void AnalyzeOptionRanks() const;
+
     private:
 
         //! Builds member variable packing information and adds it to the membersContainer
@@ -63,7 +69,6 @@ namespace AZ::ShaderCompiler
 
         bool BuildOMStruct(const ExtendedTypeInfo& returnTypeRef, string_view semanticOverride, Json::Value& jsonVal, int& semanticIndex) const;
 
-        using MapOfBeginToSpanAndUid = map<ssize_t, pair< misc::Interval, IdentifierUID> >;
         //! Populate a list of functions where a symbol appear as potentially used
         //! @param uid      The symbol to start the dependency analysis on
         //! @param output   Any dependency symbol will be appended to this set
@@ -74,6 +79,21 @@ namespace AZ::ShaderCompiler
         bool IsNonOverloaded(const IdentifierUID& uid) const;
 
         bool IsPotentialEntryPoint(const IdentifierUID& uid) const;
+
+        // Estimate a score proportional to how much code is "child" to the AST node at `location`
+        int AnalyzeImpact(TokensLocation const& location) const;
+
+        // Recursive internal detail version
+        void AnalyzeImpact(ParserRuleContext* astNode, int& scoreAccumulator) const;
+
+        // Function-call specific
+        void AnalyzeImpact(azslParser::FunctionCallExpressionContext* callNode, int& scoreAccumulator) const;
+
+        //! Useful for static analysis on dependencies or option ranks
+        void GenerateTokenScopeIntervalToUidReverseMap() const;
+        mutable MapOfBeginToSpanAndUid m_functionIntervals;  //< only functions because they are guaranteed to be disjointed (largely simplifies queries)
+        mutable IntervalCollection<ssize_t> m_intervals;  //< augmented version with anonymous blocks (slower query)
+        mutable MapOfIntervalToUid m_intervalToUid;  //< side by side data since we don't want to weight the interval struct with a payload
 
         std::ostream& m_out;
     };

@@ -248,7 +248,7 @@ namespace AZ::ShaderCompiler
         //! Get the size of a single element, ignoring array dimensions
         const uint32_t GetSingleElementSize(Packing::Layout layout, bool defaultRowMajor) const
         {
-            auto baseSize = m_coreType.m_arithmeticInfo.GetBaseSize();
+            auto baseSize = m_coreType.m_arithmeticInfo.m_baseSize;
             bool isRowMajor = (m_mtxMajor == Packing::MatrixMajor::RowMajor ||
                               (m_mtxMajor == Packing::MatrixMajor::Default && defaultRowMajor));
             auto rows = m_coreType.m_arithmeticInfo.m_rows;
@@ -399,6 +399,7 @@ namespace AZ::ShaderCompiler
         ConstNumericVal            m_constVal;   // (attempted folded) initializer value for simple scalars
         optional<SamplerStateDesc> m_samplerState;
         ExtendedTypeInfo           m_typeInfoExt;
+        int                        m_estimatedCostImpact = -1;  //!< Cached value calculated by AnalyzeOptionRanks
     };
 
     // VarInfo methods definitions
@@ -791,6 +792,7 @@ namespace AZ::ShaderCompiler
         vector< IdentifierUID >   m_overrides;                //!< list of implementing functions in child classes
         optional< IdentifierUID > m_base;   //!< points to the overridden function in the base interface, if applies. only supports one base
         FunctionMultiForwards     m_multiFwds    = FMF_None;  //!< presence of redundant prototype-only declarations
+        int                       m_costScore    = -1;        //!< heuristical static analysis of the amount of instructions contained
         struct Parameter
         {
             IdentifierUID m_varId;

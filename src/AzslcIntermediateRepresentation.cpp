@@ -332,7 +332,6 @@ namespace AZ::ShaderCompiler
                 cout << "  storage: " << sub.m_typeInfoExt.m_qualifiers.GetDisplayName() << "\n";
                 cout << "  array dim: \"" << sub.m_typeInfoExt.m_arrayDims.ToString() << "\"\n";
                 cout << "  has sampler state: " << (sub.m_samplerState ? "yes\n" : "no\n");
-                cout << "\n";
                 if (!holds_alternative<monostate>(sub.m_constVal))
                 {
                     cout << "  val: " << ExtractValueAsInt64(sub.m_constVal) << "\n";
@@ -519,7 +518,7 @@ namespace AZ::ShaderCompiler
             if (varInfo.GetTypeClass() == TypeClass::Enum)
             {
                 auto* asClassInfo = GetSymbolSubAs<ClassInfo>(varInfo.GetTypeId().GetName());
-                size = asClassInfo->Get<EnumerationInfo>()->m_underlyingType.m_arithmeticInfo.GetBaseSize();
+                size = asClassInfo->Get<EnumerationInfo>()->m_underlyingType.m_arithmeticInfo.m_baseSize;
             }
 
             nextMemberStartingOffset = Packing::PackNextChunk(layoutPacking, size, startAt);
@@ -960,5 +959,4 @@ namespace AZ::ShaderCompiler
         }
         return memberList[memberList.size() - 1];
     }
-
 }  // end of namespace AZ::ShaderCompiler
