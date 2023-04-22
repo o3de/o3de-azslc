@@ -650,8 +650,6 @@ int main(int argc, const char* argv[])
             // intermediate state validation
             ir.Validate();
 
-            bool doEmission = true;
-
             if (stripUnusedSrgs)
             {
                 ir.RemoveUnusedSrgs();
@@ -660,7 +658,6 @@ int main(int argc, const char* argv[])
             if (dumpsym)
             {
                 DumpSymbols(ir);
-                doEmission = false;
             }
             else if (!visitName.empty())
             {
@@ -675,16 +672,10 @@ int main(int argc, const char* argv[])
                     visitOptions |= possibleOption.first ? possibleOption.second : RE::EnumType(0);
                 }
                 PrintVisitSymbol(ir, visitName, visitOptions);
-                doEmission = false;
             }
-            else
+            else if (!semantic)  // do emission
             {
-                bool checkerFlagsPresent = semantic || verbose; // or --syntax but we already exited by now.
-                doEmission = !checkerFlagsPresent;
-            }
-
-            if (doEmission)
-            {
+                verboseCout << "--Emission/Reflection--\n";
                 std::ofstream mainOutFile;
 
                 if (useOutputFile)
