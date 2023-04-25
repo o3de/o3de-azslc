@@ -1069,7 +1069,7 @@ namespace AZ::ShaderCompiler
     }
 
     template< typename CtxT >
-    bool SetNextNodeIfPartOfTypeCtxTCondViaNParents(
+    bool SetNextNodeIfChildOfCtxTCondViaNParents(
         ParserRuleContext*& node,
         int maxDepth)
     {
@@ -1097,10 +1097,10 @@ namespace AZ::ShaderCompiler
         // go up the tree to meet one of them using arbitrary max depths of {5,6,7},
         // just enough to search up things like `for (a, b<(ref+1), c)` idExpr->IdentifierExpression->OtherExpression->BinaryExpr->ParenthesisExpr->BinaryExpr->Condition->For
         int complexityFactor = 1;
-        bool isNonLoop = SetNextNodeIfPartOfTypeCtxTCondViaNParents<AstIf>(node, 6);
-        if (!isNonLoop && (SetNextNodeIfPartOfTypeCtxTCondViaNParents<AstFor>(node, 7)
-                           || SetNextNodeIfPartOfTypeCtxTCondViaNParents<AstWhile>(node, 6)
-                           || SetNextNodeIfPartOfTypeCtxTCondViaNParents<AstDo>(node, 6)))
+        bool isNonLoop = SetNextNodeIfChildOfCtxTCondViaNParents<AstIf>(node, 6);
+        if (!isNonLoop && (SetNextNodeIfChildOfCtxTCondViaNParents<AstFor>(node, 7)
+                           || SetNextNodeIfChildOfCtxTCondViaNParents<AstWhile>(node, 6)
+                           || SetNextNodeIfChildOfCtxTCondViaNParents<AstDo>(node, 6)))
         {
             complexityFactor = 2; // arbitrarily augment loop scores by virtue of assuming they repeat O(N=2)
         }
@@ -1192,14 +1192,14 @@ namespace AZ::ShaderCompiler
                 {
                     if (funcInfo->m_costScore == -1)  // cost not yet discovered for this function
                     {
+                        verboseCout << " " << concrete << " non-memoized. discovering cost\n";
                         funcInfo->m_costScore = 0;
                         using AstFDef = azslParser::HlslFunctionDefinitionContext;
                         AnalyzeImpact(polymorphic_downcast<AstFDef*>(funcInfo->m_defNode->parent)->block(),
                                       funcInfo->m_costScore);  // recurse and cache
-                        verboseCout << " " << concrete << " analyzed at " << funcInfo->m_costScore << "\n";
                     }
                     scoreAccumulator += funcInfo->m_costScore;
-                    verboseCout << " " << concrete << " call score " << funcInfo->m_costScore << " added. now " << scoreAccumulator << "\n";
+                    verboseCout << " " << concrete << " call score " << funcInfo->m_costScore << " added\n";
                 }
             }
             // other cases forfeited for now, but that would at least include things like eg braces (f)()

@@ -1123,7 +1123,7 @@ namespace AZ::ShaderCompiler
             {
                 auto outputStream = lhsKindInfo.GetKind() == Kind::Type ? verboseCout : warningCout;
                 // registered predefined types can have members, but we don't know them -> not important. But anything else is very likely an ill-formed source.
-                PrintWarning(outputStream, Warn::W1, line, none, " warning: ill-formed semantics: access of member ",
+                PrintWarning(outputStream, Warn::W1, line, none, "ill-formed semantics: access of member ",
                              " on an unsupported kind ", Kind::ToStr(lhsKindInfo.GetKind()),
                              " (of believed type ", lhsSymbol->first.GetName(),
                              (lhsExpressionText ? " from expression " + *lhsExpressionText : ""), ")");

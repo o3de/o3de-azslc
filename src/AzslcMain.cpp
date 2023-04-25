@@ -269,12 +269,12 @@ namespace AZ::ShaderCompiler::Main
             visitOptions);
     }
 
-    void ParseWarningLevel(const unordered_map<Warn::EnumType, bool>& args, DiagnosticStream& warningConfig)
+    void ParseWarningLevel(const std::array<bool, Warn::EndEnumeratorSentinel_>& args, DiagnosticStream& warningConfig)
     {
         for (auto level : Warn::Enumerate{})
         {
-            auto lookup = args.find(level);
-            if (lookup != args.end() && lookup->second)
+            bool active = args[level];
+            if (active)
             {
                 if (level >= Warn::Wx)
                 {
@@ -423,7 +423,7 @@ int main(int argc, const char* argv[])
     int maxSpaces = std::numeric_limits<int>::max();
     auto maxSpacesOpt = cli.add_option("--max-spaces", maxSpaces, "Will choose register spaces that do not extend past this limit.");
 
-    std::unordered_map<Warn::EnumType, bool> warningOpts;
+    std::array<bool, Warn::EndEnumeratorSentinel_> warningOpts;
     for (const auto e : Warn::Enumerate{})
     {
         warningOpts[e] = false;
