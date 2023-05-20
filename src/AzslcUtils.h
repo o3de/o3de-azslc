@@ -965,7 +965,9 @@ namespace AZ::ShaderCompiler
         while (parent)
         {
             if (parent == assumedParent)
+            {
                 return true;
+            }
             parent = parent->parent;
         }
         return false;

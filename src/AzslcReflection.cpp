@@ -1057,7 +1057,7 @@ namespace AZ::ShaderCompiler
                 // loop over appearances over the program
                 for (Seenat& ref : kindInfo->GetSeenats())
                 {
-                    verboseCout << "Seenat line " << ref.m_where.m_line << "\n";
+                    verboseCout << "Seen-at line " << ref.m_where.m_line << "\n";
                     // determine an impact score
                     impactScore += AnalyzeImpact(ref.m_where)  // dependent code that may be skipped depending on the value of that ref
                         + 1;  // by virtue of being mentioned (seenat), we count the reference as an access of cost 1.
@@ -1199,7 +1199,7 @@ namespace AZ::ShaderCompiler
                                       funcInfo->m_costScore);  // recurse and cache
                     }
                     scoreAccumulator += funcInfo->m_costScore;
-                    verboseCout << " " << concrete << " call score " << funcInfo->m_costScore << " added\n";
+                    verboseCout << " " << concrete << " cost score " << funcInfo->m_costScore << " added\n";
                 }
             }
             // other cases forfeited for now, but that would at least include things like eg braces (f)()
