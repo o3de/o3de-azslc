@@ -162,6 +162,6 @@ namespace AZ
     private:
         Warn m_warningAsErrorLevel = Warn::EndEnumeratorSentinel_;  //!< no warning is an error by default
         Warn m_warningLevel = Warn::W1;                             //!< current activated level setting. default warning is W1
-        stack<Warn> m_activeManipulator{ {Warn::W1} };          //!< store manipulators. start with an initial value corresponding to the default filter.
+        stack<Warn> m_activeManipulator{ {Warn::W1} };              //!< store manipulators. start with an initial value corresponding to the default filter.
     };
 }

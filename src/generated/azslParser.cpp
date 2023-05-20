@@ -5680,7 +5680,7 @@ azslParser::EmbeddedStatementContext* azslParser::embeddedStatement() {
       setState(606);
       match(azslParser::LeftParen);
       setState(607);
-      antlrcpp::downCast<WhileStatementContext *>(_localctx)->condition = expressionExt(0);
+      antlrcpp::downCast<WhileStatementContext *>(_localctx)->Condition = expressionExt(0);
       setState(608);
       match(azslParser::RightParen);
       setState(609);

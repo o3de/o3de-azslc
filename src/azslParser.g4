@@ -232,7 +232,7 @@ embeddedStatement:
     |   attributeSpecifier* Switch LeftParen Expr=expressionExt RightParen switchBlock # SwitchStatement
 
     // Iteration statement
-    |   attributeSpecifier* While LeftParen condition=expressionExt RightParen embeddedStatement # WhileStatement
+    |   attributeSpecifier* While LeftParen Condition=expressionExt RightParen embeddedStatement # WhileStatement
     |   attributeSpecifier* Do embeddedStatement While LeftParen Condition=expressionExt RightParen Semi # DoStatement
     |   attributeSpecifier* For LeftParen forInitializer? Semi Condition=expressionExt? Semi iterator=expressionExt? RightParen embeddedStatement # ForStatement
 

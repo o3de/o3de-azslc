@@ -958,6 +958,21 @@ namespace AZ::ShaderCompiler
         return UnqualifiedName{ctx->Name->getText()};
     }
 
+    //! Verify filiation of an AST rule
+    inline bool IsParentOf(tree::ParseTree* assumedParent, tree::ParseTree* assumedChild)
+    {
+        tree::ParseTree* parent =  assumedChild->parent;
+        while (parent)
+        {
+            if (parent == assumedParent)
+            {
+                return true;
+            }
+            parent = parent->parent;
+        }
+        return false;
+    }
+
     //! Get a pointer to the first parent that happens to be of type `SearchType`
     //! with a limit depth of `maxDepth` parents to search through
     template <typename SearchType>
