@@ -23,7 +23,7 @@ namespace StdFs = std::filesystem;
 // For large features or milestones. Minor version allows for breaking changes. Existing tests can change.
 #define AZSLC_MINOR "8"   // last change: introduction of class inheritance
 // For small features or bug fixes. They cannot introduce breaking changes. Existing tests shouldn't change.
-#define AZSLC_REVISION "18"  // last change: automatic option ranks
+#define AZSLC_REVISION "19"  // last change: fix crash in option ranks analysis in case of bodiless functions
 
 namespace AZ::ShaderCompiler
 {

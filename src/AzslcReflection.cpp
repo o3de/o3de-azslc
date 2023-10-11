@@ -1194,9 +1194,12 @@ namespace AZ::ShaderCompiler
                     {
                         verboseCout << " " << concrete << " non-memoized. discovering cost\n";
                         funcInfo->m_costScore = 0;
-                        using AstFDef = azslParser::HlslFunctionDefinitionContext;
-                        AnalyzeImpact(polymorphic_downcast<AstFDef*>(funcInfo->m_defNode->parent)->block(),
-                                      funcInfo->m_costScore);  // recurse and cache
+                        if (funcInfo->m_defNode)  // undefined functions can't be explored
+                        {
+                            using AstFDef = azslParser::HlslFunctionDefinitionContext;
+                            AnalyzeImpact(polymorphic_downcast<AstFDef*>(funcInfo->m_defNode->parent)->block(),
+                                          funcInfo->m_costScore);  // recurse and cache
+                        }
                     }
                     scoreAccumulator += funcInfo->m_costScore;
                     verboseCout << " " << concrete << " cost score " << funcInfo->m_costScore << " added\n";
