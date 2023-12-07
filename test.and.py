@@ -20,7 +20,7 @@ from os.path import join, normpath, basename
 import re
 import importlib
 sys.path.append("tests")
-from clr import *
+from tests.clr import *
 
 testList = ['Syntax', 'Semantic', 'Advanced', 'Samples']
 
