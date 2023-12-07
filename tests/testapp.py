@@ -11,6 +11,7 @@ import os
 import io
 from argparse import ArgumentParser
 from os.path import join, normpath, basename
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 from clr import *
 import re
 import testfuncs
