@@ -12,7 +12,7 @@ import io
 from argparse import ArgumentParser
 from os.path import join, normpath, basename
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
-from clr import *
+from clr import fg, bg, style
 import re
 import testfuncs
 import importlib
