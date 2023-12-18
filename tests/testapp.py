@@ -11,7 +11,15 @@ import os
 import io
 from argparse import ArgumentParser
 from os.path import join, normpath, basename
-from clr import *
+import inspect
+clrpath = os.path.join(os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe()))), "clr.py")
+print(f"clr path is {clrpath}")
+import importlib.util
+spec = importlib.util.spec_from_file_location("clr", clrpath)
+clrmodule = importlib.util.module_from_spec(spec)
+sys.modules["clr"] = clrmodule
+spec.loader.exec_module(clrmodule)
+globals().update({v: vars(clrmodule)[v] for v in ["fg", "bg", "style"]})
 import re
 import testfuncs
 import importlib

@@ -8,7 +8,7 @@ REM
 
 set platform=win
 set architecture=x64
-set generator="Visual Studio 16 2019"
+set generator="Visual Studio 17 2022"
 
 set curr_dir=%~dp0
 set src_path=%curr_dir%\src
