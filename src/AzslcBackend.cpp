@@ -428,6 +428,8 @@ namespace AZ::ShaderCompiler
         Json::Value varRoot(Json::objectValue);
         varRoot["meta"] = "Variant options list exported by AZSLc";
 
+        bool useSpecializationConstants = false;
+
         Json::Value shaderOptions(Json::arrayValue);
         uint32_t keyOffsetBits = 0;
 
@@ -454,6 +456,8 @@ namespace AZ::ShaderCompiler
             bool isUdt = IsUserDefined(varInfo->GetTypeClass());
             assert(isUdt || IsPredefinedType(varInfo->GetTypeClass()));
             shaderOption["kind"] = isUdt ? "user-defined" : "predefined";
+            shaderOption["specializationId"] = varInfo->m_specializationId;
+            useSpecializationConstants |= varInfo->m_specializationId >= 0;
 
             AppendOptionRange(shaderOption, uid, varInfo, options);
 
@@ -482,9 +486,23 @@ namespace AZ::ShaderCompiler
             }
         }
 
+        varRoot["specializationConstants"] = options.m_useSpecializationConstantsForOptions && useSpecializationConstants;
         varRoot["ShaderOptions"] = shaderOptions;
 
         return varRoot;
+    }
+
+    void Backend::SetupOptionsSpecializationId(const Options& options) const
+    {
+        uint32_t specializationId = 0;
+        for (auto& [uid, varInfo, kindInfo] : m_ir->m_symbols.GetOrderedSymbolsOfSubType_3<VarInfo>())
+        {
+            if (varInfo->CheckHasStorageFlag(StorageFlag::Option) &&
+                !m_ir->m_symbols.GetAttribute(uid, "no_specialization"))
+            {
+                varInfo->m_specializationId = specializationId++;
+            }
+        }
     }
 
     // little check utility

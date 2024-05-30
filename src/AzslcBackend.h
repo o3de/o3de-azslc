@@ -41,6 +41,7 @@ namespace AZ::ShaderCompiler
         int m_rootConstantsMaxSize = std::numeric_limits<int>::max();   //!< Indicates the number of root constants to be allowed, 0 means root constants not enabled
         Packing::Layout m_packConstantBuffers  = Packing::Layout::DirectXPacking; //!< Packing standard for constant buffers (uniform)
         Packing::Layout m_packDataBuffers      = Packing::Layout::CStylePacking;  //!< Packing standard for data buffer views
+        bool m_useSpecializationConstantsForOptions = false; //!< Use specialization constants for shader options
     };
 
     struct Binding
@@ -148,6 +149,9 @@ namespace AZ::ShaderCompiler
         //! Get HLSL form of in/out modifiers
         static const char* GetInputModifier(const TypeQualifiers& typeQualifier);
 
+        //! Get the initialization clause as a string. Returns an empty string if it doesn't have any initialization.
+        string GetInitializerClause(const AZ::ShaderCompiler::VarInfo* varInfo) const;
+
         //! Fabricate a HLSL snippet that represents the type stored in typeInfo. Relevant options relate to matrix qualifiers.
         //! \param banned is the Flag you can setup to list a collection of type qualifiers you don't want to reproduce.
         string GetExtendedTypeInfo(const ExtendedTypeInfo& extTypeInfo, const Options& options, Modifiers banned, std::function<string(const TypeRefInfo&)> translator) const;
@@ -163,8 +167,6 @@ namespace AZ::ShaderCompiler
 
         string GetTranspiledTokens(misc::Interval interval) const;
 
-        string GetInitializerClause(const AZ::ShaderCompiler::VarInfo* varInfo) const;
-
         uint32_t GetNumberOf32BitConstants(const Options& options, const IdentifierUID& uid) const;
 
         RootSigDesc BuildSignatureDescription(const Options& options, int num32BitConst) const;
@@ -176,6 +178,8 @@ namespace AZ::ShaderCompiler
         void AppendOptionRange(Json::Value& varOption, const IdentifierUID& varUid, const AZ::ShaderCompiler::VarInfo* varInfo, const Options& options) const;
 
         Json::Value GetVariantList(const Options& options, bool includeEmpty = false) const;
+
+        void SetupOptionsSpecializationId(const Options& options) const;
 
         IntermediateRepresentation*      m_ir;
         TokenStream*                     m_tokens;

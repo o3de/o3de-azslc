@@ -76,5 +76,8 @@ namespace AZ::ShaderCompiler
         virtual uint32_t AlignRootConstants(uint32_t size) const;
 
         virtual bool RequiresUniqueSpaceForUnboundedArrays() const {return false;}
+
+        [[nodiscard]]
+        virtual string GetSpecializationConstant(const CodeEmitter& codeEmitter, const IdentifierUID& symbol, const Options& options) const;
     };
 }

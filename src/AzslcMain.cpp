@@ -423,6 +423,9 @@ int main(int argc, const char* argv[])
     int maxSpaces = std::numeric_limits<int>::max();
     auto maxSpacesOpt = cli.add_option("--max-spaces", maxSpaces, "Will choose register spaces that do not extend past this limit.");
 
+    bool useSpecializationConstants = false;
+    cli.add_flag("--sc-options", useSpecializationConstants, "Use specialization constants for shader options.");
+
     std::array<bool, Warn::EndEnumeratorSentinel_> warningOpts;
     for (const auto e : Warn::Enumerate{})
     {
@@ -575,6 +578,7 @@ int main(int argc, const char* argv[])
             emitOptions.m_emitRootSig = rootSig;
             emitOptions.m_padRootConstantCB = padRootConst;
             emitOptions.m_skipAlignmentValidation = noAlignmentValidation;
+            emitOptions.m_useSpecializationConstantsForOptions = useSpecializationConstants;
 
             if (*rootConstOpt)
             {

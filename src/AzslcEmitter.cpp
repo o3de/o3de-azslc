@@ -97,6 +97,7 @@ namespace AZ::ShaderCompiler
         const RootSigDesc rootSig = BuildSignatureDescription(options, numOf32bitConst);
 
         SetupScopeMigrations(options);
+        SetupOptionsSpecializationId(options);
 
         // Emit global attributes
         for (const auto& attr : m_ir->m_symbols.GetGlobalAttributeList())
@@ -379,17 +380,24 @@ namespace AZ::ShaderCompiler
     {
         assert(m_ir->GetKind(symbolUid) == Kind::Variable);
         assert(IsTopLevelThroughTranslation(symbolUid));
-
         auto* varInfo = m_ir->GetSymbolSubAs<VarInfo>(symbolUid.GetName());
 
-        EmitGetShaderKeyFunctionDeclaration(symbolUid, varInfo->GetTypeRefInfo());
-        m_out << ";\n\n";
+        if (options.m_useSpecializationConstantsForOptions && varInfo->m_specializationId >= 0)
+        {
+            m_out << GetPlatformEmitter().GetSpecializationConstant(*this, symbolUid, options);
+        }
+        else
+        {
 
-        m_out << "#if defined(" + JoinAllNestedNamesWithUnderscore(symbolUid.m_name) + "_OPTION_DEF)\n";
-        EmitVariableDeclaration(*varInfo, symbolUid, options, VarDeclHasFlag(VarDeclHas::OptionDefine));
-        m_out << "_OPTION_DEF ;\n#else\n";
-        EmitVariableDeclaration(*varInfo, symbolUid, options, VarDeclHasFlag(VarDeclHas::OptionDefine) | VarDeclHas::Initializer);
-        m_out << ";\n#endif\n";
+            EmitGetShaderKeyFunctionDeclaration(symbolUid, varInfo->GetTypeRefInfo());
+            m_out << ";\n\n";
+
+            m_out << "#if defined(" + JoinAllNestedNamesWithUnderscore(symbolUid.m_name) + "_OPTION_DEF)\n";
+            EmitVariableDeclaration(*varInfo, symbolUid, options, VarDeclHasFlag(VarDeclHas::OptionDefine));
+            m_out << "_OPTION_DEF ;\n#else\n";
+            EmitVariableDeclaration(*varInfo, symbolUid, options, VarDeclHasFlag(VarDeclHas::OptionDefine) | VarDeclHas::Initializer);
+            m_out << ";\n#endif\n";
+        }
     }
 
     void CodeEmitter::EmitShaderVariantOptionGetters(const Options& options) const

@@ -24,6 +24,8 @@ namespace AZ::ShaderCompiler
 
         bool RequiresUniqueSpaceForUnboundedArrays() const override {return true;}
 
+        [[nodiscard]]
+        string GetSpecializationConstant(const CodeEmitter& codeEmitter, const IdentifierUID& symbol, const Options& options) const override;
 
     private:
         DirectX12PlatformEmitter() : PlatformEmitter {} {};

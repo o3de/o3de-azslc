@@ -630,6 +630,7 @@ namespace AZ::ShaderCompiler
     void CodeReflection::DumpVariantList(const Options& options) const
     {
         AnalyzeOptionRanks();
+        SetupOptionsSpecializationId(options);
         m_out << GetVariantList(options);
         m_out << "\n";
     }

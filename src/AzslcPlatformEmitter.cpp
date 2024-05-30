@@ -97,4 +97,9 @@ namespace AZ::ShaderCompiler
     {
         return size;
     }
+
+    string PlatformEmitter::GetSpecializationConstant(const CodeEmitter& codeEmitter, const IdentifierUID& symbol, const Options& options) const
+    {
+        return "";
+    }
 }

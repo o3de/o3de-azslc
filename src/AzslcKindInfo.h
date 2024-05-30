@@ -400,6 +400,7 @@ namespace AZ::ShaderCompiler
         optional<SamplerStateDesc> m_samplerState;
         ExtendedTypeInfo           m_typeInfoExt;
         int                        m_estimatedCostImpact = -1;  //!< Cached value calculated by AnalyzeOptionRanks
+        int                        m_specializationId= -1; //< id of the specialization. -1 means no specialization.
     };
 
     // VarInfo methods definitions

@@ -126,4 +126,34 @@ namespace AZ::ShaderCompiler
 
         return Decorate("#define sig ", Join(rootAttrList, ", \" \\\n"), "\"\n\n");
     }
+
+    string DirectX12PlatformEmitter::GetSpecializationConstant(const CodeEmitter& codeEmitter, const IdentifierUID& symbolUid, const Options& options) const
+    {
+        // Specialization constants will be represented by a volatile variable that will be patched later.
+        std::stringstream stream;
+        auto* ir = codeEmitter.GetIR();
+        auto* varInfo = ir->GetSymbolSubAs<VarInfo>(symbolUid.GetName());
+        auto retInfo = varInfo->GetTypeRefInfo();
+        
+        // Volatile is not allowed for global variables, so we create a function to wrap it.
+        std:string varName = "sc_" + JoinAllNestedNamesWithUnderscore(symbolUid.m_name);
+        std::string retType = codeEmitter.GetTranslatedName(retInfo, UsageContext::ReferenceSite);
+        std::string functionName = "GetSpecializationConstant_" + JoinAllNestedNamesWithUnderscore(symbolUid.m_name) + "()";
+
+        // Emit the function
+        assert(varInfo->m_specializationId >= 0);
+        stream << retType << " " << functionName;
+        stream << "\n{\n";
+        stream << "    volatile int " << varName;
+        stream << " = " << varInfo->m_specializationId << ";\n";
+        stream << "    return (" << retType << ") " << varName << ";\n";
+        stream << "}\n\n";
+
+        // Emit the global variable that is going to be the shader option. It's default value will be the return value
+        // of the function we just created.
+        stream << codeEmitter.GetTranslatedName(varInfo->m_typeInfoExt, UsageContext::ReferenceSite, options) + " ";
+        stream << codeEmitter.GetTranslatedName(symbolUid.m_name, UsageContext::DeclarationSite);
+        stream << " = " << functionName << ";\n";
+        return stream.str();
+    }
 }

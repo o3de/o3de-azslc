@@ -25,6 +25,9 @@ namespace AZ::ShaderCompiler
         [[nodiscard]]
         std::pair<string, string> GetDataViewHeaderFooter(const CodeEmitter& codeEmitter, const IdentifierUID& symbol, uint32_t bindInfoRegisterIndex, string_view registerTypeLetter, optional<string> stringifiedLogicalSpace) const override final;
 
+        [[nodiscard]]
+        string GetSpecializationConstant(const CodeEmitter& codeEmitter, const IdentifierUID& symbol, const Options& options) const override;
+
     private:
         VulkanPlatformEmitter() : PlatformEmitter {} {};
     };
