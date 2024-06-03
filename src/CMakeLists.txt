@@ -72,6 +72,7 @@ target_include_directories(
   PRIVATE
   ${PROJECT_SOURCE_DIR}
   ${PROJECT_SOURCE_DIR}/external
+  ${PROJECT_SOURCE_DIR}/../Platform/Common/src
   ${ANTLR4CPP_INCLUDE_DIRS}
   ${MPARK_VARIANT_INCLUDE_DIRS}
   ${TINY_OPTIONAL_INCLUDE_DIRS}

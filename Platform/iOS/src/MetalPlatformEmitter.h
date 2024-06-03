@@ -8,11 +8,12 @@
 #pragma once
 
 #include <AzslcPlatformEmitter.h>
+#include <CommonVulkanPlatformEmitter.h>
 
 namespace AZ::ShaderCompiler
 {
     // PlatformEmitter is not a Backend by design. It's a supplement to CodeEmitter, not a replacement
-    struct MetalPlatformEmitter : PlatformEmitter 
+    struct MetalPlatformEmitter : CommonVulkanPlatformEmitter
     {
     public:
         //! This method will be called once and only once when the platform emitter registers itself to the system.
@@ -25,6 +26,6 @@ namespace AZ::ShaderCompiler
         uint32_t AlignRootConstants(uint32_t size) const override final;
 
     private:
-        MetalPlatformEmitter() : PlatformEmitter {} {};
+        MetalPlatformEmitter() : CommonVulkanPlatformEmitter {} {};
     };
 }

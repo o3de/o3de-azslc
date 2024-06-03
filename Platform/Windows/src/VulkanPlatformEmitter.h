@@ -8,11 +8,12 @@
 #pragma once
 
 #include <AzslcPlatformEmitter.h>
+#include <CommonVulkanPlatformEmitter.h>
 
 namespace AZ::ShaderCompiler
 {
     // PlatformEmitter is not a Backend by design. It's a supplement to CodeEmitter, not a replacement
-    struct VulkanPlatformEmitter : PlatformEmitter 
+    struct VulkanPlatformEmitter : CommonVulkanPlatformEmitter
     {
     public:
         //! This method will be called once and only once when the platform emitter registers itself to the system.
@@ -25,10 +26,7 @@ namespace AZ::ShaderCompiler
         [[nodiscard]]
         std::pair<string, string> GetDataViewHeaderFooter(const CodeEmitter& codeEmitter, const IdentifierUID& symbol, uint32_t bindInfoRegisterIndex, string_view registerTypeLetter, optional<string> stringifiedLogicalSpace) const override final;
 
-        [[nodiscard]]
-        string GetSpecializationConstant(const CodeEmitter& codeEmitter, const IdentifierUID& symbol, const Options& options) const override;
-
     private:
-        VulkanPlatformEmitter() : PlatformEmitter {} {};
+        VulkanPlatformEmitter() : CommonVulkanPlatformEmitter {} {};
     };
 }
