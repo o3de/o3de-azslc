@@ -408,7 +408,8 @@ namespace AZ::ShaderCompiler
         for (const auto& [uid, varInfo] : m_ir->m_symbols.GetOrderedSymbolsOfSubType_2<VarInfo>())
         {
             // For now only emit top level options
-            if (!IsTopLevelThroughTranslation(uid) || !varInfo->CheckHasStorageFlag(StorageFlag::Option))
+            if (!IsTopLevelThroughTranslation(uid) || !varInfo->CheckHasStorageFlag(StorageFlag::Option) ||
+                (options.m_useSpecializationConstantsForOptions && varInfo->m_specializationId >= 0))
             {
                 continue;
             }
@@ -699,6 +700,11 @@ namespace AZ::ShaderCompiler
         else if (attrInfo.m_attribute == "range")
         {
             // Reserved for integer type option variables. Do not re-emit
+            outstream << "// original attribute: [[" << attrInfo << "]]\n ";
+        }
+        else if (attrInfo.m_attribute == "no_specialization")
+        {
+            // Reserved for avoiding specialization of a shader option. Do not re-emit
             outstream << "// original attribute: [[" << attrInfo << "]]\n ";
         }
 
