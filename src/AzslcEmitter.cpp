@@ -408,8 +408,7 @@ namespace AZ::ShaderCompiler
         for (const auto& [uid, varInfo] : m_ir->m_symbols.GetOrderedSymbolsOfSubType_2<VarInfo>())
         {
             // For now only emit top level options
-            if (!IsTopLevelThroughTranslation(uid) || !varInfo->CheckHasStorageFlag(StorageFlag::Option) ||
-                (options.m_useSpecializationConstantsForOptions && varInfo->m_specializationId >= 0))
+            if (!IsTopLevelThroughTranslation(uid) || !varInfo->CheckHasStorageFlag(StorageFlag::Option))
             {
                 continue;
             }
@@ -422,15 +421,18 @@ namespace AZ::ShaderCompiler
             m_out << "// Generated code: ShaderVariantOptions fallback value getters:\n";
 
             auto shaderOptions = GetVariantList(options, true);
-            auto shaderOptionIndex = 0;
-
-            for (const auto& [uid, varInfo] : symbols)
+            for (uint32_t shaderOptionIndex = 0; shaderOptionIndex < symbols.size(); ++shaderOptionIndex)
             {
+                const auto& [uid, varInfo] = symbols[shaderOptionIndex];
+                if (options.m_useSpecializationConstantsForOptions && varInfo->m_specializationId >= 0)
+                {
+                    continue;
+                }
+
                 const auto keySizeInBits = shaderOptions["ShaderOptions"][shaderOptionIndex]["keySize"].asUInt();
                 const auto keyOffsetBits = shaderOptions["ShaderOptions"][shaderOptionIndex]["keyOffset"].asUInt();
                 const auto defaultValue = shaderOptions["ShaderOptions"][shaderOptionIndex]["defaultValue"].asString();
 
-                shaderOptionIndex++;
                 EmitGetShaderKeyFunction(m_shaderVariantFallbackUid, uid, keySizeInBits, keyOffsetBits, defaultValue, varInfo->GetTypeRefInfo());
             }
         }
