@@ -540,7 +540,6 @@ namespace AZ::ShaderCompiler
             }
             // erase the generic type, until the SubpassInputStub type can be templated:
             varInfo.m_typeInfoExt.m_genericParameter = TypeRefInfo{};
-            m_subpassInputSeen = true;
         }
         // get enclosing scope:
         auto& [curScopeId, curScopeKind] = GetCurrentScopeIdAndKind();

@@ -389,9 +389,6 @@ namespace AZ::ShaderCompiler
         azslLexer*        m_lexer;
         UnboundedArraysValidator m_unboundedArraysValidator;
 
-        //! cached property informing of the presence of at least one input attachment use.
-        bool              m_subpassInputSeen = false;
-
     private:
         // remember frequencyId to srg association, for semantic validation
         unordered_map<int64_t, IdentifierUID> m_frequencyToSrg;

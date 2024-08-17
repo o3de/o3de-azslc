@@ -251,18 +251,7 @@ namespace AZ::ShaderCompiler
 
     const PlatformEmitter& Backend::GetPlatformEmitter() const
     {
-        for (const auto& attr : m_ir->m_metaData.m_attributeNamespaceFilters)
-        {
-            // We can have multiple attribute scopes enabled
-            // By design only one can have associated platform emitter, so return the first match
-            const auto p = PlatformEmitter::GetEmitter(attr);
-            if (p)
-            {
-                return *p;
-            }
-        }
-
-        return *PlatformEmitter::GetDefaultEmitter();
+        return GetPlatformEmitter(m_ir);
     }
 
     //! Gets the next and increments tokenIndex. TokenIndex must be in the [misc::Interval.a, misc::Interval.b] range. Token cannot be nullptr.
@@ -818,6 +807,22 @@ namespace AZ::ShaderCompiler
         }
 
         return hlslString;
+    }
+
+    const PlatformEmitter& Backend::GetPlatformEmitter(IntermediateRepresentation* ir)
+    {
+        for (const auto& attr : ir->m_metaData.m_attributeNamespaceFilters)
+        {
+            // We can have multiple attribute scopes enabled
+            // By design only one can have associated platform emitter, so return the first match
+            const auto p = PlatformEmitter::GetEmitter(attr);
+            if (p)
+            {
+                return *p;
+            }
+        }
+
+        return *PlatformEmitter::GetDefaultEmitter();
     }
 
     uint32_t Backend::GetNumberOf32BitConstants(const Options& options, const IdentifierUID& uid) const

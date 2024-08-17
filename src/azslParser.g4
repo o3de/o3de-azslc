@@ -447,7 +447,9 @@ predefinedType:
     |   structuredBufferPredefinedType
     |   texturePredefinedType
     |   genericTexturePredefinedType
+    |   genericSubpassInputPredefinedType
     |   msTexturePredefinedType
+    |   subpassInputPredefinedType
     |   vectorType
     |   genericVectorType
     |   constantBufferTemplated   // needed here to get recognized as a predefined type
@@ -569,8 +571,6 @@ textureType:
     |   RWTexture2D
     |   RWTexture2DArray
     |   RWTexture3D
-    |   SubpassInput
-    |   SubpassInputMS
 ;
 
 texturePredefinedType:
@@ -588,6 +588,19 @@ textureTypeMS:
 
 msTexturePredefinedType:
     textureTypeMS Less scalarOrVectorType (Comma Samples=IntegerLiteral)? Greater
+;
+
+subpassInputType:    
+        SubpassInput
+    |   SubpassInputMS
+;
+
+subpassInputPredefinedType:
+    subpassInputType
+;
+
+genericSubpassInputPredefinedType:
+    subpassInputType Less scalarOrVectorType Greater
 ;
 
 vectorType:

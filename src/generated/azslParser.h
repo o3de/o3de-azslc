@@ -132,27 +132,28 @@ public:
     RuleScalarType = 73, RuleStreamOutputPredefinedType = 74, RuleStreamOutputObjectType = 75, 
     RuleStructuredBufferPredefinedType = 76, RuleStructuredBufferName = 77, 
     RuleTextureType = 78, RuleTexturePredefinedType = 79, RuleGenericTexturePredefinedType = 80, 
-    RuleTextureTypeMS = 81, RuleMsTexturePredefinedType = 82, RuleVectorType = 83, 
-    RuleGenericVectorType = 84, RuleScalarOrVectorType = 85, RuleScalarOrVectorOrMatrixType = 86, 
-    RuleMatrixType = 87, RuleGenericMatrixPredefinedType = 88, RuleRegisterAllocation = 89, 
-    RuleSamplerStateProperty = 90, RuleLiteral = 91, RuleLeadingTypeFunctionSignature = 92, 
-    RuleHlslFunctionDefinition = 93, RuleHlslFunctionDeclaration = 94, RuleUserDefinedType = 95, 
-    RuleAssociatedTypeDeclaration = 96, RuleTypedefStatement = 97, RuleTypealiasStatement = 98, 
-    RuleTypeAliasingDefinitionStatement = 99, RuleTypeofExpression = 100, 
-    RuleGenericParameterList = 101, RuleGenericTypeDefinition = 102, RuleGenericConstraint = 103, 
-    RuleLanguageDefinedConstraint = 104, RuleFunctionDeclaration = 105, 
-    RuleAttributedFunctionDeclaration = 106, RuleFunctionDefinition = 107, 
-    RuleAttributedFunctionDefinition = 108, RuleCompilerExtensionStatement = 109, 
-    RuleSrgDefinition = 110, RuleAttributedSrgDefinition = 111, RuleSrgMemberDeclaration = 112, 
-    RuleSrgSemantic = 113, RuleAttributedSrgSemantic = 114, RuleSrgSemanticBodyDeclaration = 115, 
-    RuleSrgSemanticMemberDeclaration = 116, RuleSamplerBodyDeclaration = 117, 
-    RuleSamplerMemberDeclaration = 118, RuleMaxAnisotropyOption = 119, RuleMinFilterOption = 120, 
-    RuleMagFilterOption = 121, RuleMipFilterOption = 122, RuleReductionTypeOption = 123, 
-    RuleComparisonFunctionOption = 124, RuleAddressUOption = 125, RuleAddressVOption = 126, 
-    RuleAddressWOption = 127, RuleMinLodOption = 128, RuleMaxLodOption = 129, 
-    RuleMipLodBiasOption = 130, RuleBorderColorOption = 131, RuleFilterModeEnum = 132, 
-    RuleReductionTypeEnum = 133, RuleAddressModeEnum = 134, RuleComparisonFunctionEnum = 135, 
-    RuleBorderColorEnum = 136
+    RuleTextureTypeMS = 81, RuleMsTexturePredefinedType = 82, RuleSubpassInputType = 83, 
+    RuleSubpassInputPredefinedType = 84, RuleGenericSubpassInputPredefinedType = 85, 
+    RuleVectorType = 86, RuleGenericVectorType = 87, RuleScalarOrVectorType = 88, 
+    RuleScalarOrVectorOrMatrixType = 89, RuleMatrixType = 90, RuleGenericMatrixPredefinedType = 91, 
+    RuleRegisterAllocation = 92, RuleSamplerStateProperty = 93, RuleLiteral = 94, 
+    RuleLeadingTypeFunctionSignature = 95, RuleHlslFunctionDefinition = 96, 
+    RuleHlslFunctionDeclaration = 97, RuleUserDefinedType = 98, RuleAssociatedTypeDeclaration = 99, 
+    RuleTypedefStatement = 100, RuleTypealiasStatement = 101, RuleTypeAliasingDefinitionStatement = 102, 
+    RuleTypeofExpression = 103, RuleGenericParameterList = 104, RuleGenericTypeDefinition = 105, 
+    RuleGenericConstraint = 106, RuleLanguageDefinedConstraint = 107, RuleFunctionDeclaration = 108, 
+    RuleAttributedFunctionDeclaration = 109, RuleFunctionDefinition = 110, 
+    RuleAttributedFunctionDefinition = 111, RuleCompilerExtensionStatement = 112, 
+    RuleSrgDefinition = 113, RuleAttributedSrgDefinition = 114, RuleSrgMemberDeclaration = 115, 
+    RuleSrgSemantic = 116, RuleAttributedSrgSemantic = 117, RuleSrgSemanticBodyDeclaration = 118, 
+    RuleSrgSemanticMemberDeclaration = 119, RuleSamplerBodyDeclaration = 120, 
+    RuleSamplerMemberDeclaration = 121, RuleMaxAnisotropyOption = 122, RuleMinFilterOption = 123, 
+    RuleMagFilterOption = 124, RuleMipFilterOption = 125, RuleReductionTypeOption = 126, 
+    RuleComparisonFunctionOption = 127, RuleAddressUOption = 128, RuleAddressVOption = 129, 
+    RuleAddressWOption = 130, RuleMinLodOption = 131, RuleMaxLodOption = 132, 
+    RuleMipLodBiasOption = 133, RuleBorderColorOption = 134, RuleFilterModeEnum = 135, 
+    RuleReductionTypeEnum = 136, RuleAddressModeEnum = 137, RuleComparisonFunctionEnum = 138, 
+    RuleBorderColorEnum = 139
   };
 
   explicit azslParser(antlr4::TokenStream *input);
@@ -255,6 +256,9 @@ public:
   class GenericTexturePredefinedTypeContext;
   class TextureTypeMSContext;
   class MsTexturePredefinedTypeContext;
+  class SubpassInputTypeContext;
+  class SubpassInputPredefinedTypeContext;
+  class GenericSubpassInputPredefinedTypeContext;
   class VectorTypeContext;
   class GenericVectorTypeContext;
   class ScalarOrVectorTypeContext;
@@ -1839,7 +1843,9 @@ public:
     StructuredBufferPredefinedTypeContext *structuredBufferPredefinedType();
     TexturePredefinedTypeContext *texturePredefinedType();
     GenericTexturePredefinedTypeContext *genericTexturePredefinedType();
+    GenericSubpassInputPredefinedTypeContext *genericSubpassInputPredefinedType();
     MsTexturePredefinedTypeContext *msTexturePredefinedType();
+    SubpassInputPredefinedTypeContext *subpassInputPredefinedType();
     VectorTypeContext *vectorType();
     GenericVectorTypeContext *genericVectorType();
     ConstantBufferTemplatedContext *constantBufferTemplated();
@@ -2109,8 +2115,6 @@ public:
     antlr4::tree::TerminalNode *RWTexture2D();
     antlr4::tree::TerminalNode *RWTexture2DArray();
     antlr4::tree::TerminalNode *RWTexture3D();
-    antlr4::tree::TerminalNode *SubpassInput();
-    antlr4::tree::TerminalNode *SubpassInputMS();
 
     virtual void enterRule(antlr4::tree::ParseTreeListener *listener) override;
     virtual void exitRule(antlr4::tree::ParseTreeListener *listener) override;
@@ -2180,6 +2184,49 @@ public:
   };
 
   MsTexturePredefinedTypeContext* msTexturePredefinedType();
+
+  class  SubpassInputTypeContext : public antlr4::ParserRuleContext {
+  public:
+    SubpassInputTypeContext(antlr4::ParserRuleContext *parent, size_t invokingState);
+    virtual size_t getRuleIndex() const override;
+    antlr4::tree::TerminalNode *SubpassInput();
+    antlr4::tree::TerminalNode *SubpassInputMS();
+
+    virtual void enterRule(antlr4::tree::ParseTreeListener *listener) override;
+    virtual void exitRule(antlr4::tree::ParseTreeListener *listener) override;
+   
+  };
+
+  SubpassInputTypeContext* subpassInputType();
+
+  class  SubpassInputPredefinedTypeContext : public antlr4::ParserRuleContext {
+  public:
+    SubpassInputPredefinedTypeContext(antlr4::ParserRuleContext *parent, size_t invokingState);
+    virtual size_t getRuleIndex() const override;
+    SubpassInputTypeContext *subpassInputType();
+
+    virtual void enterRule(antlr4::tree::ParseTreeListener *listener) override;
+    virtual void exitRule(antlr4::tree::ParseTreeListener *listener) override;
+   
+  };
+
+  SubpassInputPredefinedTypeContext* subpassInputPredefinedType();
+
+  class  GenericSubpassInputPredefinedTypeContext : public antlr4::ParserRuleContext {
+  public:
+    GenericSubpassInputPredefinedTypeContext(antlr4::ParserRuleContext *parent, size_t invokingState);
+    virtual size_t getRuleIndex() const override;
+    SubpassInputTypeContext *subpassInputType();
+    antlr4::tree::TerminalNode *Less();
+    ScalarOrVectorTypeContext *scalarOrVectorType();
+    antlr4::tree::TerminalNode *Greater();
+
+    virtual void enterRule(antlr4::tree::ParseTreeListener *listener) override;
+    virtual void exitRule(antlr4::tree::ParseTreeListener *listener) override;
+   
+  };
+
+  GenericSubpassInputPredefinedTypeContext* genericSubpassInputPredefinedType();
 
   class  VectorTypeContext : public antlr4::ParserRuleContext {
   public:

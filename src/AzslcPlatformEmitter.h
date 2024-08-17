@@ -67,9 +67,16 @@ namespace AZ::ShaderCompiler
         //! @param symbol                   The symbol path of the original variable we are emitting as an extern data view
         //! @param bindInfoRegisterIndex    Register index of the resource
         //! @param stringifiedLogicalSpace  Optional register space
+        //! @param options                  Emission options
         //! \return                         first: header to emit before the dataview declaration.   second: footer to emit after the dataview declaration
         [[nodiscard]]
-        virtual std::pair<string, string> GetDataViewHeaderFooter(const CodeEmitter& codeEmitter, const IdentifierUID& symbol, uint32_t bindInfoRegisterIndex, string_view registerTypeLetter, optional<string> stringifiedLogicalSpace) const;
+        virtual std::pair<string, string> GetDataViewHeaderFooter(
+            const CodeEmitter& codeEmitter,
+            const IdentifierUID& symbol, 
+            uint32_t bindInfoRegisterIndex,
+            string_view registerTypeLetter,
+            optional<string> stringifiedLogicalSpace,
+            const Options& options) const;
 
         //! Aligns the size for the data containing the root constants.
         //! @param size  The size of stride
@@ -79,5 +86,8 @@ namespace AZ::ShaderCompiler
 
         [[nodiscard]]
         virtual string GetSpecializationConstant(const CodeEmitter& codeEmitter, const IdentifierUID& symbol, const Options& options) const;
+
+        //! Returns true if the emitter supports subpass inputs. 
+        virtual bool SupportsSubpassInputs() const;
     };
 }

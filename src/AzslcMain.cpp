@@ -11,7 +11,9 @@
 #include "AzslcReflection.h"
 #include "AzslcEmitter.h"
 #include "AzslcHomonymVisitor.h"
+#include "AzslcPlatformEmitter.h"
 #include "Texture2DMSto2DCodeMutator.h"
+#include "SubpassInputToTexture2DCodeMutator.h"
 
 #include <cstddef>
 #include <filesystem>
@@ -425,6 +427,9 @@ int main(int argc, const char* argv[])
     bool useSpecializationConstants = false;
     cli.add_flag("--sc-options", useSpecializationConstants, "Use specialization constants for shader options.");
 
+    bool noSubpassInput = false;
+    cli.add_flag("--no-subpass-input", noSubpassInput, "Transform usage of SubpassInput/SubpassInputMS into Texture2D/Texture2DMS");
+
     std::array<bool, Warn::EndEnumeratorSentinel_> warningOpts;
     for (const auto e : Warn::Enumerate{})
     {
@@ -540,8 +545,16 @@ int main(int argc, const char* argv[])
                 StdFs::path inSource{ inputFile };
                 ir.m_metaData.m_insource = StdFs::absolute(inSource).lexically_normal().generic_string();
             }
+
+            // Enable attribute namespaces
+            std::for_each(namespaces.begin(), namespaces.end(),
+                [&](const string& space) { ir.AddAttributeNamespaceFilter(space); });
+
+            bool subpassSupport = Backend::GetPlatformEmitter(&ir).SupportsSubpassInputs() && !noSubpassInput;
+
             tree::ParseTreeWalker walker;
             Texture2DMSto2DCodeMutator texture2DMSto2DCodeMutator(&ir, &tokens);
+            SubpassInputToTexture2DCodeMutator subpassInputToTexture2DCodeMutator(&ir, &tokens, subpassSupport);
             SemaCheckListener semanticListener{&ir};
             warningCout.m_onErrorCallback = [](string_view message) {
                 throw AzslcException{WX_WARNINGS_AS_ERRORS, "as-error", string{message}};
@@ -552,13 +565,10 @@ int main(int argc, const char* argv[])
             semanticListener.m_silentPrintExtensions = !semantic || verbose; // print-extensions are useful for interested parties; but not normal operation.
             if (noMS)
             {
-                semanticListener.m_functionCallMutator = &texture2DMSto2DCodeMutator;
+                semanticListener.m_functionCallMutators.push_back(&texture2DMSto2DCodeMutator);
             }
+            semanticListener.m_functionCallMutators.push_back(&subpassInputToTexture2DCodeMutator);
             warningCout.m_on = !anyNonValidativeOption; // warnings are interesting for emission, and explicit semantic check modes.
-
-            // Enable attribute namespaces
-            std::for_each(namespaces.begin(), namespaces.end(),
-                [&](const string& space) { ir.AddAttributeNamespaceFilter(space); });
 
             UnboundedArraysValidator::Options unboundedArraysValidationOptions;
             unboundedArraysValidationOptions.m_useUniqueIndicesEnabled = uniqueIdx;
@@ -578,6 +588,7 @@ int main(int argc, const char* argv[])
             emitOptions.m_padRootConstantCB = padRootConst;
             emitOptions.m_skipAlignmentValidation = noAlignmentValidation;
             emitOptions.m_useSpecializationConstantsForOptions = useSpecializationConstants;
+            emitOptions.m_useSubpassInputs = subpassSupport;
 
             if (*rootConstOpt)
             {
@@ -644,6 +655,7 @@ int main(int argc, const char* argv[])
             {
                 texture2DMSto2DCodeMutator.RunMiddleEndMutations();
             }
+            bool hasSubpassInputMutations = subpassInputToTexture2DCodeMutator.RunMiddleEndMutations();
 
             // If ir fails to find any root members in the source, overwrite the m_numOfRootConstants to 0
             if (ir.m_rootConstantStructUID.m_name == "")
@@ -725,7 +737,11 @@ int main(int argc, const char* argv[])
                     CodeEmitter emitter{&ir, &tokens, out, &lineFinder};
                     if (noMS)
                     {
-                        emitter.SetCodeMutator(&texture2DMSto2DCodeMutator);
+                        emitter.AddCodeMutator(&texture2DMSto2DCodeMutator);
+                    }
+                    if (hasSubpassInputMutations)
+                    {
+                        emitter.AddCodeMutator(&subpassInputToTexture2DCodeMutator);
                     }
                     emitter << "// HLSL emission by " << versionString << "\n";
                     emitter.Run(emitOptions);
@@ -761,7 +777,11 @@ int main(int argc, const char* argv[])
                     CodeEmitter emitter{&ir, &tokens, out, &lineFinder};
                     if (noMS)
                     {
-                        emitter.SetCodeMutator(&texture2DMSto2DCodeMutator);
+                        emitter.AddCodeMutator(&texture2DMSto2DCodeMutator);
+                    }
+                    if (hasSubpassInputMutations)
+                    {
+                        emitter.AddCodeMutator(&subpassInputToTexture2DCodeMutator);
                     }
                     emitter << "// HLSL emission by " << versionString << "\n";
                     emitter.Run(emitOptions);

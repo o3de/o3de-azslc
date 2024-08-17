@@ -17,30 +17,6 @@ namespace StdFs = std::filesystem;
 // Every specific implementation is supplied via a factory get method
 #include "AzslcPlatformEmitter.h"
 
-namespace AZ
-{
-    namespace
-    {
-        //  spec: https://github.com/microsoft/DirectXShaderCompiler/blob/master/docs/SPIR-V.rst#subpass-inputs
-        /// extract: "Subpasses are read through two new builtin resource types, available only in pixel shader"
-        //  because we have a unified file for all stages, we need to ensure the source remains buildable for other stages.
-        static constexpr char StubSubpassInputTypes[] = R"(
-#if !defined(AZ_USE_SUBPASSINPUT)
-  class SubpassInputStub
-  {
-    float4 SubpassLoad(){return (float4)0;}
-  };
-  class SubpassInputStubMS
-  {
-    float4 SubpassLoad(int sampleIndex){return (float4)0;}
-  };
-  #define SubpassInput SubpassInputStub
-  #define SubpassInputMS SubpassInputStubMS
-#endif
-)";
-    }
-}
-
 namespace AZ::ShaderCompiler
 {
     // to activate argument dependent lookup from template utilities in AzslcUtils, this must be in a reachable namespace
@@ -103,11 +79,6 @@ namespace AZ::ShaderCompiler
         for (const auto& attr : m_ir->m_symbols.GetGlobalAttributeList())
         {
             EmitAttribute(attr);
-        }
-
-        if (m_ir->m_sema.m_subpassInputSeen)
-        {
-            m_out << StubSubpassInputTypes << "\n";
         }
         
         EmitGetterFunctionDeclarationsForRootConstants(m_ir->m_rootConstantStructUID);
@@ -834,6 +805,19 @@ namespace AZ::ShaderCompiler
         }
     }
 
+    const CodeMutation* CodeEmitter::GetCodeMutation(size_t tokenIndex) const
+    {
+        for (auto* codeMutator : m_codeMutators)
+        {
+            if (const CodeMutation* codeMutation = codeMutator->GetMutation(tokenIndex))
+            {
+                return codeMutation;
+            }
+        }
+        return nullptr;
+    }
+
+
     void CodeEmitter::EmitVariableDeclaration(const VarInfo& varInfo, const IdentifierUID& uid, const Options& options, VarDeclHasFlag declOptions) const
     {
         // from MSDN: https://docs.microsoft.com/en-us/windows/desktop/direct3dhlsl/dx-graphics-hlsl-variable-syntax
@@ -841,13 +825,13 @@ namespace AZ::ShaderCompiler
         // example of valid HLSL statement:
         //    static const int dim = 2;
         //    extern uniform bool stuff[dim][1] : Color0 : register(b0) <int blabla=27; string blacksheep="Hello There";> = {{false, true}};
-        const ICodeEmissionMutator* codeMutator = m_codeMutator;
+
         const CodeMutation* codeMutation = nullptr;
-        if (codeMutator && varInfo.m_declNode)
+        if (varInfo.m_declNode)
         {
             const auto tokenIndex = varInfo.m_declNode->start->getTokenIndex();
-            codeMutation = codeMutator->GetMutation(tokenIndex);
-        }
+            codeMutation = GetCodeMutation(tokenIndex);
+        }   
 
         if (codeMutation && codeMutation->m_prepend)
         {
@@ -1093,7 +1077,7 @@ namespace AZ::ShaderCompiler
         optional<string> stringifiedLogicalSpace = std::to_string(bindInfo.m_registerBinding.m_pair[bindSet].m_logicalSpace);
 
         // depending on platforms we may have supplementary attributes or/and type modifier.
-        auto [prefix, suffix] = GetPlatformEmitter().GetDataViewHeaderFooter(*this, tId, bindInfo.m_registerBinding.m_pair[bindSet].m_registerIndex, registerTypeLetter, stringifiedLogicalSpace);
+        auto [prefix, suffix] = GetPlatformEmitter().GetDataViewHeaderFooter(*this, tId, bindInfo.m_registerBinding.m_pair[bindSet].m_registerIndex, registerTypeLetter, stringifiedLogicalSpace, options);
         m_out << prefix;
         // declaration of the view variable on the global scope.
         // type unmangled_path_to_symbol [optional_array_dimension] : optional_register_binding_as_suffix
@@ -1290,8 +1274,6 @@ namespace AZ::ShaderCompiler
     // override of the base method, to incorporate symbol and expression mutations
     void CodeEmitter::EmitTranspiledTokens(misc::Interval interval, Streamable& output) const
     {
-        const ICodeEmissionMutator* codeMutator = m_codeMutator;
-
         ssize_t ii = interval.a;
         while (ii <= interval.b)
         {
@@ -1299,7 +1281,7 @@ namespace AZ::ShaderCompiler
             
             const auto tokenIndex = token->getTokenIndex();
 
-            const CodeMutation* codeMutation = codeMutator ? codeMutator->GetMutation(tokenIndex) : nullptr;
+            const CodeMutation* codeMutation = GetCodeMutation(tokenIndex);
             if (codeMutation && codeMutation->m_prepend)
             {
                 output << codeMutation->m_prepend.value();

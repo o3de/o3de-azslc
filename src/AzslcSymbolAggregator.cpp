@@ -85,7 +85,6 @@ namespace AZ::ShaderCompiler
         static const std::unordered_set<string_view> ReservedNames =
         {
             "/Root_Constants",
-            "AZ_USE_SUBPASSINPUT",
             RootConstantsViewName
         };
 

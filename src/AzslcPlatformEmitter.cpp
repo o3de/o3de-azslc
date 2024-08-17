@@ -76,16 +76,14 @@ namespace AZ::ShaderCompiler
         return strOut.str();
     }
 
-    std::pair<string, string> PlatformEmitter::GetDataViewHeaderFooter(const CodeEmitter& codeEmitter, const IdentifierUID& symbol, uint32_t bindInfoRegisterIndex, string_view registerTypeLetter, optional<string> stringifiedLogicalSpace) const
+    std::pair<string, string> PlatformEmitter::GetDataViewHeaderFooter(
+        const CodeEmitter& codeEmitter,
+        const IdentifierUID& symbol,
+        uint32_t bindInfoRegisterIndex, 
+        string_view registerTypeLetter, 
+        optional<string> stringifiedLogicalSpace,
+        const Options& options) const
     {
-        // there is an exception for subpassinput variables since they are not yet supported on our DX12 emission
-        // we need to neutralize it (otherwise DXC will complain with "register space cannot be specified on global constants")
-        // example result: [azslc: SubpassInput var;   hlsl: SubpassInputStub srg_var : register(t0); ]
-        optional<AttributeInfo> inputAttachmentIndexAttribute = codeEmitter.GetIR()->m_symbols.GetAttribute(symbol, "input_attachment_index");
-        if (inputAttachmentIndexAttribute)
-        {
-            return { "static ", {} };
-        }
         // in the general case, we output normal HLSL `var decl : register(b0, space0);`
         // no special header, but the post colon part is the footer
         string bindingSpaceStringlet { stringifiedLogicalSpace ? ", space" + *stringifiedLogicalSpace : "" };
@@ -101,5 +99,10 @@ namespace AZ::ShaderCompiler
     string PlatformEmitter::GetSpecializationConstant(const CodeEmitter& codeEmitter, const IdentifierUID& symbol, const Options& options) const
     {
         return "";
+    }
+
+    bool PlatformEmitter::SupportsSubpassInputs() const
+    {
+        return false;
     }
 }

@@ -42,6 +42,7 @@ namespace AZ::ShaderCompiler
         Packing::Layout m_packConstantBuffers  = Packing::Layout::DirectXPacking; //!< Packing standard for constant buffers (uniform)
         Packing::Layout m_packDataBuffers      = Packing::Layout::CStylePacking;  //!< Packing standard for data buffer views
         bool m_useSpecializationConstantsForOptions = false; //!< Use specialization constants for shader options
+        bool m_useSubpassInputs = false; //< Can use subpass inputs.
     };
 
     struct Binding
@@ -155,6 +156,9 @@ namespace AZ::ShaderCompiler
         //! Fabricate a HLSL snippet that represents the type stored in typeInfo. Relevant options relate to matrix qualifiers.
         //! \param banned is the Flag you can setup to list a collection of type qualifiers you don't want to reproduce.
         string GetExtendedTypeInfo(const ExtendedTypeInfo& extTypeInfo, const Options& options, Modifiers banned, std::function<string(const TypeRefInfo&)> translator) const;
+
+        //! Returns the Platform Emitter that is registered to the namespace in the "ir".
+        static const PlatformEmitter& GetPlatformEmitter(IntermediateRepresentation* ir);
 
     protected:
         //! Obtains a supplement emitter which provides per-platform emission functionality.

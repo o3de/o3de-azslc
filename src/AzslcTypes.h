@@ -27,6 +27,8 @@ namespace AZ::ShaderCompiler
         Texture,
         GenericTexture,
         MultisampledTexture,
+        SubpassInput,
+        GenericSubpassInput,
         Sampler,
         StructuredBuffer,
         Buffer,
@@ -96,7 +98,7 @@ namespace AZ::ShaderCompiler
 
     inline bool HasGenericParameter(TypeClass typeClass)
     { // TODO: to add InputPath/OutputPatch because it has a generic parameter. (when you do it, update ExtractGenericTypeParameterNameFromAstContext)
-        return IsChameleon(typeClass) || IsGenericArithmetic(typeClass) || typeClass.IsOneOf(TypeClass::GenericTexture, TypeClass::MultisampledTexture);
+        return IsChameleon(typeClass) || IsGenericArithmetic(typeClass) || typeClass.IsOneOf(TypeClass::GenericTexture, TypeClass::MultisampledTexture, TypeClass::GenericSubpassInput);
     }
 
     inline bool IsViewTypeBuffer(TypeClass typeClass)
@@ -107,7 +109,7 @@ namespace AZ::ShaderCompiler
     inline bool IsViewType(TypeClass typeClass)
     {   // note that a constant buffer is not a view type
         return IsViewTypeBuffer(typeClass)
-            || typeClass.IsOneOf(TypeClass::Texture, TypeClass::GenericTexture, TypeClass::MultisampledTexture, TypeClass::Sampler);
+            || typeClass.IsOneOf(TypeClass::Texture, TypeClass::GenericTexture, TypeClass::MultisampledTexture, TypeClass::Sampler, TypeClass::SubpassInput, TypeClass::GenericSubpassInput);
     }
 
     //Example Texture2D m_myTex[]; is supported.
@@ -122,14 +124,16 @@ namespace AZ::ShaderCompiler
         TypeClass toReturn = TypeClass::OtherPredefined;  // default value if nothing of the under was non null.
         using PredefinedNodeT = std::remove_pointer_t<decltype(predefinedNode)>;  // DRY
         // map TypeClasses to the same indexes than the context functions list
-        array<TypeClass, 16> contextClasses = { TypeClass::Scalar,
+        array<TypeClass, 18> contextClasses = { TypeClass::Scalar,
                                                 TypeClass::Vector,
                                                 TypeClass::GenericVector,
                                                 TypeClass::Matrix,
                                                 TypeClass::GenericMatrix,
                                                 TypeClass::Texture,
                                                 TypeClass::MultisampledTexture,
+                                                TypeClass::SubpassInput,
                                                 TypeClass::GenericTexture,
+                                                TypeClass::GenericSubpassInput,
                                                 TypeClass::Sampler,
                                                 TypeClass::StructuredBuffer,
                                                 TypeClass::Buffer,
@@ -146,7 +150,9 @@ namespace AZ::ShaderCompiler
                                            &PredefinedNodeT::genericMatrixPredefinedType,
                                            &PredefinedNodeT::texturePredefinedType,
                                            &PredefinedNodeT::msTexturePredefinedType,
+                                           &PredefinedNodeT::subpassInputPredefinedType,
                                            &PredefinedNodeT::genericTexturePredefinedType,
+                                           &PredefinedNodeT::genericSubpassInputPredefinedType,
                                            &PredefinedNodeT::samplerStatePredefinedType,
                                            &PredefinedNodeT::structuredBufferPredefinedType,
                                            &PredefinedNodeT::bufferPredefinedType,
@@ -154,7 +160,7 @@ namespace AZ::ShaderCompiler
                                            &PredefinedNodeT::constantBufferTemplated,
                                            &PredefinedNodeT::streamOutputPredefinedType,
                                            &PredefinedNodeT::otherViewResourceType,
-                                           &PredefinedNodeT::subobjectType >;
+                                           &PredefinedNodeT::subobjectType>;
         static_assert( countTemplateParameters_v<FunctionList> == contextClasses.size() );
         // This meta-loop will be unfolded at build time, therefore the generic lambda will be instantiated individually (by each type)
         ForEachValue<FunctionList>([&toReturn, &predefinedNode, &contextClasses](auto ctxMemFn, auto index)

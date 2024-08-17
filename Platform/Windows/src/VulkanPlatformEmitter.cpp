@@ -40,32 +40,32 @@ namespace AZ::ShaderCompiler
         return strOut.str();        
     }
 
-    std::pair<string, string> VulkanPlatformEmitter::GetDataViewHeaderFooter(const CodeEmitter& codeEmitter, const IdentifierUID& symbol, uint32_t bindInfoRegisterIndex, string_view registerTypeLetter, optional<string> stringifiedLogicalSpace) const
+    std::pair<string, string> VulkanPlatformEmitter::GetDataViewHeaderFooter(
+        const CodeEmitter& codeEmitter,
+        const IdentifierUID& symbol,
+        uint32_t bindInfoRegisterIndex,
+        string_view registerTypeLetter,
+        optional<string> stringifiedLogicalSpace,
+        const Options& options) const
     {
         std::stringstream stream;
-        optional<AttributeInfo> inputAttachmentIndexAttribute = codeEmitter.GetIR()->m_symbols.GetAttribute(symbol, "input_attachment_index");
-        if (inputAttachmentIndexAttribute)
+        optional<AttributeInfo> inputAttachmentIndexAttribute;
+        if (options.m_useSubpassInputs)
         {
-            // example result in HLSL:
-            /*
-                   #ifdef AZ_USE_SUBPASSINPUT
-                   [[vk::binding(0,0)]]
-                   [[vk::input_attachment_index(0)]]
-                   #endif
-                   AzSubpassInput srg_myData;
-            */
-            stream << "#ifdef AZ_USE_SUBPASSINPUT\n";
-            inputAttachmentIndexAttribute->m_namespace = "vk";
-            inputAttachmentIndexAttribute->m_category = AttributeCategory::Sequence;
-            MakeOStreamStreamable soss(stream);
-            CodeEmitter::EmitAttribute(*inputAttachmentIndexAttribute, soss);
-            stream << "[[vk::binding(" << bindInfoRegisterIndex;
-            if (stringifiedLogicalSpace)
+            inputAttachmentIndexAttribute = codeEmitter.GetIR()->m_symbols.GetAttribute(symbol, "input_attachment_index");
+            if (inputAttachmentIndexAttribute)
             {
-                stream << ", " << *stringifiedLogicalSpace;
+                inputAttachmentIndexAttribute->m_namespace = "vk";
+                inputAttachmentIndexAttribute->m_category = AttributeCategory::Sequence;
+                MakeOStreamStreamable soss(stream);
+                CodeEmitter::EmitAttribute(*inputAttachmentIndexAttribute, soss);
+                stream << "[[vk::binding(" << bindInfoRegisterIndex;
+                if (stringifiedLogicalSpace)
+                {
+                    stream << ", " << *stringifiedLogicalSpace;
+                }
+                stream << ")]]\n";
             }
-            stream << ")]]\n";
-            stream << "#else\n static\n#endif\n";  // for the stub mode, we don't export the phony variable
         }
 
         string registerString;
@@ -75,8 +75,14 @@ namespace AZ::ShaderCompiler
                                                                       symbol,
                                                                       bindInfoRegisterIndex,
                                                                       registerTypeLetter,
-                                                                      stringifiedLogicalSpace).second;
+                                                                      stringifiedLogicalSpace,
+                                                                      options).second;
         }
         return { stream.str(), registerString };
+    }
+
+    bool VulkanPlatformEmitter::SupportsSubpassInputs() const
+    {
+        return true;
     }
 }

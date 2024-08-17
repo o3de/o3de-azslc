@@ -54,7 +54,7 @@ namespace AZ::ShaderCompiler
         //! Write the HLSL formatted shape of an attribute into a stream
         static void EmitAttribute(const AttributeInfo& attrInfo, Streamable& outstream);
 
-        void SetCodeMutator(ICodeEmissionMutator* codeMutator) { m_codeMutator = codeMutator; }
+        void AddCodeMutator(ICodeEmissionMutator* codeMutator) { m_codeMutators.push_back(codeMutator); }
 
         //! It would be nice that the clients don't push text through the passed "out" stream since it's not observed by the line counter;
         //! use this API in case of custom client text pushing.
@@ -218,7 +218,7 @@ namespace AZ::ShaderCompiler
         
         //! If not null it will be used during code emission to produce
         //! the mutations. 
-        ICodeEmissionMutator* m_codeMutator = nullptr;
+        vector<ICodeEmissionMutator*> m_codeMutators;
 
         //! We keep track here of the number of lines that have been emitted.
         //! Each symbol has an original line number (virtual and physical) where it appeared,
@@ -236,5 +236,8 @@ namespace AZ::ShaderCompiler
 
         //! Given an SRG parameter, determines the space it belongs to based on the platform
         int ResolveBindingSpace(const RootSigDesc::SrgParamDesc& bindInfo, BindingPair::Set bindSet) const;
+
+        //! Returns the code mutation for a token index if it exist.
+        const CodeMutation* GetCodeMutation(size_t tokenIndex) const;
     };
 }

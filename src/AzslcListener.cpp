@@ -440,9 +440,9 @@ namespace AZ::ShaderCompiler
 
     void SemaCheckListener::enterFunctionCallExpression(azslParser::FunctionCallExpressionContext* ctx)
     {
-        if (m_functionCallMutator)
+        for(azslParserBaseListener* mutator : m_functionCallMutators)
         {
-            m_functionCallMutator->enterFunctionCallExpression(ctx);
+            mutator->enterFunctionCallExpression(ctx);
         }
     }
 

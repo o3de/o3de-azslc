@@ -65,10 +65,10 @@ namespace AZ::ShaderCompiler
         IntermediateRepresentation* m_ir;
         bool m_silentPrintExtensions = false;
 
-        //! If not null, this other parser listener will be used during
+        //! If not empty, these other parser listeners will be used during
         //! enterFunctionCallExpression(), its data type is azslParserBaseListener because
         //! in the future it can be convenient to do mutations at different stages of parsing
         //! the AST.
-        azslParserBaseListener* m_functionCallMutator = nullptr;
+        vector<azslParserBaseListener*> m_functionCallMutators;
     };
 }

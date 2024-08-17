@@ -352,6 +352,15 @@ public:
   virtual void enterMsTexturePredefinedType(azslParser::MsTexturePredefinedTypeContext * /*ctx*/) override { }
   virtual void exitMsTexturePredefinedType(azslParser::MsTexturePredefinedTypeContext * /*ctx*/) override { }
 
+  virtual void enterSubpassInputType(azslParser::SubpassInputTypeContext * /*ctx*/) override { }
+  virtual void exitSubpassInputType(azslParser::SubpassInputTypeContext * /*ctx*/) override { }
+
+  virtual void enterSubpassInputPredefinedType(azslParser::SubpassInputPredefinedTypeContext * /*ctx*/) override { }
+  virtual void exitSubpassInputPredefinedType(azslParser::SubpassInputPredefinedTypeContext * /*ctx*/) override { }
+
+  virtual void enterGenericSubpassInputPredefinedType(azslParser::GenericSubpassInputPredefinedTypeContext * /*ctx*/) override { }
+  virtual void exitGenericSubpassInputPredefinedType(azslParser::GenericSubpassInputPredefinedTypeContext * /*ctx*/) override { }
+
   virtual void enterVectorType(azslParser::VectorTypeContext * /*ctx*/) override { }
   virtual void exitVectorType(azslParser::VectorTypeContext * /*ctx*/) override { }
 

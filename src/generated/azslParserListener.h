@@ -350,6 +350,15 @@ public:
   virtual void enterMsTexturePredefinedType(azslParser::MsTexturePredefinedTypeContext *ctx) = 0;
   virtual void exitMsTexturePredefinedType(azslParser::MsTexturePredefinedTypeContext *ctx) = 0;
 
+  virtual void enterSubpassInputType(azslParser::SubpassInputTypeContext *ctx) = 0;
+  virtual void exitSubpassInputType(azslParser::SubpassInputTypeContext *ctx) = 0;
+
+  virtual void enterSubpassInputPredefinedType(azslParser::SubpassInputPredefinedTypeContext *ctx) = 0;
+  virtual void exitSubpassInputPredefinedType(azslParser::SubpassInputPredefinedTypeContext *ctx) = 0;
+
+  virtual void enterGenericSubpassInputPredefinedType(azslParser::GenericSubpassInputPredefinedTypeContext *ctx) = 0;
+  virtual void exitGenericSubpassInputPredefinedType(azslParser::GenericSubpassInputPredefinedTypeContext *ctx) = 0;
+
   virtual void enterVectorType(azslParser::VectorTypeContext *ctx) = 0;
   virtual void exitVectorType(azslParser::VectorTypeContext *ctx) = 0;
 

@@ -1281,6 +1281,11 @@ namespace AZ::ShaderCompiler
             return {ExtractedTypeExt{UnqualifiedName{coreName}},                           // m_core
                     ExtractedTypeExt{UnqualifiedName{genericCtx->getText()}, genericCtx}};  // same as previous 2 comments above
         }
+        else if (ctx->genericSubpassInputPredefinedType())
+        {
+            return { ExtractedTypeExt{UnqualifiedName{ctx->genericSubpassInputPredefinedType()->subpassInputType()->getText()}},    // m_core
+                    ExtractedTypeExt{UnqualifiedName{ctx->genericSubpassInputPredefinedType()->scalarOrVectorType()->getText()}} }; // m_genericParam
+        }
         // all other rules are getable without artefacts for sure from a simple getText
         return {ExtractedTypeExt{UnqualifiedName{ctx->getText()}}};     // only core, no generic part.
     }
