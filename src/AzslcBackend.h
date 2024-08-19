@@ -42,7 +42,7 @@ namespace AZ::ShaderCompiler
         Packing::Layout m_packConstantBuffers  = Packing::Layout::DirectXPacking; //!< Packing standard for constant buffers (uniform)
         Packing::Layout m_packDataBuffers      = Packing::Layout::CStylePacking;  //!< Packing standard for data buffer views
         bool m_useSpecializationConstantsForOptions = false; //!< Use specialization constants for shader options
-        bool m_useSubpassInputs = false; //< Can use subpass inputs.
+        int32_t m_subpassInputsOffset = 0; //< Offset to apply to the subpass index
     };
 
     struct Binding

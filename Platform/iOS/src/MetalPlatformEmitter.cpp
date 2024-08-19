@@ -47,4 +47,10 @@ namespace AZ::ShaderCompiler
     {
         return Packing::AlignUp(size, Packing::s_bytesPerRegister);
 	}
+
+    SubpassInputSupportFlag MetalPlatformEmitter::GetSubpassInputSupport() const
+    {
+        // Metal doesn't support reading from a depth/stencil attachment, only color.
+        return SubpassInputSupportFlag::Color;
+    }
 }

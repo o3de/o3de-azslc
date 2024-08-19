@@ -25,6 +25,8 @@ namespace AZ::ShaderCompiler
 
         uint32_t AlignRootConstants(uint32_t size) const override final;
 
+        SubpassInputSupportFlag GetSubpassInputSupport() const override;
+
     private:
         MetalPlatformEmitter() : CommonVulkanPlatformEmitter {} {};
     };

@@ -205,6 +205,8 @@ Struct : 'struct';
 StructuredBuffer : 'StructuredBuffer';
 SubpassInput : 'SubpassInput';
 SubpassInputMS : 'SubpassInputMS';
+SubpassInputDS : 'SubpassInputDS';
+SubpassInputDSMS : 'SubpassInputDSMS';
 Switch : 'switch';
 TBuffer : 'tbuffer';
 Texture1D : 'Texture1D';

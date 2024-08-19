@@ -43,5 +43,49 @@ namespace AZ::ShaderCompiler
         stream << codeEmitter.GetTranslatedName(symbolUid.m_name, UsageContext::DeclarationSite) + " = ";
         stream << "(" << typeAsStr << ")" << (defaultValue.empty() ? "0" : defaultValue) << "; \n";
         return stream.str();
-    }   
+    }
+
+    std::pair<string, string> CommonVulkanPlatformEmitter::GetDataViewHeaderFooter(
+        const CodeEmitter& codeEmitter,
+        const IdentifierUID& symbol,
+        uint32_t bindInfoRegisterIndex,
+        string_view registerTypeLetter,
+        optional<string> stringifiedLogicalSpace,
+        const Options& options) const
+    {
+        std::stringstream stream;
+        optional<AttributeInfo> inputAttachmentIndexAttribute;
+        auto varInfo = codeEmitter.GetIR()->GetSymbolSubAs<VarInfo>(symbol.GetName());
+        bool isSubpassInput = StartsWith(varInfo->m_typeInfoExt.m_coreType.m_typeId.GetName(), "?SubpassInput");
+        if (isSubpassInput)
+        {
+            inputAttachmentIndexAttribute = codeEmitter.GetIR()->m_symbols.GetAttribute(symbol, "input_attachment_index");
+            if (inputAttachmentIndexAttribute)
+            {
+                inputAttachmentIndexAttribute->m_namespace = "vk";
+                inputAttachmentIndexAttribute->m_category = AttributeCategory::Sequence;
+                inputAttachmentIndexAttribute->m_argList[0] = static_cast<ConstNumericVal>(ExtractValueAs<int32_t>(get<ConstNumericVal>(inputAttachmentIndexAttribute->m_argList[0]), 0) + options.m_subpassInputsOffset);
+                MakeOStreamStreamable soss(stream);
+                CodeEmitter::EmitAttribute(*inputAttachmentIndexAttribute, soss);
+                stream << "[[vk::binding(" << bindInfoRegisterIndex;
+                if (stringifiedLogicalSpace)
+                {
+                    stream << ", " << *stringifiedLogicalSpace;
+                }
+                stream << ")]]\n";
+            }
+        }
+
+        string registerString;
+        if (!inputAttachmentIndexAttribute)
+        {   // fallback to the base behavior in non-input-attachment cases for the `.. : register();` syntax.
+            registerString = PlatformEmitter::GetDataViewHeaderFooter(codeEmitter,
+                symbol,
+                bindInfoRegisterIndex,
+                registerTypeLetter,
+                stringifiedLogicalSpace,
+                options).second;
+        }
+        return { stream.str(), registerString };
+    }
 }

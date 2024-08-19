@@ -101,8 +101,8 @@ namespace AZ::ShaderCompiler
         return "";
     }
 
-    bool PlatformEmitter::SupportsSubpassInputs() const
+    SubpassInputSupportFlag PlatformEmitter::GetSubpassInputSupport() const
     {
-        return false;
+        return SubpassInputSupportFlag::None;
     }
 }

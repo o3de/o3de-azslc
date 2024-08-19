@@ -430,6 +430,9 @@ int main(int argc, const char* argv[])
     bool noSubpassInput = false;
     cli.add_flag("--no-subpass-input", noSubpassInput, "Transform usage of SubpassInput/SubpassInputMS into Texture2D/Texture2DMS");
 
+    int32_t subpassInputOffset = 0;
+    cli.add_option("--subpass-input-offset", subpassInputOffset, "Offset to apply to the subpass index attribute.");
+
     std::array<bool, Warn::EndEnumeratorSentinel_> warningOpts;
     for (const auto e : Warn::Enumerate{})
     {
@@ -550,11 +553,15 @@ int main(int argc, const char* argv[])
             std::for_each(namespaces.begin(), namespaces.end(),
                 [&](const string& space) { ir.AddAttributeNamespaceFilter(space); });
 
-            bool subpassSupport = Backend::GetPlatformEmitter(&ir).SupportsSubpassInputs() && !noSubpassInput;
+            SubpassInputSupportFlag subpassInputSupport = Backend::GetPlatformEmitter(&ir).GetSubpassInputSupport();
+            if (noSubpassInput)
+            {
+                subpassInputSupport = SubpassInputSupportFlag::None;
+            }
 
             tree::ParseTreeWalker walker;
             Texture2DMSto2DCodeMutator texture2DMSto2DCodeMutator(&ir, &tokens);
-            SubpassInputToTexture2DCodeMutator subpassInputToTexture2DCodeMutator(&ir, &tokens, subpassSupport);
+            SubpassInputToTexture2DCodeMutator subpassInputToTexture2DCodeMutator(&ir, &tokens, subpassInputSupport);
             SemaCheckListener semanticListener{&ir};
             warningCout.m_onErrorCallback = [](string_view message) {
                 throw AzslcException{WX_WARNINGS_AS_ERRORS, "as-error", string{message}};
@@ -588,7 +595,7 @@ int main(int argc, const char* argv[])
             emitOptions.m_padRootConstantCB = padRootConst;
             emitOptions.m_skipAlignmentValidation = noAlignmentValidation;
             emitOptions.m_useSpecializationConstantsForOptions = useSpecializationConstants;
-            emitOptions.m_useSubpassInputs = subpassSupport;
+            emitOptions.m_subpassInputsOffset = subpassInputOffset;
 
             if (*rootConstOpt)
             {

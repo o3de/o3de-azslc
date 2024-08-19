@@ -15,6 +15,15 @@ namespace AZ::ShaderCompiler
 {
     struct CodeEmitter;
 
+    //! Modes of subpass input the emitter supports
+    enum class SubpassInputSupportFlag : uint32_t
+    {
+        None = 0,                   // No support
+        Color = 1 << 0,             // Support for color attachments
+        DepthStencil = 1 << 1,      // Support for depth/stencil attachment
+        All = Color | DepthStencil  // Support all modes
+    };
+
     // PlatformEmitter is not a Backend by design. It's a supplement to CodeEmitter, not a replacement.
     struct PlatformEmitter 
     {
@@ -87,7 +96,7 @@ namespace AZ::ShaderCompiler
         [[nodiscard]]
         virtual string GetSpecializationConstant(const CodeEmitter& codeEmitter, const IdentifierUID& symbol, const Options& options) const;
 
-        //! Returns true if the emitter supports subpass inputs. 
-        virtual bool SupportsSubpassInputs() const;
+        //! Returns the subpass input that the platform emitter supports.
+        virtual SubpassInputSupportFlag GetSubpassInputSupport() const;
     };
 }

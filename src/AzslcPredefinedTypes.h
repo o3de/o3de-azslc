@@ -199,8 +199,10 @@ static constexpr std::array<const char*, 5> StructuredBuffer = {
 "RasterizerOrderedStructuredBuffer",
 "StructuredBuffer"};
 
-static constexpr std::array<const char*, 2> SubpassInput = {
+static constexpr std::array<const char*, 4> SubpassInput = {
 "SubpassInput",
+"SubpassInputDS",
+"SubpassInputDSMS",
 "SubpassInputMS"};
 
 static constexpr std::array<const char*, 17> Texture = {
@@ -270,7 +272,7 @@ static constexpr auto All = std::make_tuple(Bag<3>{"Buffer", Buffer},
                                             Bag<13>{"Scalar", Scalar},
                                             Bag<3>{"StreamOutput", StreamOutput},
                                             Bag<5>{"StructuredBuffer", StructuredBuffer},
-                                            Bag<2>{"SubpassInput", SubpassInput},
+                                            Bag<4>{"SubpassInput", SubpassInput},
                                             Bag<17>{"Texture", Texture},
                                             Bag<29>{"Vector", Vector},
                                             Bag<1>{"Void", Void});

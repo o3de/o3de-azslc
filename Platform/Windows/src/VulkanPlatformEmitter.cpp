@@ -40,49 +40,8 @@ namespace AZ::ShaderCompiler
         return strOut.str();        
     }
 
-    std::pair<string, string> VulkanPlatformEmitter::GetDataViewHeaderFooter(
-        const CodeEmitter& codeEmitter,
-        const IdentifierUID& symbol,
-        uint32_t bindInfoRegisterIndex,
-        string_view registerTypeLetter,
-        optional<string> stringifiedLogicalSpace,
-        const Options& options) const
+    SubpassInputSupportFlag VulkanPlatformEmitter::GetSubpassInputSupport() const
     {
-        std::stringstream stream;
-        optional<AttributeInfo> inputAttachmentIndexAttribute;
-        if (options.m_useSubpassInputs)
-        {
-            inputAttachmentIndexAttribute = codeEmitter.GetIR()->m_symbols.GetAttribute(symbol, "input_attachment_index");
-            if (inputAttachmentIndexAttribute)
-            {
-                inputAttachmentIndexAttribute->m_namespace = "vk";
-                inputAttachmentIndexAttribute->m_category = AttributeCategory::Sequence;
-                MakeOStreamStreamable soss(stream);
-                CodeEmitter::EmitAttribute(*inputAttachmentIndexAttribute, soss);
-                stream << "[[vk::binding(" << bindInfoRegisterIndex;
-                if (stringifiedLogicalSpace)
-                {
-                    stream << ", " << *stringifiedLogicalSpace;
-                }
-                stream << ")]]\n";
-            }
-        }
-
-        string registerString;
-        if (!inputAttachmentIndexAttribute)
-        {   // fallback to the base behavior in non-input-attachment cases for the `.. : register();` syntax.
-            registerString = PlatformEmitter::GetDataViewHeaderFooter(codeEmitter,
-                                                                      symbol,
-                                                                      bindInfoRegisterIndex,
-                                                                      registerTypeLetter,
-                                                                      stringifiedLogicalSpace,
-                                                                      options).second;
-        }
-        return { stream.str(), registerString };
-    }
-
-    bool VulkanPlatformEmitter::SupportsSubpassInputs() const
-    {
-        return true;
+        return SubpassInputSupportFlag::All;
     }
 }

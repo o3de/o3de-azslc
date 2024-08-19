@@ -50,10 +50,7 @@ namespace AZ::ShaderCompiler
             };
 
         vector<IdentifierUID> subpassInputVariables = m_ir->GetFilteredSymbolsOfSubType<VarInfo>(subpassInputFilterFunc);
-        if (!m_supportsSubpassInputs)
-        {
-            MutateTypeOfMultiSampleVariables(subpassInputVariables);
-        }
+        MutateTypeOfMultiSampleVariables(subpassInputVariables);
         return !subpassInputVariables.empty();
     }
 
@@ -82,9 +79,9 @@ namespace AZ::ShaderCompiler
         {
             return;
         }
-
+        
         // Define the mutations.
-        if (m_supportsSubpassInputs)
+        if (IsSubpassInputSupported(subpassInputType))
         {
             const auto argumentListCtx = ctx->argumentList();
             if (argumentListCtx)
@@ -137,15 +134,21 @@ namespace AZ::ShaderCompiler
             return SubpassInputType::None;
         }
         auto varInfo = kind.GetSubAs<VarInfo>();
+        return GetSubpassInputClass(varInfo);
+    }
+
+    SubpassInputToTexture2DCodeMutator::SubpassInputType SubpassInputToTexture2DCodeMutator::GetSubpassInputClass(const VarInfo* varInfo)
+    {
         if (varInfo->GetTypeClass() != TypeClass::SubpassInput)
         {
             return SubpassInputType::None;
         }
+
         if (EndsWith(varInfo->m_typeInfoExt.m_coreType.m_typeId.GetName(), "MS"))
         {
-            return SubpassInputType::SubpassInputMS;
+            return EndsWith(varInfo->m_typeInfoExt.m_coreType.m_typeId.GetName(), "DSMS") ? SubpassInputType::SubpassInputDSMS : SubpassInputType::SubpassInputMS;
         }
-        return SubpassInputType::SubpassInput;
+        return EndsWith(varInfo->m_typeInfoExt.m_coreType.m_typeId.GetName(), "DS") ? SubpassInputType::SubpassInputDS : SubpassInputType::SubpassInput;
     }
 
     size_t SubpassInputToTexture2DCodeMutator::MutateTypeOfMultiSampleVariables(const vector<IdentifierUID>& subpassInputVariables)
@@ -154,19 +157,33 @@ namespace AZ::ShaderCompiler
         for (const auto& uid : subpassInputVariables)
         {
             auto varInfo = m_ir->GetSymbolSubAs<VarInfo>(uid.GetName());
+            auto subpassType = GetSubpassInputClass(varInfo);
             auto& typeId = varInfo->m_typeInfoExt.m_coreType.m_typeId;
-            auto typeName = typeId.GetName();
-            if (typeName == "?SubpassInput")
+            bool isSupported = IsSubpassInputSupported(subpassType);
+            switch (subpassType)
             {
-                typeId.m_name = QualifiedName{ "?Texture2D" };
-            }
-            else
-            {
-                typeId.m_name = QualifiedName{ "?Texture2DMS" };
+            case SubpassInputType::SubpassInput:
+            case SubpassInputType::SubpassInputDS:
+                typeId.m_name = isSupported ? QualifiedName{ "?SubpassInput" } : QualifiedName{ "?Texture2D" };
+                break;
+            case SubpassInputType::SubpassInputMS:
+            case SubpassInputType::SubpassInputDSMS:
+                typeId.m_name = isSupported ? QualifiedName{ "?SubpassInputMS" } : QualifiedName{ "?Texture2DMS" };
+                break;
+            default:
+                break;
             }
             ++mutationCount;
         }
 
         return mutationCount;
+    }
+    bool SubpassInputToTexture2DCodeMutator::IsSubpassInputSupported(const SubpassInputType type)
+    {
+        bool isDepthStencilView = type == SubpassInputType::SubpassInputDS || type == SubpassInputType::SubpassInputDSMS;
+        bool subpassInputSupported = (static_cast<uint32_t>(m_subpassInputSupport) & static_cast<uint32_t>(SubpassInputSupportFlag::Color)) && !isDepthStencilView;
+        subpassInputSupported |= (static_cast<uint32_t>(m_subpassInputSupport) & static_cast<uint32_t>(SubpassInputSupportFlag::DepthStencil)) && isDepthStencilView;
+
+        return subpassInputSupported;
     }
 } //namespace AZ::ShaderCompiler

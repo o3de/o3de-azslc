@@ -11,6 +11,7 @@
 #include "AzslcUtils.h"
 #include "AzslcCodeEmissionMutator.h"
 #include "AzslcIntermediateRepresentation.h"
+#include "AzslcPlatformEmitter.h"
 
 namespace AZ::ShaderCompiler
 {
@@ -28,10 +29,10 @@ namespace AZ::ShaderCompiler
         , public ICodeEmissionMutator
     {
         SubpassInputToTexture2DCodeMutator() = delete;
-        explicit SubpassInputToTexture2DCodeMutator(IntermediateRepresentation* ir, CommonTokenStream* stream, bool supportsSubpassInput) 
+        explicit SubpassInputToTexture2DCodeMutator(IntermediateRepresentation* ir, CommonTokenStream* stream, SubpassInputSupportFlag subpassInputSupport)
             : m_ir(ir)
             , m_stream(stream)
-            , m_supportsSubpassInputs(supportsSubpassInput) {}
+            , m_subpassInputSupport(subpassInputSupport) {}
         virtual ~SubpassInputToTexture2DCodeMutator() = default;
 
         ///////////////////////////////////////////////////////////////////////
@@ -54,14 +55,18 @@ namespace AZ::ShaderCompiler
 
         //! Given an unqualified symbol name, checks within the current parsing scope
         //! if the symbol is a SubpassInput type of variable. 
-        enum class SubpassInputType { None, SubpassInput, SubpassInputMS };
+        enum class SubpassInputType { None, SubpassInput, SubpassInputMS, SubpassInputDS, SubpassInputDSMS };
         SubpassInputType GetSubpassInputClass(const UnqualifiedName& uqSymbolName);
+        SubpassInputType GetSubpassInputClass(const VarInfo* varInfo);
 
         //! Changes the variable types:
         //!     SubpassInput to Texture2D.
         //!     SubpassInputMS to Texture2DMS. 
         //! Returns the number of variables whose type was mutated
         size_t MutateTypeOfMultiSampleVariables(const vector<IdentifierUID>& subpassInputVariables);
+
+        //! Returns true if the SubpassInput is supported by the platform emitter.
+        bool IsSubpassInputSupported(const SubpassInputType type);
         
         //! Cached when RunMiddleEndMutations is called.
         IntermediateRepresentation* m_ir = nullptr;
@@ -72,7 +77,7 @@ namespace AZ::ShaderCompiler
         //! it means it should produce mutated text during emission.
         unordered_map<ssize_t, CodeMutation > m_mutations;
 
-        //! If subpass inputs are allowed.
-        bool m_supportsSubpassInputs = false;
+        //! Subpass Input support.
+        SubpassInputSupportFlag m_subpassInputSupport = SubpassInputSupportFlag::None;
     };
 } // namespace AZ::ShaderCompiler

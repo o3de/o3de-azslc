@@ -424,7 +424,9 @@ namespace AZ::ShaderCompiler
         {
             return IsViewType(m_typeClass)
                  && (  m_typeId.GetNameLeaf() == Trim(lexer->getVocabulary().getLiteralName(azslLexer::SubpassInput), "\'")
-                    || m_typeId.GetNameLeaf() == Trim(lexer->getVocabulary().getLiteralName(azslLexer::SubpassInputMS), "\'"));
+                    || m_typeId.GetNameLeaf() == Trim(lexer->getVocabulary().getLiteralName(azslLexer::SubpassInputMS), "\'")
+                    || m_typeId.GetNameLeaf() == Trim(lexer->getVocabulary().getLiteralName(azslLexer::SubpassInputDS), "\'")
+                    || m_typeId.GetNameLeaf() == Trim(lexer->getVocabulary().getLiteralName(azslLexer::SubpassInputDSMS), "\'"));
         }
 
         friend bool operator == (const TypeRefInfo& lhs, const TypeRefInfo& rhs)

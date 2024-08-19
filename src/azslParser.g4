@@ -592,7 +592,9 @@ msTexturePredefinedType:
 
 subpassInputType:    
         SubpassInput
+    |   SubpassInputDS
     |   SubpassInputMS
+    |   SubpassInputDSMS
 ;
 
 subpassInputPredefinedType:

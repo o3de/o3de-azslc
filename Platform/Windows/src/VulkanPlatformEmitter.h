@@ -23,16 +23,7 @@ namespace AZ::ShaderCompiler
         [[nodiscard]]
         string GetRootConstantsView(const CodeEmitter& codeEmitter, const RootSigDesc& rootSig, const Options& options, BindingPair::Set signatureQuery) const override final;
 
-        [[nodiscard]]
-        std::pair<string, string> GetDataViewHeaderFooter(
-            const CodeEmitter& codeEmitter,
-            const IdentifierUID& symbol,
-            uint32_t bindInfoRegisterIndex,
-            string_view registerTypeLetter,
-            optional<string> stringifiedLogicalSpace,
-            const Options& options) const override final;
-
-        bool SupportsSubpassInputs() const override;
+        SubpassInputSupportFlag GetSubpassInputSupport() const override;
 
     private:
         VulkanPlatformEmitter() : CommonVulkanPlatformEmitter {} {};
