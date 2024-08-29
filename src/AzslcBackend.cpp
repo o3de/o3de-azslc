@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright (c) Contributors to the Open 3D Engine Project.
  * For complete copyright and license terms please see the LICENSE at the root of this distribution.
  * 
@@ -811,15 +811,10 @@ namespace AZ::ShaderCompiler
 
     const PlatformEmitter& Backend::GetPlatformEmitter(IntermediateRepresentation* ir)
     {
-        for (const auto& attr : ir->m_metaData.m_attributeNamespaceFilters)
+        const auto p = PlatformEmitter::GetEmitter(ir->m_metaData.m_platformEmitterNamespace);
+        if (p)
         {
-            // We can have multiple attribute scopes enabled
-            // By design only one can have associated platform emitter, so return the first match
-            const auto p = PlatformEmitter::GetEmitter(attr);
-            if (p)
-            {
-                return *p;
-            }
+            return *p;
         }
 
         return *PlatformEmitter::GetDefaultEmitter();

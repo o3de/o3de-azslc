@@ -24,6 +24,8 @@ namespace AZ::ShaderCompiler
 
         //! the activated namespaces on the command line
         unordered_set<string> m_attributeNamespaceFilters;
+        //! The namespace for the platform code emitter
+        string m_platformEmitterNamespace;
 
         //! some platforms require source-coded target formats
         OutputFormat m_outputFormatHint[kMaxRenderTargets] = { OutputFormat::R16G16B16A16_FLOAT };
@@ -143,6 +145,12 @@ namespace AZ::ShaderCompiler
             }
 
             m_metaData.m_attributeNamespaceFilters.emplace(attr);
+            // We can have multiple attribute scopes enabled
+            // By design only one can have associated platform emitter, so just use the first one.
+            if(m_metaData.m_platformEmitterNamespace.empty())
+            {
+                m_metaData.m_platformEmitterNamespace = attr;
+            }
         }
 
         void RegisterAttributeSpecifier(AttributeScope scope,
