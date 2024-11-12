@@ -27,8 +27,8 @@ def check_StructuredBuffer_Vs_ConstantBuffer_Padding(thefile, compilerPath, sile
         predicates.append(lambda expectedSize=expectedSize: j["ShaderResourceGroups"][0]["inputsForBufferViews"][0]["stride"] == expectedSize)
         predicates.append(lambda: j["ShaderResourceGroups"][0]["inputsForBufferViews"][0]["type"] == "StructuredBuffer<MyStruct>")
 
-        predicates.append(lambda expectedSize=expectedSize: j["ShaderResourceGroups"][0]["inputsForSRGConstants"][27]["constantByteSize"] == expectedSize)
-        predicates.append(lambda: j["ShaderResourceGroups"][0]["inputsForSRGConstants"][27]["typeName"] == "/MyStruct")
+        predicates.append(lambda expectedSize=expectedSize: j["ShaderResourceGroups"][0]["inputsForSRGConstants"][-1]["constantByteSize"] == expectedSize)
+        predicates.append(lambda: j["ShaderResourceGroups"][0]["inputsForSRGConstants"][-1]["typeName"] == "/MyStruct")
 
         ok = testfuncs.verifyAllPredicates(predicates, j, silent)
         if ok and not silent:
