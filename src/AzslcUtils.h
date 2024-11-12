@@ -1362,4 +1362,42 @@ namespace AZ::ShaderCompiler
     {
         return ctx && HasStandardInitializer(ctx->variableInitializer());
     }
+
+    inline const char* ToRHIFormat(string_view format)
+    {
+        if (EqualNoCase(format, "rgba32f"))
+        {
+            return "R32G32B32A32_FLOAT";
+        }
+        else if (EqualNoCase(format, "rgba16f"))
+        {
+            return "R16G16B16A16_FLOAT";
+        }
+        else if (EqualNoCase(format, "r32f"))
+        {
+            return "R32_FLOAT";
+        }
+        else if (EqualNoCase(format, "rgba8"))
+        {
+            return "R8G8B8A8_UNORM";
+        }
+        else if (EqualNoCase(format, "rgba8snorm"))
+        {
+            return "R8G8B8A8_SNORM";
+        }
+        else if (EqualNoCase(format, "rg32f"))
+        {
+            return "R32G32_FLOAT";
+        }
+        else if (EqualNoCase(format, "rg16f"))
+        {
+            return "R16G16_FLOAT";
+        }
+        else if (EqualNoCase(format, "r16f"))
+        {
+            return "R16_FLOAT";
+        }
+
+        return "Unknown";
+    }
 }

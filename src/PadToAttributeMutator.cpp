@@ -479,19 +479,21 @@ namespace AZ::ShaderCompiler
             const auto deltaBytes = alignedOffset - startingOffset;
             if (deltaBytes < numBytesToAdd && deltaBytes != 0)
             {
-                string typeName = getFloatTypeNameOfSize(deltaBytes);
-                auto variableName = FormatString("__pad_at%u", startingOffset);
-                IdentifierUID newVarUid = createVariableInSymbolTable(scopeUid.GetName(), typeName, UnqualifiedName{variableName});
-                if (insertBeforeThisUid.IsEmpty())
+                for (uint32_t i = 0; i < (deltaBytes >> 2); ++i)
                 {
-                    classInfo->PushMember(newVarUid, Kind::Variable);
+                    auto variableName = FormatString("__pad_at%u", startingOffset + i * sizeof(float));
+                    IdentifierUID newVarUid = createVariableInSymbolTable(scopeUid.GetName(), "float", UnqualifiedName{ variableName });
+                    if (insertBeforeThisUid.IsEmpty())
+                    {
+                        classInfo->PushMember(newVarUid, Kind::Variable);
+                    }
+                    else
+                    {
+                        classInfo->InsertBefore(newVarUid, Kind::Variable, insertBeforeThisUid);
+                        m_ir.m_symbols.m_elastic.MigrateOrder(newVarUid, insertBeforeThisUid);
+                    }
+                    numAddedVariables++;
                 }
-                else
-                {
-                    classInfo->InsertBefore(newVarUid, Kind::Variable, insertBeforeThisUid);
-                    m_ir.m_symbols.m_elastic.MigrateOrder(newVarUid, insertBeforeThisUid);
-                }
-                numAddedVariables++;
                 numBytesToAdd -= deltaBytes;
                 startingOffset = alignedOffset;
             }
@@ -522,19 +524,21 @@ namespace AZ::ShaderCompiler
         // 3rd variable. The remainder
         if (numBytesToAdd > 0)
         {
-            auto variableName = FormatString("__pad_at%u", startingOffset);
-            string typeName = getFloatTypeNameOfSize(numBytesToAdd);
-            IdentifierUID newVarUid = createVariableInSymbolTable(scopeUid.GetName(), typeName, UnqualifiedName{variableName});
-            if (insertBeforeThisUid.IsEmpty())
+            for (uint32_t i = 0; i < (numBytesToAdd >> 2); ++i)
             {
-                classInfo->PushMember(newVarUid, Kind::Variable);
+                auto variableName = FormatString("__pad_at%u", startingOffset + i * sizeof(float));
+                IdentifierUID newVarUid = createVariableInSymbolTable(scopeUid.GetName(), "float", UnqualifiedName{ variableName });
+                if (insertBeforeThisUid.IsEmpty())
+                {
+                    classInfo->PushMember(newVarUid, Kind::Variable);
+                }
+                else
+                {
+                    classInfo->InsertBefore(newVarUid, Kind::Variable, insertBeforeThisUid);
+                    m_ir.m_symbols.m_elastic.MigrateOrder(newVarUid, insertBeforeThisUid);
+                }
+                numAddedVariables++;
             }
-            else
-            {
-                classInfo->InsertBefore(newVarUid, Kind::Variable, insertBeforeThisUid);
-                m_ir.m_symbols.m_elastic.MigrateOrder(newVarUid, insertBeforeThisUid);
-            }
-            numAddedVariables++;
         }
 
         return numAddedVariables;
