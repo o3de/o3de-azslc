@@ -664,20 +664,15 @@ namespace AZ::ShaderCompiler
             }
         }
 
-        else if (attrInfo.m_attribute == "partial")
-        {
-            // Reserved for ShaderResourceGroup use. Do not re-emit
-            outstream << "// original attribute: [[" << attrInfo << "]]\n ";
-        }
-
-        else if (attrInfo.m_attribute == "range")
-        {
-            // Reserved for integer type option variables. Do not re-emit
-            outstream << "// original attribute: [[" << attrInfo << "]]\n ";
-        }
-        else if (attrInfo.m_attribute == "no_specialization")
-        {
-            // Reserved for avoiding specialization of a shader option. Do not re-emit
+        else if (
+            attrInfo.m_attribute == "partial" ||            // Reserved for ShaderResourceGroup use. Do not re-emit
+            attrInfo.m_attribute == "range" ||              // Reserved for integer type option variables. Do not re-emit
+            attrInfo.m_attribute == "no_specialization" ||  // Reserved for avoiding specialization of a shader option. Do not re-emit
+            attrInfo.m_attribute == "unrolled" ||           // Reserved for unrolled resource arrays. Do not re-emit   
+            attrInfo.m_attribute == "access" ||             // Reserved for storage textures. Do not re-emit
+            attrInfo.m_attribute == "sample_type" ||        // Reserved for sampled textures. Do not re-emit
+            attrInfo.m_attribute == "binding_type")         // Reserved for samplers. Do not re-emit
+        {   
             outstream << "// original attribute: [[" << attrInfo << "]]\n ";
         }
 

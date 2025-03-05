@@ -703,7 +703,8 @@ namespace AZ::ShaderCompiler
             // SRVs and UAVs
             for (const auto& tId : srgInfo->m_srViews)
             {
-                const auto& bindInfo = rootSig.Get(tId);
+                auto mangledName = tId.m_name;
+                auto bindInfo = rootSig.Get(tId);
 
                 uint32_t strideSize = GetViewStride(tId, options.m_packDataBuffers, options);
 
@@ -718,12 +719,74 @@ namespace AZ::ShaderCompiler
                     strideSize = Packing::AlignUp(strideSize, Packing::s_bytesPerRegister);
                 }
 
+                auto unrolledAttribute = m_ir->m_symbols.GetAttribute(tId, "unrolled");
+                if (unrolledAttribute)
+                {
+                    size_t last_index = tId.m_name.find_last_not_of("0123456789");
+                    std::string result = tId.m_name.substr(last_index + 1);
+                    int arrayId = ::atoi(result.c_str());
+                    if (arrayId != 0)
+                    {
+                        continue;
+                    }
+
+                    mangledName = QualifiedName(tId.m_name.substr(0, last_index + 1));
+                    uint32_t arraySize = 0;
+                    VarInfo* varInfo = nullptr;
+                    do
+                    {
+                        arraySize++;
+                        varInfo = m_ir->GetSymbolSubAs<VarInfo>(QualifiedName(mangledName + std::to_string(arraySize)));
+                    } while (varInfo);
+
+                    bindInfo.m_uid.m_name = mangledName;
+                    bindInfo.m_registerRange = arraySize;
+                }
+
+                std::string format = "Unknown";
+                auto formatAttribute = m_ir->m_symbols.GetAttribute(tId, "image_format");
+                if (formatAttribute)
+                {
+                    if (!formatAttribute->m_argList.empty() && m_ir->IsAttributeNamespaceActivated(formatAttribute->m_namespace))
+                    {
+                        if (holds_alternative<string>(formatAttribute->m_argList[0]))
+                        {
+                            format = Trim(get<string>(formatAttribute->m_argList[0]), "\"");
+                            format = ToRHIFormat(format.c_str());
+                        }
+                    }
+                }
+
+                std::string sampleType = "Unknown";
+                auto sampleTypeAttribute = m_ir->m_symbols.GetAttribute(tId, "sample_type");
+                if (sampleTypeAttribute)
+                {
+                    if (!sampleTypeAttribute->m_argList.empty())
+                    {
+                        if (holds_alternative<string>(sampleTypeAttribute->m_argList[0]))
+                        {
+                            sampleType = Trim(get<string>(sampleTypeAttribute->m_argList[0]), "\"");
+                        }
+                    }
+                }
+
+                std::string usage = (isReadWriteView) ? "ReadWrite" : "Read";
+                auto accessAttribute = m_ir->m_symbols.GetAttribute(tId, "access");
+                if (accessAttribute)
+                {
+                    if (!accessAttribute->m_argList.empty())
+                    {
+                        usage = Trim(get<string>(accessAttribute->m_argList[0]), "\"");
+                    }
+                }
+
                 Json::Value dataView(Json::objectValue);
-                dataView["id"]     = ExtractLeaf(tId.m_name).data();
+                dataView["id"]     = ExtractLeaf(mangledName).data();
                 dataView["type"]   = viewName;
-                dataView["usage"]  = (isReadWriteView) ? "ReadWrite" : "Read";
+                dataView["usage"] = usage;
                 ReflectBinding(dataView, bindInfo);
                 dataView["stride"] = strideSize;
+                dataView["format"] = format;
 
                 if (isBufferView)
                 {
@@ -731,6 +794,7 @@ namespace AZ::ShaderCompiler
                 }
                 else
                 {
+                    dataView["sampleType"] = sampleType;
                     imagesList.append(dataView);
                 }
             }
@@ -746,9 +810,23 @@ namespace AZ::ShaderCompiler
                 const auto* srgMemberInfo = m_ir->GetSymbolSubAs<VarInfo>(sId.m_name);
                 const auto& samplerInfo = *srgMemberInfo->m_samplerState;
 
+                std::string bindingType = "Unknown";
+                auto bindingTypeAttribute = m_ir->m_symbols.GetAttribute(sId, "binding_type");
+                if (bindingTypeAttribute)
+                {
+                    if (!bindingTypeAttribute->m_argList.empty())
+                    {
+                        if (holds_alternative<string>(bindingTypeAttribute->m_argList[0]))
+                        {
+                            bindingType = Trim(get<string>(bindingTypeAttribute->m_argList[0]), "\"");
+                        }
+                    }
+                }
+
                 Json::Value samplerJson(Json::objectValue);
                 samplerJson["id"] = sId.GetNameLeaf();
                 samplerJson["isDynamic"] = samplerInfo.m_isDynamic;
+                samplerJson["bindingType"] = bindingType;
                 ReflectBinding(samplerJson, bindInfo);
 
                 if (!samplerInfo.m_isDynamic)
@@ -954,6 +1032,19 @@ namespace AZ::ShaderCompiler
                     return resourceJsonValue;
                 };
 
+                auto combineJsonArrays = [](Json::Value& lhs, Json::Value& rhs) 
+                {
+                    if (!lhs.isArray() || !rhs.isArray())
+                    {
+                        return;
+                    }
+
+                    for (const auto entry : rhs) 
+                    {
+                        lhs.append(entry);
+                    }
+                };
+
                 optional<RootSigDesc::SrgParamDesc> srgConstants;  // if we have SRG Constants we treat them later
                 for (auto& srgParam : srgDesc.m_parameters)
                 {
@@ -966,7 +1057,28 @@ namespace AZ::ShaderCompiler
                     {
                         set<IdentifierUID> dependencyList;
                         DiscoverTopLevelFunctionDependencies(srgParam.m_uid, dependencyList, m_functionIntervals);
-                        srgMember[srgParam.m_uid.GetNameLeaf()] = makeJsonNodeForOneResource(dependencyList, srgParam, {});
+                        auto jsonNodeResource = makeJsonNodeForOneResource(dependencyList, srgParam, {});
+                        auto unrolledAttribute = m_ir->m_symbols.GetAttribute(srgParam.m_uid, "unrolled");
+                        if (unrolledAttribute)
+                        {
+                            auto leafName = srgParam.m_uid.GetNameLeaf();
+                            size_t last_index = leafName.find_last_not_of("0123456789");
+                            string resourceName = leafName.substr(0, last_index + 1);
+                            if (srgMember[resourceName].empty())
+                            {
+                                srgMember[resourceName] = std::move(jsonNodeResource);
+                            }
+                            else
+                            {
+                                combineJsonArrays(srgMember[resourceName]["dependentFunctions"], jsonNodeResource["dependentFunctions"]);
+                                srgMember[resourceName]["binding"]["count"] = srgMember[resourceName]["binding"]["count"].asInt() + 1;
+                            }
+                        }
+                        else
+                        {
+
+                            srgMember[srgParam.m_uid.GetNameLeaf()] = std::move(jsonNodeResource);
+                        }
                     }
                 }
                 // SRG constants (and the variant-fallback) are in one special constant buffer
