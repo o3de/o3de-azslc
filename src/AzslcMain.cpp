@@ -321,7 +321,7 @@ int main(int argc, const char* argv[])
     cli.add_flag("--version", printVersion, "Prints version information");
 
     std::string inputFile;
-    cli.add_option("(- | FILE)", inputFile, "Input file (pass - to read from stdin).");
+    cli.add_option("FILE", inputFile, "Input file (pass - to read from stdin).");
 
     std::string output;
     cli.add_option("-o", output, "Output file (writes to stdout if omitted).");
