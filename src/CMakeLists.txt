@@ -4,11 +4,15 @@ project (Azslc)
 
 include(FetchContent)
 
-FetchContent_Declare(
-  cli11
-  GIT_REPOSITORY https://github.com/CLIUtils/CLI11.git
-  GIT_TAG 3ce61a169297f5fe7d4b08bdbfa82290950d6f7f
-)
+find_package(CLI11 QUIET)
+if(NOT CLI11_FOUND)
+  FetchContent_Declare(
+    cli11
+    GIT_REPOSITORY https://github.com/CLIUtils/CLI11.git
+    GIT_TAG 3ce61a169297f5fe7d4b08bdbfa82290950d6f7f
+  )
+  FetchContent_MakeAvailable(cli11)
+endif()
 
 # Antlr4 external dependency
 FetchContent_Declare(
@@ -21,7 +25,7 @@ FetchContent_Declare(
   GIT_PROGRESS TRUE
 )
 
-FetchContent_MakeAvailable(cli11 antlr4)
+FetchContent_MakeAvailable(antlr4)
 
 # get all chars that are not separators before the end
 string(REGEX MATCH "[^/\\]*$" buildPlatform ${CMAKE_BINARY_DIR})
